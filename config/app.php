@@ -128,4 +128,9 @@ return [
         'Helper' => App\Helpers\Helpers::class,
     ],
 
+    // 'providers' => [
+    //     // Laravel Framework Service Providers...
+    //     App\Providers\RouteServiceProvider::class,
+    //     // Add other providers as needed
+    // ],
 ];
