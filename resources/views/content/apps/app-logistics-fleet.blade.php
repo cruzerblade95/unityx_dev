@@ -22,7 +22,7 @@
 
 @if (env('APP_ENV') !== 'production')
 <div class="alert alert-primary alert-dismissible" role="alert">
-  Fleet page is using Mapbox to display maps. The maps on the fleet page may not load on your localhost or domain because you need to add your own access token for Mapbox. <br />For more details refer to the <a href="https://docs.mapbox.com/mapbox-gl-js/guides/" target="_blank">Mapbox</a> section in the <a href="{{ config('variables.documentation') }}/faq.html#mapbox-not-loading" class="alert-link" target="_blank">documentation</a>.
+  Fleet page is using Mapbox to display maps. The maps on the fleet page may not load on your localhost or domain because you need to add your own access token for Mapbox. <br />For more details refer to the <a href="https://docs.mapbox.com/mapbox-gl-js/guides/" >Mapbox</a> section in the <a href="{{ config('variables.documentation') }}/faq.html#mapbox-not-loading" class="alert-link" >documentation</a>.
 
   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>

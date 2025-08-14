@@ -9,7 +9,7 @@
 @section('content')
   <p class="ms-3">
     You can check complete list of Font Awesome icons from
-    <a href="https://fontawesome.com/" target="_blank">https://fontawesome.com</a>
+    <a href="https://fontawesome.com/" >https://fontawesome.com</a>
   </p>
 
   <!-- Icons Container -->
@@ -156,8 +156,8 @@
 
   <!-- Buttons -->
   <div class="d-flex justify-content-center mx-auto gap-4">
-    <a href="https://fontawesome.com/" target="_blank" class="btn btn-primary">View All Icons</a>
-    <a href="{{ config('variables.documentation') }}/Icons.html" class="btn btn-primary" target="_blank">How to use
+    <a href="https://fontawesome.com/"  class="btn btn-primary">View All Icons</a>
+    <a href="{{ config('variables.documentation') }}/Icons.html" class="btn btn-primary" >How to use
       icons?</a>
   </div>
 @endsection

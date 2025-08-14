@@ -281,7 +281,7 @@ $configData = Helper::appClasses();
           <div class="flex-grow-1 row align-items-center me-n1">
             <div class="col-7 mb-sm-0 mb-2">
               <h6 class="mb-1">Twitter</h6>
-              <a href="{{ config('variables.twitterUrl') }}" class="small" target="_blank">{{ '@' . config('variables.creatorName') }}</a>
+              <a href="{{ config('variables.twitterUrl') }}" class="small" >{{ '@' . config('variables.creatorName') }}</a>
             </div>
             <div class="col-5 text-end">
               <button class="btn btn-label-danger btn-icon"><i class="icon-base ti tabler-trash icon-22px"></i></button>
@@ -295,7 +295,7 @@ $configData = Helper::appClasses();
           <div class="flex-grow-1 row align-items-center me-n1">
             <div class="col-7 mb-sm-0 mb-2">
               <h6 class="mb-1">linkedin</h6>
-              <a href="{{ config('variables.instagramUrl') }}" class="small" target="_blank">{{ '@' . config('variables.creatorName') }}</a>
+              <a href="{{ config('variables.instagramUrl') }}" class="small" >{{ '@' . config('variables.creatorName') }}</a>
             </div>
             <div class="col-5 text-end">
               <button class="btn btn-label-danger btn-icon"><i class="icon-base ti tabler-trash icon-22px"></i></button>

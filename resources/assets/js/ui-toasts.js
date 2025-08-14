@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
   const getMessage = function () {
     const msgs = [
       "Don't be pushed around by the fears in your mind. Be led by the dreams in your heart.",
-      '<div class="mb-3"><input class="input-small form-control" value="Textbox"/>&nbsp;<a href="http://example.com" target="_blank" class="text-white">This is a hyperlink</a></div><div class="d-flex"><button type="button" id="okBtn" class="btn btn-primary btn-sm me-2">Close me</button><button type="button" id="surpriseBtn" class="btn btn-sm btn-secondary">Surprise me</button></div>',
+      '<div class="mb-3"><input class="input-small form-control" value="Textbox"/>&nbsp;<a href="http://example.com"  class="text-white">This is a hyperlink</a></div><div class="d-flex"><button type="button" id="okBtn" class="btn btn-primary btn-sm me-2">Close me</button><button type="button" id="surpriseBtn" class="btn btn-sm btn-secondary">Surprise me</button></div>',
       'Live the Life of Your Dreams',
       'Believe in Yourself!',
       'Be mindful. Be grateful. Be positive.',

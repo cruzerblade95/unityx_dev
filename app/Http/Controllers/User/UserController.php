@@ -7,8 +7,24 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function index()
+    public function dashboard()
     {
-        return view('user.index');
+        return view('user.content.dashboard');
+    }
+
+    public function profile()
+    {
+        return view('user.content.profile');
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+        $validated = $request->validate([
+            'firstname' => 'required|string|max:255',
+            'lastname' => 'required|string|max:255',
+        ]);
+        $user->update($validated);
+        return redirect()->route('user.profile')->with('profile_updated', true);
     }
 }

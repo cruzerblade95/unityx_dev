@@ -1,0 +1,22 @@
+{
+  "menu": [
+    {
+      "url": "admin/dashboard",
+      "name": "Dashboards",
+      "icon": "menu-icon icon-base ti tabler-smart-home",
+      "slug": "admin.dashboard"
+    },
+    {
+      "url": "admin/users",
+      "name": "Users",
+      "icon": "menu-icon icon-base ti tabler-users",
+      "slug": "admin.users.index"
+    },
+    {
+      "url": "admin/wallets",
+      "name": "Wallets",
+      "icon": "menu-icon icon-base ti tabler-wallet",
+      "slug": "admin.wallets.index"
+    }
+  ]
+}

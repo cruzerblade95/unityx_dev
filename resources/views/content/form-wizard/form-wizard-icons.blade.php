@@ -20,8 +20,8 @@
 @section('content')
   <p class="mb-6">
     Icons used on this page are made by <a href="https://www.flaticon.com/authors/itim2101" title="itim2101"
-      target="_blank">itim2101</a> from
-    <a href="https://www.flaticon.com/" title="Flaticon" target="_blank">www.flaticon.com</a>
+      >itim2101</a> from
+    <a href="https://www.flaticon.com/" title="Flaticon" >www.flaticon.com</a>
   </p>
   <!-- Default -->
   <div class="row">
