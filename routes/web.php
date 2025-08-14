@@ -163,7 +163,7 @@ use App\Http\Controllers\maps\Leaflet;
 // Main Page Route
 Route::get('/', [Landing::class, 'index'])->name('front-pages-landing');
 // Docs Template Route
-Route::get('/docs-template', [Analytics::class, 'index'])->name('docs-template');
+Route::get('/admin/dashboard', [Analytics::class, 'index'])->middleware('admin')->name('admin-dashboard');
 Route::get('/dashboard/analytics', [Analytics::class, 'index'])->name('dashboard-analytics');
 Route::get('/dashboard/crm', [Crm::class, 'index'])->name('dashboard-crm');
 // locale
@@ -175,8 +175,8 @@ Route::get('/layouts/content-navbar', [ContentNavbar::class, 'index'])->name('la
 Route::get('/layouts/content-nav-sidebar', [ContentNavSidebar::class, 'index'])->name('layouts-content-nav-sidebar');
 // Route::get('/layouts/navbar-full', [NavbarFull::class, 'index'])->name('layouts-navbar-full');
 // Route::get('/layouts/navbar-full-sidebar', [NavbarFullSidebar::class, 'index'])->name('layouts-navbar-full-sidebar');
-Route::get('/layouts/horizontal', [Horizontal::class, 'index'])->name('dashboard-analytics');
-Route::get('/layouts/vertical', [Vertical::class, 'index'])->name('dashboard-analytics');
+Route::get('/layouts/horizontal', [Horizontal::class, 'index'])->name('dashboard-analytics2');
+Route::get('/layouts/vertical', [Vertical::class, 'index'])->name('dashboard-analytics3');
 Route::get('/layouts/without-menu', [WithoutMenu::class, 'index'])->name('layouts-without-menu');
 Route::get('/layouts/without-navbar', [WithoutNavbar::class, 'index'])->name('layouts-without-navbar');
 Route::get('/layouts/fluid', [Fluid::class, 'index'])->name('layouts-fluid');
@@ -184,7 +184,7 @@ Route::get('/layouts/container', [Container::class, 'index'])->name('layouts-con
 Route::get('/layouts/blank', [Blank::class, 'index'])->name('layouts-blank');
 
 // Front Pages
-Route::get('/front-pages/landing', [Landing::class, 'index'])->name('front-pages-landing');
+Route::get('/front-pages/landing', [Landing::class, 'index'])->name('front-pages-landing2');
 Route::get('/front-pages/pricing', [Pricing::class, 'index'])->name('front-pages-pricing');
 Route::get('/front-pages/payment', [Payment::class, 'index'])->name('front-pages-payment');
 Route::get('/front-pages/checkout', [Checkout::class, 'index'])->name('front-pages-checkout');
@@ -261,7 +261,7 @@ Route::get('/auth/verify-email-basic', [VerifyEmailBasic::class, 'index'])->name
 Route::get('/auth/verify-email-cover', [VerifyEmailCover::class, 'index'])->name('auth-verify-email-cover');
 Route::get('/auth/reset-password-basic', [ResetPasswordBasic::class, 'index'])->name('auth-reset-password-basic');
 Route::get('/auth/reset-password-cover', [ResetPasswordCover::class, 'index'])->name('auth-reset-password-cover');
-Route::get('/auth/forgot-password-basic', [ForgotPasswordBasic::class, 'index'])->name('auth-reset-password-basic');
+Route::get('/auth/forgot-password-basic', [ForgotPasswordBasic::class, 'index'])->name('auth-forgot-password-basic');
 Route::get('/auth/forgot-password-cover', [ForgotPasswordCover::class, 'index'])->name('auth-forgot-password-cover');
 Route::get('/auth/two-steps-basic', [TwoStepsBasic::class, 'index'])->name('auth-two-steps-basic');
 Route::get('/auth/two-steps-cover', [TwoStepsCover::class, 'index'])->name('auth-two-steps-cover');

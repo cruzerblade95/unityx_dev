@@ -1,14 +1,17 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\AdminLoginController;
 
-Route::middleware(['web'])->prefix('admin')->group(function () {
-    Route::get('login', [App\Http\Controllers\Admin\AdminLoginController::class, 'showLoginForm'])->name('admin.login');
-    Route::post('login', [App\Http\Controllers\Admin\AdminLoginController::class, 'login']);
-    Route::post('logout', [App\Http\Controllers\Admin\AdminLoginController::class, 'logout'])->name('admin.logout');
+Route::group(['prefix' => 'admin'], function () {
+    // Guest routes
+    Route::get('/login', [AdminLoginController::class, 'showLoginForm'])->name('admin.login');
+    Route::post('/login', [AdminLoginController::class, 'login'])->name('admin.login');
 
-    Route::middleware(['auth', 'admin'])->group(function () {
-        Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('admin.dashboard');
-        // Other admin routes
+    // Protected routes
+    Route::middleware('auth:admin')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+        Route::post('/logout', [AdminLoginController::class, 'logout'])->name('admin.logout');
     });
 });

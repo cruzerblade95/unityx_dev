@@ -10,8 +10,15 @@ class Admin extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    /**
+     * The guard that should be used for authentication.
+     *
+     * @var string
+     */
+    protected $guard = 'admin';
+
     protected $fillable = [
-        'name',
+        'username',
         'email',
         'password',
     ];
