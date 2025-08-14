@@ -11,7 +11,7 @@ Route::middleware(['web'])->group(function () {
     Route::post('register', [App\Http\Controllers\User\UserRegisterController::class, 'register'])->name('user.register.submit');
 
     Route::middleware(['auth', 'user'])->group(function () {
-        Route::get('/', [App\Http\Controllers\User\UserController::class, 'index'])->name('user.dashboard');
+    Route::get('dashboard', [App\Http\Controllers\User\UserController::class, 'dashboard'])->name('user.dashboard');
         // Other user routes
     });
 });
