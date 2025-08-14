@@ -160,6 +160,10 @@ use App\Http\Controllers\tables\DatatableExtensions;
 use App\Http\Controllers\charts\ApexCharts;
 use App\Http\Controllers\charts\ChartJs;
 use App\Http\Controllers\maps\Leaflet;
+use App\Http\Controllers\authentications\ConnectTelegramController;
+
+//telegram bot hehe
+Route::get('/connect-telegram', [ConnectTelegramController::class, 'index'])->name('connect-telegram');
 
 // Main Page Route
 Route::get('/', [Landing::class, 'index'])->name('front-pages-landing');

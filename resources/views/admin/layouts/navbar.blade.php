@@ -8,11 +8,11 @@ $navbarDetached = $navbarDetached ?? '';
 <nav
   class="layout-navbar {{ $containerNav }} {{ $navbarDetached }} navbar navbar-expand-xl align-items-center bg-navbar-theme"
   id="layout-navbar">
-  @include('layouts/sections/navbar/navbar-partial')
+  @include('admin/layouts/navbar-partial')
 </nav>
 @else
 <nav class="layout-navbar navbar navbar-expand-xl align-items-center" id="layout-navbar">
-  <div class="{{ $containerNav }}">@include('layouts/sections/navbar/navbar-partial')</div>
+  <div class="{{ $containerNav }}">@include('admin/layouts/navbar-partial')</div>
 </nav>
 @endif
 <!-- / Navbar -->

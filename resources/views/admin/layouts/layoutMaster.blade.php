@@ -14,7 +14,7 @@
   $isMenu = $isMenu ?? true;
   $isFlex = $isFlex ?? false;
   $isFooter = $isFooter ?? true;
-  $customizerHidden = $customizerHidden ?? '';
+  $customizerHidden = $customizerHidden ?? 'customizer-hide';
 
   /* HTML Classes */
   $navbarDetached = 'navbar-detached';

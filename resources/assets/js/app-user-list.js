@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function () {
       details: {
         display: $.fn.dataTable.Responsive.display.modal({
           header: function (row) {
-            return 'Details of ' + row.data().name;
+            return 'Details of ' + row.data().firstname + ' ' + row.data().lastname;
           }
         }),
         type: 'column',
