@@ -171,7 +171,7 @@ $(function () {
           display: $.fn.dataTable.Responsive.display.modal({
             header: function (row) {
               var data = row.data();
-              return 'Details of ' + data['name'];
+              return 'Details ofs ' + (data && data['name'] ? data['name'] : 'User');
             }
           }),
           type: 'column',

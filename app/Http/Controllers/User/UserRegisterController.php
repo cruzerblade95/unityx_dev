@@ -35,7 +35,7 @@ class UserRegisterController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        Auth::guard('web')->login($user);
-        return redirect()->route('user.dashboard')->with('notyf_success', 'Registration successful!');
+    Auth::guard('web')->login($user);
+    return redirect()->route('connect-telegram')->with('notyf_success', 'Registration successful!');
     }
 }
