@@ -18,20 +18,11 @@ $configData = Helper::appClasses();
 @section('title', 'Login Cover - Pages')
 
 @section('vendor-style')
-@vite(['resources/assets/vendor/libs/@form-validation/form-validation.scss'])
+@vite(['resources/assets/vendor/libs/@form-validation/form-validation.scss',
+'resources/assets/vendor/libs/animate-css/animate.scss'])
 @endsection
 
-@push('scripts')
-  @if(session('notyf_success'))
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        if (window.Notyf) {
-          new Notyf().success(@json(session('notyf_success')));
-        }
-      });
-    </script>
-  @endif
-@endpush
+
 
 @section('page-style')
 @vite(['resources/assets/vendor/scss/pages/page-auth.scss'])
@@ -76,6 +67,11 @@ $configData = Helper::appClasses();
         <h4 class="mb-1">Welcome to {{ config('variables.templateName') }}! 👋</h4>
         <p class="mb-6">Please sign-in to your account and start the adventure</p>
 
+        @if ($errors->has('email'))
+          <div class="alert alert-danger mb-4" role="alert">
+            {{ $errors->first('email') }}
+          </div>
+        @endif
         <form id="formAuthentication" class="mb-6" action="{{ route('user.login.submit') }}" method="POST">
           @csrf
           <div class="mb-6 form-control-validation">
@@ -108,16 +104,16 @@ $configData = Helper::appClasses();
 
         <p class="text-center">
           <span>New on our platform?</span>
-          <a href="{{ url('auth/register-cover') }}">
+          <a href="{{ url('register') }}">
             <span>Create an account</span>
           </a>
         </p>
 
-        <div class="divider my-6">
+        {{-- <div class="divider my-6">
           <div class="divider-text">or</div>
-        </div>
+        </div> --}}
 
-        <div class="d-flex justify-content-center">
+        {{-- <div class="d-flex justify-content-center">
           <a href="javascript:;" class="btn btn-icon rounded-circle btn-text-facebook me-1_5">
             <i class="icon-base ti tabler-brand-facebook-filled icon-20px"></i>
           </a>
@@ -133,7 +129,7 @@ $configData = Helper::appClasses();
           <a href="javascript:;" class="btn btn-icon rounded-circle btn-text-google-plus">
             <i class="icon-base ti tabler-brand-google-filled icon-20px"></i>
           </a>
-        </div>
+        </div> --}}
       </div>
     </div>
     <!-- /Login -->
@@ -141,22 +137,3 @@ $configData = Helper::appClasses();
 </div>
 @endsection
 
-@push('scripts')
-  @php
-    $notyfMessages = [
-      'success' => session('notyf_success'),
-      'error' => session('notyf_error'),
-    ];
-  @endphp
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      if (window.Notyf) {
-        @foreach($notyfMessages as $type => $message)
-          @if($message)
-            new Notyf().{{ $type }}(@json($message));
-          @endif
-        @endforeach
-      }
-    });
-  </script>
-@endpush

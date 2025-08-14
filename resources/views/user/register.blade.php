@@ -16,8 +16,16 @@ $configData = Helper::appClasses();
         <form id="formRegister" class="mb-6" action="{{ route('user.register.submit') }}" method="POST">
           @csrf
           <div class="mb-6">
-            <label for="name" class="form-label">Name</label>
-            <input type="text" class="form-control" id="name" name="name" required autofocus />
+            <label for="firstname" class="form-label">First Name</label>
+            <input type="text" class="form-control" id="firstname" name="firstname" required autofocus />
+          </div>
+          <div class="mb-6">
+            <label for="lastname" class="form-label">Last Name</label>
+            <input type="text" class="form-control" id="lastname" name="lastname" required />
+          </div>
+          <div class="mb-6">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" name="username" required />
           </div>
           <div class="mb-6">
             <label for="email" class="form-label">Email</label>
