@@ -30,6 +30,7 @@ class MenuServiceProvider extends ServiceProvider
     $horizontalMenuData = json_decode($horizontalMenuJson);
 
     // Share all menuData to all the views
-    $this->app->make('view')->share('menuData', [$verticalMenuDataAdmin, $verticalMenuDataUser, $horizontalMenuData]);
+    $this->app->make('view')->share('menuData', [$verticalMenuDataUser, $horizontalMenuData]);
+    $this->app->make('view')->share('menuDataAdmin', [$verticalMenuDataAdmin, $horizontalMenuData]);
   }
 }
