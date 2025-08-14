@@ -39,7 +39,7 @@
     <div class="layout-container">
 
       @if ($isMenu)
-        @include('layouts/sections/menu/verticalMenu')
+        @include('user/layouts/sections/menu/verticalMenu')
       @endif
 
       <!-- Layout page -->
@@ -50,7 +50,7 @@
 
         <!-- BEGIN: Navbar-->
         @if ($isNavbar)
-          @include('layouts/sections/navbar/navbar')
+          @include('user/layouts/sections/navbar/navbar')
         @endif
         <!-- END: Navbar-->
 

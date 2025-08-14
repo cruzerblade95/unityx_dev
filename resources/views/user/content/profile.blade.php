@@ -89,9 +89,9 @@
             <div class="user-profile-info">
               <h4 class="mb-2 mt-lg-6">{{ auth()->user()->username }}</h4>
               <ul class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-4 my-2">
-                <li class="list-inline-item d-flex gap-2 align-items-center"><i class="icon-base ti tabler-palette icon-lg"></i><span class="fw-medium">UX Designer</span></li>
+                {{-- <li class="list-inline-item d-flex gap-2 align-items-center"><i class="icon-base ti tabler-palette icon-lg"></i><span class="fw-medium">UX Designer</span></li> --}}
                 <li class="list-inline-item d-flex gap-2 align-items-center"><i class="icon-base ti tabler-map-pin  icon-lg"></i><span class="fw-medium">Vatican City</span></li>
-                <li class="list-inline-item d-flex gap-2 align-items-center"><i class="icon-base ti tabler-calendar  icon-lg"></i><span class="fw-medium"> Joined April 2021</span></li>
+                <li class="list-inline-item d-flex gap-2 align-items-center"><i class="icon-base ti tabler-calendar  icon-lg"></i><span class="fw-medium"> Joined {{ \Carbon\Carbon::parse(auth()->user()->created_at)->format('d F Y') }}</span></li>
               </ul>
             </div>
             <a href="javascript:void(0)" class="btn btn-primary mb-1"> <i class="icon-base ti tabler-user-check icon-xs me-2"></i>Connected </a>
