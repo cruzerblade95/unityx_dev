@@ -180,7 +180,7 @@
         </button>
         <button class="btn btn-label-secondary d-grid w-100 mb-4">Download</button>
         <div class="d-flex mb-4">
-          <a class="btn btn-label-secondary d-grid w-100 me-4" target="_blank" href="{{ url('app/invoice/print') }}"> Print </a>
+          <a class="btn btn-label-secondary d-grid w-100 me-4"  href="{{ url('app/invoice/print') }}"> Print </a>
           <a href="{{ url('app/invoice/edit') }}" class="btn btn-label-secondary d-grid w-100"> Edit </a>
         </div>
         <button class="btn btn-success d-grid w-100" data-bs-toggle="offcanvas" data-bs-target="#addPaymentOffcanvas">

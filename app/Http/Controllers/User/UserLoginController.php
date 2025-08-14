@@ -10,16 +10,18 @@ class UserLoginController extends Controller
 {
     public function showLoginForm()
     {
-        return view('user.login');
+        $pageConfigs = ['myLayout' => 'blank'];
+        return view('user.login', compact('pageConfigs'));
     }
 
     public function login(Request $request)
     {
+        // dd($request->all());
         $credentials = $request->only('email', 'password');
         if (Auth::guard('web')->attempt($credentials)) {
-            return redirect()->intended(route('user.dashboard'));
+            return redirect()->intended(route('user.dashboard'))->with('notyf_success', 'Login successful!');
         }
-        return back()->withErrors(['email' => 'Invalid credentials']);
+    return back()->withErrors(['email' => 'Invalid credentials'])->with('notyf_error', 'Invalid credentials');
     }
 
     public function logout(Request $request)

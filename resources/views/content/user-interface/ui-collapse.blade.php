@@ -48,7 +48,7 @@
             The collapse plugin also supports horizontal collapsing.<br />
             If you want more detailed information, you can check the
             <a href="{{ config('variables.documentation') }}/ui-collapse.html#horizontal-collapse"
-              target="_blank">documentation</a>.
+              >documentation</a>.
           </p>
           <p class="demo-inline-spacing">
             <button class="btn btn-primary" type="button" data-bs-toggle="collapse"

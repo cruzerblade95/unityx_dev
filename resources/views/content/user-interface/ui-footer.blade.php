@@ -10,10 +10,10 @@
   <footer class="footer bg-light">
     <div
       class="container-fluid d-flex flex-md-row flex-column justify-content-between align-items-md-center gap-1 container-p-x py-4">
-      <div><a href="{{ config('variables.livePreview') }}" target="_blank"
+      <div><a href="{{ config('variables.livePreview') }}" 
           class="footer-text fw-medium">{{ config('variables.templateName') }}</a> ©</div>
       <div class="d-flex flex-column flex-sm-row">
-        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" target="_blank">License</a>
+        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" >License</a>
         <a href="javascript:void(0)" class="footer-link me-6">Help</a>
         <a href="javascript:void(0)" class="footer-link me-6">Contact</a>
         <a href="javascript:void(0)" class="footer-link">Terms &amp; Conditions</a>
@@ -31,7 +31,7 @@
   <footer class="footer bg-light">
     <div
       class="container-fluid d-flex flex-md-row flex-column justify-content-between align-items-md-center gap-1 container-p-x py-4">
-      <div><a href="{{ config('variables.livePreview') }}" target="_blank"
+      <div><a href="{{ config('variables.livePreview') }}" 
           class="footer-text fw-medium">{{ config('variables.templateName') }}</a> ©</div>
       <div class="d-flex flex-column flex-sm-row gap-4">
         <div class="form-check form-control-sm footer-link mb-0 pt-1 mt-50">
@@ -69,10 +69,10 @@
   <footer class="footer bg-primary mb-6">
     <div
       class="container-fluid d-flex flex-md-row flex-column justify-content-between align-items-md-center gap-1 container-p-x py-4">
-      <div><a href="{{ config('variables.livePreview') }}" target="_blank"
+      <div><a href="{{ config('variables.livePreview') }}" 
           class="footer-text fw-medium">{{ config('variables.templateName') }}</a> ©</div>
       <div class="d-flex flex-column flex-sm-row">
-        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" target="_blank">License</a>
+        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" >License</a>
         <a href="javascript:void(0)" class="footer-link me-6">Help</a>
         <a href="javascript:void(0)" class="footer-link me-6">Contact</a>
         <a href="javascript:void(0)" class="footer-link">Terms &amp; Conditions</a>
@@ -83,10 +83,10 @@
   <footer class="footer bg-secondary mb-6">
     <div
       class="container-fluid d-flex flex-md-row flex-column justify-content-between align-items-md-center gap-1 container-p-x py-4">
-      <div><a href="{{ config('variables.livePreview') }}" target="_blank"
+      <div><a href="{{ config('variables.livePreview') }}" 
           class="footer-text fw-medium">{{ config('variables.templateName') }}</a> ©</div>
       <div class="d-flex flex-column flex-sm-row">
-        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" target="_blank">License</a>
+        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" >License</a>
         <a href="javascript:void(0)" class="footer-link me-6">Help</a>
         <a href="javascript:void(0)" class="footer-link me-6">Contact</a>
         <a href="javascript:void(0)" class="footer-link">Terms &amp; Conditions</a>
@@ -97,10 +97,10 @@
   <footer class="footer bg-success mb-6">
     <div
       class="container-fluid d-flex flex-md-row flex-column justify-content-between align-items-md-center gap-1 container-p-x py-4">
-      <div><a href="{{ config('variables.livePreview') }}" target="_blank"
+      <div><a href="{{ config('variables.livePreview') }}" 
           class="footer-text fw-medium">{{ config('variables.templateName') }}</a> ©</div>
       <div class="d-flex flex-column flex-sm-row">
-        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" target="_blank">License</a>
+        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" >License</a>
         <a href="javascript:void(0)" class="footer-link me-6">Help</a>
         <a href="javascript:void(0)" class="footer-link me-6">Contact</a>
         <a href="javascript:void(0)" class="footer-link">Terms &amp; Conditions</a>
@@ -111,10 +111,10 @@
   <footer class="footer bg-danger mb-6">
     <div
       class="container-fluid d-flex flex-md-row flex-column justify-content-between align-items-md-center gap-1 container-p-x py-4">
-      <div><a href="{{ config('variables.livePreview') }}" target="_blank"
+      <div><a href="{{ config('variables.livePreview') }}" 
           class="footer-text fw-medium">{{ config('variables.templateName') }}</a> ©</div>
       <div class="d-flex flex-column flex-sm-row">
-        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" target="_blank">License</a>
+        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" >License</a>
         <a href="javascript:void(0)" class="footer-link me-6">Help</a>
         <a href="javascript:void(0)" class="footer-link me-6">Contact</a>
         <a href="javascript:void(0)" class="footer-link">Terms &amp; Conditions</a>
@@ -125,10 +125,10 @@
   <footer class="footer bg-warning mb-6">
     <div
       class="container-fluid d-flex flex-md-row flex-column justify-content-between align-items-md-center gap-1 container-p-x py-4">
-      <div><a href="{{ config('variables.livePreview') }}" target="_blank"
+      <div><a href="{{ config('variables.livePreview') }}" 
           class="footer-text fw-medium">{{ config('variables.templateName') }}</a> ©</div>
       <div class="d-flex flex-column flex-sm-row">
-        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" target="_blank">License</a>
+        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" >License</a>
         <a href="javascript:void(0)" class="footer-link me-6">Help</a>
         <a href="javascript:void(0)" class="footer-link me-6">Contact</a>
         <a href="javascript:void(0)" class="footer-link">Terms &amp; Conditions</a>
@@ -139,10 +139,10 @@
   <footer class="footer bg-info mb-6">
     <div
       class="container-fluid d-flex flex-md-row flex-column justify-content-between align-items-md-center gap-1 container-p-x py-4">
-      <div><a href="{{ config('variables.livePreview') }}" target="_blank"
+      <div><a href="{{ config('variables.livePreview') }}" 
           class="footer-text fw-medium">{{ config('variables.templateName') }}</a> ©</div>
       <div class="d-flex flex-column flex-sm-row">
-        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" target="_blank">License</a>
+        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" >License</a>
         <a href="javascript:void(0)" class="footer-link me-6">Help</a>
         <a href="javascript:void(0)" class="footer-link me-6">Contact</a>
         <a href="javascript:void(0)" class="footer-link">Terms &amp; Conditions</a>
@@ -153,10 +153,10 @@
   <footer class="footer bg-light mb-6">
     <div
       class="container-fluid d-flex flex-md-row flex-column justify-content-between align-items-md-center gap-1 container-p-x py-4">
-      <div><a href="{{ config('variables.livePreview') }}" target="_blank"
+      <div><a href="{{ config('variables.livePreview') }}" 
           class="footer-text fw-medium">{{ config('variables.templateName') }}</a> ©</div>
       <div class="d-flex flex-column flex-sm-row">
-        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" target="_blank">License</a>
+        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" >License</a>
         <a href="javascript:void(0)" class="footer-link me-6">Help</a>
         <a href="javascript:void(0)" class="footer-link me-6">Contact</a>
         <a href="javascript:void(0)" class="footer-link">Terms &amp; Conditions</a>
@@ -167,10 +167,10 @@
   <footer class="footer bg-dark mb-6">
     <div
       class="container-fluid d-flex flex-md-row flex-column justify-content-between align-items-md-center gap-1 container-p-x py-4">
-      <div><a href="{{ config('variables.livePreview') }}" target="_blank"
+      <div><a href="{{ config('variables.livePreview') }}" 
           class="footer-text fw-medium">{{ config('variables.templateName') }}</a> ©</div>
       <div class="d-flex flex-column flex-sm-row">
-        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" target="_blank">License</a>
+        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" >License</a>
         <a href="javascript:void(0)" class="footer-link me-6">Help</a>
         <a href="javascript:void(0)" class="footer-link me-6">Contact</a>
         <a href="javascript:void(0)" class="footer-link">Terms &amp; Conditions</a>
@@ -181,10 +181,10 @@
   <footer class="footer bg-white">
     <div
       class="container-fluid d-flex flex-md-row flex-column justify-content-between align-items-md-center gap-1 container-p-x py-4">
-      <div><a href="{{ config('variables.livePreview') }}" target="_blank"
+      <div><a href="{{ config('variables.livePreview') }}" 
           class="footer-text fw-medium">{{ config('variables.templateName') }}</a> ©</div>
       <div class="d-flex flex-column flex-sm-row">
-        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" target="_blank">License</a>
+        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" >License</a>
         <a href="javascript:void(0)" class="footer-link me-6">Help</a>
         <a href="javascript:void(0)" class="footer-link me-6">Contact</a>
         <a href="javascript:void(0)" class="footer-link">Terms &amp; Conditions</a>
@@ -203,11 +203,11 @@
     <div
       class="container-fluid d-flex flex-md-row flex-column justify-content-between align-items-md-center gap-1 container-p-x py-4">
       <div>
-        <a href="{{ config('variables.livePreview') }}" target="_blank" class="footer-text fw-medium"><span
+        <a href="{{ config('variables.livePreview') }}"  class="footer-text fw-medium"><span
             class="text-body">{{ config('variables.templateName') }}</span></a> ©
       </div>
       <div class="d-flex flex-column flex-sm-row">
-        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" target="_blank">License</a>
+        <a href="{{ config('variables.licenseUrl') }}" class="footer-link me-6" >License</a>
         <a href="javascript:void(0)" class="footer-link me-6">Help</a>
         <a href="javascript:void(0)" class="footer-link me-6">Contact</a>
         <a href="javascript:void(0)" class="footer-link">Terms &amp; Conditions</a>
@@ -226,7 +226,7 @@
     <div class="container-fluid container-p-x pt-12 pb-6">
       <div class="row">
         <div class="col-12 col-sm-6 col-md-3 mb-6 mb-sm-0">
-          <h4 class="fw-bold mb-4"><a href="{{ config('variables.livePreview') }}" target="_blank"
+          <h4 class="fw-bold mb-4"><a href="{{ config('variables.livePreview') }}" 
               class="footer-text">{{ config('variables.templateName') }}
             </a></h4>
           <span>Get ready for better world</span>
@@ -244,7 +244,7 @@
             <script>
             document.write(new Date().getFullYear());
             </script>
-            © <a href="{{ config('variables.creatorUrl') }}" target="_blank"
+            © <a href="{{ config('variables.creatorUrl') }}" 
               class="text-body">{{ config('variables.creatorName') }} </a>
           </p>
         </div>

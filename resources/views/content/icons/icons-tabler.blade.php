@@ -8,7 +8,7 @@
 
 @section('content')
   <p class="ms-3">You can check complete list of Tabler icons from <a href="https://tabler-icons.io/"
-      target="_blank">https://tabler-icons.io/</a></p>
+      >https://tabler-icons.io/</a></p>
 
   <!-- Icon container -->
   <div class="d-flex flex-wrap" id="icons-container">
@@ -160,8 +160,8 @@
 
   <!-- Buttons -->
   <div class="d-flex justify-content-center mx-auto gap-4">
-    <a href="https://tabler-icons.io/" target="_blank" class="btn btn-primary">View All Icons</a>
-    <a href="{{ config('variables.documentation') }}/Icons.html" class="btn btn-primary" target="_blank">How to use
+    <a href="https://tabler-icons.io/"  class="btn btn-primary">View All Icons</a>
+    <a href="{{ config('variables.documentation') }}/Icons.html" class="btn btn-primary" >How to use
       icons?</a>
   </div>
 @endsection

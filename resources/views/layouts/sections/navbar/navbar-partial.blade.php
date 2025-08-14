@@ -540,7 +540,7 @@ use Illuminate\Support\Facades\Route;
         <li>
           <div class="d-grid px-2 pt-2 pb-1">
             <a class="btn btn-sm btn-danger d-flex"
-              href="{{ Route::has('login') ? route('login') : url('auth/login-basic') }}" target="_blank">
+              href="{{ Route::has('login') ? route('login') : url('auth/login-basic') }}" >
               <small class="align-middle">Login</small>
               <i class="icon-base ti tabler-login ms-2 icon-14px"></i>
             </a>

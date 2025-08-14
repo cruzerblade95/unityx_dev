@@ -3,7 +3,7 @@
 return [
   "creatorName" => "Pixinvent",
   "creatorUrl" => "https://pixinvent.com",
-  "templateName" => "Vuexy",
+  "templateName" => "UnityX",
   "templateSuffix" => "Bootstrap Admin Template",
   "templateVersion" => "3.0.0",
   "templateFree" => false,
@@ -14,7 +14,7 @@ return [
   "productPage" => "https://themeforest.net/item/vuexy-vuejs-html-laravel-admin-dashboard-template/23328599",
   "support" => "https://pixinvent.ticksy.com/",
   "moreThemes" => "https://themeforest.net/user/pixinvent/portfolio",
-  "ogTitle" => "Vuexy bootstrap Dashboard by Pixinvent",
+  "ogTitle" => "UnityX bootstrap Dashboard by Pixinvent",
   "ogImage" => "https://pixinvent.com/wp-content/uploads/2023/06/vuexy-hero-image.png",
   "ogType" => "product",
   "documentation" => "https://demos.pixinvent.com/vuexy-html-admin-template/documentation",

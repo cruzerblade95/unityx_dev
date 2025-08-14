@@ -49,7 +49,7 @@ $configData = Helper::appClasses();
           </div>
         </div>
         <div id="heroDashboardAnimation" class="hero-animation-img">
-          <a href="{{ url('/app/ecommerce/dashboard') }}" target="_blank">
+          <a href="{{ url('/app/ecommerce/dashboard') }}" >
             <div id="heroAnimationImg" class="position-relative hero-dashboard-img">
               <img
                 src="{{ asset('assets/img/front-pages/landing-page/hero-dashboard-' . $configData['theme'] . '.png') }}"
