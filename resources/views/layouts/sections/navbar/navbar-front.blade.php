@@ -282,7 +282,7 @@ $activeClass = in_array($currentRouteName, $activeRoutes) ? 'active' : '';
 
         <!-- navbar button: Start -->
         <li>
-          <a href="{{ url('/login') }}" class="btn btn-primary" ><span
+          <a href="{{ url('/user/login') }}" class="btn btn-primary" ><span
               class="icon-base ti tabler-login scaleX-n1-rtl me-md-1"></span><span
               class="d-none d-md-block">Login/Register</span></a>
         </li>
