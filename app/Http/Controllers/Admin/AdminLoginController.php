@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use App\Providers\RouteServiceProvider;
 
 class AdminLoginController extends Controller
@@ -33,7 +34,14 @@ class AdminLoginController extends Controller
         
         if (Auth::guard('admin')->attempt($credentials)) {
             Log::info('Login successful');
-            return redirect()->intended('/admin/dashboard');
+            
+            // Update last login timestamp using DB facade
+            $adminId = Auth::guard('admin')->id();
+            DB::table('admins')
+                ->where('id', $adminId)
+                ->update(['last_login_at' => now()]);
+            
+            return redirect()->route('admin.dashboard');
         }
         
         Log::info('Login failed');

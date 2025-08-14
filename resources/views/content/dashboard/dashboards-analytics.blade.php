@@ -35,7 +35,8 @@ $configData = Helper::appClasses();
   <!-- Website Analytics -->
   <div class="col-xl-6 col">
     <div class="swiper-container swiper-container-horizontal swiper swiper-card-advance-bg"
-      id="swiper-with-pagination-cards">
+      id="swiper-with-paginatioTarget class [admin] does not exist.
+sn-cards">
       <div class="swiper-wrapper">
         <div class="swiper-slide">
           <div class="row">

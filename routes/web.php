@@ -17,6 +17,7 @@ use App\Http\Controllers\layouts\WithoutNavbar;
 use App\Http\Controllers\layouts\Fluid;
 use App\Http\Controllers\layouts\Container;
 use App\Http\Controllers\layouts\Blank;
+use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 use App\Http\Controllers\front_pages\Landing;
 use App\Http\Controllers\front_pages\Pricing;
 use App\Http\Controllers\front_pages\Payment;
@@ -162,9 +163,11 @@ use App\Http\Controllers\maps\Leaflet;
 
 // Main Page Route
 Route::get('/', [Landing::class, 'index'])->name('front-pages-landing');
-// Docs Template Route
-Route::get('/admin/dashboard', [Analytics::class, 'index'])->middleware('admin')->name('admin-dashboard');
-Route::get('/dashboard/analytics', [Analytics::class, 'index'])->name('dashboard-analytics');
+
+// Jetstream Routes
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
+    ->name('logout');
+// Dashboard Routes
 Route::get('/dashboard/crm', [Crm::class, 'index'])->name('dashboard-crm');
 // locale
 Route::get('/lang/{locale}', [LanguageController::class, 'swap']);
@@ -360,3 +363,13 @@ Route::get('/maps/leaflet', [Leaflet::class, 'index'])->name('maps-leaflet');
 // laravel example
 Route::get('/laravel/user-management', [UserManagement::class, 'UserManagement'])->name('laravel-example-user-management');
 Route::resource('/user-list', UserManagement::class);
+
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+});

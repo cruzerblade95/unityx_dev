@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web'])->group(function () {
-    Route::get('login', [App\Http\Controllers\User\UserLoginController::class, 'showLoginForm'])->name('user.login');
+    Route::get('login', [App\Http\Controllers\User\UserLoginController::class, 'showLoginForm'])->name('login'); // Main login route
     Route::post('login', [App\Http\Controllers\User\UserLoginController::class, 'login'])->name('user.login.submit');
     Route::post('logout', [App\Http\Controllers\User\UserLoginController::class, 'logout'])->name('user.logout');
 
