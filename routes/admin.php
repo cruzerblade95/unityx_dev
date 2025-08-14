@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AdminLoginController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Admin\WalletManagementController;
 
 Route::prefix('admin')->middleware('web')->group(function () {
     // Guest routes
@@ -21,8 +22,15 @@ Route::prefix('admin')->middleware('web')->group(function () {
         // User Management Routes
         Route::get('/users', [UserManagementController::class, 'index'])->name('admin.users.index');
         Route::get('/users/list', [UserManagementController::class, 'list'])->name('admin.users.list');
+        Route::get('/users/{id}', [UserManagementController::class, 'show'])->name('admin.users.show');
+        Route::get('/users/{id}/profile', [UserManagementController::class, 'profile'])->name('admin.users.profile');
         Route::post('/users', [UserManagementController::class, 'store'])->name('admin.users.store');
-        Route::put('/users/{user}', [UserManagementController::class, 'update'])->name('admin.users.update');
+        Route::put('/users/{id}', [UserManagementController::class, 'update'])->name('admin.users.update');
         Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('admin.users.destroy');
+
+        // Wallet Management Routes
+        Route::get('/wallets', [WalletManagementController::class, 'index'])->name('admin.wallets.index');
+        Route::get('/wallets/list', [WalletManagementController::class, 'list'])->name('admin.wallets.list');
+        Route::post('/wallets/{user}', [WalletManagementController::class, 'updateBalance'])->name('admin.wallets.update');
     });
 });

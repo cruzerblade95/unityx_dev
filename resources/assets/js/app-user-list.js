@@ -21,13 +21,25 @@ document.addEventListener('DOMContentLoaded', function () {
       },
       // User column with avatar
       {
-        data: 'name',
+        data: 'firstname',
         render: function (data, type, row) {
           // Get the profile photo URL or use default avatar
           const photoUrl = row.profile_photo_path 
             ? `/storage/${row.profile_photo_path}`
             : '/assets/img/avatars/1.png';
+            
+          const fullName = row.firstname + ' ' + row.lastname;
+          
+          // Debug logging
+          console.log('Row data:', {
+            firstname: row.firstname,
+            lastname: row.lastname,
+            username: row.username,
+            email: row.email,
+            fullRow: row
+          });
 
+          const username = row.username ? `@${row.username}` : row.email;
           return `
             <div class="d-flex justify-content-start align-items-center user-name">
               <div class="avatar-wrapper">
@@ -36,8 +48,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
               </div>
               <div class="d-flex flex-column">
-                <span class="fw-medium">${data}</span>
-                <small class="text-muted">${row.email}</small>
+                <span class="fw-medium">${fullName}</span>
+                <small class="text-muted">${username}</small>
               </div>
             </div>
           `;
@@ -102,18 +114,16 @@ document.addEventListener('DOMContentLoaded', function () {
         searchable: false,
         render: function (data, type, row) {
           return `
-            <div class="dropdown">
-              <button type="button" class="btn btn-sm dropdown-toggle hide-arrow py-0" data-bs-toggle="dropdown">
-                <i class="fas fa-ellipsis-vertical"></i>
+            <div class="d-inline-flex gap-2">
+              <a href="/admin/users/${row.id}/profile" class="btn btn-sm btn-icon btn-info" title="View Profile">
+                <i class="fas fa-user"></i>
+              </a>
+              <button class="btn btn-sm btn-icon btn-primary edit-record" data-id="${row.id}" data-bs-toggle="offcanvas" data-bs-target="#offcanvasEditUser" title="Edit User">
+                <i class="fas fa-edit"></i>
               </button>
-              <div class="dropdown-menu dropdown-menu-end">
-                <a href="javascript:;" class="dropdown-item edit-record" data-id="${row.id}" data-bs-toggle="offcanvas" data-bs-target="#offcanvasEditUser">
-                  <i class="fas fa-edit me-2"></i>Edit
-                </a>
-                <a href="javascript:;" class="dropdown-item text-danger delete-record" data-id="${row.id}">
-                  <i class="fas fa-trash-alt me-2"></i>Delete
-                </a>
-              </div>
+              <button class="btn btn-sm btn-icon btn-danger delete-record" data-id="${row.id}" title="Delete User">
+                <i class="fas fa-trash-alt"></i>
+              </button>
             </div>
           `;
         }
@@ -171,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function () {
       type: 'GET',
       success: function(data) {
         // Fill the edit form with user data
-        $('#editUserForm input[name="name"]').val(data.name);
+        $('#editUserForm input[name="username"]').val(data.username);
         $('#editUserForm input[name="email"]').val(data.email);
         $('#editUserForm select[name="role"]').val(data.role);
         $('#editUserForm').data('id', id);
@@ -278,16 +288,27 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // Form submission for new user
-  $('#addNewUserForm').on('submit', function (e) {
+  $(document).on('submit', '#addNewUserForm', function (e) {
     e.preventDefault();
+    console.log('Form submitted');
+    
     const form = $(this);
+    const url = form.data('action');
+    const formData = form.serialize();
+    const token = $('meta[name="csrf-token"]').attr('content');
+    
+    console.log('Submission details:', {
+      url: url,
+      formData: formData,
+      hasToken: !!token
+    });
     
     $.ajax({
-      url: form.attr('action'),
+      url: url,
       type: 'POST',
-      data: form.serialize(),
+      data: formData,
       headers: {
-        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        'X-CSRF-TOKEN': token
       },
       success: function (data) {
         if (data.success) {
@@ -307,11 +328,31 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       },
       error: function (error) {
-        console.error('Error:', error);
+        console.error('Full error details:', error);
+        let errorMessage = 'Could not add the user.';
+        
+        if (error.responseJSON) {
+          console.log('Server response:', error.responseJSON);
+          if (error.responseJSON.errors) {
+            // Handle validation errors
+            errorMessage = Object.entries(error.responseJSON.errors)
+              .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
+              .join('\n');
+          } else if (error.responseJSON.message) {
+            errorMessage = error.responseJSON.message;
+            console.log('Error message:', error.responseJSON.message);
+            if (error.responseJSON.exception) {
+              console.log('Exception:', error.responseJSON.exception);
+              console.log('File:', error.responseJSON.file);
+              console.log('Line:', error.responseJSON.line);
+            }
+          }
+        }
+        
         Swal.fire({
           icon: 'error',
           title: 'Error!',
-          text: error.responseJSON?.message || 'Could not add the user.',
+          html: errorMessage.replace(/\n/g, '<br>'),
           customClass: {
             confirmButton: 'btn btn-primary'
           },

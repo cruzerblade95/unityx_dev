@@ -12,6 +12,7 @@
 
 @section('vendor-script')
 @vite(['resources/assets/vendor/libs/moment/moment.js', 'resources/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js', 'resources/assets/vendor/libs/select2/select2.js', 'resources/assets/vendor/libs/@form-validation/popular.js', 'resources/assets/vendor/libs/@form-validation/bootstrap5.js', 'resources/assets/vendor/libs/@form-validation/auto-focus.js', 'resources/assets/vendor/libs/cleave-zen/cleave-zen.js'])
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection
 
 @section('page-script')
@@ -125,7 +126,7 @@
       <thead>
         <tr>
           <th></th>
-          <th>Name</th>
+          <th>User</th>
           <th>Email</th>
           <th>Role</th>
           <th>Status</th>
@@ -146,11 +147,15 @@
       <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body mx-0 flex-grow-0 p-6 h-100">
-      <form class="add-new-user pt-0" id="addNewUserForm" method="POST" action="{{ route('admin.users.store') }}">
+      <form class="add-new-user pt-0" id="addNewUserForm" data-action="{{ route('admin.users.store') }}">
         @csrf
         <div class="mb-6 form-control-validation">
-          <label class="form-label" for="add-user-fullname">Full Name</label>
-          <input type="text" class="form-control" id="add-user-fullname" placeholder="John Doe" name="name" required />
+          <label class="form-label" for="add-user-firstname">First Name</label>
+          <input type="text" class="form-control" id="add-user-firstname" placeholder="John" name="firstname" required />
+        </div>
+        <div class="mb-6 form-control-validation">
+          <label class="form-label" for="add-user-lastname">Last Name</label>
+          <input type="text" class="form-control" id="add-user-lastname" placeholder="Doe" name="lastname" required />
         </div>
         <div class="mb-6 form-control-validation">
           <label class="form-label" for="add-user-email">Email</label>
@@ -161,8 +166,8 @@
           <input type="password" id="add-user-password" class="form-control" name="password" required />
         </div>
         <div class="mb-6">
-          <label class="form-label" for="user-role">User Role</label>
-          <select id="user-role" class="form-select" name="role" required>
+          <label class="form-label" for="add-user-role">User Role</label>
+          <select id="add-user-role" class="form-select" name="role" required>
             <option value="user">User</option>
             <option value="admin">Admin</option>
           </select>
@@ -184,8 +189,8 @@
         @csrf
         @method('PUT')
         <div class="mb-6 form-control-validation">
-          <label class="form-label" for="edit-user-fullname">Full Name</label>
-          <input type="text" class="form-control" id="edit-user-fullname" placeholder="John Doe" name="name" required />
+          <label class="form-label" for="edit-user-username">Username</label>
+          <input type="text" class="form-control" id="edit-user-username" placeholder="johndoe" name="username" required />
         </div>
         <div class="mb-6 form-control-validation">
           <label class="form-label" for="edit-user-email">Email</label>

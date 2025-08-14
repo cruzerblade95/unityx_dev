@@ -48,6 +48,14 @@ class User extends Authenticatable
     ];
 
     /**
+     * Get the wallet associated with the user.
+     */
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class);
+    }
+
+    /**
      * The accessors to append to the model's array form.
      *
      * @var array<int, string>

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
 
 class UserManagementController extends Controller
@@ -47,7 +48,9 @@ class UserManagementController extends Controller
     {
         $users = User::select([
             'id',
-            'name',
+            'firstname',
+            'lastname',
+            'username',
             'email',
             'role',
             'created_at',
@@ -71,37 +74,82 @@ class UserManagementController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-            'role' => 'required|string|in:user,admin'
-        ]);
+        try {
+            $validatedData = $request->validate([
+                'firstname' => 'required|string|max:255',
+                'lastname' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users,email',
+                'password' => 'required|string|min:8',
+                'role' => 'required|string|in:user,admin'
+            ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role
-        ]);
+            // Create base username
+            $baseUsername = strtolower($validatedData['firstname'] . '.' . $validatedData['lastname']);
+            
+            // Check if username exists and append number if needed
+            $username = $baseUsername;
+            $counter = 1;
+            while (User::where('username', $username)->exists()) {
+                $username = $baseUsername . $counter;
+                $counter++;
+            }
+            
+            // Log the data before creating user
+            Log::info('Creating user with data:', [
+                'firstname' => $validatedData['firstname'],
+                'lastname' => $validatedData['lastname'],
+                'username' => $username,
+                'email' => $validatedData['email'],
+                'role' => $validatedData['role']
+            ]);
+            
+            $user = User::create([
+                'firstname' => (string) $validatedData['firstname'],
+                'lastname' => (string) $validatedData['lastname'],
+                'email' => (string) $validatedData['email'],
+                'password' => Hash::make((string) $validatedData['password']),
+                'role' => (string) $validatedData['role'],
+                'username' => $username
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User created successfully'
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'User created successfully'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('User creation failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create user: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
-    public function update(Request $request, User $user)
+    public function show($id)
     {
+        $user = User::findOrFail($id);
+        return response()->json($user);
+    }
+
+    public function profile($id)
+    {
+        $user = User::with('wallet')->findOrFail($id);
+        return view('admin.userProfile', compact('user'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+        
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'username' => 'required|string|max:255|unique:users,username,' . $id,
+            'email' => 'required|string|email|max:255|unique:users,email,' . $id,
             'password' => 'nullable|string|min:8',
             'role' => 'required|string|in:user,admin'
         ]);
 
         $userData = [
-            'name' => $request->name,
+            'username' => $request->username,
             'email' => $request->email,
             'role' => $request->role
         ];
