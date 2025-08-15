@@ -107,34 +107,40 @@ $configData = Helper::appClasses();
 
         <form id="formAuthentication" class="mb-6" action="{{ route('user.register.submit') }}" method="POST">
           @csrf
-          <div class="mb-6 form-control-validation">
-            <label for="firstname" class="form-label">First Name</label>
-            <input type="text" class="form-control" id="firstname" name="firstname" required autofocus />
-          </div>
-          <div class="mb-6 form-control-validation">
-            <label for="lastname" class="form-label">Last Name</label>
-            <input type="text" class="form-control" id="lastname" name="lastname" required />
-          </div>
-          <div class="mb-6 form-control-validation">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" class="form-control" id="username" name="username" required />
-          </div>
-          <div class="mb-6 form-control-validation">
-            <label for="email" class="form-label">Email</label>
-            <input type="text" class="form-control" id="email" name="email" placeholder="Enter your email" />
-          </div>
-          <div class="mb-6 form-password-toggle form-control-validation">
-            <label class="form-label" for="password">Password</label>
-            <div class="input-group input-group-merge">
-              <input type="password" id="password" class="form-control" name="password"
-              placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-              aria-describedby="password" />
-              <span class="input-group-text cursor-pointer"><i class="icon-base ti tabler-eye-off"></i></span>
+          <div class="row">
+            <div class="col-6 mb-6 form-control-validation">
+              <label for="firstname" class="form-label">First Name</label>
+              <input type="text" class="form-control" id="firstname" name="firstname" required autofocus />
             </div>
-          </div>
-          <div class="mb-6 form-control-validation">
-            <label for="password_confirmation" class="form-label">Confirm Password</label>
-            <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required />
+            <div class="col-6 mb-6 form-control-validation">
+              <label for="lastname" class="form-label">Last Name</label>
+              <input type="text" class="form-control" id="lastname" name="lastname" required />
+            </div>
+            <div class="col-6 mb-6 form-control-validation">
+              <label for="username" class="form-label">Username</label>
+              <input type="text" class="form-control" id="username" name="username" required />
+            </div>
+            <div class="col-6 mb-6 form-control-validation">
+              <label for="referral_code" class="form-label">Referral Code (optional)</label>
+              <input type="text" class="form-control" id="referral_code" name="referral_code" placeholder="Enter referral code if you have one" />
+            </div>
+            <div class="col-12 mb-6 form-control-validation">
+              <label for="email" class="form-label">Email</label>
+              <input type="text" class="form-control" id="email" name="email" placeholder="Enter your email" />
+            </div>
+            <div class="col-6 mb-6 form-password-toggle form-control-validation">
+              <label class="form-label" for="password">Password</label>
+              <div class="input-group input-group-merge">
+                <input type="password" id="password" class="form-control" name="password"
+                placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                aria-describedby="password" />
+                <span class="input-group-text cursor-pointer"><i class="icon-base ti tabler-eye-off"></i></span>
+              </div>
+            </div>
+            <div class="col-6 mb-6 form-control-validation">
+              <label for="password_confirmation" class="form-label">Confirm Password</label>
+              <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required />
+            </div>
           </div>
           <div class="mb-6 mt-8">
             <div class="form-check mb-8 ms-2 form-control-validation">

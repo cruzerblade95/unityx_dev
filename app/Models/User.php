@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -33,6 +32,8 @@ class User extends Authenticatable
         'role',
         'last_active_at',
         'password',
+        'referral_code',
+        'upline_id',
     ];
 
     /**
@@ -75,5 +76,10 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function downlines()
+    {
+        return $this->hasMany(User::class, 'upline_id');
     }
 }

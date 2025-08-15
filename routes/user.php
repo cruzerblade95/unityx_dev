@@ -1,3 +1,4 @@
+    
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -32,6 +33,7 @@ Route::prefix('user')->middleware('web')->group(function () {
         Route::get('/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
         Route::get('/profile', [UserController::class, 'profile'])->name('user.profile');
         Route::put('/profile', [UserController::class, 'updateProfile'])->name('user.profile.update');
+        Route::get('downline', [UserController::class, 'downline'])->name('user.downline');
         Route::get('/logout', [UserLoginController::class, 'logout']);
         // Route::get('/debug', [UserController::class, 'debug']);
 

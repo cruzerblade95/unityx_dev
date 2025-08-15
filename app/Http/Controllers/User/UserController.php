@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
@@ -26,5 +25,12 @@ class UserController extends Controller
         ]);
         $user->update($validated);
         return redirect()->route('user.profile')->with('profile_updated', true);
+    }
+
+    public function downline()
+    {
+        $user = auth()->user();
+        $downlines = $user->downlines ?? collect();
+        return view('user.content.downline', compact('downlines'));
     }
 }
