@@ -8,6 +8,7 @@ use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\DepositController;
 use App\Http\Controllers\User\WithdrawalController;
 use App\Http\Controllers\User\InvestmentController;
+use App\Http\Controllers\KycController;
 // Route::middleware(['web'])->group(function () {
 //     Route::get('login', [App\Http\Controllers\User\UserLoginController::class, 'showLoginForm'])->name('login'); // Main login route
 //     Route::post('login', [App\Http\Controllers\User\UserLoginController::class, 'login'])->name('user.login.submit');
@@ -40,6 +41,10 @@ Route::prefix('user')->middleware('web')->group(function () {
         Route::get('downline', [UserController::class, 'downline'])->name('user.downline');
         Route::get('/logout', [UserLoginController::class, 'logout']);
         // Route::get('/debug', [UserController::class, 'debug']);
+
+    // KYC Verification
+    Route::get('kyc', [KycController::class, 'index'])->name('user.kyc.index');
+    Route::post('kyc', [KycController::class, 'store'])->name('user.kyc.store');
 
     // Deposit & Withdrawal
     Route::get('deposit', [DepositController::class, 'index'])->name('user.deposit.index');

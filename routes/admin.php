@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AdminLoginController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\WalletManagementController;
+use App\Http\Controllers\Admin\KycApprovalController;
 
 Route::prefix('admin')->middleware('web')->group(function () {
     // Guest routes
@@ -32,5 +33,11 @@ Route::prefix('admin')->middleware('web')->group(function () {
         Route::get('/wallets', [WalletManagementController::class, 'index'])->name('admin.wallets.index');
         Route::get('/wallets/list', [WalletManagementController::class, 'list'])->name('admin.wallets.list');
         Route::post('/wallets/{user}', [WalletManagementController::class, 'updateBalance'])->name('admin.wallets.update');
+
+        // KYC Approval Routes
+        Route::get('/kyc', [KycApprovalController::class, 'index'])->name('admin.kyc.index');
+        Route::get('/kyc/{id}', [KycApprovalController::class, 'show'])->name('admin.kyc.show');
+        Route::post('/kyc/{id}/approve', [KycApprovalController::class, 'approve'])->name('admin.kyc.approve');
+        Route::post('/kyc/{id}/reject', [KycApprovalController::class, 'reject'])->name('admin.kyc.reject');
     });
 });

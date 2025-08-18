@@ -1,3 +1,6 @@
+
+{{-- edit menu at resources/menu/verticalMenuUser.json --}}
+
 @php
 use Illuminate\Support\Facades\Route;
 $configData = Helper::appClasses();

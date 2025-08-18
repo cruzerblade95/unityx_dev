@@ -3,7 +3,8 @@
 @section('title', 'Deposit')
 
 @section('content')
-<div class="container py-4">
+@include('components.coming-soon-overlay')
+<div class="container py-4 position-relative" style="z-index: 1;">
     <h2>Deposit</h2>
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>

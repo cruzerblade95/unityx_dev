@@ -1,3 +1,4 @@
+@include('components.coming-soon-overlay')
 @extends('user.layouts.layoutMaster')
 
 @section('title', 'Withdrawal')

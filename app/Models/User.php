@@ -66,6 +66,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the KYC verification record for the user.
+     */
+    public function kycVerification()
+    {
+        return $this->hasOne(KycVerification::class);
+    }
+
+    /**
      * The accessors to append to the model's array form.
      *
      * @var array<int, string>

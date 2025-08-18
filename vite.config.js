@@ -7,6 +7,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
+                'public/assets/css/coming-soon-overlay.css',
                 // All unique @vite references from complete workspace scan
                 'resources/assets/css/demo.css',
                 'resources/assets/js/admin-auth.js',
