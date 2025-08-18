@@ -7,6 +7,7 @@ use App\Http\Controllers\User\UserRegisterController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\DepositController;
 use App\Http\Controllers\User\WithdrawalController;
+use App\Http\Controllers\User\InvestmentController;
 // Route::middleware(['web'])->group(function () {
 //     Route::get('login', [App\Http\Controllers\User\UserLoginController::class, 'showLoginForm'])->name('login'); // Main login route
 //     Route::post('login', [App\Http\Controllers\User\UserLoginController::class, 'login'])->name('user.login.submit');
@@ -40,10 +41,13 @@ Route::prefix('user')->middleware('web')->group(function () {
         Route::get('/logout', [UserLoginController::class, 'logout']);
         // Route::get('/debug', [UserController::class, 'debug']);
 
-        // Deposit & Withdrawal
-        Route::get('deposit', [DepositController::class, 'index'])->name('user.deposit.index');
-        Route::post('deposit', [DepositController::class, 'store'])->name('user.deposit.store');
-        Route::get('withdrawal', [WithdrawalController::class, 'index'])->name('user.withdrawal.index');
-        Route::post('withdrawal', [WithdrawalController::class, 'store'])->name('user.withdrawal.store');
+    // Deposit & Withdrawal
+    Route::get('deposit', [DepositController::class, 'index'])->name('user.deposit.index');
+    Route::post('deposit', [DepositController::class, 'store'])->name('user.deposit.store');
+    Route::get('withdrawal', [WithdrawalController::class, 'index'])->name('user.withdrawal.index');
+    Route::post('withdrawal', [WithdrawalController::class, 'store'])->name('user.withdrawal.store');
+
+    // Investment
+    Route::get('investment', [InvestmentController::class, 'index'])->name('user.investment.index');
     });
 });

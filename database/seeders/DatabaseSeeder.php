@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             UserProfileFieldsSeeder::class,
             DepositSeeder::class,
             WithdrawalSeeder::class,
+            InvestmentSeeder::class,
         ]);
     }
 }
