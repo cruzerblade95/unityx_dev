@@ -34,6 +34,15 @@ class User extends Authenticatable
         'password',
         'referral_code',
         'upline_id',
+        'organization',
+        'phone',
+        'address',
+        'state',
+        'zipCode',
+        'country',
+        'language',
+        'timezone',
+        'currency',
     ];
 
     /**

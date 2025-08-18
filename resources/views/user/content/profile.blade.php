@@ -134,21 +134,20 @@
       <div class="card-body">
         <h2>User Profile</h2>
         <form id="profileForm" method="POST" action="{{ route('user.profile.update') }}">
-            @csrf
-            @method('PUT')
             <div class="mb-3">
-                <label for="firstname" class="form-label">First Name</label>
-                <input type="text" class="form-control" id="firstname" name="firstname" value="{{ old('firstname', auth()->user()->firstname) }}" required>
+                <label class="form-label">First Name</label>
+                <div class="form-control-plaintext">{{ auth()->user()->firstname }}</div>
             </div>
             <div class="mb-3">
-                <label for="lastname" class="form-label">Last Name</label>
-                <input type="text" class="form-control" id="lastname" name="lastname" value="{{ old('lastname', auth()->user()->lastname) }}" required>
+                <label class="form-label">Last Name</label>
+                <div class="form-control-plaintext">{{ auth()->user()->lastname }}</div>
             </div>
             <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" value="{{ old('email', auth()->user()->email) }}" required readonly>
+                <label class="form-label">Email</label>
+                <div class="form-control-plaintext">{{ auth()->user()->email }}</div>
             </div>
-            <button type="submit" class="btn btn-primary">Update Profile</button>
+            {{-- <button type="button" class="btn btn-primary">Edit Profile</button> --}}
+            <a href="{{ url('/user/profile/edit') }}" class="btn btn-primary">Edit Profile</a>
         </form>
         <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
             <div id="profileToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
