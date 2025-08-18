@@ -121,8 +121,8 @@ $configData = Helper::appClasses();
               <input type="text" class="form-control" id="username" name="username" required />
             </div>
             <div class="col-6 mb-6 form-control-validation">
-              <label for="referral_code" class="form-label">Referral Code (optional)</label>
-              <input type="text" class="form-control" id="referral_code" name="referral_code" placeholder="Enter referral code if you have one" />
+              <label for="referral_code" class="form-label">Referral Code</label>
+              <input type="text" class="form-control" id="referral_code" name="referral_code" placeholder="Eg. ASDWFCS" required/>
             </div>
             <div class="col-12 mb-6 form-control-validation">
               <label for="email" class="form-label">Email</label>

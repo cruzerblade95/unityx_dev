@@ -161,9 +161,13 @@ use App\Http\Controllers\charts\ApexCharts;
 use App\Http\Controllers\charts\ChartJs;
 use App\Http\Controllers\maps\Leaflet;
 use App\Http\Controllers\authentications\ConnectTelegramController;
+use App\Http\Controllers\TelegramController;
 
 //telegram bot hehe
 Route::get('/connect-telegram', [ConnectTelegramController::class, 'index'])->name('connect-telegram');
+Route::get('/telegram/verify', [TelegramController::class, 'verify'])->name('telegram.verify');
+Route::post('/test-csrf', function() { die('test csrf'); })->middleware('web');
+Route::get('/test-csrf', function() { die('test csrf get'); });
 
 // Main Page Route
 Route::get('/', [Landing::class, 'index'])->name('front-pages-landing');
@@ -180,6 +184,7 @@ Route::get('/lang/{locale}', [LanguageController::class, 'swap']);
 Route::get('/layouts/collapsed-menu', [CollapsedMenu::class, 'index'])->name('layouts-collapsed-menu');
 Route::get('/layouts/content-navbar', [ContentNavbar::class, 'index'])->name('layouts-content-navbar');
 Route::get('/layouts/content-nav-sidebar', [ContentNavSidebar::class, 'index'])->name('layouts-content-nav-sidebar');
+
 // Route::get('/layouts/navbar-full', [NavbarFull::class, 'index'])->name('layouts-navbar-full');
 // Route::get('/layouts/navbar-full-sidebar', [NavbarFullSidebar::class, 'index'])->name('layouts-navbar-full-sidebar');
 Route::get('/layouts/horizontal', [Horizontal::class, 'index'])->name('dashboard-analytics2');

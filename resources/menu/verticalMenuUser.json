@@ -36,6 +36,18 @@
       ]
     },
     {
+      "name": "AI Investment",
+      "icon": "menu-icon icon-base ti tabler-users",
+      "slug": "user",
+      "submenu": [
+        {
+          "url": "user/investment",
+          "name": "Investment",
+          "slug": "user.investment"
+        }
+      ]
+    },
+    {
       "url": "user/downline",
       "name": "Downline",
       "icon": "menu-icon icon-base ti tabler-git-branch",
