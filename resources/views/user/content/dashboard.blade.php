@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <div class="card-body">
             <div id="profitLastMonth"></div>
             <div class="d-flex justify-content-between align-items-center mt-3 gap-3">
-              <h4 class="mb-0">624k</h4>
+              <h4 class="mb-0">0.000</h4>
               <small class="text-success">+8.24%</small>
             </div>
           </div>
@@ -195,6 +195,8 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="mt-3 text-center">
               <small class="text-body-secondary mt-3">$21k Expenses more than last month</small>
             </div>
+            <!-- Overlay -->
+            @include('components.coming-soon-overlay')
           </div>
         </div>
       </div>
@@ -815,6 +817,8 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
           </li>
         </ul>
+        <!-- Overlay -->
+        @include('components.coming-soon-overlay')
       </div>
     </div>
   </div>

@@ -3,7 +3,7 @@
 return [
   "creatorName" => "Pixinvent",
   "creatorUrl" => "https://pixinvent.com",
-  "templateName" => "UnityX",
+  "templateName" => "",
   "templateSuffix" => "Investment",
   "templateVersion" => "3.0.0",
   "templateFree" => false,

@@ -90,7 +90,7 @@
               <h4 class="mb-2 mt-lg-6">{{ auth()->user()->username }}</h4>
               <ul class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-4 my-2">
                 {{-- <li class="list-inline-item d-flex gap-2 align-items-center"><i class="icon-base ti tabler-palette icon-lg"></i><span class="fw-medium">UX Designer</span></li> --}}
-                <li class="list-inline-item d-flex gap-2 align-items-center"><i class="icon-base ti tabler-map-pin  icon-lg"></i><span class="fw-medium">Vatican City</span></li>
+                {{-- <li class="list-inline-item d-flex gap-2 align-items-center"><i class="icon-base ti tabler-map-pin  icon-lg"></i><span class="fw-medium">Vatican City</span></li> --}}
                 <li class="list-inline-item d-flex gap-2 align-items-center"><i class="icon-base ti tabler-calendar  icon-lg"></i><span class="fw-medium"> Joined {{ \Carbon\Carbon::parse(auth()->user()->created_at)->format('d F Y') }}</span></li>
               </ul>
             </div>
@@ -202,7 +202,7 @@
   </div>
   <div class="col-xl-8 col-lg-7 col-md-7">
     <!-- Activity Timeline -->
-    <div class="card card-action mb-6">
+    {{-- <div class="card card-action mb-6">
       <div class="card-header align-items-center">
         <h5 class="card-action-title mb-0"><i class="icon-base ti tabler-chart-bar-popular icon-lg me-4"></i>Activity Timeline</h5>
         <div class="card-action-element">
@@ -290,11 +290,11 @@
           </li>
         </ul>
       </div>
-    </div>
+    </div> --}}
     <!--/ Activity Timeline -->
     <div class="row">
       <!-- Connections -->
-      <div class="col-lg-12 col-xl-6">
+      <div class="col-lg-12 col-xl-12">
         <div class="card card-action mb-6">
           <div class="card-header align-items-center">
             <h5 class="card-action-title mb-0">Referral</h5>
@@ -404,7 +404,7 @@
       </div>
       <!--/ Connections -->
       <!-- Teams -->
-      <div class="col-lg-12 col-xl-6">
+      {{-- <div class="col-lg-12 col-xl-6">
         <div class="card card-action mb-6">
           <div class="card-header align-items-center">
             <h5 class="card-action-title mb-0">Teams</h5>
@@ -510,7 +510,7 @@
             </ul>
           </div>
         </div>
-      </div>
+      </div> --}}
       <!--/ Teams -->
     </div>
     <!-- Projects table -->
