@@ -1,40 +1,3 @@
-{{-- @extends('user.layouts.layoutMaster')
-
-@section('title', 'User Profile')
-
-@section('content')
-<div class="container py-4">
-    <h2>User Profile</h2>
-    <form id="profileForm" method="POST" action="{{ route('user.profile.update') }}">
-        @csrf
-        @method('PUT')
-        <div class="mb-3">
-            <label for="firstname" class="form-label">First Name</label>
-            <input type="text" class="form-control" id="firstname" name="firstname" value="{{ old('firstname', auth()->user()->firstname) }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="lastname" class="form-label">Last Name</label>
-            <input type="text" class="form-control" id="lastname" name="lastname" value="{{ old('lastname', auth()->user()->lastname) }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input type="email" class="form-control" id="email" name="email" value="{{ old('email', auth()->user()->email) }}" required readonly>
-        </div>
-        <button type="submit" class="btn btn-primary">Update Profile</button>
-    </form>
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-        <div id="profileToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body">
-                    Profile updated successfully!
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-    </div>
-</div>
-@endsection
-
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -43,9 +6,15 @@
             var toast = new bootstrap.Toast(toastEl);
             toast.show();
         @endif
+
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
     });
 </script>
-@endpush --}}
+@endpush
 
 @extends('user/layouts/layoutMaster')
 
@@ -111,10 +80,28 @@
         <li class="nav-item">
           <a class="nav-link active" href="javascript:void(0);"><i class="icon-base ti tabler-user-check icon-sm me-1_5"></i> Profile</a>
         </li>
-        {{-- <li class="nav-item">
-          <a class="nav-link" href="{{ url('pages/profile-teams') }}"><i class="icon-base ti tabler-users icon-sm me-1_5"></i> Teams</a>
-        </li>
         <li class="nav-item">
+          <a class="nav-link" href="{{ route('user.kyc.index') }}">
+            <i class="icon-base ti tabler-users icon-sm me-1_5"></i> 
+            KYC Verification
+            @if(auth()->user()->kycVerification)
+              @if(auth()->user()->kycVerification->kyc_status === App\Models\KycVerification::STATUS_NOT_SUBMITTED)
+                @if(auth()->user()->kycVerification->kyc_reason)
+                  <span class="badge bg-danger ms-2" data-bs-toggle="tooltip" title="KYC verification rejected: {{ auth()->user()->kycVerification->kyc_reason }}">Rejected</span>
+                @else
+                  <span class="badge bg-danger ms-2" data-bs-toggle="tooltip" title="KYC verification not submitted">Not Submitted</span>
+                @endif
+              @elseif(auth()->user()->kycVerification->kyc_status === App\Models\KycVerification::STATUS_PENDING)
+                <span class="badge bg-warning ms-2" data-bs-toggle="tooltip" title="KYC verification pending review">Pending</span>
+              @elseif(auth()->user()->kycVerification->kyc_status === App\Models\KycVerification::STATUS_APPROVED)
+                <span class="badge bg-success ms-2" data-bs-toggle="tooltip" title="KYC verification approved">Approved</span>
+              @endif
+            @else
+              <span class="badge bg-danger ms-2" data-bs-toggle="tooltip" title="KYC verification not submitted">Not Submitted</span>
+            @endif
+          </a>
+        </li>
+        {{-- <li class="nav-item">
           <a class="nav-link" href="{{ url('pages/profile-projects') }}"><i class="icon-base ti tabler-layout-grid icon-sm me-1_5"></i> Projects</a>
         </li>
         <li class="nav-item">
@@ -535,5 +522,24 @@
   </div>
 </div>
 <!--/ User Profile Content -->
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        @if(session('profile_updated'))
+            var toastEl = document.getElementById('profileToast');
+            var toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        @endif
+
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+@endpush
+
 @endsection
 
