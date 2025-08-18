@@ -4,6 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\LocaleMiddleware;
+use Illuminate\Console\Scheduling\Schedule;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -13,6 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(LocaleMiddleware::class);
+    })
+    ->withSchedule(function (Schedule $schedule) {
+        // $schedule->command('investment:test-cron')->everyMinute();
+        $schedule->call(function () {
+            dispatch(new \App\Jobs\TestInvestmentCron());
+        })->everyMinute();
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
