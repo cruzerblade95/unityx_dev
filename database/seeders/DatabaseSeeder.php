@@ -16,7 +16,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             AdminSeeder::class,
-            WalletSeeder::class
+            WalletSeeder::class,
+            UserProfileFieldsSeeder::class,
+            DepositSeeder::class,
+            WithdrawalSeeder::class,
         ]);
     }
 }

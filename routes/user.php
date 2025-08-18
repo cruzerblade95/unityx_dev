@@ -1,9 +1,12 @@
+    
 <?php
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\User\UserLoginController;
 use App\Http\Controllers\User\UserRegisterController;
 use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\User\DepositController;
+use App\Http\Controllers\User\WithdrawalController;
 // Route::middleware(['web'])->group(function () {
 //     Route::get('login', [App\Http\Controllers\User\UserLoginController::class, 'showLoginForm'])->name('login'); // Main login route
 //     Route::post('login', [App\Http\Controllers\User\UserLoginController::class, 'login'])->name('user.login.submit');
@@ -31,15 +34,16 @@ Route::prefix('user')->middleware('web')->group(function () {
     Route::middleware(['auth:web'])->group(function () {
         Route::get('/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
         Route::get('/profile', [UserController::class, 'profile'])->name('user.profile');
-        Route::put('/profile', [UserController::class, 'updateProfile'])->name('user.profile.update');
+        Route::match(['put', 'post'], '/profile', [UserController::class, 'updateProfile'])->name('user.profile.update');
+        Route::get('/profile/edit', [UserController::class, 'editProfile'])->name('user.profile.edit');
+        Route::get('downline', [UserController::class, 'downline'])->name('user.downline');
         Route::get('/logout', [UserLoginController::class, 'logout']);
         // Route::get('/debug', [UserController::class, 'debug']);
 
-        // User Management Routes
-        // Route::get('/users', [UserManagementController::class, 'index'])->name('user.users.index');
-        // Route::get('/users/list', [UserManagementController::class, 'list'])->name('user.users.list');
-        // Route::post('/users', [UserManagementController::class, 'store'])->name('user.users.store');
-        // Route::put('/users/{user}', [UserManagementController::class, 'update'])->name('user.users.update');
-        // Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('user.users.destroy');
+        // Deposit & Withdrawal
+        Route::get('deposit', [DepositController::class, 'index'])->name('user.deposit.index');
+        Route::post('deposit', [DepositController::class, 'store'])->name('user.deposit.store');
+        Route::get('withdrawal', [WithdrawalController::class, 'index'])->name('user.withdrawal.index');
+        Route::post('withdrawal', [WithdrawalController::class, 'store'])->name('user.withdrawal.store');
     });
 });

@@ -17,7 +17,8 @@
 'resources/assets/vendor/libs/apex-charts/apex-charts.scss',
 'resources/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.scss',
 'resources/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.scss',
-'resources/assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.scss'
+'resources/assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.scss',
+'public/assets/css/coming-soon-overlay.css'
 ])
 @endsection
 
@@ -30,9 +31,51 @@
 
 @section('page-script')
 @vite(['resources/assets/js/app-ecommerce-dashboard.js'])
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var el = document.getElementById('sync-estimate');
+  var customTimestamp = el.getAttribute('data-timestamp');
+  function pad(n) { return n < 10 ? '0' + n : n; }
+  function updateCountdown(target) {
+    var now = new Date();
+    var diff = Math.max(0, target - now);
+    var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    var hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    var minutes = Math.floor((diff / (1000 * 60)) % 60);
+    var seconds = Math.floor((diff / 1000) % 60);
+    el.textContent = days + 'd ' + pad(hours) + 'h ' + pad(minutes) + 'm ' + pad(seconds) + 's';
+  }
+  if (customTimestamp) {
+    var target = new Date(customTimestamp);
+    updateCountdown(target);
+    setInterval(function() { updateCountdown(target); }, 1000);
+  } else {
+    var estimate = new Date();
+    estimate.setDate(estimate.getDate() + 3);
+    var options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+    el.textContent = estimate.toLocaleString(undefined, options);
+  }
+});
+</script>
 @endsection
 
 @section('content')
+<div class="row g-6">
+    <!-- Alerts with headings -->
+    <div class="col-xl-12 mb-4">
+        <div class="card">
+        {{-- <h5 class="card-header">Alerts with Heading</h5> --}}
+        <div class="card-body">
+            <div class="alert alert-primary alert-dismissible" role="alert">
+            <h5 class="alert-heading mb-2">Announcement!</h5>
+            <p class="mb-0">Your data is currently being processed from old system. Please wait for a moment. Estimated date for all data to be synced: <span id="sync-estimate" data-timestamp="2025-08-20T00:00:00"></span></p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+        </div>
+    </div>
+    <!--/ Alerts with headings -->
+</div>
 <div class="row g-6">
   <!-- View sales -->
   <div class="col-xl-4">
@@ -41,8 +84,8 @@
         <div class="col-7">
           <div class="card-body text-nowrap">
             <h5 class="card-title mb-0">Congratulations {{ Illuminate\Support\Facades\Auth::user()->firstname }} {{ Illuminate\Support\Facades\Auth::user()->lastname }}! 🎉</h5>
-            <p class="mb-2">Best seller of the month</p>
-            <h4 class="text-primary mb-1">$48.9k</h4>
+            <p class="mb-2">Welcome to UnityX</p>
+            <h4 class="text-primary mb-1">0.0000 USDT</h4>
             <a href="javascript:;" class="btn btn-primary">View Sales</a>
           </div>
         </div>
@@ -56,12 +99,16 @@
   </div>
   <!-- View sales -->
 
-  <!-- Statistics -->
+  <!-- My Wallets -->
   <div class="col-xl-8 col-md-12">
     <div class="card h-100">
       <div class="card-header d-flex justify-content-between">
-        <h5 class="card-title mb-0">Statistics</h5>
-        <small class="text-body-secondary">Updated 1 month ago</small>
+        <h5 class="card-title mb-0">My Wallets</h5>
+        <small class="text-body-secondary">
+          @if(isset($wallet) && $wallet && $wallet->updated_at)
+            Updated {{ $wallet->updated_at->diffForHumans() }}
+          @endif
+        </small>
       </div>
       <div class="card-body d-flex align-items-end">
         <div class="w-100">
@@ -69,43 +116,43 @@
             <div class="col-md-3 col-6">
               <div class="d-flex align-items-center">
                 <div class="badge rounded bg-label-primary me-4 p-2">
-                  <i class="icon-base ti tabler-chart-pie-2 icon-lg"></i>
+                  <i class="icon-base ti tabler-wallet icon-lg"></i>
                 </div>
                 <div class="card-info">
-                  <h5 class="mb-0">230k</h5>
-                  <small>Sales</small>
+                  <h5 class="mb-0">{{ number_format($wallet->deposit ?? 0, 4) }} USDT</h5>
+                  <small class="text-uppercase">DEPOSIT</small>
                 </div>
               </div>
             </div>
             <div class="col-md-3 col-6">
               <div class="d-flex align-items-center">
-                <div class="badge rounded bg-label-info me-4 p-2"><i class="icon-base ti tabler-users icon-lg"></i>
+                <div class="badge rounded bg-label-info me-4 p-2"><i class="icon-base ti tabler-trending-up icon-lg"></i>
                 </div>
                 <div class="card-info">
-                  <h5 class="mb-0">8.549k</h5>
-                  <small>Customers</small>
+                  <h5 class="mb-0">{{ number_format($wallet->profit ?? 0, 4) }} USDT</h5>
+                  <small class="text-uppercase">PROFIT</small>
                 </div>
               </div>
             </div>
             <div class="col-md-3 col-6">
               <div class="d-flex align-items-center">
                 <div class="badge rounded bg-label-danger me-4 p-2">
-                  <i class="icon-base ti tabler-shopping-cart icon-lg"></i>
+                  <i class="icon-base ti tabler-gift icon-lg"></i>
                 </div>
                 <div class="card-info">
-                  <h5 class="mb-0">1.423k</h5>
-                  <small>Products</small>
+                  <h5 class="mb-0">{{ number_format($wallet->bonus ?? 0, 4) }} USDT</h5>
+                  <small class="text-uppercase">BONUS</small>
                 </div>
               </div>
             </div>
             <div class="col-md-3 col-6">
               <div class="d-flex align-items-center">
                 <div class="badge rounded bg-label-success me-4 p-2">
-                  <i class="icon-base ti tabler-currency-dollar icon-lg"></i>
+                  <i class="icon-base ti tabler-cash icon-lg"></i>
                 </div>
                 <div class="card-info">
-                  <h5 class="mb-0">$9745</h5>
-                  <small>Revenue</small>
+                  <h5 class="mb-0">{{ number_format($wallet->cash ?? 0, 4) }} USDT</h5>
+                  <small class="text-uppercase">CASH</small>
                 </div>
               </div>
             </div>
@@ -114,7 +161,7 @@
       </div>
     </div>
   </div>
-  <!--/ Statistics -->
+  <!--/ My Wallets -->
 
   <div class="col-xxl-4 col-12">
     <div class="row g-6">
@@ -154,9 +201,9 @@
       <!--/ Expenses -->
 
       <!-- Generated Leads -->
-      <div class="col-xl-12">
+      <div class="col-xl-12 position-relative">
         <div class="card h-100">
-          <div class="card-body d-flex justify-content-between">
+          <div class="card-body d-flex justify-content-between position-relative">
             <div class="d-flex flex-column">
               <div class="card-title mb-auto">
                 <h5 class="mb-0 text-nowrap">Generated Leads</h5>
@@ -168,6 +215,8 @@
               </div>
             </div>
             <div id="generatedLeadsChart"></div>
+            <!-- Overlay -->
+            @include('components.coming-soon-overlay')
           </div>
         </div>
       </div>
@@ -224,13 +273,15 @@
             </div>
           </div>
         </div>
+        <!-- Overlay -->
+            @include('components.coming-soon-overlay')
       </div>
     </div>
   </div>
   <!--/ Revenue Report -->
 
   <!-- Earning Reports -->
-  <div class="col-xxl-4 col-md-6">
+  <div class="col-xxl-6 col-md-6">
     <div class="card h-100">
       <div class="card-header d-flex justify-content-between">
         <div class="card-title mb-0">
@@ -311,13 +362,15 @@
           </li>
         </ul>
         <div id="reportBarChart"></div>
+        <!-- Overlay -->
+        @include('components.coming-soon-overlay')
       </div>
     </div>
   </div>
   <!--/ Earning Reports -->
 
   <!-- Popular Product -->
-  <div class="col-xxl-4 col-md-6">
+  {{-- <div class="col-xxl-4 col-md-6">
     <div class="card h-100">
       <div class="card-header d-flex justify-content-between">
         <div class="card-title m-0 me-2">
@@ -425,11 +478,11 @@
         </ul>
       </div>
     </div>
-  </div>
+  </div> --}}
   <!--/ Popular Product -->
 
   <!-- Sales by Countries tabs-->
-  <div class="col-xxl-4 col-md-6">
+  {{-- <div class="col-xxl-4 col-md-6">
     <div class="card h-100">
       <div class="card-header d-flex align-items-center justify-content-between">
         <div class="card-title mb-0">
@@ -638,11 +691,11 @@
         </div>
       </div>
     </div>
-  </div>
+  </div> --}}
   <!--/ Sales by Countries tabs -->
 
   <!-- Transactions -->
-  <div class="col-xxl-4 col-md-6">
+  <div class="col-xxl-6 col-md-6">
     <div class="card h-100">
       <div class="card-header d-flex justify-content-between">
         <div class="card-title m-0 me-2">
@@ -768,7 +821,7 @@
   <!--/ Transactions -->
 
   <!-- Invoice table -->
-  <div class="col-xxl-8">
+  {{-- <div class="col-xxl-8">
     <div class="card">
       <div class="card-datatable table-responsive">
         <table class="table table-sm datatable-invoice border-top">
@@ -787,7 +840,7 @@
         </table>
       </div>
     </div>
-  </div>
+  </div> --}}
   <!-- /Invoice table -->
 </div>
 @endsection

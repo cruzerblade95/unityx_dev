@@ -15,10 +15,14 @@ class Authenticate extends Middleware
         if (!$request->expectsJson()) {
             if ($request->is('admin/*')) {
                 // For admin routes, redirect to main login
-                return '/login';
+                return '/admin/login';
+            }
+            if ($request->is('user/*')) {
+                // For user routes, redirect to user login
+                return '/user/login';
             }
             // For other routes, use the named route
-            return route('login');
+            return route('/');
         }
         return null;
     }

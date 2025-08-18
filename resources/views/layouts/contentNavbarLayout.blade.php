@@ -39,7 +39,10 @@
     <div class="layout-container">
 
       @if ($isMenu)
-        @include('layouts/sections/menu/verticalMenu')
+        @php
+          $menuData = json_decode(file_get_contents(resource_path('menu/horizontalMenu.json')));
+        @endphp
+        @include('layouts/sections/menu/verticalMenu', ['menuData' => [$menuData]])
       @endif
 
       <!-- Layout page -->

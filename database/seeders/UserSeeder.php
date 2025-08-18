@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserSeeder extends Seeder
 {
@@ -20,6 +21,8 @@ class UserSeeder extends Seeder
             'username' => 'testuser',
             'email' => 'test@example.com',
             'password' => Hash::make('password'),
+            'referral_code' => strtoupper(Str::random(6)),
+            'upline_id' => null,
         ]);
 
         // Create additional users using factory
