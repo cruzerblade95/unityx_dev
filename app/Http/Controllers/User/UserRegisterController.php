@@ -26,7 +26,7 @@ class UserRegisterController extends Controller
             'username' => 'required|string|max:255|unique:users',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
-            'referral_code' => 'nullable|string|size:6|exists:users,referral_code',
+            'referral_code' => 'required|string|size:6|exists:users,referral_code',
         ]);
 
         // Generate unique 6-character referral code

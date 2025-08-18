@@ -42,7 +42,7 @@ $configData = Helper::appClasses();
 <div class="authentication-wrapper authentication-cover">
   <!-- Logo -->
   <a href="{{ url('/') }}" class="app-brand auth-cover-brand">
-    <span class="app-brand-logo demo">@include('_partials.macros')</span>
+  <span class="app-brand-logo demo"><img src="{{ asset('assets/img/icons/unityx.png') }}" alt="UnityX Logo" width="200"></span>
     <span class="app-brand-text demo text-heading fw-bold">{{ config('variables.templateName') }}</span>
   </a>
   <!-- /Logo -->
