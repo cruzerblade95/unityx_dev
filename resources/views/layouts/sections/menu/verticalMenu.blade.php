@@ -11,7 +11,7 @@ $configData = Helper::appClasses();
   @if (!isset($navbarFull))
   <div class="app-brand demo">
     <a href="{{ url('/') }}" class="app-brand-link">
-      <span class="app-brand-logo demo">@include('_partials.macros')</span>
+      <span class="app-brand-logo demo"><img src="{{ asset('assets/img/icons/logo-new-unityx.png') }}" alt="UnityX Logo" width="200"></span>
       <span class="app-brand-text demo menu-text fw-bold ms-3">{{ config('variables.templateName') }}</span>
     </a>
 

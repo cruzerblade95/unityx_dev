@@ -7,7 +7,7 @@
       <div class="row gx-0 gy-6 g-lg-10">
         <div class="col-lg-5">
           <a href="{{ url('front-pages/landing') }}" class="app-brand-link mb-6">
-            <span class="app-brand-logo demo">@include('_partials.macros')</span>
+            <span class="app-brand-logo demo"><img src="{{ asset('assets/img/icons/logo-new-unityx.png') }}" alt="UnityX Logo" width="200"></span>
             <span
               class="app-brand-text demo footer-link fw-bold ms-2 ps-1">{{ config('variables.templateName') }}</span>
           </a>
