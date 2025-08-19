@@ -23,7 +23,7 @@ $activeClass = in_array($currentRouteName, $activeRoutes) ? 'active' : '';
         </button>
         <!-- Mobile menu toggle: End-->
         <a href="{{ url('front-pages/landing') }}" class="app-brand-link">
-          <span class="app-brand-logo demo"><img src="{{ asset('assets/img/icons/unityx.png') }}" alt="UnityX Logo" width="200"></span>
+          <span class="app-brand-logo demo"><img src="{{ asset('assets/img/icons/logo-new-unityx.png') }}" alt="UnityX Logo" width="200"></span>
           <span class="app-brand-text demo menu-text fw-bold ms-2 ps-1">{{ config('variables.templateName') }}</span>
         </a>
       </div>

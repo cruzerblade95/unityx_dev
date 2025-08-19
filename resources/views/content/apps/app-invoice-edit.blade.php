@@ -27,7 +27,7 @@
         <div class="row text-heading px-3">
           <div class="col-md-7 mb-md-0 mb-6 ps-0">
             <div class="d-flex svg-illustration mb-6 gap-2 align-items-center">
-              <span class="app-brand-logo demo">@include('_partials.macros')</span>
+              <span class="app-brand-logo demo"><img src="{{ asset('assets/img/icons/logo-new-unityx.png') }}" alt="UnityX Logo" width="200"></span>
               <span class="app-brand-text fw-bold fs-4 ms-50">{{ config('variables.templateName') }}</span>
             </div>
             <p class="mb-2">Office 149, 450 South Brand Brooklyn</p>

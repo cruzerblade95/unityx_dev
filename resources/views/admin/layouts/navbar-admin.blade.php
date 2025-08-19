@@ -5,7 +5,7 @@
 <nav class="layout-navbar container-{{ config('variables.style') }} navbar navbar-expand-xl {{ config('variables.navbarType') }} align-items-center bg-navbar-theme" id="layout-navbar">
   <div class="navbar-brand app-brand demo d-xl-flex py-0 me-4">
     <a href="{{ url('/') }}" class="app-brand-link gap-2">
-      <span class="app-brand-logo demo">@include('_partials.macros')</span>
+      <span class="app-brand-logo demo"><img src="{{ asset('assets/img/icons/logo-new-unityx.png') }}" alt="UnityX Logo" width="200"></span>
       <span class="app-brand-text demo menu-text fw-bold">{{config('variables.templateName')}}</span>
     </a>
     <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-xl-none">

@@ -28,7 +28,7 @@
         <div class="d-flex justify-content-between flex-xl-row flex-md-column flex-sm-row flex-column align-items-xl-center align-items-md-start align-items-sm-center align-items-start">
           <div class="mb-xl-0 mb-6 text-heading">
             <div class="d-flex svg-illustration mb-6 gap-2 align-items-center">
-              <span class="app-brand-logo demo">@include('_partials.macros')</span>
+              <span class="app-brand-logo demo"><img src="{{ asset('assets/img/icons/logo-new-unityx.png') }}" alt="UnityX Logo" width="200"></span>
               <span class="app-brand-text fw-bold fs-4 ms-50">{{ config('variables.templateName') }}</span>
             </div>
             <p class="mb-2">Office 149, 450 South Brand Brooklyn</p>
