@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="card-body">
             <div class="alert alert-primary alert-dismissible" role="alert">
             <h5 class="alert-heading mb-2">Announcement!</h5>
-            <p class="mb-0">AI Trade will be available on: <span id="sync-estimate" data-timestamp="2025-08-20T09:00:00"></span></p>
+            <p class="mb-0">AI Trade will be available on: <span id="sync-estimate" data-timestamp="2025-08-20T11:00:00"></span></p>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         </div>
