@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
             DepositSeeder::class,
             WithdrawalSeeder::class,
             InvestmentSeeder::class,
+            // AiTradeSeeder::class,
+            // AiTradeHistorySeeder::class,
         ]);
     }
 }
