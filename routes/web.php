@@ -28,6 +28,10 @@ use App\Http\Controllers\apps\Email;
 use App\Http\Controllers\apps\Chat;
 use App\Http\Controllers\apps\Calendar;
 use App\Http\Controllers\apps\Kanban;
+use App\Http\Controllers\NOWPaymentsWebhookController;
+
+// NOWPayments webhook route (public access)
+Route::post('/api/nowpayments/webhook', [NOWPaymentsWebhookController::class, 'handle'])->name('nowpayments.webhook');
 use App\Http\Controllers\apps\EcommerceDashboard;
 use App\Http\Controllers\apps\EcommerceProductList;
 use App\Http\Controllers\apps\EcommerceProductAdd;

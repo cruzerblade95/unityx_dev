@@ -49,6 +49,9 @@ Route::prefix('user')->middleware('web')->group(function () {
     // Deposit & Withdrawal
     Route::get('deposit', [DepositController::class, 'index'])->name('user.deposit.index');
     Route::post('deposit', [DepositController::class, 'store'])->name('user.deposit.store');
+    Route::post('deposit/crypto', [DepositController::class, 'createCryptoPayment'])->name('user.deposit.crypto');
+    Route::get('deposit/success', [DepositController::class, 'success'])->name('user.deposit.success');
+    Route::get('deposit/cancel', [DepositController::class, 'cancel'])->name('user.deposit.cancel');
     Route::get('withdrawal', [WithdrawalController::class, 'index'])->name('user.withdrawal.index');
     Route::post('withdrawal', [WithdrawalController::class, 'store'])->name('user.withdrawal.store');
 

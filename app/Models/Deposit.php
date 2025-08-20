@@ -9,8 +9,22 @@ class Deposit extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'user_id', 'amount', 'tax_percent', 'tax_amount', 'net_amount', 'status', 'reference', 'note'
+        'user_id', 
+        'amount', 
+        'tax_percent', 
+        'tax_amount', 
+        'net_amount', 
+        'status', 
+        'reference', 
+        'note',
+        'payment_method',
+        'payment_id',
+        'payment_url',
+        'crypto_currency',
+        'crypto_amount',
+        'payment_address'
     ];
+    
     public function user() {
         return $this->belongsTo(User::class);
     }
