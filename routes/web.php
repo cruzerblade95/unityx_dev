@@ -163,6 +163,44 @@ use App\Http\Controllers\maps\Leaflet;
 use App\Http\Controllers\authentications\ConnectTelegramController;
 use App\Http\Controllers\TelegramController;
 
+// Route to process wallets and insert into ai_trades if not already present
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+
+// Manual trigger for TestInvestmentCron job
+use App\Jobs\TestInvestmentCron;
+Route::get('/run-test-investment-cron', function () {
+    dispatch(new TestInvestmentCron());
+    return response()->json(['message' => 'TestInvestmentCron job dispatched.']);
+});
+
+Route::get('/process-wallets-to-ai-trades', function () {
+    $users = DB::table('users')->get();
+    $inserted = [];
+    foreach ($users as $user) {
+        $wallet = DB::table('wallets')->where('user_id', $user->id)->first();
+        if (!$wallet) continue;
+        $exists = DB::table('ai_trades')->where('user_id', $user->id)->exists();
+        if ($exists) continue;
+        $amount_invest = $wallet->deposit;
+        $ending_amount = $amount_invest * 3;
+        DB::table('ai_trades')->insert([
+            'user_id' => $user->id,
+            'amount_invest' => $amount_invest,
+            'trade_status' => 1,
+            // current_amount left as default
+            'ending_amount' => $ending_amount,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $inserted[] = $user->id;
+    }
+    return response()->json([
+        'inserted_user_ids' => $inserted,
+        'message' => 'Processed wallets. Skipped users with existing ai_trades.'
+    ]);
+});
+
 //telegram bot hehe
 Route::get('/connect-telegram', [ConnectTelegramController::class, 'index'])->name('connect-telegram');
 Route::get('/telegram/verify', [TelegramController::class, 'verify'])->name('telegram.verify');
