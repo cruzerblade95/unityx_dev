@@ -16,8 +16,9 @@ class TestInvestmentCron implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function handle()
+    public function calculatesss()
     {
+        // dd("TestInvestmentCron started");
         try {
             // Configurable min/max percent (as decimals, e.g., 0.0003 for 0.03%)
             $minPercent = 0.0002; // 0.02%
