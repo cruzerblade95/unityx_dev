@@ -17,9 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withSchedule(function (Schedule $schedule) {
         // $schedule->command('investment:test-cron')->everyMinute();
-        $schedule->call(function () {
-            dispatch(new \App\Jobs\TestInvestmentCron());
-        })->cron('0 1,5,9,13,17,21 * * *');
+        // $schedule->call(function () {
+        //     dispatch(new \App\Jobs\TestInvestmentCron());
+        // })->cron('0 1,5,9,13,17,21 * * *');
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
