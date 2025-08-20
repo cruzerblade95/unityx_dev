@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Deposit;
 use App\Services\NOWPaymentsService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class DepositController extends Controller
 {
@@ -71,8 +72,18 @@ class DepositController extends Controller
             );
 
             if (!$payment) {
-                return redirect()->back()->withErrors(['error' => 'Failed to create crypto payment. Please try again.']);
+                Log::error('NOWPayments createPayment returned false for user ' . Auth::id());
+                return redirect()->back()->withErrors(['error' => 'Failed to create crypto payment. Please check the logs and try again.']);
             }
+
+            // Check if the payment response has the required fields
+            if (!isset($payment['payment_id'])) {
+                Log::error('NOWPayments response missing payment_id', ['response' => $payment]);
+                return redirect()->back()->withErrors(['error' => 'Invalid payment response from NOWPayments.']);
+            }
+
+            // For NOWPayments, we don't get a pay_url, instead we show payment details on success page
+            $paymentUrl = route('user.deposit.success') . '?payment_id=' . $payment['payment_id'];
 
             // Store deposit in database
             Deposit::create([
@@ -86,22 +97,37 @@ class DepositController extends Controller
                 'note' => $request->note ?? 'Cryptocurrency deposit',
                 'payment_method' => 'crypto',
                 'payment_id' => $payment['payment_id'],
-                'payment_url' => $payment['pay_url'],
+                'payment_url' => $paymentUrl,
                 'crypto_currency' => $request->crypto_currency,
                 'crypto_amount' => $payment['pay_amount'] ?? null,
                 'payment_address' => $payment['pay_address'] ?? null,
             ]);
 
-            return redirect($payment['pay_url']);
+            return redirect($paymentUrl);
 
         } catch (\Exception $e) {
+            Log::error('Crypto payment creation exception: ' . $e->getMessage(), [
+                'user_id' => Auth::id(),
+                'amount' => $request->amount,
+                'currency' => $request->crypto_currency,
+                'trace' => $e->getTraceAsString()
+            ]);
             return redirect()->back()->withErrors(['error' => 'Payment creation failed: ' . $e->getMessage()]);
         }
     }
 
-    public function success()
+    public function success(Request $request)
     {
-        return view('user.content.deposit-success');
+        $paymentId = $request->get('payment_id');
+        $deposit = null;
+        
+        if ($paymentId) {
+            $deposit = Deposit::where('payment_id', $paymentId)
+                             ->where('user_id', Auth::id())
+                             ->first();
+        }
+        
+        return view('user.content.deposit-success', compact('deposit'));
     }
 
     public function cancel()
