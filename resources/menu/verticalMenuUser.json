@@ -24,11 +24,6 @@
       "slug": "user.wallet",
       "submenu": [
         {
-          "url": "user/deposit",
-          "name": "Deposit",
-          "slug": "user.deposit"
-        },
-        {
           "url": "user/withdrawal",
           "name": "Withdraw",
           "slug": "user.withdrawal"
