@@ -54,5 +54,10 @@ Route::prefix('user')->middleware('web')->group(function () {
 
     // Investment
     Route::get('investment', [InvestmentController::class, 'index'])->name('user.investment.index');
+
+    // AI Trades
+    Route::get('ai-trades', [\App\Http\Controllers\User\AiTradeController::class, 'index'])->name('user.ai_trades.index');
+    Route::get('ai-trades/{id}', [\App\Http\Controllers\User\AiTradeController::class, 'show'])->name('user.ai_trades.show');
+    Route::post('ai-trades/{id}/cancel', [\App\Http\Controllers\User\AiTradeController::class, 'cancel'])->name('user.ai_trades.cancel');
     });
 });

@@ -48,6 +48,12 @@
       ]
     },
     {
+      "name": "AI Trades",
+      "icon": "menu-icon icon-base ti tabler-robot",
+      "url": "user/ai-trades",
+      "slug": "user.ai_trades.index"
+    },
+    {
       "url": "user/downline",
       "name": "Downline",
       "icon": "menu-icon icon-base ti tabler-git-branch",
