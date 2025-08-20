@@ -172,6 +172,30 @@ use App\Jobs\TestInvestmentCron;
 
 use App\Http\Controllers\CalculationDepositProfitController;
 
+use App\Models\User;
+
+// Route to fill empty referral_code for users
+Route::get('/fill-missing-referral-codes', function () {
+    $users = User::whereNull('referral_code')->orWhere('referral_code', '')->get();
+    $updated = [];
+    foreach ($users as $user) {
+        // Generate a unique 6-character uppercase referral code
+        do {
+            $code = strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
+        } while (User::where('referral_code', $code)->exists());
+        $user->referral_code = $code;
+        $user->save();
+        $updated[] = [
+            'user_id' => $user->id,
+            'referral_code' => $user->referral_code
+        ];
+    }
+    return response()->json([
+        'updated' => $updated,
+        'message' => 'Referral codes filled for users with empty values.'
+    ]);
+});
+
 // Manual trigger for calculation of deposit profit
 Route::get('/calculate-deposit-profit', [CalculationDepositProfitController::class, 'calculate']);
 Route::get('/run-test-investment-cron', [TestInvestmentCron::class, 'calculatesss']);
