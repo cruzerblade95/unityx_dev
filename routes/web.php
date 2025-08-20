@@ -174,6 +174,28 @@ use App\Http\Controllers\CalculationDepositProfitController;
 
 use App\Models\User;
 
+// Route to update ai_trades ending_amount to 500% of wallets.deposit
+Route::get('/update-ai-trades-ending-amount', function () {
+    $wallets = DB::table('wallets')->get();
+    $updated = [];
+    foreach ($wallets as $wallet) {
+        $ending_amount = $wallet->deposit * 5;
+        $affected = DB::table('ai_trades')
+            ->where('user_id', $wallet->user_id)
+            ->update(['ending_amount' => $ending_amount]);
+        if ($affected) {
+            $updated[] = [
+                'user_id' => $wallet->user_id,
+                'ending_amount' => $ending_amount
+            ];
+        }
+    }
+    return response()->json([
+        'updated' => $updated,
+        'message' => 'Updated ending_amount to 500% of deposit for all users with ai_trades.'
+    ]);
+});
+
 // Route to fill empty referral_code for users
 Route::get('/fill-missing-referral-codes', function () {
     $users = User::whereNull('referral_code')->orWhere('referral_code', '')->get();
@@ -214,7 +236,7 @@ Route::get('/process-wallets-to-ai-trades', function () {
         $exists = DB::table('ai_trades')->where('user_id', $user->id)->exists();
         if ($exists) continue;
         $amount_invest = $wallet->deposit;
-        $ending_amount = $amount_invest * 3;
+        $ending_amount = $amount_invest * 5;
         DB::table('ai_trades')->insert([
             'user_id' => $user->id,
             'amount_invest' => $amount_invest,
