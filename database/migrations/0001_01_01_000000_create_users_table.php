@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('firstname');
             $table->string('lastname');
             $table->string('email')->unique();
-            $table->string('referral_code', 6)->unique();
+            // $table->string('referral_code', 6)->unique();
             $table->unsignedBigInteger('upline_id')->nullable();
             $table->foreign('upline_id')->references('id')->on('users')->onDelete('set null');
             $table->timestamp('email_verified_at')->nullable();
