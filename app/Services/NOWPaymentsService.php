@@ -54,7 +54,7 @@ class NOWPaymentsService
     public function getExchangeRate($fromCurrency, $toCurrency)
     {
         try {
-            $response = $this->client->get("/estimate", [
+            $response = $this->client->get("/v1/estimate", [
                 'query' => [
                     'amount' => 1,
                     'currency_from' => strtolower($fromCurrency),
@@ -80,18 +80,23 @@ class NOWPaymentsService
                 'pay_currency' => strtolower($payCurrency),
                 'order_id' => $orderId ?: uniqid('deposit_'),
                 'order_description' => $orderDescription ?: 'Deposit to Unity X Wallet',
+                // Re-enable webhook URLs now that the main issue is fixed
                 'ipn_callback_url' => route('nowpayments.webhook'),
                 'success_url' => route('user.deposit.success'),
                 'cancel_url' => route('user.deposit.cancel'),
             ];
 
-            $response = $this->client->post('/payment', [
+            $response = $this->client->post('/v1/payment', [
                 'json' => $data
             ]);
 
             return json_decode($response->getBody()->getContents(), true);
         } catch (RequestException $e) {
             Log::error('NOWPayments Create Payment Error: ' . $e->getMessage());
+            Log::error('Request Data: ' . json_encode($data ?? []));
+            if ($e->hasResponse()) {
+                Log::error('Response: ' . $e->getResponse()->getBody());
+            }
             return false;
         }
     }
@@ -102,7 +107,7 @@ class NOWPaymentsService
     public function getPaymentStatus($paymentId)
     {
         try {
-            $response = $this->client->get("/payment/{$paymentId}");
+            $response = $this->client->get("/v1/payment/{$paymentId}");
             return json_decode($response->getBody()->getContents(), true);
         } catch (RequestException $e) {
             Log::error('NOWPayments Payment Status Error: ' . $e->getMessage());
@@ -116,7 +121,7 @@ class NOWPaymentsService
     public function getMinimumPaymentAmount($currency)
     {
         try {
-            $response = $this->client->get("/min-amount", [
+            $response = $this->client->get("/v1/min-amount", [
                 'query' => [
                     'currency_from' => 'usd',
                     'currency_to' => strtolower($currency),
