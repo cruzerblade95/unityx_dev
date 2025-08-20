@@ -174,11 +174,12 @@ use App\Http\Controllers\CalculationDepositProfitController;
 
 // Manual trigger for calculation of deposit profit
 Route::get('/calculate-deposit-profit', [CalculationDepositProfitController::class, 'calculate']);
+Route::get('/run-test-investment-cron', [TestInvestmentCron::class, 'calculatesss']);
 
-Route::get('/run-test-investment-cron', function () {
-    dispatch(new TestInvestmentCron());
-    return response()->json(['message' => 'TestInvestmentCron job dispatched.']);
-});
+// Route::get('/run-test-investment-cron', function () {
+//     dispatch(new TestInvestmentCron());
+//     return response()->json(['message' => 'TestInvestmentCron job dispatched.']);
+// });
 
 Route::get('/process-wallets-to-ai-trades', function () {
     $users = DB::table('users')->get();
