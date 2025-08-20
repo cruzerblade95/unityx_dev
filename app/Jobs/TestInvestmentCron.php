@@ -21,8 +21,8 @@ class TestInvestmentCron implements ShouldQueue
         // dd("TestInvestmentCron started");
         try {
             // Configurable min/max percent (as decimals, e.g., 0.0003 for 0.03%)
-            $minPercent = 0.0002; // 0.02%
-            $maxPercent = 0.0005; // 0.05%
+            $minPercent = 0.003; // 0.3%
+            $maxPercent = 0.004; // 0.4%
 
             $trades = AiTrade::where('trade_status', 1)->get();
             foreach ($trades as $trade) {
