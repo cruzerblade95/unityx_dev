@@ -169,6 +169,12 @@ use Illuminate\Http\Request;
 
 // Manual trigger for TestInvestmentCron job
 use App\Jobs\TestInvestmentCron;
+
+use App\Http\Controllers\CalculationDepositProfitController;
+
+// Manual trigger for calculation of deposit profit
+Route::get('/calculate-deposit-profit', [CalculationDepositProfitController::class, 'calculate']);
+
 Route::get('/run-test-investment-cron', function () {
     dispatch(new TestInvestmentCron());
     return response()->json(['message' => 'TestInvestmentCron job dispatched.']);
