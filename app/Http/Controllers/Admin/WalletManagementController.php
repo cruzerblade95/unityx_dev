@@ -133,4 +133,48 @@ class WalletManagementController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Create wallet for a user
+     */
+    public function createWallet(User $user)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Check if wallet already exists
+            if ($user->wallet) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Wallet already exists for this user.'
+                ], 400);
+            }
+
+            // Create new wallet with default values
+            $wallet = new Wallet([
+                'user_id' => $user->id,
+                'deposit' => 0,
+                'profit' => 0,
+                'bonus' => 0,
+                'cash' => 0
+            ]);
+            $wallet->save();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Wallet created successfully for ' . ($user->firstname . ' ' . $user->lastname),
+                'wallet' => $wallet
+            ]);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Wallet creation error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while creating the wallet.'
+            ], 500);
+        }
+    }
 }

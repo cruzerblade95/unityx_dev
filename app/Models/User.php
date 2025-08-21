@@ -9,11 +9,28 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 
+use App\Models\Wallet;
+
 class User extends Authenticatable
 {
     use HasApiTokens;
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
+    /**
+     * Boot the model and add event listeners.
+     */
+    protected static function booted()
+    {
+        static::created(function ($user) {
+            // Create a wallet for the user after registration
+            $user->wallet()->create([
+                'deposit' => 0,
+                'profit' => 0,
+                'bonus' => 0,
+                'cash' => 0,
+            ]);
+        });
+    }
     use HasFactory;
     use HasProfilePhoto;
     use Notifiable;

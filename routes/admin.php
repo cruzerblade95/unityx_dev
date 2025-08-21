@@ -33,6 +33,7 @@ Route::prefix('admin')->middleware('web')->group(function () {
         Route::get('/wallets', [WalletManagementController::class, 'index'])->name('admin.wallets.index');
         Route::get('/wallets/list', [WalletManagementController::class, 'list'])->name('admin.wallets.list');
         Route::post('/wallets/{user}', [WalletManagementController::class, 'updateBalance'])->name('admin.wallets.update');
+        Route::post('/wallets/{user}/create', [WalletManagementController::class, 'createWallet'])->name('admin.wallets.create');
 
         // KYC Approval Routes
         Route::get('/kyc', [KycApprovalController::class, 'index'])->name('admin.kyc.index');

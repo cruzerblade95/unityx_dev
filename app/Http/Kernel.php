@@ -25,6 +25,7 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\VerifyCsrfToken::class,
             \App\Http\Middleware\LocaleMiddleware::class,
             // ...existing web middleware...
+            // \App\Http\Middleware\UpdateLastActiveAt::class,
         ],
 
         'api' => [
