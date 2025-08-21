@@ -27,6 +27,11 @@
           "url": "user/withdrawal",
           "name": "Withdraw",
           "slug": "user.withdrawal"
+        },
+        {
+          "url": "user/deposit",
+          "name": "Deposit",
+          "slug": "user.deposit"
         }
       ]
     },

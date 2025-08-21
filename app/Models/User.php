@@ -10,6 +10,7 @@ use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 
 use App\Models\Wallet;
+use App\Models\KycVerification;
 
 class User extends Authenticatable
 {
@@ -115,5 +116,15 @@ class User extends Authenticatable
     public function downlines()
     {
         return $this->hasMany(User::class, 'upline_id');
+    }
+
+    /**
+     * Check if user's KYC is approved.
+     *
+     * @return bool
+     */
+    public function isKycApproved()
+    {
+        return $this->kycVerification && $this->kycVerification->kyc_status === KycVerification::STATUS_APPROVED;
     }
 }
