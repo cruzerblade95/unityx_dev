@@ -36,18 +36,6 @@
       ]
     },
     {
-      "name": "AI Investment",
-      "icon": "menu-icon icon-base ti tabler-users",
-      "slug": "user",
-      "submenu": [
-        {
-          "url": "user/investment",
-          "name": "Investment",
-          "slug": "user.investment"
-        }
-      ]
-    },
-    {
       "name": "AI Trades",
       "icon": "menu-icon icon-base ti tabler-robot",
       "url": "user/ai-trades",
