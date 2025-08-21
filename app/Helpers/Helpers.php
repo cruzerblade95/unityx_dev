@@ -273,6 +273,25 @@ class Helpers
     }
   }
 
+    /**
+   * Insert a new AI trade for a user with given amount.
+   *
+   * @param int $user_id
+   * @param float $amount_invest
+   * @return int|bool Inserted trade ID or false on failure
+   */
+  public static function insertAiTrade($user_id, $amount_invest)
+  {
+    $ending_amount = $amount_invest * 5;
+    return \DB::table('ai_trades')->insertGetId([
+      'user_id' => $user_id,
+      'amount_invest' => $amount_invest,
+      'ending_amount' => $ending_amount,
+      'created_at' => now(),
+      'updated_at' => now(),
+    ]);
+  }
+
   /**
    * Generate CSS for primary color
    *
