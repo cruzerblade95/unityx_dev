@@ -24,8 +24,9 @@
     <!-- Wallet Balance Display -->
     <div class="card mb-4">
         <div class="card-body">
-            <h5 class="card-title">Available Balance</h5>
+            <h5 class="card-title">Available Deposit Balance</h5>
             <h3 class="text-success">${{ number_format($walletBalance, 2) }}</h3>
+            <small class="text-muted">Only deposit balance is available for withdrawal</small>
         </div>
     </div>
 
@@ -56,13 +57,14 @@
                                 <label for="amount" class="form-label">Withdrawal Amount <span class="text-danger">*</span></label>
                                 <input type="number" 
                                        step="0.01" 
+                                       min="100"
                                        class="form-control @error('amount') is-invalid @enderror" 
                                        id="amount" 
                                        name="amount" 
                                        value="{{ old('amount') }}"
                                        max="{{ $walletBalance }}"
                                        required>
-                                <div class="form-text">Maximum: ${{ number_format($walletBalance, 2) }}</div>
+                                <div class="form-text">Minimum: $100.00 | Maximum: ${{ number_format($walletBalance, 2) }}</div>
                                 @error('amount')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -70,14 +72,18 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="bank_name" class="form-label">Bank Name <span class="text-danger">*</span></label>
-                                <input type="text" 
-                                       class="form-control @error('bank_name') is-invalid @enderror" 
-                                       id="bank_name" 
-                                       name="bank_name" 
-                                       value="{{ old('bank_name') }}"
-                                       required>
-                                @error('bank_name')
+                                <label for="currency" class="form-label">Currency <span class="text-danger">*</span></label>
+                                <select class="form-control @error('currency') is-invalid @enderror" 
+                                        id="currency" 
+                                        name="currency" 
+                                        required>
+                                    <option value="">Select Currency</option>
+                                    <option value="USDT" {{ old('currency') == 'USDT' ? 'selected' : '' }}>USDT</option>
+                                    <option value="USDTBEP20" {{ old('currency') == 'USDTBEP20' ? 'selected' : '' }}>USDT BEP20</option>
+                                    <option value="USDC" {{ old('currency') == 'USDC' ? 'selected' : '' }}>USDC</option>
+                                    <option value="FDUSD" {{ old('currency') == 'FDUSD' ? 'selected' : '' }}>FDUSD</option>
+                                </select>
+                                @error('currency')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -87,14 +93,16 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="account_number" class="form-label">Account Number <span class="text-danger">*</span></label>
+                                <label for="wallet_address" class="form-label">Wallet Address <span class="text-danger">*</span></label>
                                 <input type="text" 
-                                       class="form-control @error('account_number') is-invalid @enderror" 
-                                       id="account_number" 
-                                       name="account_number" 
-                                       value="{{ old('account_number') }}"
+                                       class="form-control @error('wallet_address') is-invalid @enderror" 
+                                       id="wallet_address" 
+                                       name="wallet_address" 
+                                       value="{{ old('wallet_address') }}"
+                                       placeholder="Enter your wallet address"
                                        required>
-                                @error('account_number')
+                                <div class="form-text">Please ensure your wallet address is correct for the selected currency</div>
+                                @error('wallet_address')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -123,8 +131,9 @@
                     <div class="alert alert-info">
                         <strong>Fee Information:</strong>
                         <ul class="mb-0 mt-2">
-                            <li>Service fee: 2.5% will be deducted from your withdrawal amount</li>
+                            <li>Service fee: 4.75% will be deducted from your withdrawal amount</li>
                             <li>Processing time: 1-3 business days</li>
+                            <li>Minimum withdrawal: $100 USD</li>
                         </ul>
                     </div>
                     
@@ -151,9 +160,9 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Amount</th>
-                                <th>Tax (2.5%)</th>
+                                <th>Fee (4.75%)</th>
                                 <th>Net Amount</th>
-                                <th>Bank Details</th>
+                                <th>Crypto Details</th>
                                 <th>Status</th>
                                 <th>Reference</th>
                                 <th>Date</th>
@@ -169,8 +178,8 @@
                                     <td>
                                         @if($withdrawal->bank_name && $withdrawal->account_number)
                                             <small>
-                                                <strong>Bank:</strong> {{ $withdrawal->bank_name }}<br>
-                                                <strong>Account:</strong> {{ substr($withdrawal->account_number, 0, 4) }}****{{ substr($withdrawal->account_number, -4) }}
+                                                <strong>Currency:</strong> {{ $withdrawal->bank_name }}<br>
+                                                <strong>Wallet:</strong> {{ substr($withdrawal->account_number, 0, 6) }}...{{ substr($withdrawal->account_number, -6) }}
                                             </small>
                                         @else
                                             <small class="text-muted">N/A</small>
@@ -209,12 +218,21 @@
 document.addEventListener('DOMContentLoaded', function() {
     const amountInput = document.getElementById('amount');
     const maxBalance = {{ $walletBalance }};
+    const minAmount = 100;
     
     if (amountInput) {
+        // Set minimum attribute
+        amountInput.setAttribute('min', minAmount);
+        
         amountInput.addEventListener('input', function() {
             const amount = parseFloat(this.value);
             if (amount > maxBalance) {
                 this.value = maxBalance;
+            }
+            if (amount < minAmount && amount > 0) {
+                this.setCustomValidity('Minimum withdrawal amount is $100.00');
+            } else {
+                this.setCustomValidity('');
             }
         });
     }

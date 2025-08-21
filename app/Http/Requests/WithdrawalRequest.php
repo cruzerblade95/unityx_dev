@@ -25,17 +25,17 @@ class WithdrawalRequest extends FormRequest
     public function rules(): array
     {
         $user = $this->user();
-        $maxBalance = $user && $user->wallet ? $user->wallet->total_balance : 0;
+        $maxBalance = $user && $user->wallet ? $user->wallet->deposit : 0;
         
         return [
             'amount' => [
                 'required',
                 'numeric',
-                'min:1',
+                'min:100',
                 "max:{$maxBalance}"
             ],
-            'bank_name' => 'required|string|max:255',
-            'account_number' => 'required|string|max:255',
+            'currency' => 'required|string|in:USDT,USDTBEP20,USDC,FDUSD',
+            'wallet_address' => 'required|string|max:255',
             'reference' => 'nullable|string|max:255',
             'note' => 'nullable|string|max:1000',
         ];
@@ -49,13 +49,14 @@ class WithdrawalRequest extends FormRequest
     public function messages()
     {
         $user = $this->user();
-        $maxBalance = $user && $user->wallet ? $user->wallet->total_balance : 0;
+        $maxBalance = $user && $user->wallet ? $user->wallet->deposit : 0;
         
         return [
-            'amount.max' => "The withdrawal amount cannot exceed your available balance of $" . number_format($maxBalance, 2),
-            'amount.min' => 'The minimum withdrawal amount is $1.00',
-            'bank_name.required' => 'Bank name is required',
-            'account_number.required' => 'Account number is required',
+            'amount.max' => "The withdrawal amount cannot exceed your available deposit balance of $" . number_format($maxBalance, 2),
+            'amount.min' => 'The minimum withdrawal amount is $100.00',
+            'currency.required' => 'Please select a currency',
+            'currency.in' => 'Invalid currency selected',
+            'wallet_address.required' => 'Wallet address is required',
         ];
     }
 

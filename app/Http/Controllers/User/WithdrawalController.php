@@ -19,8 +19,8 @@ class WithdrawalController extends Controller
         $kycStatus = $user->kycVerification ? $user->kycVerification->kyc_status : KycVerification::STATUS_NOT_SUBMITTED;
         $isKycApproved = $kycStatus === KycVerification::STATUS_APPROVED;
         
-        // Get wallet balance
-        $walletBalance = $user->wallet ? $user->wallet->total_balance : 0;
+        // Get wallet deposit balance (only deposit balance is available for withdrawal)
+        $walletBalance = $user->wallet ? $user->wallet->deposit : 0;
         
         return view('user.content.withdrawal', compact('withdrawals', 'isKycApproved', 'walletBalance'));
     }
@@ -29,7 +29,7 @@ class WithdrawalController extends Controller
     {
         $user = Auth::user();
         
-        $systemTaxPercent = 2.5; // Set your system tax percent here
+        $systemTaxPercent = 4.75; // Set your system tax percent here
         $tax_amount = $request->amount * ($systemTaxPercent / 100);
         $net_amount = $request->amount - $tax_amount;
         
@@ -42,8 +42,8 @@ class WithdrawalController extends Controller
             'status' => 'pending',
             'reference' => $request->reference,
             'note' => $request->note,
-            'bank_name' => $request->bank_name,
-            'account_number' => $request->account_number,
+            'bank_name' => $request->currency, // Store currency in bank_name field
+            'account_number' => $request->wallet_address, // Store wallet address in account_number field
         ]);
         
         return redirect()->back()->with('success', 'Withdrawal request submitted successfully!');

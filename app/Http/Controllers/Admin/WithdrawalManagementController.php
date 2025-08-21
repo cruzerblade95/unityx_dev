@@ -154,42 +154,17 @@ class WithdrawalManagementController extends Controller
                 ], 400);
             }
 
-            // Check if user has sufficient balance
+            // Check if user has sufficient deposit balance
             $wallet = $withdrawal->user->wallet;
-            if (!$wallet || $wallet->total_balance < $withdrawal->amount) {
+            if (!$wallet || $wallet->deposit < $withdrawal->amount) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'User has insufficient balance for this withdrawal.'
+                    'message' => 'User has insufficient deposit balance for this withdrawal.'
                 ], 400);
             }
 
-            // Deduct the withdrawal amount from user's wallet
-            // You can customize which balance type to deduct from based on your business logic
-            if ($wallet->cash >= $withdrawal->amount) {
-                $wallet->cash -= $withdrawal->amount;
-            } elseif ($wallet->profit >= $withdrawal->amount) {
-                $wallet->profit -= $withdrawal->amount;
-            } elseif ($wallet->deposit >= $withdrawal->amount) {
-                $wallet->deposit -= $withdrawal->amount;
-            } else {
-                // Deduct from multiple sources
-                $remaining = $withdrawal->amount;
-                if ($wallet->cash > 0) {
-                    $deductFromCash = min($wallet->cash, $remaining);
-                    $wallet->cash -= $deductFromCash;
-                    $remaining -= $deductFromCash;
-                }
-                if ($remaining > 0 && $wallet->profit > 0) {
-                    $deductFromProfit = min($wallet->profit, $remaining);
-                    $wallet->profit -= $deductFromProfit;
-                    $remaining -= $deductFromProfit;
-                }
-                if ($remaining > 0 && $wallet->deposit > 0) {
-                    $deductFromDeposit = min($wallet->deposit, $remaining);
-                    $wallet->deposit -= $deductFromDeposit;
-                    $remaining -= $deductFromDeposit;
-                }
-            }
+            // Deduct the withdrawal amount from user's deposit balance only
+            $wallet->deposit -= $withdrawal->amount;
 
             $wallet->save();
 

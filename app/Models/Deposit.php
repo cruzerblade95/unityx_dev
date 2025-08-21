@@ -22,7 +22,10 @@ class Deposit extends Model
         'payment_url',
         'crypto_currency',
         'crypto_amount',
-        'payment_address'
+        'payment_address',
+        'unique_address',
+        'address_memo',
+        'address_expires_at'
     ];
     
     public function user() {

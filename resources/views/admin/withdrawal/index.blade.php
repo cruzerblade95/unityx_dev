@@ -99,14 +99,14 @@ function initializeWithdrawalPage() {
             { 
                 data: 'bank_info', 
                 name: 'bank_info', 
-                title: 'Bank Info',
+                title: 'Crypto Info',
                 render: function(data, type, row) {
                     if (!data) {
-                        return '<div class="bank-info">N/A</div>';
+                        return '<div class="crypto-info">N/A</div>';
                     }
-                    return '<div class="bank-info">' +
+                    return '<div class="crypto-info">' +
                            '<strong>' + (data.bank_name || 'N/A') + '</strong><br>' +
-                           '<small class="text-muted">' + (data.account_number || 'N/A') + '</small>' +
+                           '<small class="text-muted">' + (data.account_number ? (data.account_number.substr(0, 6) + '...' + data.account_number.substr(-6)) : 'N/A') + '</small>' +
                            '</div>';
                 },
                 orderable: false
@@ -278,7 +278,7 @@ function initializeWithdrawalPage() {
                             <div class="col-md-6">
                                 <p><strong>Withdrawal ID:</strong> #${data.id}</p>
                                 <p><strong>Amount:</strong> $${parseFloat(data.amount).toFixed(2)}</p>
-                                <p><strong>Tax Amount:</strong> $${parseFloat(data.tax_amount).toFixed(2)}</p>
+                                <p><strong>Fee Amount (4.75%):</strong> $${parseFloat(data.tax_amount).toFixed(2)}</p>
                                 <p><strong>Net Amount:</strong> $${parseFloat(data.net_amount).toFixed(2)}</p>
                                 <p><strong>Status:</strong> <span class="badge bg-${data.status === 'pending' ? 'warning' : data.status === 'approved' ? 'success' : 'danger'}">${data.status.charAt(0).toUpperCase() + data.status.slice(1)}</span></p>
                             </div>
@@ -286,8 +286,8 @@ function initializeWithdrawalPage() {
                                 <p><strong>User:</strong> ${data.user.firstname} ${data.user.lastname}</p>
                                 <p><strong>Username:</strong> @${data.user.username}</p>
                                 <p><strong>Email:</strong> ${data.user.email}</p>
-                                <p><strong>Bank Name:</strong> ${data.bank_name}</p>
-                                <p><strong>Account Number:</strong> ${data.account_number}</p>
+                                <p><strong>Currency:</strong> ${data.bank_name}</p>
+                                <p><strong>Wallet Address:</strong> ${data.account_number}</p>
                             </div>
                         </div>
                         <div class="row mt-3">
