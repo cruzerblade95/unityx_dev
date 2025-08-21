@@ -61,6 +61,8 @@ class User extends Authenticatable
         'language',
         'timezone',
         'currency',
+        'telegram_id',
+        'profile_photo_path',
     ];
 
     /**

@@ -39,16 +39,31 @@
         </li> --}}
       </ul>
     </div>
+    
+    @if(session('profile_updated'))
+    <div class="alert alert-success alert-dismissible d-flex align-items-baseline" role="alert">
+      <span class="alert-icon alert-icon-lg text-success me-2">
+        <i class="icon-base ti tabler-check icon-sm"></i>
+      </span>
+      <div class="d-flex flex-column ps-1">
+        <h5 class="alert-heading mb-2">Profile Updated!</h5>
+        <p class="mb-0">Your profile information has been successfully updated.</p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+        </button>
+      </div>
+    </div>
+    @endif
+    
     <div class="card mb-6">
       <!-- Account -->
       <div class="card-body">
         <div class="d-flex align-items-start align-items-sm-center gap-6">
-          <img src="{{ asset('assets/img/avatars/1.png') }}" alt="user-avatar" class="d-block w-px-100 h-px-100 rounded" id="uploadedAvatar" />
+          <img src="{{ auth()->user()->profile_photo_path ? asset(auth()->user()->profile_photo_path) : asset('assets/img/avatars/1.png') }}" alt="user-avatar" class="d-block w-px-100 h-px-100 rounded" id="uploadedAvatar" />
           <div class="button-wrapper">
             <label for="upload" class="btn btn-primary me-3 mb-4" tabindex="0">
               <span class="d-none d-sm-block">Upload new photo</span>
               <i class="icon-base ti tabler-upload d-block d-sm-none"></i>
-              <input type="file" id="upload" class="account-file-input" hidden accept="image/png, image/jpeg" />
+              <input type="file" id="upload" name="profile_photo" class="account-file-input" hidden accept="image/png, image/jpeg, image/jpg, image/gif" />
             </label>
             <button type="button" class="btn btn-label-secondary account-image-reset mb-4">
               <i class="icon-base ti tabler-reset d-block d-sm-none"></i>
@@ -60,17 +75,17 @@
         </div>
       </div>
       <div class="card-body pt-4">
-        <form id="formAccountSettings" method="POST" action="{{ route('user.profile.update') }}">
+        <form id="formAccountSettings" method="POST" action="{{ route('user.profile.update') }}" enctype="multipart/form-data">
           @csrf
           @method('PUT')
           <div class="row gy-4 gx-6 mb-6">
             <div class="col-md-6 form-control-validation">
-              <label for="firstName" class="form-label">First Name</label>
-              <input class="form-control" type="text" id="firstName" name="firstName" value="{{ auth()->user()->firstname ?? '' }}" autofocus />
+              <label for="firstname" class="form-label">First Name</label>
+              <input class="form-control" type="text" id="firstname" name="firstname" value="{{ auth()->user()->firstname ?? '' }}" autofocus />
             </div>
             <div class="col-md-6 form-control-validation">
-              <label for="lastName" class="form-label">Last Name</label>
-              <input class="form-control" type="text" name="lastName" id="lastName" value="{{ auth()->user()->lastname ?? '' }}" />
+              <label for="lastname" class="form-label">Last Name</label>
+              <input class="form-control" type="text" name="lastname" id="lastname" value="{{ auth()->user()->lastname ?? '' }}" />
             </div>
             <div class="col-md-6 form-control-validation">
               <label for="username" class="form-label">Username</label>
@@ -180,7 +195,7 @@
           </div>
           <div class="mt-2">
             <button type="submit" class="btn btn-primary me-3">Save changes</button>
-            <button type="reset" class="btn btn-label-secondary">Cancel</button>
+            <button type="button" class="btn btn-label-secondary" id="cancelBtn">Cancel</button>
           </div>
         </form>
       </div>
@@ -206,5 +221,138 @@
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('formAccountSettings');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const uploadInput = document.getElementById('upload');
+    const uploadedAvatar = document.getElementById('uploadedAvatar');
+    const resetBtn = document.querySelector('.account-image-reset');
+    
+    // Store initial values
+    const defaultAvatarSrc = uploadedAvatar.src;
+    let initialFormData = new FormData(form);
+    let hasChanges = false;
+    
+    // Handle file upload preview
+    uploadInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file size (2MB = 2097152 bytes)
+            if (file.size > 2097152) {
+                Swal.fire({
+                    title: 'File Too Large',
+                    text: 'Please select a file smaller than 2MB',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'btn btn-primary'
+                    },
+                    buttonsStyling: false
+                });
+                uploadInput.value = '';
+                return;
+            }
+            
+            // Validate file type
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            if (!allowedTypes.includes(file.type)) {
+                Swal.fire({
+                    title: 'Invalid File Type',
+                    text: 'Please select a JPG, PNG, or GIF image',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'btn btn-primary'
+                    },
+                    buttonsStyling: false
+                });
+                uploadInput.value = '';
+                return;
+            }
+            
+            // Preview the image
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedAvatar.src = e.target.result;
+                checkForChanges();
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Handle reset button
+    resetBtn.addEventListener('click', function() {
+        uploadedAvatar.src = defaultAvatarSrc;
+        uploadInput.value = '';
+        checkForChanges();
+    });
+    
+    // Function to check if form has changes
+    function checkForChanges() {
+        const currentFormData = new FormData(form);
+        hasChanges = false;
+        
+        // Compare current values with initial values
+        for (let [key, value] of currentFormData.entries()) {
+            if (key !== 'profile_photo' && initialFormData.get(key) !== value) {
+                hasChanges = true;
+                break;
+            }
+        }
+        
+        // Check if photo was changed
+        if (uploadInput.files.length > 0) {
+            hasChanges = true;
+        }
+        
+        // Also check if any initial fields are missing in current form
+        for (let [key, value] of initialFormData.entries()) {
+            if (key !== 'profile_photo' && currentFormData.get(key) !== value) {
+                hasChanges = true;
+                break;
+            }
+        }
+    }
+    
+    // Add event listeners to form inputs
+    const formInputs = form.querySelectorAll('input, select, textarea');
+    formInputs.forEach(input => {
+        if (input.type !== 'file') {
+            input.addEventListener('input', checkForChanges);
+            input.addEventListener('change', checkForChanges);
+        }
+    });
+    
+    // Handle cancel button click
+    cancelBtn.addEventListener('click', function() {
+        checkForChanges();
+        
+        if (hasChanges) {
+            Swal.fire({
+                title: 'Unsaved Changes',
+                text: 'You have unsaved changes. Are you sure you want to leave?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, leave',
+                cancelButtonText: 'Stay',
+                customClass: {
+                    confirmButton: 'btn btn-danger me-3',
+                    cancelButton: 'btn btn-label-secondary'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '{{ route("user.profile") }}';
+                }
+            });
+        } else {
+            // No changes, redirect immediately
+            window.location.href = '{{ route("user.profile") }}';
+        }
+    });
+});
+</script>
 
 @endsection
