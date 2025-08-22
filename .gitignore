@@ -8,7 +8,10 @@
 /vendor
 
 .env
+<<<<<<< HEAD
+=======
 .env.*
+>>>>>>> refs/remotes/origin/master
 .env.backup
 .env.production
 .phpactor.json
