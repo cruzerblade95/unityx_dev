@@ -7,6 +7,7 @@ use App\Services\NotificationService;
 use App\Models\Deposit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Yajra\DataTables\Facades\DataTables;
 
 class NOWPaymentsController extends Controller
 {
@@ -23,53 +24,91 @@ class NOWPaymentsController extends Controller
     public function index(Request $request)
     {
         try {
-            // Get ALL local deposits (including those without NOWPayments payment_id)
-            $localPayments = Deposit::with('user:id,firstname,lastname,email')
-                ->orderBy('created_at', 'desc')
-                ->get();
+            // Get statistics for the dashboard cards
+            $totalDeposits = Deposit::count();
+            $pendingDeposits = Deposit::where('status', 'pending')->count();
+            $completedDeposits = Deposit::where('status', 'completed')->count();
+            $totalAmount = Deposit::sum('amount');
 
-            // Try to enrich local payments with NOWPayments data (only for those with payment_id)
-            $enrichedPayments = [];
-            foreach ($localPayments as $deposit) {
-                if ($deposit->payment_id) {
-                    $paymentData = $this->nowPayments->getPaymentStatus($deposit->payment_id);
-
-                    $enrichedPayments[] = [
-                        'local_deposit' => $deposit,
-                        'nowpayments_data' => $paymentData ?: null,
-                        'payment_id' => $deposit->payment_id,
-                        'order_id' => $paymentData ? ($paymentData['order_id'] ?? null) : null,
-                        'payment_status' => $paymentData ? ($paymentData['payment_status'] ?? 'unknown') : 'api_error',
-                        'amount' => $deposit->amount,
-                        'user' => $deposit->user,
-                        'created_at' => $deposit->created_at
-                    ];
-                }
-            }
-
-            // Try to fetch NOWPayments bulk data (this will likely fail due to restrictions)
-            $apiPayments = $this->nowPayments->listPayments();
-            $apiError = null;
-
-            if ($apiPayments === false) {
-                $apiError = 'NOWPayments payment list API is restricted. Showing individual payment data instead.';
-            }
-
-            return view('admin.nowpayments.index', [
-                'localPayments' => $localPayments,
-                'enrichedPayments' => $enrichedPayments,
-                'apiPayments' => $apiPayments,
-                'apiError' => $apiError
-            ]);
+            return view('admin.nowpayments.index', compact(
+                'totalDeposits',
+                'pendingDeposits',
+                'completedDeposits',
+                'totalAmount'
+            ));
 
         } catch (\Exception $e) {
             Log::error('NOWPayments Controller Error: ' . $e->getMessage());
             return view('admin.nowpayments.index', [
-                'localPayments' => collect(),
-                'enrichedPayments' => [],
-                'apiPayments' => null,
-                'apiError' => 'An error occurred while fetching payments'
+                'totalDeposits' => 0,
+                'pendingDeposits' => 0,
+                'completedDeposits' => 0,
+                'totalAmount' => 0
             ]);
+        }
+    }
+
+    /**
+     * Get the list of deposits for DataTables
+     */
+    public function list(Request $request)
+    {
+        try {
+            $deposits = Deposit::with('user:id,firstname,lastname,email')
+                ->select('deposits.*')
+                ->orderBy('created_at', 'desc');
+
+            return DataTables::of($deposits)
+                ->addIndexColumn()
+                ->addColumn('user', function ($deposit) {
+                    if ($deposit->user) {
+                        return $deposit->user->firstname . ' ' . $deposit->user->lastname . '<br><small class="text-muted">' . $deposit->user->email . '</small>';
+                    }
+                    return '<span class="text-muted">Unknown User</span>';
+                })
+                ->addColumn('amount', function ($deposit) {
+                    return '<span class="font-weight-bold text-success">$' . number_format($deposit->amount, 2) . '</span>';
+                })
+                ->addColumn('payment_id', function ($deposit) {
+                    if ($deposit->payment_id) {
+                        return '<code class="bg-light p-1">' . $deposit->payment_id . '</code>';
+                    }
+                    return '<span class="badge badge-warning">Pending NOWPayments</span>';
+                })
+                ->addColumn('status', function ($deposit) {
+                    $statusClass = $deposit->status === 'completed' ? 'success' :
+                                  ($deposit->status === 'pending' ? 'warning' : 'secondary');
+                    return '<span class="badge bg-' . $statusClass . '">' . ucfirst($deposit->status) . '</span>';
+                })
+                ->addColumn('created_at', function ($deposit) {
+                    return $deposit->created_at->format('M d, Y H:i') . '<br><small class="text-muted">' . $deposit->created_at->diffForHumans() . '</small>';
+                })
+                ->addColumn('actions', function ($deposit) {
+                    $actions = '<button class="btn btn-sm btn-outline-info" onclick="showDepositDetails(' . $deposit->id . ', this)">
+                                    <i class="fas fa-info-circle"></i> Details
+                                </button>';
+
+                    if ($deposit->status === 'pending') {
+                        $actions .= ' <button class="btn btn-sm btn-success ml-1" onclick="approvePayment(' . $deposit->id . ', this)">
+                                        <i class="fas fa-check"></i> Approve
+                                    </button>';
+
+                        if ($deposit->payment_method === 'manual' || !$deposit->payment_id) {
+                            $userName = $deposit->user ? $deposit->user->firstname . ' ' . $deposit->user->lastname : 'Unknown User';
+                            $actions .= ' <button class="btn btn-sm btn-danger ml-1" onclick="showRejectModal(' . $deposit->id . ', \'' . $userName . '\', ' . $deposit->amount . ')">
+                                            <i class="fas fa-times"></i> Reject
+                                        </button>';
+                        }
+                    }
+
+                    return $actions;
+                })
+                ->rawColumns(['user', 'amount', 'payment_id', 'status', 'created_at', 'actions'])
+                ->make(true);
+
+        } catch (\Exception $e) {
+            Log::error('NOWPayments DataTables Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to load deposits'], 500);
         }
     }
 
