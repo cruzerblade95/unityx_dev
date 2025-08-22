@@ -225,6 +225,7 @@ export default defineConfig({
                 'resources/assets/vendor/scss/pages/ui-carousel.scss',
                 'resources/assets/vendor/scss/pages/wizard-ex-checkout.scss',
                 'resources/js/laravel-user-management.js',
+                'resources/assets/vendor/libs/datatables-rowgroup-bs5/rowgroup.bootstrap5.scss'
             ],
             refresh: true,
         }),
