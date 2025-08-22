@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Services\NOWPaymentsService;
+use App\Services\NotificationService;
 use App\Models\Deposit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -26,13 +27,13 @@ class NOWPaymentsController extends Controller
             $localPayments = Deposit::with('user:id,firstname,lastname,email')
                 ->orderBy('created_at', 'desc')
                 ->get();
-            
+
             // Try to enrich local payments with NOWPayments data (only for those with payment_id)
             $enrichedPayments = [];
             foreach ($localPayments as $deposit) {
                 if ($deposit->payment_id) {
                     $paymentData = $this->nowPayments->getPaymentStatus($deposit->payment_id);
-                    
+
                     $enrichedPayments[] = [
                         'local_deposit' => $deposit,
                         'nowpayments_data' => $paymentData ?: null,
@@ -45,22 +46,22 @@ class NOWPaymentsController extends Controller
                     ];
                 }
             }
-            
+
             // Try to fetch NOWPayments bulk data (this will likely fail due to restrictions)
             $apiPayments = $this->nowPayments->listPayments();
             $apiError = null;
-            
+
             if ($apiPayments === false) {
                 $apiError = 'NOWPayments payment list API is restricted. Showing individual payment data instead.';
             }
-            
+
             return view('admin.nowpayments.index', [
                 'localPayments' => $localPayments,
                 'enrichedPayments' => $enrichedPayments,
                 'apiPayments' => $apiPayments,
                 'apiError' => $apiError
             ]);
-            
+
         } catch (\Exception $e) {
             Log::error('NOWPayments Controller Error: ' . $e->getMessage());
             return view('admin.nowpayments.index', [
@@ -76,35 +77,42 @@ class NOWPaymentsController extends Controller
     {
         try {
             $deposit = Deposit::findOrFail($depositId);
-            
+
             if ($deposit->status === 'completed') {
                 return response()->json([
                     'success' => false,
                     'message' => 'Payment is already completed'
                 ]);
             }
-            
+
             // Update deposit status
             $deposit->status = 'completed';
             $deposit->save();
-            
+
             // Update user wallet balance (add to deposit balance)
             if ($deposit->user && $deposit->user->wallet) {
                 $deposit->user->wallet->deposit += $deposit->net_amount;
                 $deposit->user->wallet->save();
             }
-            
+
+            // Create success notification for the user
+            NotificationService::createDepositSuccessNotification(
+                $deposit->user_id,
+                $deposit->net_amount,
+                $deposit->id
+            );
+
             Log::info('Deposit approved manually', [
                 'deposit_id' => $deposit->id,
                 'user_id' => $deposit->user_id,
                 'amount' => $deposit->net_amount
             ]);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Payment approved successfully'
             ]);
-            
+
         } catch (\Exception $e) {
             Log::error('Error approving deposit: ' . $e->getMessage());
             return response()->json([
@@ -114,34 +122,256 @@ class NOWPaymentsController extends Controller
         }
     }
 
+    public function rejectDeposit($depositId, Request $request)
+    {
+        try {
+            $deposit = Deposit::findOrFail($depositId);
+
+            if ($deposit->status === 'completed') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot reject a completed payment'
+                ]);
+            }
+
+            if ($deposit->status === 'rejected') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Payment is already rejected'
+                ]);
+            }
+
+            // Validate reason
+            $request->validate([
+                'reason' => 'required|string|min:10|max:500'
+            ]);
+
+            // Update deposit status
+            $deposit->status = 'rejected';
+            $deposit->rejection_reason = $request->reason;
+            $deposit->rejected_at = now();
+            $deposit->rejected_by = auth()->user()->id ?? null;
+            $deposit->save();
+
+            // Create rejection notification for the user
+            NotificationService::createDepositRejectedNotification(
+                $deposit->user_id,
+                $deposit->amount,
+                $request->reason,
+                $deposit->id
+            );
+
+            Log::info('Deposit rejected manually', [
+                'deposit_id' => $deposit->id,
+                'user_id' => $deposit->user_id,
+                'amount' => $deposit->amount,
+                'reason' => $request->reason,
+                'rejected_by' => auth()->user()->id ?? null
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Deposit rejected successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error rejecting deposit: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error rejecting deposit: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function refreshStatus($paymentId)
     {
         try {
+            // First check if this payment ID exists in our database
+            $deposit = Deposit::where('payment_id', $paymentId)->first();
+
+            // Log the refresh attempt
+            Log::info('Admin refreshing payment status', [
+                'payment_id' => $paymentId,
+                'deposit_exists' => $deposit ? 'yes' : 'no',
+                'deposit_status' => $deposit ? $deposit->status : 'N/A'
+            ]);
+
             $payment = $this->nowPayments->getPaymentStatus($paymentId);
-            
+
             if ($payment) {
-                // Update local deposit record
-                $deposit = Deposit::where('payment_id', $paymentId)->first();
+                // Log successful API response
+                Log::info('NOWPayments API returned payment data', [
+                    'payment_id' => $paymentId,
+                    'payment_status' => $payment['payment_status'] ?? 'unknown',
+                    'payment_data_keys' => array_keys($payment)
+                ]);
+
+                // Update local deposit record if it exists
                 if ($deposit) {
-                    $deposit->status = $payment['payment_status'] ?? $deposit->status;
+                    $oldStatus = $deposit->status;
+                    $newStatus = $payment['payment_status'] ?? $deposit->status;
+
+                    $deposit->status = $newStatus;
                     $deposit->save();
+
+                    Log::info('Updated local deposit status', [
+                        'payment_id' => $paymentId,
+                        'old_status' => $oldStatus,
+                        'new_status' => $newStatus
+                    ]);
+                } else {
+                    Log::warning('Payment found in NOWPayments but not in local database', [
+                        'payment_id' => $paymentId
+                    ]);
                 }
-                
+
                 return response()->json([
                     'success' => true,
-                    'payment' => $payment
+                    'payment' => $payment,
+                    'local_deposit_updated' => $deposit ? true : false
                 ]);
             }
-            
+
+            Log::warning('NOWPayments API returned null/false for payment', [
+                'payment_id' => $paymentId
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Payment not found'
+                'message' => 'Payment not found in NOWPayments system',
+                'payment_id' => $paymentId,
+                'local_deposit_exists' => $deposit ? true : false
             ], 404);
-            
+
         } catch (\Exception $e) {
+            Log::error('Error refreshing payment status', [
+                'payment_id' => $paymentId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Error refreshing payment status: ' . $e->getMessage()
+                'message' => 'Error refreshing payment status: ' . $e->getMessage(),
+                'payment_id' => $paymentId
+            ], 500);
+        }
+    }
+
+    /**
+     * Test NOWPayments API connection and configuration
+     */
+    public function testApiConnection()
+    {
+        try {
+            // Test basic API connectivity
+            $testResult = $this->nowPayments->getApiStatus();
+
+            Log::info('NOWPayments API test result', [
+                'result' => $testResult,
+                'config_check' => [
+                    'api_key_set' => config('services.nowpayments.api_key') ? 'yes' : 'no',
+                    'email_set' => config('services.nowpayments.email') ? 'yes' : 'no',
+                    'password_set' => config('services.nowpayments.password') ? 'yes' : 'no',
+                    'sandbox_mode' => config('services.nowpayments.sandbox', true) ? 'yes' : 'no'
+                ]
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'test_result' => $testResult,
+                'api_configured' => config('services.nowpayments.api_key') ? true : false,
+                'sandbox_mode' => config('services.nowpayments.sandbox', true)
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('NOWPayments API test failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'API test failed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Show detailed information about a specific deposit
+     */
+    public function showDepositDetails($depositId)
+    {
+        try {
+            $deposit = Deposit::with('user:id,firstname,lastname,email,username')->find($depositId);
+
+            if (!$deposit) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Deposit not found'
+                ], 404);
+            }
+
+            // Prepare deposit details
+            $depositDetails = [
+                'id' => $deposit->id,
+                'payment_id' => $deposit->payment_id,
+                'amount' => $deposit->amount,
+                'net_amount' => $deposit->net_amount,
+                'tax_amount' => $deposit->tax_amount,
+                'tax_percent' => $deposit->tax_percent,
+                'status' => $deposit->status,
+                'reference' => $deposit->reference,
+                'note' => $deposit->note,
+                'payment_method' => $deposit->payment_method,
+                'payment_url' => $deposit->payment_url,
+                'crypto_currency' => $deposit->crypto_currency,
+                'crypto_amount' => $deposit->crypto_amount,
+                'payment_address' => $deposit->payment_address,
+                'unique_address' => $deposit->unique_address,
+                'address_memo' => $deposit->address_memo,
+                'address_expires_at' => $deposit->address_expires_at,
+                'created_at' => $deposit->created_at,
+                'updated_at' => $deposit->updated_at,
+                'user' => [
+                    'id' => $deposit->user->id,
+                    'name' => $deposit->user->firstname . ' ' . $deposit->user->lastname,
+                    'email' => $deposit->user->email,
+                    'username' => $deposit->user->username ?? 'N/A'
+                ]
+            ];
+
+            // If payment_id exists, try to get NOWPayments data
+            $nowpaymentsData = null;
+            if ($deposit->payment_id) {
+                $nowpaymentsData = $this->nowPayments->getPaymentStatus($deposit->payment_id);
+            }
+
+            Log::info('Deposit details requested', [
+                'deposit_id' => $depositId,
+                'payment_id' => $deposit->payment_id,
+                'user_id' => $deposit->user_id,
+                'has_nowpayments_data' => $nowpaymentsData ? 'yes' : 'no'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'deposit' => $depositDetails,
+                'nowpayments_data' => $nowpaymentsData,
+                'has_payment_id' => $deposit->payment_id ? true : false,
+                'payment_found_in_nowpayments' => $nowpaymentsData ? true : false
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error fetching deposit details', [
+                'deposit_id' => $depositId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching deposit details: ' . $e->getMessage()
             ], 500);
         }
     }

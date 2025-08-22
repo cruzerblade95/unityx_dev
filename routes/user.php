@@ -1,4 +1,4 @@
-    
+
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -7,7 +7,10 @@ use App\Http\Controllers\User\UserRegisterController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\DepositController;
 use App\Http\Controllers\User\WithdrawalController;
+use App\Http\Controllers\User\NotificationController;
 use App\Http\Controllers\User\InvestmentController;
+use App\Http\Controllers\User\AiTradeController;
+use App\Http\Controllers\User\MarketplaceController;
 use App\Http\Controllers\KycController;
 // Route::middleware(['web'])->group(function () {
 //     Route::get('login', [App\Http\Controllers\User\UserLoginController::class, 'showLoginForm'])->name('login'); // Main login route
@@ -61,20 +64,29 @@ Route::prefix('user')->middleware('web')->group(function () {
     Route::get('investment', [InvestmentController::class, 'index'])->name('user.investment.index');
 
     // AI Trades
-    Route::get('ai-trades', [\App\Http\Controllers\User\AiTradeController::class, 'index'])->name('user.ai_trades.index');
-    Route::get('ai-trades/{id}', [\App\Http\Controllers\User\AiTradeController::class, 'show'])->name('user.ai_trades.show');
-    Route::post('ai-trades/{id}/cancel', [\App\Http\Controllers\User\AiTradeController::class, 'cancel'])->name('user.ai_trades.cancel');
+    Route::get('ai-trades', [AiTradeController::class, 'index'])->name('user.ai_trades.index');
+    Route::get('ai-trades/{id}', [AiTradeController::class, 'show'])->name('user.ai_trades.show');
+    Route::post('ai-trades/{id}/cancel', [AiTradeController::class, 'cancel'])->name('user.ai_trades.cancel');
 
     // Marketplace
-    Route::get('marketplace', [\App\Http\Controllers\User\MarketplaceController::class, 'index'])->name('user.marketplace.index');
-    Route::post('marketplace/create', [\App\Http\Controllers\User\MarketplaceController::class, 'createListing'])->name('user.marketplace.create');
-    Route::post('marketplace/purchase/{listingId}', [\App\Http\Controllers\User\MarketplaceController::class, 'purchaseListing'])->name('user.marketplace.purchase');
-    Route::post('marketplace/cancel/{listingId}', [\App\Http\Controllers\User\MarketplaceController::class, 'cancelListing'])->name('user.marketplace.cancel');
-    Route::post('marketplace/topup', [\App\Http\Controllers\User\MarketplaceController::class, 'topUpCash'])->name('user.marketplace.topup');
-    
+    Route::get('marketplace', [MarketplaceController::class, 'index'])->name('user.marketplace.index');
+    Route::post('marketplace/create', [MarketplaceController::class, 'createListing'])->name('user.marketplace.create');
+    Route::post('marketplace/purchase/{listingId}', [MarketplaceController::class, 'purchaseListing'])->name('user.marketplace.purchase');
+    Route::post('marketplace/cancel/{listingId}', [MarketplaceController::class, 'cancelListing'])->name('user.marketplace.cancel');
+    Route::post('marketplace/topup', [MarketplaceController::class, 'topUpCash'])->name('user.marketplace.topup');
+
     // Marketplace Verification
-    Route::post('marketplace/approve/{listingId}', [\App\Http\Controllers\User\MarketplaceController::class, 'approveVerification'])->name('user.marketplace.approve');
-    Route::post('marketplace/reject/{listingId}', [\App\Http\Controllers\User\MarketplaceController::class, 'rejectVerification'])->name('user.marketplace.reject');
-    Route::post('marketplace/cancel-verification/{listingId}', [\App\Http\Controllers\User\MarketplaceController::class, 'cancelVerification'])->name('user.marketplace.cancel_verification');
+    Route::post('marketplace/approve/{listingId}', [MarketplaceController::class, 'approveVerification'])->name('user.marketplace.approve');
+    Route::post('marketplace/reject/{listingId}', [MarketplaceController::class, 'rejectVerification'])->name('user.marketplace.reject');
+    Route::post('marketplace/cancel-verification/{listingId}', [MarketplaceController::class, 'cancelVerification'])->name('user.marketplace.cancel_verification');
+
+    // Notifications
+    Route::get('notifications', [NotificationController::class, 'index'])->name('user.notifications.index');
+    Route::get('notifications/api', [NotificationController::class, 'getNotifications'])->name('user.notifications.api');
+    Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('user.notifications.read_all');
+    Route::delete('notifications/clear-all', [NotificationController::class, 'clearAll'])->name('user.notifications.clear_all');
+    Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('user.notifications.read');
+    Route::delete('notifications/{id}', [NotificationController::class, 'destroy'])->name('user.notifications.destroy');
+    Route::post('notifications/test', [NotificationController::class, 'testNotification'])->name('user.notifications.test');
     });
 });
