@@ -22,5 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // })->cron('0 1,5,9,13,17,21 * * *');
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->redirectTo(function ($request) {
+            return $request->expectsJson() ? null : route('home');
+        });
     })->create();
