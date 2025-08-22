@@ -22,7 +22,7 @@ class AiTradeController extends Controller
     {
         $user = Auth::user();
         $trade = AiTrade::where('user_id', $user->id)->findOrFail($id);
-        $histories = $trade->histories()->orderByDesc('created_at')->get();
+    $histories = $trade->histories()->orderByDesc('created_at')->paginate(10);
         return view('user.content.ai_trades.show', compact('trade', 'histories'));
     }
 
