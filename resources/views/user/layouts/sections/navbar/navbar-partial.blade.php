@@ -33,29 +33,7 @@
 
 <div class="navbar-nav-right d-flex align-items-center justify-content-end" id="navbar-collapse">
 
-    @if (!isset($menuHorizontal))
-        <!-- Search -->
-        <div class="navbar-nav align-items-center">
-            <div class="nav-item navbar-search-wrapper px-md-0 px-2 mb-0">
-                <a class="nav-item nav-link search-toggler d-flex align-items-center px-0" href="javascript:void(0);">
-                    <span class="d-inline-block text-body-secondary fw-normal" id="autocomplete"></span>
-                </a>
-            </div>
-        </div>
-        <!-- /Search -->
-    @endif
-
     <ul class="navbar-nav flex-row align-items-center ms-md-auto">
-        @if (isset($menuHorizontal))
-            <!-- Search -->
-            <li class="nav-item navbar-search-wrapper btn btn-text-secondary btn-icon rounded-pill">
-                <a class="nav-item nav-link search-toggler px-0" href="javascript:void(0);">
-                    <span class="d-inline-block text-body-secondary fw-normal" id="autocomplete"></span>
-                </a>
-            </li>
-            <!-- /Search -->
-        @endif
-
         <!-- Language -->
         <li class="nav-item dropdown-language dropdown">
             <a class="nav-link dropdown-toggle hide-arrow btn btn-icon btn-text-secondary rounded-pill"
@@ -126,96 +104,96 @@
         @endif
 
         <!-- Quick links  -->
-        {{-- <li class="nav-item dropdown-shortcuts navbar-dropdown dropdown">
-      <a class="nav-link dropdown-toggle hide-arrow btn btn-icon btn-text-secondary rounded-pill"
-        href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-        <i class="icon-base ti tabler-layout-grid-add icon-22px text-heading"></i>
-      </a>
-      <div class="dropdown-menu dropdown-menu-end p-0">
-        <div class="dropdown-menu-header border-bottom">
-          <div class="dropdown-header d-flex align-items-center py-3">
-            <h6 class="mb-0 me-auto">Shortcuts</h6>
-            <a href="javascript:void(0)"
-              class="dropdown-shortcuts-add py-2 btn btn-text-secondary rounded-pill btn-icon" data-bs-toggle="tooltip"
-              data-bs-placement="top" title="Add shortcuts"><i
-                class="icon-base ti tabler-plus icon-20px text-heading"></i></a>
-          </div>
-        </div>
-        <div class="dropdown-shortcuts-list scrollable-container">
-          <div class="row row-bordered overflow-visible g-0">
-            <div class="dropdown-shortcuts-item col">
-              <span class="dropdown-shortcuts-icon rounded-circle mb-3">
-                <i class="icon-base ti tabler-calendar icon-26px text-heading"></i>
-              </span>
-              <a href="{{ url('app/calendar') }}" class="stretched-link">Calendar</a>
-              <small>Appointments</small>
+        <li class="nav-item dropdown-shortcuts navbar-dropdown dropdown">
+            <a class="nav-link dropdown-toggle hide-arrow btn btn-icon btn-text-secondary rounded-pill"
+                href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                <i class="icon-base ti tabler-layout-grid-add icon-22px text-heading"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end p-0">
+                <div class="dropdown-menu-header border-bottom">
+                    <div class="dropdown-header d-flex align-items-center py-3">
+                        <h6 class="mb-0 me-auto">Shortcuts</h6>
+                        <a href="javascript:void(0)"
+                            class="dropdown-shortcuts-add py-2 btn btn-text-secondary rounded-pill btn-icon"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Add shortcuts"><i
+                                class="icon-base ti tabler-plus icon-20px text-heading"></i></a>
+                    </div>
+                </div>
+                <div class="dropdown-shortcuts-list scrollable-container">
+                    <div class="row row-bordered overflow-visible g-0">
+                        <div class="dropdown-shortcuts-item col">
+                            <span class="dropdown-shortcuts-icon rounded-circle mb-3">
+                                <i class="icon-base ti tabler-wallet icon-26px text-heading"></i>
+                            </span>
+                            <a href="{{ route('user.deposit.index') }}" class="stretched-link">Deposit</a>
+                            <small>Add Funds</small>
+                        </div>
+                        <div class="dropdown-shortcuts-item col">
+                            <span class="dropdown-shortcuts-icon rounded-circle mb-3">
+                                <i class="icon-base ti tabler-cash icon-26px text-heading"></i>
+                            </span>
+                            <a href="{{ route('user.withdrawal.index') }}" class="stretched-link">Withdrawal</a>
+                            <small>Withdraw Funds</small>
+                        </div>
+                    </div>
+                    <div class="row row-bordered overflow-visible g-0">
+                        <div class="dropdown-shortcuts-item col">
+                            <span class="dropdown-shortcuts-icon rounded-circle mb-3">
+                                <i class="icon-base ti tabler-chart-line icon-26px text-heading"></i>
+                            </span>
+                            <a href="{{ route('user.investment.index') }}" class="stretched-link">Investment</a>
+                            <small>Your Investments</small>
+                        </div>
+                        <div class="dropdown-shortcuts-item col">
+                            <span class="dropdown-shortcuts-icon rounded-circle mb-3">
+                                <i class="icon-base ti tabler-robot icon-26px text-heading"></i>
+                            </span>
+                            <a href="{{ route('user.ai_trades.index') }}" class="stretched-link">AI Trades</a>
+                            <small>Trading Bot</small>
+                        </div>
+                    </div>
+                    <div class="row row-bordered overflow-visible g-0">
+                        <div class="dropdown-shortcuts-item col">
+                            <span class="dropdown-shortcuts-icon rounded-circle mb-3">
+                                <i class="icon-base ti tabler-device-desktop-analytics icon-26px text-heading"></i>
+                            </span>
+                            <a href="{{ route('user.dashboard') }}" class="stretched-link">Dashboard</a>
+                            <small>User Dashboard</small>
+                        </div>
+                        <div class="dropdown-shortcuts-item col">
+                            <span class="dropdown-shortcuts-icon rounded-circle mb-3">
+                                <i class="icon-base ti tabler-settings icon-26px text-heading"></i>
+                            </span>
+                            <a href="{{ route('user.profile') }}" class="stretched-link">Profile</a>
+                            <small>Account Settings</small>
+                        </div>
+                    </div>
+                    <div class="row row-bordered overflow-visible g-0">
+                        <div class="dropdown-shortcuts-item col">
+                            <span class="dropdown-shortcuts-icon rounded-circle mb-3">
+                                <i class="icon-base ti tabler-shield-check icon-26px text-heading"></i>
+                            </span>
+                            <a href="{{ route('user.kyc.index') }}" class="stretched-link">KYC</a>
+                            <small>Verification</small>
+                        </div>
+                        <div class="dropdown-shortcuts-item col">
+                            <span class="dropdown-shortcuts-icon rounded-circle mb-3">
+                                <i class="icon-base ti tabler-store icon-26px text-heading"></i>
+                            </span>
+                            <a href="{{ route('user.marketplace.index') }}" class="stretched-link">Marketplace</a>
+                            <small>Buy & Sell</small>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="dropdown-shortcuts-item col">
-              <span class="dropdown-shortcuts-icon rounded-circle mb-3">
-                <i class="icon-base ti tabler-file-dollar icon-26px text-heading"></i>
-              </span>
-              <a href="{{ url('app/invoice/list') }}" class="stretched-link">Invoice App</a>
-              <small>Manage Accounts</small>
-            </div>
-          </div>
-          <div class="row row-bordered overflow-visible g-0">
-            <div class="dropdown-shortcuts-item col">
-              <span class="dropdown-shortcuts-icon rounded-circle mb-3">
-                <i class="icon-base ti tabler-user icon-26px text-heading"></i>
-              </span>
-              <a href="{{ url('app/user/list') }}" class="stretched-link">User App</a>
-              <small>Manage Users</small>
-            </div>
-            <div class="dropdown-shortcuts-item col">
-              <span class="dropdown-shortcuts-icon rounded-circle mb-3">
-                <i class="icon-base ti tabler-users icon-26px text-heading"></i>
-              </span>
-              <a href="{{ url('app/access-roles') }}" class="stretched-link">Role Management</a>
-              <small>Permission</small>
-            </div>
-          </div>
-          <div class="row row-bordered overflow-visible g-0">
-            <div class="dropdown-shortcuts-item col">
-              <span class="dropdown-shortcuts-icon rounded-circle mb-3">
-                <i class="icon-base ti tabler-device-desktop-analytics icon-26px text-heading"></i>
-              </span>
-              <a href="{{ url('/') }}" class="stretched-link">Dashboard</a>
-              <small>User Dashboard</small>
-            </div>
-            <div class="dropdown-shortcuts-item col">
-              <span class="dropdown-shortcuts-icon rounded-circle mb-3">
-                <i class="icon-base ti tabler-settings icon-26px text-heading"></i>
-              </span>
-              <a href="{{ url('pages/account-settings-account') }}" class="stretched-link">Setting</a>
-              <small>Account Settings</small>
-            </div>
-          </div>
-          <div class="row row-bordered overflow-visible g-0">
-            <div class="dropdown-shortcuts-item col">
-              <span class="dropdown-shortcuts-icon rounded-circle mb-3">
-                <i class="icon-base ti tabler-help-circle icon-26px text-heading"></i>
-              </span>
-              <a href="{{ url('pages/faq') }}" class="stretched-link">FAQs</a>
-              <small>FAQs & Articles</small>
-            </div>
-            <div class="dropdown-shortcuts-item col">
-              <span class="dropdown-shortcuts-icon rounded-circle mb-3">
-                <i class="icon-base ti tabler-square icon-26px text-heading"></i>
-              </span>
-              <a href="{{ url('modal-examples') }}" class="stretched-link">Modals</a>
-              <small>Useful Popups</small>
-            </div>
-          </div>
-        </div>
-      </div>
-    </li> --}}
+        </li>
         <!-- Quick links -->
 
         <!-- Notification -->
         <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-2">
             <a class="nav-link dropdown-toggle hide-arrow btn btn-icon btn-text-secondary rounded-pill"
-                href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
-                id="notificationDropdown">
+                href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside"
+                aria-expanded="false" id="notificationDropdown">
                 <span class="position-relative">
                     <i class="icon-base ti tabler-bell icon-22px text-heading"></i>
                     <span class="badge rounded-pill bg-danger badge-dot badge-notifications border"
