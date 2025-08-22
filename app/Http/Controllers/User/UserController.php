@@ -13,7 +13,7 @@ class UserController extends Controller
     {
         $user = Auth::user();
         $wallet = $user->wallet;
-        
+
         // Get 4 latest marketplace listings for mini display
         $miniMarketplaceListings = MarketplaceListing::with('seller')
             ->active()
@@ -21,7 +21,7 @@ class UserController extends Controller
             ->orderBy('created_at', 'desc')
             ->limit(4)
             ->get();
-        
+
         return view('user.content.dashboard', compact('wallet', 'miniMarketplaceListings'));
     }
 
@@ -33,26 +33,18 @@ class UserController extends Controller
     public function updateProfile(Request $request)
     {
         $user = Auth::user();
-        
+
         $validated = $request->validate([
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
-            'username' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
-            // 'organization' => 'nullable|string|max:255',
-            // 'phone' => 'nullable|string|max:255',
+            'username' => 'nullable|string|max:255|unique:users,username,' . $user->id,
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
             'address' => 'nullable|string|max:255',
             'state' => 'nullable|string|max:255',
-            'zipCode' => 'nullable|string|max:255',
+            'zipCode' => 'nullable|string|max:10',
             'country' => 'nullable|string|max:255',
-            // 'language' => 'nullable|string|max:10',
-            // 'timezone' => 'nullable|string|max:64',
-            // 'currency' => 'nullable|string|max:16',
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-
-        // Remove profile_photo from validated data before updating
-        unset($validated['profile_photo']);
 
         // Handle profile photo upload
         if ($request->hasFile('profile_photo')) {
@@ -61,16 +53,25 @@ class UserController extends Controller
                 unlink(public_path($user->profile_photo_path));
             }
 
+            // Create directory if it doesn't exist
+            $uploadPath = public_path('storage/profile-photos');
+            if (!file_exists($uploadPath)) {
+                mkdir($uploadPath, 0755, true);
+            }
+
             // Store new photo
             $file = $request->file('profile_photo');
             $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('storage/profile-photos'), $filename);
+            $file->move($uploadPath, $filename);
             $validated['profile_photo_path'] = 'storage/profile-photos/' . $filename;
         }
-        
-        // Update user using model query
-        User::where('id', $user->id)->update($validated);
-        
+
+        // Remove profile_photo from validated data as it's handled separately
+        unset($validated['profile_photo']);
+
+        // Update user
+        $user->update($validated);
+
         return redirect()->route('user.profile.edit')->with('profile_updated', true);
     }
 
@@ -114,6 +115,12 @@ class UserController extends Controller
     public function editProfile()
     {
         $user = Auth::user();
+
+        // Ensure user is loaded with all necessary data
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Please log in to access your profile.');
+        }
+
         return view('user.content.profile-edit', compact('user'));
     }
 }
