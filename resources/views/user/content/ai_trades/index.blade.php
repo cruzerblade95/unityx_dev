@@ -67,8 +67,6 @@
                         'cancelled_page' => request('cancelled_page')
                     ])->links() }}
                 </div>
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
