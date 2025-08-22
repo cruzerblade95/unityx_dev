@@ -2,6 +2,10 @@
 
 @section('title', 'Crypto Payment Details')
 
+@section('vendor-style')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+@endsection
+
 @section('content')
 <div class="container py-4">
     <div class="row justify-content-center">
@@ -10,7 +14,7 @@
                 <div class="card">
                     <div class="card-body text-center">
                         <div class="mb-4">
-                            <i class="ti ti-wallet text-warning" style="font-size: 4rem;"></i>
+                            <i class="fas fa-wallet text-warning" style="font-size: 4rem;"></i>
                         </div>
                         <h2 class="text-warning mb-3">Payment Details</h2>
                         <p class="text-muted mb-4">
@@ -48,7 +52,7 @@
                                         {{ $deposit->payment_address }}
                                     </code>
                                     <button class="btn btn-outline-primary btn-sm" onclick="copyToClipboard('{{ $deposit->payment_address }}')">
-                                        <i class="ti ti-copy"></i>
+                                        <i class="fas fa-copy"></i>
                                     </button>
                                 </div>
                             </div>
@@ -56,18 +60,18 @@
                         @endif
 
                         <div class="alert alert-info">
-                            <i class="ti ti-info-circle me-2"></i>
+                            <i class="fas fa-info-circle me-2"></i>
                             <strong>Important:</strong> Send only {{ strtoupper($deposit->crypto_currency) }} to this address. 
                             Sending any other cryptocurrency will result in permanent loss.
                         </div>
 
                         <div class="d-flex gap-3 justify-content-center">
                             <a href="{{ route('user.deposit.index') }}" class="btn btn-primary">
-                                <i class="ti ti-arrow-left me-2"></i>
+                                <i class="fas fa-arrow-left me-2"></i>
                                 Back to Deposits
                             </a>
                             <a href="{{ route('user.dashboard') }}" class="btn btn-outline-primary">
-                                <i class="ti ti-dashboard me-2"></i>
+                                <i class="fas fa-tachometer-alt me-2"></i>
                                 Go to Dashboard
                             </a>
                         </div>
@@ -77,7 +81,7 @@
                 <div class="card">
                     <div class="card-body text-center">
                         <div class="mb-4">
-                            <i class="ti ti-check-circle text-success" style="font-size: 4rem;"></i>
+                            <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
                         </div>
                         <h2 class="text-success mb-3">Payment Initiated!</h2>
                         <p class="text-muted mb-4">
@@ -85,11 +89,11 @@
                         </p>
                         <div class="d-flex gap-3 justify-content-center">
                             <a href="{{ route('user.deposit.index') }}" class="btn btn-primary">
-                                <i class="ti ti-arrow-left me-2"></i>
+                                <i class="fas fa-arrow-left me-2"></i>
                                 Back to Deposits
                             </a>
                             <a href="{{ route('user.dashboard') }}" class="btn btn-outline-primary">
-                                <i class="ti ti-dashboard me-2"></i>
+                                <i class="fas fa-tachometer-alt me-2"></i>
                                 Go to Dashboard
                             </a>
                         </div>

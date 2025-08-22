@@ -3,5 +3,46 @@
     "title": "Dashboard",
     "icon": "ti ti-home",
     "url": "/user/dashboard"
+  },
+  {
+    "title": "Profile",
+    "icon": "ti ti-user",
+    "url": "/user/profile"
+  },
+  {
+    "title": "KYC Verification",
+    "icon": "ti ti-shield-check",
+    "url": "/user/kyc"
+  },
+  {
+    "title": "Deposit",
+    "icon": "ti ti-wallet",
+    "url": "/user/deposit"
+  },
+  {
+    "title": "Withdrawal",
+    "icon": "ti ti-cash",
+    "url": "/user/withdrawal"
+  },
+  {
+    "title": "Marketplace",
+    "icon": "fas fa-store",
+    "url": "/user/marketplace",
+    "badge": "NEW"
+  },
+  {
+    "title": "Investment",
+    "icon": "ti ti-chart-line",
+    "url": "/user/investment"
+  },
+  {
+    "title": "AI Trades",
+    "icon": "ti ti-robot",
+    "url": "/user/ai-trades"
+  },
+  {
+    "title": "Downline",
+    "icon": "ti ti-users",
+    "url": "/user/downline"
   }
 ]

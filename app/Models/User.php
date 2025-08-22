@@ -9,11 +9,29 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 
+use App\Models\Wallet;
+use App\Models\KycVerification;
+
 class User extends Authenticatable
 {
     use HasApiTokens;
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
+    /**
+     * Boot the model and add event listeners.
+     */
+    protected static function booted()
+    {
+        static::created(function ($user) {
+            // Create a wallet for the user after registration
+            $user->wallet()->create([
+                'deposit' => 0,
+                'profit' => 0,
+                'bonus' => 0,
+                'cash' => 0,
+            ]);
+        });
+    }
     use HasFactory;
     use HasProfilePhoto;
     use Notifiable;
@@ -43,6 +61,8 @@ class User extends Authenticatable
         'language',
         'timezone',
         'currency',
+        'telegram_id',
+        'profile_photo_path',
     ];
 
     /**
@@ -98,5 +118,15 @@ class User extends Authenticatable
     public function downlines()
     {
         return $this->hasMany(User::class, 'upline_id');
+    }
+
+    /**
+     * Check if user's KYC is approved.
+     *
+     * @return bool
+     */
+    public function isKycApproved()
+    {
+        return $this->kycVerification && $this->kycVerification->kyc_status === KycVerification::STATUS_APPROVED;
     }
 }

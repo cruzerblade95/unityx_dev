@@ -12,9 +12,9 @@ class AiTradeController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $tradesRunning = AiTrade::where('user_id', $user->id)->where('trade_status', 1)->get();
-        $tradesEnded = AiTrade::where('user_id', $user->id)->where('trade_status', 2)->get();
-        $tradesCancelled = AiTrade::where('user_id', $user->id)->where('trade_status', 0)->get();
+        $tradesRunning = AiTrade::where('user_id', $user->id)->where('trade_status', 1)->orderByDesc('id')->paginate(10, ['*'], 'running_page');
+        $tradesEnded = AiTrade::where('user_id', $user->id)->where('trade_status', 2)->orderByDesc('id')->paginate(10, ['*'], 'ended_page');
+        $tradesCancelled = AiTrade::where('user_id', $user->id)->where('trade_status', 0)->orderByDesc('id')->paginate(10, ['*'], 'cancelled_page');
         return view('user.content.ai_trades.index', compact('tradesRunning', 'tradesEnded', 'tradesCancelled'));
     }
 
@@ -22,7 +22,7 @@ class AiTradeController extends Controller
     {
         $user = Auth::user();
         $trade = AiTrade::where('user_id', $user->id)->findOrFail($id);
-        $histories = $trade->histories()->orderByDesc('created_at')->get();
+    $histories = $trade->histories()->orderByDesc('created_at')->paginate(10);
         return view('user.content.ai_trades.show', compact('trade', 'histories'));
     }
 

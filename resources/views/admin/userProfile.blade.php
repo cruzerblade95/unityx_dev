@@ -9,6 +9,7 @@
 
 @section('vendor-script')
 @vite(['resources/assets/vendor/libs/moment/moment.js'])
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection
 
@@ -182,7 +183,7 @@
                             </span>
                         </div>
                         <h6 class="text-muted">No wallet information available</h6>
-                        <button type="button" class="btn btn-primary mt-3">
+                        <button type="button" id="createWalletBtn" class="btn btn-primary mt-3" data-user-id="{{ $user->id }}">
                             <i class="fas fa-plus me-1"></i>
                             Create Wallet
                         </button>
@@ -192,4 +193,83 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('page-script')
+<script>
+$(document).ready(function() {
+    // Set CSRF token for all AJAX requests
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
+    // Handle create wallet button click
+    $('#createWalletBtn').on('click', function(e) {
+        e.preventDefault();
+        
+        const button = $(this);
+        const userId = button.data('user-id');
+        const originalBtnText = button.html();
+        
+        // Disable button and show loading state
+        button.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...');
+        button.prop('disabled', true);
+        
+        // Send AJAX request to create wallet
+        $.ajax({
+            url: `/admin/wallets/${userId}/create`,
+            type: 'POST',
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: response.message,
+                        confirmButtonText: 'OK',
+                        allowOutsideClick: false
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Reload the page to show the new wallet
+                            location.reload();
+                        }
+                    });
+                } else {
+                    showError(response.message || 'Failed to create wallet.');
+                    resetButton();
+                }
+            },
+            error: function(xhr, status, error) {
+                let errorMessage = 'An error occurred while creating the wallet.';
+                
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                } else if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                    // Validation errors
+                    const errors = Object.values(xhr.responseJSON.errors).flat();
+                    errorMessage = errors.length > 0 ? errors[0] : errorMessage;
+                }
+                
+                showError(errorMessage);
+                resetButton();
+            }
+        });
+        
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: message,
+                confirmButtonText: 'OK'
+            });
+        }
+        
+        function resetButton() {
+            button.html(originalBtnText);
+            button.prop('disabled', false);
+        }
+    });
+});
+</script>
 @endsection

@@ -44,6 +44,9 @@
             @endforelse
         </tbody>
     </table>
+    <div class="d-flex justify-content-center">
+        {{ $histories->links() }}
+    </div>
     <a href="{{ route('user.ai_trades.index') }}" class="btn btn-secondary mt-3">Back to Trades</a>
 </div>
 @endsection

@@ -38,6 +38,7 @@ Route::prefix('user')->middleware('web')->group(function () {
         Route::get('/profile', [UserController::class, 'profile'])->name('user.profile');
         Route::match(['put', 'post'], '/profile', [UserController::class, 'updateProfile'])->name('user.profile.update');
         Route::get('/profile/edit', [UserController::class, 'editProfile'])->name('user.profile.edit');
+        Route::post('/profile/upload-photo', [UserController::class, 'uploadPhoto'])->name('user.profile.upload-photo');
         Route::get('downline', [UserController::class, 'downline'])->name('user.downline');
         Route::get('/logout', [UserLoginController::class, 'logout']);
         // Route::get('/debug', [UserController::class, 'debug']);
@@ -49,6 +50,7 @@ Route::prefix('user')->middleware('web')->group(function () {
     // Deposit & Withdrawal
     Route::get('deposit', [DepositController::class, 'index'])->name('user.deposit.index');
     Route::post('deposit', [DepositController::class, 'store'])->name('user.deposit.store');
+    Route::post('deposit/unique-address', [DepositController::class, 'getUniqueAddress'])->name('user.deposit.unique-address');
     Route::post('deposit/crypto', [DepositController::class, 'createCryptoPayment'])->name('user.deposit.crypto');
     Route::get('deposit/success', [DepositController::class, 'success'])->name('user.deposit.success');
     Route::get('deposit/cancel', [DepositController::class, 'cancel'])->name('user.deposit.cancel');
@@ -62,5 +64,17 @@ Route::prefix('user')->middleware('web')->group(function () {
     Route::get('ai-trades', [\App\Http\Controllers\User\AiTradeController::class, 'index'])->name('user.ai_trades.index');
     Route::get('ai-trades/{id}', [\App\Http\Controllers\User\AiTradeController::class, 'show'])->name('user.ai_trades.show');
     Route::post('ai-trades/{id}/cancel', [\App\Http\Controllers\User\AiTradeController::class, 'cancel'])->name('user.ai_trades.cancel');
+
+    // Marketplace
+    Route::get('marketplace', [\App\Http\Controllers\User\MarketplaceController::class, 'index'])->name('user.marketplace.index');
+    Route::post('marketplace/create', [\App\Http\Controllers\User\MarketplaceController::class, 'createListing'])->name('user.marketplace.create');
+    Route::post('marketplace/purchase/{listingId}', [\App\Http\Controllers\User\MarketplaceController::class, 'purchaseListing'])->name('user.marketplace.purchase');
+    Route::post('marketplace/cancel/{listingId}', [\App\Http\Controllers\User\MarketplaceController::class, 'cancelListing'])->name('user.marketplace.cancel');
+    Route::post('marketplace/topup', [\App\Http\Controllers\User\MarketplaceController::class, 'topUpCash'])->name('user.marketplace.topup');
+    
+    // Marketplace Verification
+    Route::post('marketplace/approve/{listingId}', [\App\Http\Controllers\User\MarketplaceController::class, 'approveVerification'])->name('user.marketplace.approve');
+    Route::post('marketplace/reject/{listingId}', [\App\Http\Controllers\User\MarketplaceController::class, 'rejectVerification'])->name('user.marketplace.reject');
+    Route::post('marketplace/cancel-verification/{listingId}', [\App\Http\Controllers\User\MarketplaceController::class, 'cancelVerification'])->name('user.marketplace.cancel_verification');
     });
 });

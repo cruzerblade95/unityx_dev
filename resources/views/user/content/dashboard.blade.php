@@ -20,6 +20,18 @@
 'resources/assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.scss',
 'public/assets/css/coming-soon-overlay.css'
 ])
+<style>
+.listing-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border: 1px solid #e3e6f0;
+    border-radius: 0.35rem;
+}
+
+.listing-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+</style>
 @endsection
 
 @section('vendor-script')
@@ -68,7 +80,9 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="card-body">
             <div class="alert alert-primary alert-dismissible" role="alert">
             <h5 class="alert-heading mb-2">Announcement!</h5>
-            <p class="mb-0">AI Trade will be available on: <span id="sync-estimate" data-timestamp="2025-08-20T11:00:00"></span></p>
+            <p class="mb-0">Deposit, withdrawal & p2p is available now! Next update will be Referral System Bonus. 
+              {{-- <span id="sync-estimate" data-timestamp="2025-08-20T11:00:00"></span> --}}
+            </p>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         </div>
@@ -83,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <div class="d-flex align-items-end row">
         <div class="col-7">
           <div class="card-body text-nowrap">
-            <h5 class="card-title mb-0">Congratulations {{ Illuminate\Support\Facades\Auth::user()->firstname }} {{ Illuminate\Support\Facades\Auth::user()->lastname }}! 🎉</h5>
+            <h5 class="card-title mb-0">Hello, {{ Illuminate\Support\Facades\Auth::user()->firstname }} {{ Illuminate\Support\Facades\Auth::user()->lastname }}! 🎉</h5>
             <p class="mb-2">Welcome to UnityX</p>
             <h4 class="text-primary mb-1">0.0000 USDT</h4>
             <a href="javascript:;" class="btn btn-primary">View Sales</a>
@@ -226,61 +240,87 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 
-  <!-- Revenue Report -->
+  <!-- Mini Marketplace -->
   <div class="col-xxl-8">
     <div class="card h-100">
-      <div class="card-body p-0">
-        <div class="row row-bordered g-0">
-          <div class="col-md-8 position-relative p-6">
-            <div class="card-header d-inline-block p-0 text-wrap position-absolute">
-              <h5 class="m-0 card-title">Revenue Report</h5>
-            </div>
-            <div id="totalRevenueChart" class="mt-n1"></div>
-          </div>
-          <div class="col-md-4 p-4">
-            <div class="text-center mt-5">
-              <div class="dropdown">
-                <button class="btn btn-sm btn-label-primary dropdown-toggle" type="button" id="budgetId"
-                  data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <script>
-                  document.write(new Date().getFullYear());
-                  </script>
-                </button>
-                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="budgetId">
-                  <a class="dropdown-item prev-year1" href="javascript:void(0);">
-                    <script>
-                    document.write(new Date().getFullYear() - 1);
-                    </script>
-                  </a>
-                  <a class="dropdown-item prev-year2" href="javascript:void(0);">
-                    <script>
-                    document.write(new Date().getFullYear() - 2);
-                    </script>
-                  </a>
-                  <a class="dropdown-item prev-year3" href="javascript:void(0);">
-                    <script>
-                    document.write(new Date().getFullYear() - 3);
-                    </script>
+      <div class="card-body p-6">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h5 class="m-0 card-title">
+            <i class="fas fa-store me-2"></i>
+            USDT Marketplace
+          </h5>
+          <a href="{{ route('user.marketplace.index') }}" class="btn btn-primary">
+            <i class="fas fa-external-link-alt me-2"></i>
+            View All Listings
+          </a>
+        </div>
+        
+        @if(isset($miniMarketplaceListings) && $miniMarketplaceListings->count() > 0)
+          <div class="row g-3">
+            @foreach($miniMarketplaceListings as $listing)
+            <div class="col-xl-3 col-lg-6 col-md-6">
+              <div class="card border listing-card h-100">
+                <div class="card-body p-3">
+                  <div class="text-center mb-3">
+                    <i class="fas fa-coins text-warning" style="font-size: 2rem;"></i>
+                  </div>
+                  
+                  <h6 class="card-title text-center mb-2">
+                    {{ number_format($listing->amount, 2) }} USDT
+                  </h6>
+                  
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                      <small class="text-muted">Multiplier:</small>
+                      <strong>x{{ number_format($listing->price_per_usdt, 2) }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                      <small class="text-muted">Total Price:</small>
+                      <strong>${{ number_format($listing->total_price, 2) }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                      <small class="text-muted">Fee (1.8%):</small>
+                      <small class="text-danger">${{ number_format($listing->total_price * 0.018, 2) }}</small>
+                    </div>
+                    <hr class="my-2">
+                    <div class="d-flex justify-content-between">
+                      <strong>You Pay:</strong>
+                      <strong class="text-primary">${{ number_format($listing->total_price * 1.018, 2) }}</strong>
+                    </div>
+                  </div>
+                  
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <small class="text-muted">
+                      <i class="fas fa-user me-1"></i>
+                      {{ $listing->seller->username ?? 'Seller' }}
+                    </small>
+                    <small class="text-muted">{{ $listing->unique_id }}</small>
+                  </div>
+                  
+                  <a href="{{ route('user.marketplace.index') }}" class="btn btn-primary btn-sm w-100">
+                    <i class="fas fa-shopping-cart me-2"></i>
+                    Buy Now
                   </a>
                 </div>
               </div>
             </div>
-            <h3 class="text-center pt-8 mb-0">$25,825</h3>
-            <p class="mb-8 text-center"><span class="fw-medium text-heading">Budget: </span>56,800</p>
-            <div class="px-3">
-              <div id="budgetChart"></div>
-            </div>
-            <div class="text-center mt-8">
-              <button type="button" class="btn btn-primary">Increase Button</button>
-            </div>
+            @endforeach
           </div>
-        </div>
-        <!-- Overlay -->
-            @include('components.coming-soon-overlay')
+        @else
+          <div class="text-center py-5">
+            <i class="fas fa-store-slash text-muted" style="font-size: 4rem;"></i>
+            <h6 class="mt-3 text-muted">No USDT listings available</h6>
+            <p class="text-muted">Check back later or create your own listing!</p>
+            <a href="{{ route('user.marketplace.index') }}" class="btn btn-outline-primary">
+              <i class="fas fa-plus me-2"></i>
+              Visit Marketplace
+            </a>
+          </div>
+        @endif
       </div>
     </div>
   </div>
-  <!--/ Revenue Report -->
+  <!--/ Mini Marketplace -->
 
   <!-- Earning Reports -->
   <div class="col-xxl-6 col-md-6">
