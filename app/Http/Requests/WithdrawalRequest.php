@@ -25,8 +25,8 @@ class WithdrawalRequest extends FormRequest
     public function rules(): array
     {
         $user = $this->user();
-        $maxBalance = $user && $user->wallet ? $user->wallet->deposit : 0;
-        
+        $maxBalance = $user ? $user->getWithdrawableBalance() : 0;
+
         return [
             'amount' => [
                 'required',
@@ -49,10 +49,10 @@ class WithdrawalRequest extends FormRequest
     public function messages()
     {
         $user = $this->user();
-        $maxBalance = $user && $user->wallet ? $user->wallet->deposit : 0;
-        
+        $maxBalance = $user ? $user->getWithdrawableBalance() : 0;
+
         return [
-            'amount.max' => "The withdrawal amount cannot exceed your available deposit balance of $" . number_format($maxBalance, 2),
+            'amount.max' => "The withdrawal amount cannot exceed your available profit balance of $" . number_format($maxBalance, 2),
             'amount.min' => 'The minimum withdrawal amount is $100.00',
             'currency.required' => 'Please select a currency',
             'currency.in' => 'Invalid currency selected',

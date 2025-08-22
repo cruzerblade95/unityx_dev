@@ -129,4 +129,14 @@ class User extends Authenticatable
     {
         return $this->kycVerification && $this->kycVerification->kyc_status === KycVerification::STATUS_APPROVED;
     }
+
+    /**
+     * Get the user's withdrawable balance (profit balance).
+     *
+     * @return float
+     */
+    public function getWithdrawableBalance()
+    {
+        return $this->wallet ? $this->wallet->profit : 0;
+    }
 }

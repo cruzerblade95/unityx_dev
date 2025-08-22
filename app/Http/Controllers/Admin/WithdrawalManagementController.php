@@ -23,7 +23,7 @@ class WithdrawalManagementController extends Controller
 
         return view('admin.withdrawal.index', compact(
             'totalWithdrawals',
-            'pendingWithdrawals', 
+            'pendingWithdrawals',
             'approvedWithdrawals',
             'totalAmount',
             'pendingAmount'
@@ -33,7 +33,7 @@ class WithdrawalManagementController extends Controller
     public function list(Request $request)
     {
         Log::info('Withdrawal list method called', ['request_data' => $request->all()]);
-        
+
         $withdrawals = Withdrawal::with(['user'])
             ->select([
                 'withdrawals.id',
@@ -55,11 +55,11 @@ class WithdrawalManagementController extends Controller
         if ($request->filled('status')) {
             $withdrawals->where('status', $request->status);
         }
-        
+
         if ($request->filled('date_from')) {
             $withdrawals->whereDate('created_at', '>=', $request->date_from);
         }
-        
+
         if ($request->filled('date_to')) {
             $withdrawals->whereDate('created_at', '<=', $request->date_to);
         }
@@ -88,38 +88,38 @@ class WithdrawalManagementController extends Controller
                 ->addColumn('bank_info', function ($withdrawal) {
                     return [
                         'bank_name' => $withdrawal->bank_name ?? 'N/A',
-                        'account_number' => $withdrawal->account_number ? 
-                            substr($withdrawal->account_number, 0, 4) . '****' . substr($withdrawal->account_number, -4) : 
+                        'account_number' => $withdrawal->account_number ?
+                            substr($withdrawal->account_number, 0, 4) . '****' . substr($withdrawal->account_number, -4) :
                             'N/A'
                     ];
                 })
                 ->addColumn('action', function ($withdrawal) {
                     $actions = '<div class="btn-group" role="group">';
-                    
+
                     if ($withdrawal->status === 'pending') {
-                        $actions .= '<button type="button" class="btn btn-success btn-sm approve-btn" 
-                                        data-id="' . $withdrawal->id . '" 
-                                        data-bs-toggle="modal" 
+                        $actions .= '<button type="button" class="btn btn-success btn-sm approve-btn"
+                                        data-id="' . $withdrawal->id . '"
+                                        data-bs-toggle="modal"
                                         data-bs-target="#approveModal">
                                         <i class="fas fa-check"></i> Approve
                                     </button>';
-                        $actions .= '<button type="button" class="btn btn-danger btn-sm reject-btn" 
+                        $actions .= '<button type="button" class="btn btn-danger btn-sm reject-btn"
                                         data-id="' . $withdrawal->id . '"
-                                        data-bs-toggle="modal" 
+                                        data-bs-toggle="modal"
                                         data-bs-target="#rejectModal">
                                         <i class="fas fa-times"></i> Reject
                                     </button>';
                     }
-                    
-                    $actions .= '<button type="button" class="btn btn-info btn-sm view-btn" 
+
+                    $actions .= '<button type="button" class="btn btn-info btn-sm view-btn"
                                     data-id="' . $withdrawal->id . '"
-                                    data-bs-toggle="modal" 
+                                    data-bs-toggle="modal"
                                     data-bs-target="#viewModal">
                                     <i class="fas fa-eye"></i> View
                                 </button>';
-                    
+
                     $actions .= '</div>';
-                    
+
                     return $actions;
                 })
                 ->filterColumn('user_info', function ($query, $keyword) {
@@ -132,10 +132,10 @@ class WithdrawalManagementController extends Controller
                 })
                 ->rawColumns(['action'])
                 ->make(true);
-            
+
             Log::info('DataTables result generated successfully');
             return $result;
-            
+
         } catch (\Exception $e) {
             Log::error('DataTables error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json(['error' => $e->getMessage()], 500);
@@ -146,7 +146,7 @@ class WithdrawalManagementController extends Controller
     {
         try {
             $withdrawal = Withdrawal::with('user.wallet')->findOrFail($id);
-            
+
             if ($withdrawal->status !== 'pending') {
                 return response()->json([
                     'success' => false,
@@ -154,17 +154,17 @@ class WithdrawalManagementController extends Controller
                 ], 400);
             }
 
-            // Check if user has sufficient deposit balance
+            // Check if user has sufficient profit balance
             $wallet = $withdrawal->user->wallet;
-            if (!$wallet || $wallet->deposit < $withdrawal->amount) {
+            if (!$wallet || $wallet->profit < $withdrawal->amount) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'User has insufficient deposit balance for this withdrawal.'
+                    'message' => 'User has insufficient profit balance for this withdrawal.'
                 ], 400);
             }
 
-            // Deduct the withdrawal amount from user's deposit balance only
-            $wallet->deposit -= $withdrawal->amount;
+            // Deduct the withdrawal amount from user's profit balance only
+            $wallet->profit -= $withdrawal->amount;
 
             $wallet->save();
 
@@ -189,7 +189,7 @@ class WithdrawalManagementController extends Controller
     {
         try {
             $withdrawal = Withdrawal::findOrFail($id);
-            
+
             if ($withdrawal->status !== 'pending') {
                 return response()->json([
                     'success' => false,
@@ -218,7 +218,7 @@ class WithdrawalManagementController extends Controller
     {
         try {
             $withdrawal = Withdrawal::with('user')->findOrFail($id);
-            
+
             return response()->json([
                 'success' => true,
                 'data' => [
