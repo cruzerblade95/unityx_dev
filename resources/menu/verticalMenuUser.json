@@ -9,7 +9,7 @@
     {
       "name": "Users",
       "icon": "menu-icon icon-base ti tabler-users",
-      "slug": "user",
+      "slug": "user.profile",
       "submenu": [
         {
           "url": "user/profile",
@@ -40,6 +40,12 @@
       "icon": "menu-icon icon-base ti tabler-robot",
       "url": "user/ai-trades",
       "slug": "user.ai_trades.index"
+    },
+    {
+      "url": "user/marketplace",
+      "name": "Marketplace",
+      "icon": "menu-icon icon-base ti tabler-shopping-cart",
+      "slug": "user.marketplace.index"
     },
     {
       "url": "user/downline",
