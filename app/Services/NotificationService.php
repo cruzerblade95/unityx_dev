@@ -9,11 +9,25 @@ use Illuminate\Support\Facades\Log;
 class NotificationService
 {
     /**
+     * Create notification and send to Telegram if user has it connected
+     */
+    private static function createAndSendNotification($userId, $type, $title, $message, $data = null)
+    {
+        // Create the web notification
+        $notification = Notification::createNotification($userId, $type, $title, $message, $data);
+
+        // Also send to Telegram if user has telegram_id
+        TelegramNotificationService::sendNotificationToTelegram($userId, $title, $message);
+
+        return $notification;
+    }
+
+    /**
      * Create KYC approved notification
      */
     public static function createKycApprovedNotification($userId)
     {
-        return Notification::createNotification(
+        return self::createAndSendNotification(
             $userId,
             Notification::TYPE_KYC_APPROVED,
             'KYC Verification Approved ✅',
@@ -31,7 +45,7 @@ class NotificationService
             $message .= ' Reason: ' . $reason;
         }
 
-        return Notification::createNotification(
+        return self::createAndSendNotification(
             $userId,
             Notification::TYPE_KYC_REJECTED,
             'KYC Verification Rejected ❌',
@@ -44,7 +58,7 @@ class NotificationService
      */
     public static function createWithdrawalApprovedNotification($userId, $amount, $withdrawalId)
     {
-        return Notification::createNotification(
+        return self::createAndSendNotification(
             $userId,
             Notification::TYPE_WITHDRAWAL_APPROVED,
             'Withdrawal Approved ✅',
@@ -63,7 +77,7 @@ class NotificationService
             $message .= ' Reason: ' . $reason;
         }
 
-        return Notification::createNotification(
+        return self::createAndSendNotification(
             $userId,
             Notification::TYPE_WITHDRAWAL_REJECTED,
             'Withdrawal Rejected ❌',
@@ -107,7 +121,7 @@ class NotificationService
             'deposit_id' => $depositId
         ]);
 
-        $notification = Notification::createNotification(
+        $notification = self::createAndSendNotification(
             $userId,
             Notification::TYPE_DEPOSIT_SUCCESS,
             'Deposit Successful 💰',
@@ -140,7 +154,7 @@ class NotificationService
             'reason' => $reason
         ]);
 
-        $notification = Notification::createNotification(
+        $notification = self::createAndSendNotification(
             $userId,
             Notification::TYPE_DEPOSIT_REJECTED,
             'Deposit Rejected ❌',
@@ -270,5 +284,36 @@ class NotificationService
         return Notification::where('user_id', $userId)
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
+    }
+
+    /**
+     * Create password changed notification
+     */
+    public static function createPasswordChangedNotification($userId, $ipAddress = null, $userAgent = null)
+    {
+        $message = 'Your password has been successfully changed.';
+
+        if ($ipAddress) {
+            $message .= ' This change was made from IP address: ' . $ipAddress;
+        }
+
+        $message .= ' If you did not make this change, please contact support immediately.';
+
+        $data = [];
+        if ($ipAddress) {
+            $data['ip_address'] = $ipAddress;
+        }
+        if ($userAgent) {
+            $data['user_agent'] = $userAgent;
+        }
+        $data['changed_at'] = now()->toISOString();
+
+        return self::createAndSendNotification(
+            $userId,
+            Notification::TYPE_PASSWORD_CHANGED,
+            'Password Changed Successfully 🔒',
+            $message,
+            $data
+        );
     }
 }

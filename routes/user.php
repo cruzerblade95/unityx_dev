@@ -4,6 +4,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\User\UserLoginController;
 use App\Http\Controllers\User\UserRegisterController;
+use App\Http\Controllers\User\UserForgotPasswordController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\DepositController;
 use App\Http\Controllers\User\WithdrawalController;
@@ -27,12 +28,27 @@ use App\Http\Controllers\KycController;
 // });
 
 Route::prefix('user')->middleware('web')->group(function () {
+    // Password reset routes (accessible without auth)
+    Route::get('/password/reset/telegram/{token}', [UserForgotPasswordController::class, 'showTelegramResetForm'])
+        ->name('user.password.reset.telegram');
+
+    Route::get('/password/reset/{token}', [UserForgotPasswordController::class, 'showEmailResetForm'])
+        ->name('password.reset');
+
+    Route::post('/password/reset', [UserForgotPasswordController::class, 'resetPassword'])
+        ->name('user.password.reset.submit');
+
+    Route::post('/password/update', [UserForgotPasswordController::class, 'resetPassword'])
+        ->name('password.update');
+
     // Guest routes
     Route::middleware('guest')->group(function () {
         Route::get('/login', [UserLoginController::class, 'showLoginForm'])->name('user.login');
         Route::post('/login', [UserLoginController::class, 'login'])->name('user.login.submit');
         Route::get('/register', [UserRegisterController::class, 'showRegisterForm'])->name('user.register');
         Route::post('/register', [UserRegisterController::class, 'register'])->name('user.register.submit');
+        Route::get('/forgot-password', [UserForgotPasswordController::class, 'index'])->name('user.forgot-password');
+        Route::post('/forgot-password', [UserForgotPasswordController::class, 'sendResetLink'])->name('user.password.forgot.send');
     });
 
     // Protected routes

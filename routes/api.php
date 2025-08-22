@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/telegram/webhook', [TelegramController::class, 'webhook']);
 Route::get('/telegram/webhook', function() { return 'ok'; });
+Route::get('/telegram/setup-webhook', [TelegramController::class, 'setupWebhook']);
 Route::post('/test-post', function() { return 'post works'; });
 
 Route::get('/user', function (Request $request) {

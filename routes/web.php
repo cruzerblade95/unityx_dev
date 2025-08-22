@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\laravel_example\UserManagement;
 use App\Http\Controllers\dashboard\Analytics;
 use App\Http\Controllers\dashboard\Crm;
@@ -467,6 +468,38 @@ Route::get('/maps/leaflet', [Leaflet::class, 'index'])->name('maps-leaflet');
 // laravel example
 Route::get('/laravel/user-management', [UserManagement::class, 'UserManagement'])->name('laravel-example-user-management');
 Route::resource('/user-list', UserManagement::class);
+
+// Telegram notification test route
+Route::post('/test-telegram-notification', function (Request $request) {
+    if (!Auth::check()) {
+        return response()->json(['error' => 'Unauthorized'], 401);
+    }
+
+    $user = Auth::user();
+
+    if (!$user->telegram_id) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No Telegram account connected. Please connect your Telegram first.'
+        ]);
+    }
+
+    $title = $request->input('title', '🧪 Test Notification');
+    $message = $request->input('message', 'This is a test notification to verify Telegram integration is working properly.');
+
+    $result = \App\Services\TelegramNotificationService::sendNotificationToTelegram(
+        $user->id,
+        $title,
+        $message
+    );
+
+    return response()->json([
+        'success' => $result,
+        'message' => $result ? 'Test notification sent successfully!' : 'Failed to send notification',
+        'telegram_id' => $user->telegram_id,
+        'username' => $user->username
+    ]);
+})->middleware('web');
 
 Route::middleware([
     'auth:sanctum',

@@ -24,8 +24,6 @@ class VerifyCsrfToken extends Middleware
      */
     public function handle($request, \Closure $next)
     {
-        die('csrf middleware hit');
-
         return parent::handle($request, $next);
     }
 }

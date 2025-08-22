@@ -37,6 +37,7 @@ class Notification extends Model
     const TYPE_MARKETPLACE_SELLER_APPROVED = 'marketplace_seller_approved';
     const TYPE_MARKETPLACE_SELLER_REJECTED = 'marketplace_seller_rejected';
     const TYPE_CASH_TOPUP = 'cash_topup';
+    const TYPE_PASSWORD_CHANGED = 'password_changed';
 
     /**
      * Get the user that owns the notification.
@@ -85,6 +86,7 @@ class Notification extends Model
             self::TYPE_MARKETPLACE_SELLER_APPROVED => 'tabler-check-circle',
             self::TYPE_MARKETPLACE_SELLER_REJECTED => 'tabler-x-circle',
             self::TYPE_CASH_TOPUP => 'tabler-wallet',
+            self::TYPE_PASSWORD_CHANGED => 'tabler-shield-lock',
             default => 'tabler-bell'
         };
     }
@@ -99,7 +101,8 @@ class Notification extends Model
             self::TYPE_WITHDRAWAL_APPROVED,
             self::TYPE_DEPOSIT_SUCCESS,
             self::TYPE_MARKETPLACE_SELLER_APPROVED,
-            self::TYPE_CASH_TOPUP => 'success',
+            self::TYPE_CASH_TOPUP,
+            self::TYPE_PASSWORD_CHANGED => 'success',
 
             self::TYPE_KYC_REJECTED,
             self::TYPE_WITHDRAWAL_REJECTED,

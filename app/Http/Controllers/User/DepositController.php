@@ -8,7 +8,6 @@ use App\Models\Deposit;
 use App\Services\NOWPaymentsService;
 use App\Services\WalletAddressService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class DepositController extends Controller
 {
@@ -26,7 +25,7 @@ class DepositController extends Controller
         $deposits = Deposit::where('user_id', Auth::id())->latest()->get();
         $currencies = $this->nowPayments->getAvailableCurrencies();
         $cryptoCurrencies = $currencies ? array_slice($currencies['currencies'], 0, 10) : [];
-        
+
         return view('user.content.deposit', compact('deposits', 'cryptoCurrencies'));
     }
 
@@ -35,14 +34,18 @@ class DepositController extends Controller
         $request->validate([
             'amount' => 'required|numeric|min:100',
             'payment_id' => 'required|string|min:10',
-            'auto_reference' => 'required|string',
-            'deposit_address' => 'required|string',
+            'auto_reference' => 'nullable|string',
+            'deposit_address' => 'nullable|string',
         ]);
-        
+
         $systemTaxPercent = 2.5; // Set your system tax percent here
         $tax_amount = $request->amount * ($systemTaxPercent / 100);
         $net_amount = $request->amount - $tax_amount;
-        
+
+        // Generate fallback reference if not provided
+        $autoReference = $request->auto_reference ?: 'DEP_' . Auth::id() . '_' . time();
+        $depositAddress = $request->deposit_address ?: 'TXFBqBkAjdoBiXRVsRqPW7DGNYqCX6jY8V'; // Default USDT address
+
         // Create the deposit with auto-generated reference
         $deposit = Deposit::create([
             'user_id' => Auth::id(),
@@ -51,19 +54,19 @@ class DepositController extends Controller
             'tax_amount' => $tax_amount,
             'net_amount' => $net_amount,
             'status' => 'pending',
-            'reference' => $request->auto_reference, // Use auto-generated reference
+            'reference' => $autoReference,
             'note' => $request->note,
             'payment_method' => 'manual',
             'payment_id' => $request->payment_id,
             'crypto_currency' => 'USDT',
-            'payment_address' => $request->deposit_address,
-            'unique_address' => $request->deposit_address,
-            'address_memo' => $request->auto_reference,
+            'payment_address' => $depositAddress,
+            'unique_address' => $depositAddress,
+            'address_memo' => $autoReference,
         ]);
-        
-        return redirect()->back()->with('success', 'USDT deposit request submitted! Your deposit will be approved once the transaction is verified. Reference: ' . $request->auto_reference);
+
+        return redirect()->back()->with('success', 'USDT deposit request submitted! Your deposit will be approved once the transaction is verified. Reference: ' . $autoReference);
     }
-    
+
     /**
      * Get unique wallet address for a new deposit
      */
@@ -72,19 +75,19 @@ class DepositController extends Controller
         $request->validate([
             'amount' => 'required|numeric|min:100',
         ]);
-        
+
         try {
             // Create a temporary deposit to get unique address
             $tempDeposit = new Deposit([
                 'user_id' => Auth::id(),
                 'amount' => $request->amount,
             ]);
-            
+
             // Generate a temporary ID for address generation
             $tempId = 'temp_' . Auth::id() . '_' . time();
-            
+
             $addressData = $this->walletService->generateUniqueAddress(Auth::id(), $tempId);
-            
+
             return response()->json([
                 'success' => true,
                 'address' => $addressData['address'],
@@ -92,7 +95,7 @@ class DepositController extends Controller
                 'expires_at' => $addressData['expires_at'],
                 'instructions' => $addressData['instructions']
             ]);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -174,13 +177,13 @@ class DepositController extends Controller
     {
         $paymentId = $request->get('payment_id');
         $deposit = null;
-        
+
         if ($paymentId) {
             $deposit = Deposit::where('payment_id', $paymentId)
                              ->where('user_id', Auth::id())
                              ->first();
         }
-        
+
         return view('user.content.deposit-success', compact('deposit'));
     }
 

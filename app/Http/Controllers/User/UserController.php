@@ -15,12 +15,7 @@ class UserController extends Controller
         $user = Auth::user();
         $wallet = $user->wallet;
 
-        // Create a test notification (only if user doesn't have any notifications yet)
-        if ($user->notifications()->count() == 0) {
-            NotificationService::createDepositSuccessNotification($user->id, 100.00, 'test_deposit_001');
-            NotificationService::createWithdrawalSuccessNotification($user->id, 50.00, 'test_withdrawal_001');
-            NotificationService::createKycVerifiedNotification($user->id);
-        }
+        // Test notifications removed - no longer creating default notifications for new users
 
         // Get 4 latest marketplace listings for mini display
         $miniMarketplaceListings = MarketplaceListing::with('seller')
