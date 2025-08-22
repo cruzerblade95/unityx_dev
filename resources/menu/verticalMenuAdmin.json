@@ -23,6 +23,18 @@
       "name": "KYC Verification",
       "icon": "menu-icon icon-base ti tabler-id",
       "slug": "admin.kyc.index"
+    },
+    {
+      "url": "admin/withdrawals",
+      "name": "Withdrawals",
+      "icon": "menu-icon icon-base ti tabler-coin",
+      "slug": "admin.withdrawals.index"
+    },
+    {
+      "url": "admin/nowpayments",
+      "name": "Deposit Records",
+      "icon": "menu-icon icon-base ti tabler-cash",
+      "slug": "admin.nowpayments.index"
     }
   ]
 }

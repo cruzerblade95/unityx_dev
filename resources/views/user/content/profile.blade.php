@@ -50,7 +50,7 @@
       </div>
       <div class="user-profile-header d-flex flex-column flex-lg-row text-sm-start text-center mb-5">
         <div class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
-          <img src="{{ asset('assets/img/avatars/1.png') }}" alt="user image"
+          <img src="{{ auth()->user()->profile_photo_path ? asset(auth()->user()->profile_photo_path) : asset('assets/img/avatars/1.png') }}" alt="user image"
             class="d-block h-auto ms-0 ms-sm-6 rounded user-profile-img" />
         </div>
         <div class="flex-grow-1 mt-3 mt-lg-5">
@@ -174,18 +174,6 @@
       </div>
     </div>
     <!--/ About User -->
-    <!-- Profile Overview -->
-    <div class="card mb-6">
-      <div class="card-body">
-        <p class="card-text text-uppercase text-body-secondary small">Overview</p>
-        <ul class="list-unstyled mb-0">
-          <li class="d-flex align-items-center mb-4"><i class="icon-base ti tabler-check icon-lg"></i><span class="fw-medium mx-2">Task Compiled:</span> <span>13.5k</span></li>
-          <li class="d-flex align-items-center mb-4"><i class="icon-base ti tabler-layout-grid icon-lg"></i><span class="fw-medium mx-2">Projects Compiled:</span> <span>146</span></li>
-          <li class="d-flex align-items-center"><i class="icon-base ti tabler-users icon-lg"></i><span class="fw-medium mx-2">Connections:</span> <span>897</span></li>
-        </ul>
-      </div>
-    </div>
-    <!--/ Profile Overview -->
   </div>
   <div class="col-xl-8 col-lg-7 col-md-7">
     <!-- Activity Timeline -->

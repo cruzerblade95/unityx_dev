@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Models\User;
+use App\Models\Withdrawal;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -19,6 +20,13 @@ class AdminController extends Controller
 
         // Get active sessions count
         $activeSessions = DB::table('sessions')->count();
+
+        // Get withdrawal statistics
+        $totalWithdrawals = Withdrawal::count();
+        $pendingWithdrawals = Withdrawal::where('status', 'pending')->count();
+        $approvedWithdrawals = Withdrawal::where('status', 'approved')->count();
+        $totalWithdrawalAmount = Withdrawal::sum('amount');
+        $todayWithdrawals = Withdrawal::whereDate('created_at', Carbon::today())->count();
 
         // Create sample recent activity (you can replace this with real activity data)
         $recentActivity = collect([
@@ -42,7 +50,16 @@ class AdminController extends Controller
             ]
         ]);
 
-        return view('admin.dashboard', compact('totalUsers', 'activeSessions', 'recentActivity'));
+        return view('admin.dashboard', compact(
+            'totalUsers', 
+            'activeSessions', 
+            'recentActivity',
+            'totalWithdrawals',
+            'pendingWithdrawals',
+            'approvedWithdrawals',
+            'totalWithdrawalAmount',
+            'todayWithdrawals'
+        ));
     }
 
     public function debug()

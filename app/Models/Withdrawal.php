@@ -9,7 +9,7 @@ class Withdrawal extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'user_id', 'amount', 'tax_percent', 'tax_amount', 'net_amount', 'status', 'reference', 'note'
+        'user_id', 'amount', 'tax_percent', 'tax_amount', 'net_amount', 'status', 'reference', 'note', 'bank_name', 'account_number'
     ];
     public function user() {
         return $this->belongsTo(User::class);

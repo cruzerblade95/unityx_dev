@@ -6,6 +6,8 @@ use App\Http\Controllers\Admin\AdminLoginController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\WalletManagementController;
 use App\Http\Controllers\Admin\KycApprovalController;
+use App\Http\Controllers\Admin\NOWPaymentsController;
+use App\Http\Controllers\Admin\WithdrawalManagementController;
 
 Route::prefix('admin')->middleware('web')->group(function () {
     // Guest routes
@@ -33,11 +35,24 @@ Route::prefix('admin')->middleware('web')->group(function () {
         Route::get('/wallets', [WalletManagementController::class, 'index'])->name('admin.wallets.index');
         Route::get('/wallets/list', [WalletManagementController::class, 'list'])->name('admin.wallets.list');
         Route::post('/wallets/{user}', [WalletManagementController::class, 'updateBalance'])->name('admin.wallets.update');
+        Route::post('/wallets/{user}/create', [WalletManagementController::class, 'createWallet'])->name('admin.wallets.create');
 
         // KYC Approval Routes
         Route::get('/kyc', [KycApprovalController::class, 'index'])->name('admin.kyc.index');
         Route::get('/kyc/{id}', [KycApprovalController::class, 'show'])->name('admin.kyc.show');
         Route::post('/kyc/{id}/approve', [KycApprovalController::class, 'approve'])->name('admin.kyc.approve');
         Route::post('/kyc/{id}/reject', [KycApprovalController::class, 'reject'])->name('admin.kyc.reject');
+
+        // NOWPayments Payment Details
+        Route::get('/nowpayments', [NOWPaymentsController::class, 'index'])->name('admin.nowpayments.index');
+        Route::post('/nowpayments/refresh-status/{paymentId}', [NOWPaymentsController::class, 'refreshStatus'])->name('admin.nowpayments.refresh-status');
+        Route::post('/deposits/approve/{depositId}', [NOWPaymentsController::class, 'approveDeposit'])->name('admin.deposits.approve');
+
+        // Withdrawal Management Routes
+        Route::get('/withdrawals', [WithdrawalManagementController::class, 'index'])->name('admin.withdrawals.index');
+        Route::get('/withdrawals/list', [WithdrawalManagementController::class, 'list'])->name('admin.withdrawals.list');
+        Route::get('/withdrawals/{id}', [WithdrawalManagementController::class, 'show'])->name('admin.withdrawals.show');
+        Route::post('/withdrawals/{id}/approve', [WithdrawalManagementController::class, 'approve'])->name('admin.withdrawals.approve');
+        Route::post('/withdrawals/{id}/reject', [WithdrawalManagementController::class, 'reject'])->name('admin.withdrawals.reject');
     });
 });
