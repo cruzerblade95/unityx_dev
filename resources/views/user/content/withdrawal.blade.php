@@ -1,4 +1,4 @@
-{{-- @include('components.coming-soon-overlay') --}}
+@include('components.coming-soon-overlay')
 @extends('user.layouts.layoutMaster')
 
 @section('title', 'Withdrawal')
@@ -61,6 +61,10 @@
                                         name="amount" value="{{ old('amount') }}" max="{{ $walletBalance }}" required>
                                     <div class="form-text">Minimum: $100.00 | Maximum:
                                         ${{ number_format($walletBalance, 2) }}</div>
+                                    <div id="netAmountDisplay" class="form-text text-success fw-bold"
+                                        style="display: none;">
+                                        Net amount after 4.75% fee: <span id="netAmountValue">$0.00</span>
+                                    </div>
                                     @error('amount')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -219,6 +223,19 @@
 
                     amountInput.addEventListener('input', function() {
                         const amount = parseFloat(this.value);
+
+                        // Calculate net amount after 4.75% fee
+                        if (amount && amount > 0) {
+                            const feePercent = 4.75;
+                            const feeAmount = amount * (feePercent / 100);
+                            const netAmount = amount - feeAmount;
+
+                            document.getElementById('netAmountValue').textContent = '$' + netAmount.toFixed(2);
+                            document.getElementById('netAmountDisplay').style.display = 'block';
+                        } else {
+                            document.getElementById('netAmountDisplay').style.display = 'none';
+                        }
+
                         if (amount > maxBalance) {
                             this.value = maxBalance;
                         }

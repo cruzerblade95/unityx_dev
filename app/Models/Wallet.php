@@ -19,7 +19,8 @@ class Wallet extends Model
         'deposit',
         'profit',
         'bonus',
-        'cash'
+        'cash',
+        'floating'
     ];
 
     /**
@@ -32,6 +33,7 @@ class Wallet extends Model
         'profit' => 'decimal:2',
         'bonus' => 'decimal:2',
         'cash' => 'decimal:2',
+        'floating' => 'decimal:2',
     ];
 
     /**
@@ -53,6 +55,16 @@ class Wallet extends Model
     }
 
     /**
+     * Get the available balance (profit minus floating).
+     *
+     * @return float
+     */
+    public function getAvailableBalanceAttribute()
+    {
+        return $this->profit - $this->floating;
+    }
+
+    /**
      * Add amount to a specific type of balance.
      *
      * @param string $type
@@ -61,7 +73,7 @@ class Wallet extends Model
      */
     public function addBalance(string $type, float $amount)
     {
-        if (!in_array($type, ['deposit', 'profit', 'bonus', 'cash'])) {
+        if (!in_array($type, ['deposit', 'profit', 'bonus', 'cash', 'floating'])) {
             return false;
         }
 
@@ -78,7 +90,7 @@ class Wallet extends Model
      */
     public function subtractBalance(string $type, float $amount)
     {
-        if (!in_array($type, ['deposit', 'profit', 'bonus', 'cash'])) {
+        if (!in_array($type, ['deposit', 'profit', 'bonus', 'cash', 'floating'])) {
             return false;
         }
 
@@ -87,6 +99,56 @@ class Wallet extends Model
         }
 
         $this->$type -= $amount;
+        return $this->save();
+    }
+
+    /**
+     * Move amount from profit to floating (for pending withdrawals).
+     *
+     * @param float $amount
+     * @return bool
+     */
+    public function holdAmount(float $amount)
+    {
+        if ($this->profit < $amount) {
+            return false;
+        }
+
+        $this->profit -= $amount;
+        $this->floating += $amount;
+        return $this->save();
+    }
+
+    /**
+     * Move amount from floating back to profit (for rejected withdrawals).
+     *
+     * @param float $amount
+     * @return bool
+     */
+    public function releaseAmount(float $amount)
+    {
+        if ($this->floating < $amount) {
+            return false;
+        }
+
+        $this->floating -= $amount;
+        $this->profit += $amount;
+        return $this->save();
+    }
+
+    /**
+     * Remove amount from floating (for approved withdrawals).
+     *
+     * @param float $amount
+     * @return bool
+     */
+    public function deductFloating(float $amount)
+    {
+        if ($this->floating < $amount) {
+            return false;
+        }
+
+        $this->floating -= $amount;
         return $this->save();
     }
 }

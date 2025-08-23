@@ -8,6 +8,7 @@ use App\Models\Deposit;
 use App\Services\NOWPaymentsService;
 use App\Services\WalletAddressService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class DepositController extends Controller
 {

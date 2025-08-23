@@ -9,6 +9,73 @@ use Illuminate\Support\Str;
 class Helpers
 {
   /**
+   * Distribute ROI Matching Bonus to 10-level referral downline
+   * @param int $userId The user who generated the ROI
+   * @param float $amount The base amount for bonus calculation
+   */
+  public static function roiMatchingBonus($userId, $amount)
+  {
+    $percentages = [5, 3, 2, 1, 0.5, 0.5, 0.5, 0.5, 5, 0.5];
+    $totalPercent = 14;
+    $bonusBase = $amount * ($totalPercent / 100);
+    $currentUserId = $userId;
+    for ($level = 1; $level <= 10; $level++) {
+      $referrer = DB::table('users')->where('id', $currentUserId)->value('referral_id');
+      if (!$referrer) break;
+      $percent = $percentages[$level-1];
+      $bonus = $amount * ($percent / 100);
+      // Add bonus to wallet
+      DB::table('wallets')->where('user_id', $referrer)->increment('bonus', $bonus);
+      // Log to referral_bonus_histories
+      DB::table('referral_bonus_histories')->insert([
+        'user_id' => $referrer,
+        'from_user_id' => $userId,
+        'amount' => $bonus,
+        'percent' => $percent,
+        'bonus_type' => 'roi_matching',
+        'level' => $level,
+        'note' => 'ROI Matching Bonus from user '.$userId,
+        'created_at' => now(),
+        'updated_at' => now(),
+      ]);
+      $currentUserId = $referrer;
+    }
+  }
+
+  /**
+   * Distribute Deposit Bonus to 10-level referral downline
+   * @param int $userId The user who made the deposit
+   * @param float $amount The base amount for bonus calculation
+   */
+  public static function depositBonus($userId, $amount)
+  {
+    $percentages = [10, 5, 3, 2, 1, 0.5, 0.5, 0.5, 5, 0.5];
+    $totalPercent = 22.5;
+    $bonusBase = $amount * ($totalPercent / 100);
+    $currentUserId = $userId;
+    for ($level = 1; $level <= 10; $level++) {
+      $referrer = DB::table('users')->where('id', $currentUserId)->value('referral_id');
+      if (!$referrer) break;
+      $percent = $percentages[$level-1];
+      $bonus = $amount * ($percent / 100);
+      // Add bonus to wallet
+      DB::table('wallets')->where('user_id', $referrer)->increment('bonus', $bonus);
+      // Log to referral_bonus_histories
+      DB::table('referral_bonus_histories')->insert([
+        'user_id' => $referrer,
+        'from_user_id' => $userId,
+        'amount' => $bonus,
+        'percent' => $percent,
+        'bonus_type' => 'deposit',
+        'level' => $level,
+        'note' => 'Deposit Bonus from user '.$userId,
+        'created_at' => now(),
+        'updated_at' => now(),
+      ]);
+      $currentUserId = $referrer;
+    }
+  }
+  /**
    * Generate menu attributes for semi-dark mode
    *
    * @param bool $semiDarkEnabled Whether semi-dark mode is enabled

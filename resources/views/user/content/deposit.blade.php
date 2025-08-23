@@ -210,6 +210,9 @@
                                 <label for="crypto_currency" class="form-label">Send From Currency</label>
                                 <select class="form-select" id="crypto_currency" name="crypto_currency" required>
                                     <option value="">Select cryptocurrency to send</option>
+                                    <option value="usdt_bsc">USDT BSC → USDT (Direct Transfer)</option>
+                                    <option value="usdt_trc">USDT TRC → USDT (Direct Transfer)</option>
+                                    <option value="usdt_erc">USDT ERC → USDT (Direct Transfer)</option>
                                     <option value="btc">Bitcoin (BTC) → USDT</option>
                                     <option value="eth">Ethereum (ETH) → USDT</option>
                                     <option value="ltc">Litecoin (LTC) → USDT</option>

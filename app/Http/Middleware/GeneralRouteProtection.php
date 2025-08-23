@@ -36,6 +36,7 @@ class GeneralRouteProtection
             'api/*',
             'up', // Health check
             'sanctum/*', // Sanctum CSRF
+            'connect-telegram', // Telegram connection route
         ];
 
         // Check if current route is public

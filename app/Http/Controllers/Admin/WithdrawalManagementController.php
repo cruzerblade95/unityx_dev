@@ -154,19 +154,22 @@ class WithdrawalManagementController extends Controller
                 ], 400);
             }
 
-            // Check if user has sufficient profit balance
+            // Check if user has sufficient floating balance (should match withdrawal amount)
             $wallet = $withdrawal->user->wallet;
-            if (!$wallet || $wallet->profit < $withdrawal->amount) {
+            if (!$wallet || $wallet->floating < $withdrawal->amount) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'User has insufficient profit balance for this withdrawal.'
+                    'message' => 'Error: Floating balance mismatch. Please contact system administrator.'
                 ], 400);
             }
 
-            // Deduct the withdrawal amount from user's profit balance only
-            $wallet->profit -= $withdrawal->amount;
-
-            $wallet->save();
+            // Remove the amount from floating (complete the withdrawal process)
+            if (!$wallet->deductFloating($withdrawal->amount)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error: Failed to process floating amount. Please contact system administrator.'
+                ], 400);
+            }
 
             $withdrawal->update([
                 'status' => 'approved'
@@ -174,7 +177,7 @@ class WithdrawalManagementController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Withdrawal approved successfully! Amount deducted from user wallet.'
+                'message' => 'Withdrawal approved successfully! Amount has been processed for withdrawal.'
             ]);
 
         } catch (\Exception $e) {
@@ -188,12 +191,21 @@ class WithdrawalManagementController extends Controller
     public function reject(Request $request, $id)
     {
         try {
-            $withdrawal = Withdrawal::findOrFail($id);
+            $withdrawal = Withdrawal::with('user.wallet')->findOrFail($id);
 
             if ($withdrawal->status !== 'pending') {
                 return response()->json([
                     'success' => false,
                     'message' => 'Only pending withdrawals can be rejected.'
+                ], 400);
+            }
+
+            // Return the floating amount back to profit balance
+            $wallet = $withdrawal->user->wallet;
+            if ($wallet && !$wallet->releaseAmount($withdrawal->amount)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error: Failed to release floating amount back to profit. Please contact system administrator.'
                 ], 400);
             }
 
@@ -203,7 +215,7 @@ class WithdrawalManagementController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Withdrawal rejected successfully!'
+                'message' => 'Withdrawal rejected successfully! Amount returned to user\'s profit balance.'
             ]);
 
         } catch (\Exception $e) {
