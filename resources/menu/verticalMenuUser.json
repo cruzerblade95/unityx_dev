@@ -7,16 +7,10 @@
       "slug": "user.dashboard"
     },
     {
-      "name": "Users",
+      "name": "Profile",
       "icon": "menu-icon icon-base ti tabler-users",
-      "slug": "user.profile",
-      "submenu": [
-        {
-          "url": "user/profile",
-          "name": "Profile",
-          "slug": "user.profile"
-        }
-      ]
+      "url": "user/profile",
+      "slug": "user.profile"
     },
     {
       "name": "Wallet",
@@ -24,14 +18,14 @@
       "slug": "user.wallet",
       "submenu": [
         {
-          "url": "user/withdrawal",
-          "name": "Withdraw",
-          "slug": "user.withdrawal"
-        },
-        {
           "url": "user/deposit",
           "name": "Deposit",
           "slug": "user.deposit"
+        },
+        {
+          "url": "user/withdrawal",
+          "name": "Withdraw",
+          "slug": "user.withdrawal"
         }
       ]
     },
@@ -42,16 +36,16 @@
       "slug": "user.ai_trades.index"
     },
     {
+      "url": "user/downline",
+      "name": "Referral",
+      "icon": "menu-icon icon-base ti tabler-git-branch",
+      "slug": "user.downline"
+    },
+    {
       "url": "user/marketplace",
       "name": "Marketplace",
       "icon": "menu-icon icon-base ti tabler-shopping-cart",
       "slug": "user.marketplace.index"
-    },
-    {
-      "url": "user/downline",
-      "name": "Downline",
-      "icon": "menu-icon icon-base ti tabler-git-branch",
-      "slug": "user.downline"
     }
   ]
 }

@@ -35,8 +35,8 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Amount Invest</th>
-                                <th>Current Amount</th>
-                                <th>Ending Amount</th>
+                                <th>Current Profit</th>
+                                <th>Ending Profit</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -84,8 +84,8 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Amount Invest</th>
-                                <th>Current Amount</th>
-                                <th>Ending Amount</th>
+                                <th>Current Profit</th>
+                                <th>Ending Profit</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -125,8 +125,8 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Amount Invest</th>
-                                <th>Current Amount</th>
-                                <th>Ending Amount</th>
+                                <th>Current Profit</th>
+                                <th>Ending Profit</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
