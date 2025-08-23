@@ -148,12 +148,17 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the user's withdrawable balance (profit balance).
+     * Get the user's withdrawable balance (profit balance minus floating).
      *
      * @return float
      */
     public function getWithdrawableBalance()
     {
-        return $this->wallet ? $this->wallet->profit : 0;
+        if (!$this->wallet) {
+            return 0;
+        }
+
+        // Subtract floating amount from profit as it's locked for pending withdrawals
+        return $this->wallet->profit - $this->wallet->floating;
     }
 }
