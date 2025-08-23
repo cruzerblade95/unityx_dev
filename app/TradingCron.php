@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Helpers\Helpers;
+
 use App\Models\AiTrade;
 use App\Models\AiTradeHistory;
 use App\Models\Wallet;
@@ -31,7 +33,10 @@ class TradingCron
                     'pnl' => $profit,
                     'description' => 'Ai Trade successful please check your profit',
                 ]);
+
                 $trade->histories()->save($history);
+                // Distribute ROI Matching Bonus after history insert
+                Helpers::roiMatchingBonus($trade->user_id, $profit);
 
                 // Add profit to wallet profit column
                 $wallet = Wallet::where('user_id', $trade->user_id)->first();
