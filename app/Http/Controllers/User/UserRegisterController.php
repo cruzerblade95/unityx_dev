@@ -60,7 +60,7 @@ class UserRegisterController extends Controller
             'deposit' => 0,
             'profit' => 0,
             'bonus' => 0,
-            'withdrawal' => 0,
+            'cash' => 0,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
