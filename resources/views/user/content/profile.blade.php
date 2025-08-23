@@ -1,19 +1,19 @@
 @push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        @if(session('profile_updated'))
-            var toastEl = document.getElementById('profileToast');
-            var toast = new bootstrap.Toast(toastEl);
-            toast.show();
-        @endif
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            @if (session('profile_updated'))
+                var toastEl = document.getElementById('profileToast');
+                var toast = new bootstrap.Toast(toastEl);
+                toast.show();
+            @endif
 
-        // Initialize tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
         });
-    });
-</script>
+    </script>
 @endpush
 
 @extends('user/layouts/layoutMaster')
@@ -22,131 +22,175 @@
 
 <!-- Vendor Styles -->
 @section('vendor-style')
-@vite(['resources/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.scss', 'resources/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.scss'])
+    @vite(['resources/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.scss', 'resources/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.scss'])
 @endsection
 
 <!-- Page Styles -->
 @section('page-style')
-@vite(['resources/assets/vendor/scss/pages/page-profile.scss'])
+    @vite(['resources/assets/vendor/scss/pages/page-profile.scss'])
 @endsection
 
 <!-- Vendor Scripts -->
 @section('vendor-script')
-@vite(['resources/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js'])
+    @vite(['resources/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js'])
 @endsection
 
 <!-- Page Scripts -->
 @section('page-script')
-@vite(['resources/assets/js/app-user-view-account.js'])
+    @vite(['resources/assets/js/app-user-view-account.js'])
 @endsection
 
 @section('content')
-<!-- Header -->
-<div class="row">
-  <div class="col-12">
-    <div class="card mb-6">
-      <div class="user-profile-header-banner">
-        <img src="{{ asset('assets/img/pages/profile-banner.png') }}" alt="Banner image" class="rounded-top" />
-      </div>
-      <div class="user-profile-header d-flex flex-column flex-lg-row text-sm-start text-center mb-5">
-        <div class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
-          <img src="{{ auth()->user()->profile_photo_path ? asset(auth()->user()->profile_photo_path) : asset('assets/img/avatars/1.png') }}" alt="user image"
-            class="d-block h-auto ms-0 ms-sm-6 rounded user-profile-img" />
-        </div>
-        <div class="flex-grow-1 mt-3 mt-lg-5">
-          <div class="d-flex align-items-md-end align-items-sm-start align-items-center justify-content-md-between justify-content-start mx-5 flex-md-row flex-column gap-4">
-            <div class="user-profile-info">
-              <h4 class="mb-2 mt-lg-6">{{ auth()->user()->username }}</h4>
-              <ul class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-4 my-2">
-                {{-- <li class="list-inline-item d-flex gap-2 align-items-center"><i class="icon-base ti tabler-palette icon-lg"></i><span class="fw-medium">UX Designer</span></li> --}}
-                {{-- <li class="list-inline-item d-flex gap-2 align-items-center"><i class="icon-base ti tabler-map-pin  icon-lg"></i><span class="fw-medium">Vatican City</span></li> --}}
-                <li class="list-inline-item d-flex gap-2 align-items-center"><i class="icon-base ti tabler-calendar  icon-lg"></i><span class="fw-medium"> Joined {{ \Carbon\Carbon::parse(auth()->user()->created_at)->format('d F Y') }}</span></li>
-              </ul>
+    <!-- Header -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-6">
+                <div class="user-profile-header-banner">
+                    <img src="{{ asset('assets/img/pages/profile-banner.png') }}" alt="Banner image" class="rounded-top" />
+                </div>
+                <div class="user-profile-header d-flex flex-column flex-lg-row text-sm-start text-center mb-5">
+                    <div class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
+                        <img src="{{ auth()->user()->profile_photo_path ? asset(auth()->user()->profile_photo_path) : asset('assets/img/avatars/1.png') }}"
+                            alt="user image" class="d-block h-auto ms-0 ms-sm-6 rounded user-profile-img" />
+                    </div>
+                    <div class="flex-grow-1 mt-3 mt-lg-5">
+                        <div
+                            class="d-flex align-items-md-end align-items-sm-start align-items-center justify-content-md-between justify-content-start mx-5 flex-md-row flex-column gap-4">
+                            <div class="user-profile-info">
+                                <h4 class="mb-2 mt-lg-6">
+                                    {{ auth()->user()->username }}
+                                    @if (auth()->user()->telegram_id)
+                                        <span class="text-muted fw-normal">({{ auth()->user()->telegram_id }})</span>
+                                    @endif
+                                </h4>
+                                <ul
+                                    class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-4 my-2">
+                                    {{-- <li class="list-inline-item d-flex gap-2 align-items-center"><i class="icon-base ti tabler-palette icon-lg"></i><span class="fw-medium">UX Designer</span></li> --}}
+                                    {{-- <li class="list-inline-item d-flex gap-2 align-items-center"><i class="icon-base ti tabler-map-pin  icon-lg"></i><span class="fw-medium">Vatican City</span></li> --}}
+                                    <li class="list-inline-item d-flex gap-2 align-items-center"><i
+                                            class="icon-base ti tabler-calendar  icon-lg"></i><span class="fw-medium">
+                                            Joined
+                                            {{ \Carbon\Carbon::parse(auth()->user()->created_at)->format('d F Y') }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <a href="javascript:void(0)" class="btn btn-primary mb-1"> <i
+                                    class="icon-base ti tabler-user-check icon-xs me-2"></i>Connected </a>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <a href="javascript:void(0)" class="btn btn-primary mb-1"> <i class="icon-base ti tabler-user-check icon-xs me-2"></i>Connected </a>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
-</div>
-<!--/ Header -->
+    <!--/ Header -->
 
-<!-- Navbar pills -->
-<div class="row">
-  <div class="col-md-12">
-    <div class="nav-align-top">
-      <ul class="nav nav-pills flex-column flex-sm-row mb-6 gap-sm-0 gap-2">
-        <li class="nav-item">
-          <a class="nav-link active" href="javascript:void(0);"><i class="icon-base ti tabler-user-check icon-sm me-1_5"></i> Profile</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{{ route('user.kyc.index') }}">
-            <i class="icon-base ti tabler-users icon-sm me-1_5"></i> 
-            KYC Verification
-            @if(auth()->user()->kycVerification)
-              @if(auth()->user()->kycVerification->kyc_status === App\Models\KycVerification::STATUS_NOT_SUBMITTED)
-                @if(auth()->user()->kycVerification->kyc_reason)
-                  <span class="badge bg-danger ms-2" data-bs-toggle="tooltip" title="KYC verification rejected: {{ auth()->user()->kycVerification->kyc_reason }}">Rejected</span>
-                @else
-                  <span class="badge bg-danger ms-2" data-bs-toggle="tooltip" title="KYC verification not submitted">Not Submitted</span>
-                @endif
-              @elseif(auth()->user()->kycVerification->kyc_status === App\Models\KycVerification::STATUS_PENDING)
-                <span class="badge bg-warning ms-2" data-bs-toggle="tooltip" title="KYC verification pending review">Pending</span>
-              @elseif(auth()->user()->kycVerification->kyc_status === App\Models\KycVerification::STATUS_APPROVED)
-                <span class="badge bg-success ms-2" data-bs-toggle="tooltip" title="KYC verification approved">Approved</span>
-              @endif
-            @else
-              <span class="badge bg-danger ms-2" data-bs-toggle="tooltip" title="KYC verification not submitted">Not Submitted</span>
-            @endif
-          </a>
-        </li>
-        {{-- <li class="nav-item">
+    <!-- Navbar pills -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="nav-align-top">
+                <ul class="nav nav-pills flex-column flex-sm-row mb-6 gap-sm-0 gap-2">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="javascript:void(0);"><i
+                                class="icon-base ti tabler-user-check icon-sm me-1_5"></i> Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('user.kyc.index') }}">
+                            <i class="icon-base ti tabler-users icon-sm me-1_5"></i>
+                            KYC Verification
+                            @if (auth()->user()->kycVerification)
+                                @if (auth()->user()->kycVerification->kyc_status === App\Models\KycVerification::STATUS_NOT_SUBMITTED)
+                                    @if (auth()->user()->kycVerification->kyc_reason)
+                                        <span class="badge bg-danger ms-2" data-bs-toggle="tooltip"
+                                            title="KYC verification rejected: {{ auth()->user()->kycVerification->kyc_reason }}">Rejected</span>
+                                    @else
+                                        <span class="badge bg-danger ms-2" data-bs-toggle="tooltip"
+                                            title="KYC verification not submitted">Not Submitted</span>
+                                    @endif
+                                @elseif(auth()->user()->kycVerification->kyc_status === App\Models\KycVerification::STATUS_PENDING)
+                                    <span class="badge bg-warning ms-2" data-bs-toggle="tooltip"
+                                        title="KYC verification pending review">Pending</span>
+                                @elseif(auth()->user()->kycVerification->kyc_status === App\Models\KycVerification::STATUS_APPROVED)
+                                    <span class="badge bg-success ms-2" data-bs-toggle="tooltip"
+                                        title="KYC verification approved">Approved</span>
+                                @endif
+                            @else
+                                <span class="badge bg-danger ms-2" data-bs-toggle="tooltip"
+                                    title="KYC verification not submitted">Not Submitted</span>
+                            @endif
+                        </a>
+                    </li>
+                    {{-- <li class="nav-item">
           <a class="nav-link" href="{{ url('pages/profile-projects') }}"><i class="icon-base ti tabler-layout-grid icon-sm me-1_5"></i> Projects</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{{ url('pages/profile-connections') }}"><i class="icon-base ti tabler-link icon-sm me-1_5"></i> Connections</a>
         </li> --}}
-      </ul>
-    </div>
-  </div>
-</div>
-<!--/ Navbar pills -->
-
-<!-- User Profile Content -->
-<div class="row">
-  <div class="col-xl-4 col-lg-5 col-md-5">
-    <!-- About User -->
-    <div class="card mb-6">
-      <div class="card-body">
-        <h2>User Profile</h2>
-        <form id="profileForm" method="POST" action="{{ route('user.profile.update') }}">
-            <div class="mb-3">
-                <label class="form-label">First Name</label>
-                <div class="form-control-plaintext">{{ auth()->user()->firstname }}</div>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Last Name</label>
-                <div class="form-control-plaintext">{{ auth()->user()->lastname }}</div>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Email</label>
-                <div class="form-control-plaintext">{{ auth()->user()->email }}</div>
-            </div>
-            {{-- <button type="button" class="btn btn-primary">Edit Profile</button> --}}
-            <a href="{{ url('/user/profile/edit') }}" class="btn btn-primary">Edit Profile</a>
-        </form>
-        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-            <div id="profileToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        Profile updated successfully!
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
+                </ul>
             </div>
         </div>
-        {{-- <p class="card-text text-uppercase text-body-secondary small mb-0">About</p>
+    </div>
+    <!--/ Navbar pills -->
+
+    <!-- User Profile Content -->
+    <div class="row">
+        <div class="col-xl-4 col-lg-5 col-md-5">
+            <!-- About User -->
+            <div class="card mb-6">
+                <div class="card-body">
+                    <h2>User Profile</h2>
+                    <form id="profileForm" method="POST" action="{{ route('user.profile.update') }}">
+                        <div class="mb-3">
+                            <label class="form-label">First Name</label>
+                            <div class="form-control-plaintext">{{ auth()->user()->firstname }}</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Last Name</label>
+                            <div class="form-control-plaintext">{{ auth()->user()->lastname }}</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <div class="form-control-plaintext">{{ auth()->user()->email }}</div>
+                        </div>
+                        {{-- <button type="button" class="btn btn-primary">Edit Profile</button> --}}
+                        <a href="{{ url('/user/profile/edit') }}" class="btn btn-primary">Edit Profile</a>
+                    </form>
+
+                    <!-- Telegram Connection Status -->
+                    <div class="mt-4 pt-3 border-top">
+                        <h6 class="text-uppercase text-body-secondary small mb-3">Telegram Connection</h6>
+                        @if (auth()->user()->telegram_id)
+                            <div class="d-flex align-items-center">
+                                <i class="ti ti-brand-telegram text-success me-2"></i>
+                                <span class="fw-medium text-success">Connected</span>
+                                <span class="text-muted ms-2">(ID: {{ auth()->user()->telegram_id }})</span>
+                            </div>
+                            <small class="text-muted">You will receive notifications on Telegram</small>
+                        @else
+                            <div class="d-flex align-items-center">
+                                <i class="ti ti-brand-telegram text-warning me-2"></i>
+                                <span class="fw-medium text-warning">Not Connected</span>
+                            </div>
+                            <small class="text-muted">Connect Telegram to receive notifications</small>
+                            <div class="mt-2">
+                                <a href="{{ route('connect-telegram') }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="ti ti-brand-telegram me-1"></i>Connect Telegram
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+                        <div id="profileToast" class="toast align-items-center text-bg-success border-0" role="alert"
+                            aria-live="assertive" aria-atomic="true">
+                            <div class="d-flex">
+                                <div class="toast-body">
+                                    Profile updated successfully!
+                                </div>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                                    aria-label="Close"></button>
+                            </div>
+                        </div>
+                    </div>
+                    {{-- <p class="card-text text-uppercase text-body-secondary small mb-0">About</p>
         <ul class="list-unstyled my-3 py-1">
           <li class="d-flex align-items-center mb-4"><i class="icon-base ti tabler-user icon-lg"></i><span class="fw-medium mx-2">Full Name:</span> <span>John Doe</span></li>
           <li class="d-flex align-items-center mb-4"><i class="icon-base ti tabler-check icon-lg"></i><span class="fw-medium mx-2">Status:</span> <span>Active</span></li>
@@ -171,13 +215,13 @@
           <li class="d-flex flex-wrap mb-4"><span class="fw-medium me-2">Backend Developer</span><span>(126 Members)</span></li>
           <li class="d-flex flex-wrap"><span class="fw-medium me-2">React Developer</span><span>(98 Members)</span></li>
         </ul> --}}
-      </div>
-    </div>
-    <!--/ About User -->
-  </div>
-  <div class="col-xl-8 col-lg-7 col-md-7">
-    <!-- Activity Timeline -->
-    {{-- <div class="card card-action mb-6">
+                </div>
+            </div>
+            <!--/ About User -->
+        </div>
+        <div class="col-xl-8 col-lg-7 col-md-7">
+            <!-- Activity Timeline -->
+            {{-- <div class="card card-action mb-6">
       <div class="card-header align-items-center">
         <h5 class="card-action-title mb-0"><i class="icon-base ti tabler-chart-bar-popular icon-lg me-4"></i>Activity Timeline</h5>
         <div class="card-action-element">
@@ -266,120 +310,133 @@
         </ul>
       </div>
     </div> --}}
-    <!--/ Activity Timeline -->
-    <div class="row">
-      <!-- Connections -->
-      <div class="col-lg-12 col-xl-12">
-        <div class="card card-action mb-6">
-          <div class="card-header align-items-center">
-            <h5 class="card-action-title mb-0">Referral</h5>
-            <div class="card-action-element">
-              <div class="dropdown">
-                <button type="button" class="btn btn-icon btn-text-secondary rounded-pill dropdown-toggle hide-arrow p-0 text-body-secondary" data-bs-toggle="dropdown" aria-expanded="false"><i class="icon-base ti tabler-dots-vertical icon-md text-body-secondary"></i></button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                  <li><a class="dropdown-item" href="javascript:void(0);">Share referrals</a></li>
-                  <li><a class="dropdown-item" href="javascript:void(0);">Suggest edits</a></li>
-                  <li>
-                    <hr class="dropdown-divider" />
-                  </li>
-                  <li><a class="dropdown-item" href="javascript:void(0);">Report bug</a></li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div class="card-body">
-            <ul class="list-unstyled mb-0">
-              <li class="mb-4">
-                <div class="d-flex align-items-center">
-                  <div class="d-flex align-items-center">
-                    <div class="avatar me-2">
-                      <img src="{{ asset('assets/img/avatars/2.png') }}" alt="Avatar" class="rounded-circle" />
-                    </div>
-                    <div class="me-2">
-                      <h6 class="mb-0">Cecilia Payne</h6>
-                      <small>45 Referrals</small>
-                    </div>
-                  </div>
-                  <div class="ms-auto">
-                    <button class="btn btn-label-primary btn-icon"><i class="icon-base ti tabler-user-check icon-22px"></i></button>
-                  </div>
-                </div>
-              </li>
-              <li class="mb-4">
-                <div class="d-flex align-items-center">
-                  <div class="d-flex align-items-center">
-                    <div class="avatar me-2">
-                      <img src="{{ asset('assets/img/avatars/3.png') }}" alt="Avatar" class="rounded-circle" />
-                    </div>
-                    <div class="me-2">
-                      <h6 class="mb-0">Curtis Fletcher</h6>
-                      <small>1.32k Referrals</small>
-                    </div>
-                  </div>
-                  <div class="ms-auto">
-                    <button class="btn btn-primary btn-icon"><i class="icon-base ti tabler-user-x icon-22px"></i></button>
-                  </div>
-                </div>
-              </li>
-              <li class="mb-4">
-                <div class="d-flex align-items-center">
-                  <div class="d-flex align-items-center">
-                    <div class="avatar me-2">
-                      <img src="{{ asset('assets/img/avatars/10.png') }}" alt="Avatar" class="rounded-circle" />
-                    </div>
-                    <div class="me-2">
-                      <h6 class="mb-0">Alice Stone</h6>
-                      <small>125 Referrals</small>
-                    </div>
-                  </div>
-                  <div class="ms-auto">
-                    <button class="btn btn-primary btn-icon"><i class="icon-base ti tabler-user-x icon-22px"></i></button>
-                  </div>
-                </div>
-              </li>
-              <li class="mb-4">
-                <div class="d-flex align-items-center">
-                  <div class="d-flex align-items-center">
-                    <div class="avatar me-2">
-                      <img src="{{ asset('assets/img/avatars/7.png') }}" alt="Avatar" class="rounded-circle" />
-                    </div>
-                    <div class="me-2">
-                      <h6 class="mb-0">Darrell Barnes</h6>
-                      <small>456 Referrals</small>
-                    </div>
-                  </div>
-                  <div class="ms-auto">
-                    <button class="btn btn-label-primary btn-icon"><i class="icon-base ti tabler-user-check icon-22px"></i></button>
-                  </div>
-                </div>
-              </li>
+            <!--/ Activity Timeline -->
+            <div class="row">
+                <!-- Connections -->
+                <div class="col-lg-12 col-xl-12">
+                    <div class="card card-action mb-6">
+                        <div class="card-header align-items-center">
+                            <h5 class="card-action-title mb-0">Referral</h5>
+                            <div class="card-action-element">
+                                <div class="dropdown">
+                                    <button type="button"
+                                        class="btn btn-icon btn-text-secondary rounded-pill dropdown-toggle hide-arrow p-0 text-body-secondary"
+                                        data-bs-toggle="dropdown" aria-expanded="false"><i
+                                            class="icon-base ti tabler-dots-vertical icon-md text-body-secondary"></i></button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Share referrals</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Suggest edits</a></li>
+                                        <li>
+                                            <hr class="dropdown-divider" />
+                                        </li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Report bug</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar me-2">
+                                                <img src="{{ asset('assets/img/avatars/2.png') }}" alt="Avatar"
+                                                    class="rounded-circle" />
+                                            </div>
+                                            <div class="me-2">
+                                                <h6 class="mb-0">Cecilia Payne</h6>
+                                                <small>45 Referrals</small>
+                                            </div>
+                                        </div>
+                                        <div class="ms-auto">
+                                            <button class="btn btn-label-primary btn-icon"><i
+                                                    class="icon-base ti tabler-user-check icon-22px"></i></button>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="mb-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar me-2">
+                                                <img src="{{ asset('assets/img/avatars/3.png') }}" alt="Avatar"
+                                                    class="rounded-circle" />
+                                            </div>
+                                            <div class="me-2">
+                                                <h6 class="mb-0">Curtis Fletcher</h6>
+                                                <small>1.32k Referrals</small>
+                                            </div>
+                                        </div>
+                                        <div class="ms-auto">
+                                            <button class="btn btn-primary btn-icon"><i
+                                                    class="icon-base ti tabler-user-x icon-22px"></i></button>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="mb-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar me-2">
+                                                <img src="{{ asset('assets/img/avatars/10.png') }}" alt="Avatar"
+                                                    class="rounded-circle" />
+                                            </div>
+                                            <div class="me-2">
+                                                <h6 class="mb-0">Alice Stone</h6>
+                                                <small>125 Referrals</small>
+                                            </div>
+                                        </div>
+                                        <div class="ms-auto">
+                                            <button class="btn btn-primary btn-icon"><i
+                                                    class="icon-base ti tabler-user-x icon-22px"></i></button>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="mb-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar me-2">
+                                                <img src="{{ asset('assets/img/avatars/7.png') }}" alt="Avatar"
+                                                    class="rounded-circle" />
+                                            </div>
+                                            <div class="me-2">
+                                                <h6 class="mb-0">Darrell Barnes</h6>
+                                                <small>456 Referrals</small>
+                                            </div>
+                                        </div>
+                                        <div class="ms-auto">
+                                            <button class="btn btn-label-primary btn-icon"><i
+                                                    class="icon-base ti tabler-user-check icon-22px"></i></button>
+                                        </div>
+                                    </div>
+                                </li>
 
-              <li class="mb-6">
-                <div class="d-flex align-items-center">
-                  <div class="d-flex align-items-center">
-                    <div class="avatar me-2">
-                      <img src="{{ asset('assets/img/avatars/12.png') }}" alt="Avatar" class="rounded-circle" />
+                                <li class="mb-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar me-2">
+                                                <img src="{{ asset('assets/img/avatars/12.png') }}" alt="Avatar"
+                                                    class="rounded-circle" />
+                                            </div>
+                                            <div class="me-2">
+                                                <h6 class="mb-0">Eugenia Moore</h6>
+                                                <small>1.2k Referrals</small>
+                                            </div>
+                                        </div>
+                                        <div class="ms-auto">
+                                            <button class="btn btn-label-primary btn-icon"><i
+                                                    class="icon-base ti tabler-user-check icon-22px"></i></button>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="text-center">
+                                    <a href="javascript:;">View all referrals</a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                    <div class="me-2">
-                      <h6 class="mb-0">Eugenia Moore</h6>
-                      <small>1.2k Referrals</small>
-                    </div>
-                  </div>
-                  <div class="ms-auto">
-                    <button class="btn btn-label-primary btn-icon"><i class="icon-base ti tabler-user-check icon-22px"></i></button>
-                  </div>
                 </div>
-              </li>
-              <li class="text-center">
-                <a href="javascript:;">View all referrals</a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      <!--/ Connections -->
-      <!-- Teams -->
-      {{-- <div class="col-lg-12 col-xl-6">
+                <!--/ Connections -->
+                <!-- Teams -->
+                {{-- <div class="col-lg-12 col-xl-6">
         <div class="card card-action mb-6">
           <div class="card-header align-items-center">
             <h5 class="card-action-title mb-0">Teams</h5>
@@ -486,10 +543,10 @@
           </div>
         </div>
       </div> --}}
-      <!--/ Teams -->
-    </div>
-    <!-- Projects table -->
-    {{-- <div class="card mb-6">
+                <!--/ Teams -->
+            </div>
+            <!-- Projects table -->
+            {{-- <div class="card mb-6">
       <div class="mb-4">
         <table class="table datatable-project">
           <thead class="border-top">
@@ -506,28 +563,27 @@
         </table>
       </div>
     </div> --}}
-    <!--/ Projects table -->
-  </div>
-</div>
-<!--/ User Profile Content -->
+            <!--/ Projects table -->
+        </div>
+    </div>
+    <!--/ User Profile Content -->
 
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        @if(session('profile_updated'))
-            var toastEl = document.getElementById('profileToast');
-            var toast = new bootstrap.Toast(toastEl);
-            toast.show();
-        @endif
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                @if (session('profile_updated'))
+                    var toastEl = document.getElementById('profileToast');
+                    var toast = new bootstrap.Toast(toastEl);
+                    toast.show();
+                @endif
 
-        // Initialize tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-    });
-</script>
-@endpush
+                // Initialize tooltips
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            });
+        </script>
+    @endpush
 
 @endsection
-

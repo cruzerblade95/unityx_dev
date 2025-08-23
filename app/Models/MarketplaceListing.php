@@ -24,7 +24,10 @@ class MarketplaceListing extends Model
         'verification_expires_at',
         'seller_approval_reason',
         'seller_approved',
-        'seller_approved_at'
+        'seller_approved_at',
+        'admin_rejection_reason',
+        'admin_rejected_at',
+        'admin_rejected_by'
     ];
 
     protected $casts = [
@@ -37,6 +40,7 @@ class MarketplaceListing extends Model
         'verification_expires_at' => 'datetime',
         'seller_approved_at' => 'datetime',
         'seller_approved' => 'boolean',
+        'admin_rejected_at' => 'datetime',
     ];
 
     /**
@@ -47,7 +51,7 @@ class MarketplaceListing extends Model
         do {
             $uniqueId = 'MP' . strtoupper(substr(uniqid(), -8));
         } while (self::where('unique_id', $uniqueId)->exists());
-        
+
         return $uniqueId;
     }
 
@@ -65,6 +69,14 @@ class MarketplaceListing extends Model
     public function buyer()
     {
         return $this->belongsTo(User::class, 'buyer_id');
+    }
+
+    /**
+     * Get the admin who rejected the transaction
+     */
+    public function rejectedBy()
+    {
+        return $this->belongsTo(\App\Models\Admin::class, 'admin_rejected_by');
     }
 
     /**
@@ -88,7 +100,7 @@ class MarketplaceListing extends Model
      */
     public function isPurchasable()
     {
-        return $this->status === 'active' && 
+        return $this->status === 'active' &&
                (!$this->expires_at || $this->expires_at->isFuture());
     }
 
@@ -109,12 +121,44 @@ class MarketplaceListing extends Model
     }
 
     /**
+     * Scope for sold listings
+     */
+    public function scopeSold($query)
+    {
+        return $query->where('status', 'sold');
+    }
+
+    /**
+     * Scope for cancelled listings
+     */
+    public function scopeCancelled($query)
+    {
+        return $query->where('status', 'cancelled');
+    }
+
+    /**
+     * Scope for rejected listings
+     */
+    public function scopeRejected($query)
+    {
+        return $query->where('status', 'rejected');
+    }
+
+    /**
+     * Scope for expired listings
+     */
+    public function scopeExpired($query)
+    {
+        return $query->where('status', 'expired');
+    }
+
+    /**
      * Check if verification has expired
      */
     public function isVerificationExpired()
     {
-        return $this->verification_expires_at && 
-               $this->verification_expires_at->isPast() && 
+        return $this->verification_expires_at &&
+               $this->verification_expires_at->isPast() &&
                $this->status === 'pending_verification';
     }
 
@@ -165,7 +209,7 @@ class MarketplaceListing extends Model
         if (!$this->verification_expires_at) {
             return 0;
         }
-        
+
         return max(0, now()->diffInMinutes($this->verification_expires_at, false));
     }
 }

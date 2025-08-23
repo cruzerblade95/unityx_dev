@@ -210,9 +210,9 @@
                                 <label for="crypto_currency" class="form-label">Send From Currency</label>
                                 <select class="form-select" id="crypto_currency" name="crypto_currency" required>
                                     <option value="">Select cryptocurrency to send</option>
-                                    <option value="usdt_bsc">USDT BSC → USDT (Direct Transfer)</option>
-                                    <option value="usdt_trc">USDT TRC → USDT (Direct Transfer)</option>
-                                    <option value="usdt_erc">USDT ERC → USDT (Direct Transfer)</option>
+                                    <option value="usdt_bsc">USDT BSC → USDT </option>
+                                    <option value="usdt_trc">USDT TRC → USDT </option>
+                                    <option value="usdt_erc">USDT ERC → USDT </option>
                                     <option value="btc">Bitcoin (BTC) → USDT</option>
                                     <option value="eth">Ethereum (ETH) → USDT</option>
                                     <option value="ltc">Litecoin (LTC) → USDT</option>
@@ -231,9 +231,9 @@
                                 <textarea class="form-control" id="crypto_note" name="note" placeholder="Optional note for this deposit"></textarea>
                             </div>
 
-                            <div class="alert alert-warning">
+                            <div class="alert alert-warning" id="cryptoWarningAlert">
                                 <small><strong>Important:</strong></small>
-                                <ul class="mb-0 mt-1 small">
+                                <ul class="mb-0 mt-1 small" id="cryptoWarningList">
                                     <li>You'll receive a unique address for your selected cryptocurrency</li>
                                     <li>Your deposit will be converted to USDT at current market rates</li>
                                     <li>Conversion rate is locked when you send the transaction</li>
@@ -573,6 +573,7 @@
             // Crypto form validation
             const cryptoForm = document.getElementById('cryptoDepositForm');
             const cryptoAmountInput = document.getElementById('crypto_amount');
+            const cryptoCurrencySelect = document.getElementById('crypto_currency');
 
             if (cryptoForm && cryptoAmountInput) {
                 cryptoForm.addEventListener('submit', function(e) {
@@ -585,6 +586,58 @@
                         return;
                     }
                 });
+            }
+
+            // Handle crypto currency selection change
+            if (cryptoCurrencySelect) {
+                cryptoCurrencySelect.addEventListener('change', function() {
+                    updateCryptoForm();
+                });
+
+                function updateCryptoForm() {
+                    const selectedCurrency = cryptoCurrencySelect.value;
+                    const isUsdtVariant = ['usdt_bsc', 'usdt_trc', 'usdt_erc'].includes(selectedCurrency);
+
+                    // Update form labels and help text
+                    const amountLabel = document.querySelector('label[for="crypto_amount"]');
+                    const amountInputGroup = cryptoAmountInput.parentElement;
+                    const helpText = amountInputGroup.nextElementSibling;
+                    const warningAlert = document.getElementById('cryptoWarningAlert');
+
+                    if (isUsdtVariant) {
+                        // For USDT variants, show USDT amount instead of USD
+                        amountLabel.textContent = 'USDT Amount';
+                        amountInputGroup.querySelector('.input-group-text').textContent = 'USDT';
+                        helpText.textContent = 'Minimum deposit: 100 USDT (1:1 transfer, no conversion)';
+
+                        // Update warning text for USDT variants
+                        warningAlert.innerHTML = `
+                            <small><strong>USDT Transfer Information:</strong></small>
+                            <ul class="mb-0 mt-1 small">
+                                <li>This is a direct USDT transfer (1:1 ratio)</li>
+                                <li>No conversion needed - send exactly the amount you specify</li>
+                                <li>You'll receive a specific address for the selected network</li>
+                                <li>Processing time: 10-30 minutes depending on network confirmation</li>
+                            </ul>
+                        `;
+                    } else {
+                        // For other cryptocurrencies, show USD amount
+                        amountLabel.textContent = 'Amount (USD Value)';
+                        amountInputGroup.querySelector('.input-group-text').textContent = 'USD';
+                        helpText.textContent = 'Minimum deposit: $100 USD equivalent';
+
+                        // Update warning text for crypto conversions
+                        warningAlert.innerHTML = `
+                            <small><strong>Important:</strong></small>
+                            <ul class="mb-0 mt-1 small">
+                                <li>You'll receive a unique address for your selected cryptocurrency</li>
+                                <li>Your deposit will be converted to USDT at current market rates</li>
+                                <li>Conversion rate is locked when you send the transaction</li>
+                                <li>Processing time: 10-60 minutes depending on network</li>
+                            </ul>
+                        `;
+                    }
+                }
             }
         });
 

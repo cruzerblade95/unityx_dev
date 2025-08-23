@@ -117,7 +117,15 @@ class DepositController extends Controller
             $tax_amount = $request->amount * ($systemTaxPercent / 100);
             $net_amount = $request->amount - $tax_amount;
 
-            // Create payment with NOWPayments - all payments convert to USDT
+            // Check if this is a USDT variant (BSC, TRC, ERC)
+            $isUsdtVariant = in_array($request->crypto_currency, ['usdt_bsc', 'usdt_trc', 'usdt_erc']);
+
+            if ($isUsdtVariant) {
+                // Handle USDT variants differently - they're 1:1 transfers, not conversions
+                return $this->handleUsdtVariantDeposit($request, $systemTaxPercent, $tax_amount, $net_amount);
+            }
+
+            // Create payment with NOWPayments for other cryptocurrencies
             $orderId = 'crypto_deposit_' . Auth::id() . '_' . time();
             $payment = $this->nowPayments->createPayment(
                 $request->amount,
@@ -191,5 +199,51 @@ class DepositController extends Controller
     public function cancel()
     {
         return redirect()->route('user.deposit.index')->with('warning', 'Payment was cancelled.');
+    }
+
+    /**
+     * Handle USDT variant deposits (BSC, TRC, ERC) - these are 1:1 transfers
+     */
+    private function handleUsdtVariantDeposit($request, $systemTaxPercent, $tax_amount, $net_amount)
+    {
+        // Generate unique deposit address for USDT variant
+        $networkMap = [
+            'usdt_bsc' => 'BSC (BEP-20)',
+            'usdt_trc' => 'TRC-20',
+            'usdt_erc' => 'ERC-20'
+        ];
+
+        $network = $networkMap[$request->crypto_currency] ?? 'Unknown';
+
+        // Generate a unique address or use a default one for the network
+        $addressMap = [
+            'usdt_bsc' => '0x8cAA7c9988E731F68598941503C41E00339de533', // BSC address
+            'usdt_trc' => 'TRX9a5u5Gh2xPgVWbJRK5WaxqGE4vF2Jx5', // TRC-20 address
+            'usdt_erc' => '0x8cAA7c9988E731F68598941503C41E00339de533'  // ERC-20 address
+        ];
+
+        $depositAddress = $addressMap[$request->crypto_currency] ?? $addressMap['usdt_bsc'];
+        $memo = 'USDT_' . strtoupper(str_replace('usdt_', '', $request->crypto_currency)) . '_' . time();
+
+        // Create the deposit record
+        $deposit = Deposit::create([
+            'user_id' => Auth::id(),
+            'amount' => $request->amount,
+            'tax_percent' => $systemTaxPercent,
+            'tax_amount' => $tax_amount,
+            'net_amount' => $net_amount,
+            'note' => $request->note ?? "USDT {$network} deposit",
+            'payment_method' => 'crypto',
+            'status' => 'pending',
+            'unique_address' => $depositAddress,
+            'crypto_currency' => $request->crypto_currency . '_TO_USDT',
+            'crypto_amount' => $request->amount, // 1:1 ratio for USDT
+            'payment_address' => $depositAddress,
+            'payment_id' => 'USDT_PENDING_' . time(),
+            'address_memo' => $memo,
+        ]);
+
+        return redirect()->route('user.deposit.success', ['payment_id' => $deposit->payment_id])
+            ->with('success', "USDT {$network} deposit created successfully!");
     }
 }
