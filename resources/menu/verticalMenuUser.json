@@ -36,10 +36,21 @@
       "slug": "user.ai_trades.index"
     },
     {
-      "name": "Referral Bonus Histories",
-      "icon": "menu-icon icon-base ti tabler-robot",
-      "url": "user/referral-bonus-histories",
-      "slug": "user.referral_bonus_histories.index"
+      "name": "Bonus",
+      "icon": "menu-icon icon-base ti tabler-wallet",
+      "slug": "user.bonus",
+      "submenu": [
+        {
+          "url": "user/referral-bonus-histories",
+          "name": "Bonus Referral",
+          "slug": "user.referral_bonus_histories.index"
+        },
+        {
+          "url": "user/roi-matching-bonus-histories",
+          "name": "ROI Matching Bonus",
+          "slug": "user.roi_matching_bonus_histories.index"
+        }
+      ]
     },
     {
       "url": "user/downline",

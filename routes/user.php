@@ -13,6 +13,7 @@ use App\Http\Controllers\User\InvestmentController;
 use App\Http\Controllers\User\AiTradeController;
 use App\Http\Controllers\User\MarketplaceController;
 use App\Http\Controllers\User\ReferralBonusHistoryController;
+use App\Http\Controllers\User\RoiMatchingBonusHistoryController;
 use App\Http\Controllers\KycController;
 // Route::middleware(['web'])->group(function () {
 //     Route::get('login', [App\Http\Controllers\User\UserLoginController::class, 'showLoginForm'])->name('login'); // Main login route
@@ -62,6 +63,9 @@ Route::prefix('user')->middleware('web')->group(function () {
         Route::get('downline', [UserController::class, 'downline'])->name('user.downline');
         Route::get('/logout', [UserLoginController::class, 'logout']);
         // Route::get('/debug', [UserController::class, 'debug']);
+
+    // ROI Matching Bonus History
+    Route::get('roi-matching-bonus-histories', [RoiMatchingBonusHistoryController::class, 'index'])->name('user.roi_matching_bonus_histories.index');
 
     // Referral Bonus Histories
     Route::get('referral-bonus-histories', [ReferralBonusHistoryController::class, 'index'])->name('user.referral_bonus_histories.index');

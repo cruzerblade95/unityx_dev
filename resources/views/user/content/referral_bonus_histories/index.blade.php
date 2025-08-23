@@ -5,7 +5,7 @@
 @section('content')
 <div class="container-fluid">
     <div class="row">
-        <div class="col-12 mb-4">
+        {{-- <div class="col-12 mb-4">
             <div class="card">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">ROI Matching Bonus History</h5>
@@ -44,7 +44,7 @@
                     {{ $roiMatching->links() }}
                 </div>
             </div>
-        </div>
+        </div> --}}
         <div class="col-12">
             <div class="card">
                 <div class="card-header bg-success text-white">
