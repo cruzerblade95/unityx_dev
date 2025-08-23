@@ -34,7 +34,7 @@ class Helpers
         'percent' => $percent,
         'bonus_type' => 'roi_matching',
         'level' => $level,
-        'note' => 'ROI Matching Bonus from user '.$userId,
+        'note' => 'ROI Matching Bonus from user id:'.$userId,
         'created_at' => now(),
         'updated_at' => now(),
       ]);
@@ -54,7 +54,7 @@ class Helpers
     $bonusBase = $amount * ($totalPercent / 100);
     $currentUserId = $userId;
     for ($level = 1; $level <= 10; $level++) {
-      $referrer = DB::table('users')->where('id', $currentUserId)->value('referral_id');
+      $referrer = DB::table('users')->where('id', $currentUserId)->value('upline_id');
       if (!$referrer) break;
       $percent = $percentages[$level-1];
       $bonus = $amount * ($percent / 100);
@@ -68,7 +68,7 @@ class Helpers
         'percent' => $percent,
         'bonus_type' => 'deposit',
         'level' => $level,
-        'note' => 'Deposit Bonus from user '.$userId,
+        'note' => 'Deposit Bonus from user id:'.$userId,
         'created_at' => now(),
         'updated_at' => now(),
       ]);

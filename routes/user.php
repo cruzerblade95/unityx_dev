@@ -12,6 +12,7 @@ use App\Http\Controllers\User\NotificationController;
 use App\Http\Controllers\User\InvestmentController;
 use App\Http\Controllers\User\AiTradeController;
 use App\Http\Controllers\User\MarketplaceController;
+use App\Http\Controllers\User\ReferralBonusHistoryController;
 use App\Http\Controllers\KycController;
 // Route::middleware(['web'])->group(function () {
 //     Route::get('login', [App\Http\Controllers\User\UserLoginController::class, 'showLoginForm'])->name('login'); // Main login route
@@ -61,6 +62,9 @@ Route::prefix('user')->middleware('web')->group(function () {
         Route::get('downline', [UserController::class, 'downline'])->name('user.downline');
         Route::get('/logout', [UserLoginController::class, 'logout']);
         // Route::get('/debug', [UserController::class, 'debug']);
+
+    // Referral Bonus Histories
+    Route::get('referral-bonus-histories', [ReferralBonusHistoryController::class, 'index'])->name('user.referral_bonus_histories.index');
 
     // KYC Verification
     Route::get('kyc', [KycController::class, 'index'])->name('user.kyc.index');
