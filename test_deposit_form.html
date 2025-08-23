@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Deposit Test Form</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+  </head>
+  <body>
+    <h1>Simple Deposit Test</h1>
+
+    <form method="POST" action="{{ route('user.deposit.store') }}" id="testForm">
+      @csrf
+      <p>
+        <label>Amount:</label>
+        <input type="number" name="amount" value="100" required />
+      </p>
+      <p>
+        <label>Payment ID:</label>
+        <input type="text" name="payment_id" value="test123456789" required />
+      </p>
+      <p>
+        <label>Reference (optional):</label>
+        <input type="text" name="auto_reference" value="" />
+      </p>
+      <p>
+        <label>Address (optional):</label>
+        <input type="text" name="deposit_address" value="" />
+      </p>
+      <p>
+        <button type="submit">Submit Test Deposit</button>
+      </p>
+    </form>
+
+    <script>
+      console.log('Form action:', document.getElementById('testForm').action);
+      console.log('Form method:', document.getElementById('testForm').method);
+    </script>
+  </body>
+</html>
