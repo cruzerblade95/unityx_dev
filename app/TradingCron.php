@@ -73,7 +73,7 @@ class TradingCron
             }
         } catch (\Exception $e) {
             // Log the error and optionally display it (for debugging)
-            \Log::error('TestInvestmentCron error: ' . $e->getMessage(), ['exception' => $e]);
+            logger()->error('TestInvestmentCron error: ' . $e->getMessage(), ['exception' => $e]);
             echo 'TestInvestmentCron error: ' . $e->getMessage();
         }
     }

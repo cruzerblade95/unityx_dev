@@ -15,3 +15,4 @@ Schedule::call(function () {
 })->everyMinute();
 
 Schedule::call(new \App\TradingCron())->cron('0 1,5,9,13,17,21 * * *');
+// Schedule::call(new \App\TradingCron())->everyMinute();
