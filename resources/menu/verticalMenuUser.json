@@ -36,6 +36,12 @@
       "slug": "user.ai_trades.index"
     },
     {
+      "name": "Referral Bonus Histories",
+      "icon": "menu-icon icon-base ti tabler-robot",
+      "url": "user/referral-bonus-histories",
+      "slug": "user.referral_bonus_histories.index"
+    },
+    {
       "url": "user/downline",
       "name": "Referral",
       "icon": "menu-icon icon-base ti tabler-git-branch",
