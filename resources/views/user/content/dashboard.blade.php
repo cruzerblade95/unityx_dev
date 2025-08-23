@@ -96,7 +96,8 @@
                         <div class="alert alert-info mt-3" role="alert">
                             <h6 class="alert-heading mb-2">📱 Telegram Notifications Connected</h6>
                             <p class="mb-2">Telegram ID:
-                                <strong>{{ \Illuminate\Support\Facades\Auth::user()->telegram_id }}</strong></p>
+                                <strong>{{ \Illuminate\Support\Facades\Auth::user()->telegram_id }}</strong>
+                            </p>
                             <p class="mb-3">Test your Telegram notification connection:</p>
                             <button type="button" class="btn btn-sm btn-info" onclick="testTelegramNotification()">
                                 <i class="ti ti-send me-1"></i>Send Test Notification
@@ -130,7 +131,7 @@
                                 {{ Illuminate\Support\Facades\Auth::user()->lastname }}! 🎉</h5>
                             <p class="mb-2">Welcome to UnityX</p>
                             <h4 class="text-primary mb-1">{{ number_format($wallet->profit ?? 0, 2) }} USDT</h4>
-                            <a href="{{ route('user.ai-trade') }}" class="btn btn-primary">View AI Trade</a>
+                            <a href="{{ route('user.ai_trades.index') }}" class="btn btn-primary">View AI Trade</a>
                         </div>
                     </div>
                     <div class="col-5 text-center text-sm-left">
