@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\User;
 
+use Illuminate\Support\Facades\DB;
+
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -50,6 +52,17 @@ class UserRegisterController extends Controller
             'password' => Hash::make($request->password),
             'referral_code' => $newReferralCode,
             'upline_id' => $uplineId,
+        ]);
+
+        // Insert default wallet for new user
+        DB::table('wallets')->insert([
+            'user_id' => $user->id,
+            'deposit' => 0,
+            'profit' => 0,
+            'bonus' => 0,
+            'withdrawal' => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         Auth::guard('web')->login($user);
