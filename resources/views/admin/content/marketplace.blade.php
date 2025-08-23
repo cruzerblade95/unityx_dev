@@ -15,6 +15,9 @@
 @endsection
 
 @section('content')
+    <!-- Add CSRF Token -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <div class="container-xxl flex-grow-1 container-p-y">
         <!-- Header -->
         <div class="row">
@@ -30,6 +33,7 @@
                             <span class="badge bg-success">{{ $completedTransactions }} Completed</span>
                             <span class="badge bg-warning">{{ $pendingTransactions }} Pending</span>
                             <span class="badge bg-danger">{{ $cancelledTransactions }} Cancelled</span>
+                            <span class="badge bg-dark">{{ $rejectedTransactions }} Rejected</span>
                         </div>
                     </div>
                 </div>
@@ -148,6 +152,8 @@
                                             Completed</option>
                                         <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>
                                             Cancelled</option>
+                                        <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>
+                                            Rejected</option>
                                         <option value="expired" {{ request('status') == 'expired' ? 'selected' : '' }}>
                                             Expired</option>
                                     </select>
@@ -273,6 +279,10 @@
                                                         <span class="badge bg-danger">Cancelled</span>
                                                     @break
 
+                                                    @case('rejected')
+                                                        <span class="badge bg-dark">Rejected</span>
+                                                    @break
+
                                                     @case('expired')
                                                         <span class="badge bg-secondary">Expired</span>
                                                     @break
@@ -335,6 +345,17 @@
                                                                 <i class="ti tabler-copy me-1"></i>Copy ID
                                                             </a>
                                                         </li>
+                                                        @if ($transaction->status === 'pending_verification')
+                                                            <li>
+                                                                <hr class="dropdown-divider">
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item text-danger" href="#"
+                                                                    onclick="rejectTransaction('{{ $transaction->unique_id }}')">
+                                                                    <i class="ti tabler-x me-1"></i>Reject with Reason
+                                                                </a>
+                                                            </li>
+                                                        @endif
                                                     </ul>
                                                 </div>
                                             </td>
@@ -372,7 +393,129 @@
             </div>
         </div>
 
+        <!-- Reject Transaction Modal -->
+        <div class="modal fade" id="rejectTransactionModal" tabindex="-1" aria-labelledby="rejectTransactionModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="rejectTransactionModalLabel">Reject Transaction</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="rejectTransactionForm">
+                        @csrf
+                        <div class="modal-body">
+                            <div class="alert alert-warning">
+                                <i class="ti tabler-alert-triangle me-2"></i>
+                                <strong>Warning:</strong> This action will permanently reject the transaction and cannot be
+                                undone.
+                            </div>
+                            <div class="mb-3">
+                                <label for="rejectReason" class="form-label">Rejection Reason <span
+                                        class="text-danger">*</span></label>
+                                <textarea class="form-control" id="rejectReason" name="reason" rows="4"
+                                    placeholder="Please provide a detailed reason for rejecting this transaction..." required></textarea>
+                                <div class="form-text">This reason will be visible to both the buyer and seller.</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="ti tabler-x me-1"></i>Reject Transaction
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <script>
+            let currentTransactionId = null;
+
+            function rejectTransaction(transactionId) {
+                currentTransactionId = transactionId;
+                const modal = new bootstrap.Modal(document.getElementById('rejectTransactionModal'));
+                modal.show();
+            }
+
+            document.getElementById('rejectTransactionForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const reason = document.getElementById('rejectReason').value;
+                const submitBtn = this.querySelector('button[type="submit"]');
+
+                if (!reason.trim()) {
+                    alert('Please provide a rejection reason.');
+                    return;
+                }
+
+                // Disable submit button
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Rejecting...';
+
+                fetch(`/admin/marketplace/${currentTransactionId}/reject`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                'content')
+                        },
+                        body: JSON.stringify({
+                            reason: reason
+                        })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // Close modal
+                            const modal = bootstrap.Modal.getInstance(document.getElementById(
+                                'rejectTransactionModal'));
+                            modal.hide();
+
+                            // Show success message
+                            const toast = document.createElement('div');
+                            toast.className = 'toast position-fixed top-0 end-0 m-3';
+                            toast.innerHTML = `
+                            <div class="toast-header bg-success text-white">
+                                <strong class="me-auto">Success</strong>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                            </div>
+                            <div class="toast-body">Transaction rejected successfully</div>
+                        `;
+                            document.body.appendChild(toast);
+                            const bsToast = new bootstrap.Toast(toast);
+                            bsToast.show();
+
+                            // Reload page after 2 seconds
+                            setTimeout(() => {
+                                location.reload();
+                            }, 2000);
+                        } else {
+                            alert('Error: ' + (data.message || 'Failed to reject transaction'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while rejecting the transaction: ' + error.message);
+                    })
+                    .finally(() => {
+                        // Re-enable submit button
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="ti tabler-x me-1"></i>Reject Transaction';
+                    });
+            });
+
+            // Reset form when modal is hidden
+            document.getElementById('rejectTransactionModal').addEventListener('hidden.bs.modal', function() {
+                document.getElementById('rejectTransactionForm').reset();
+                currentTransactionId = null;
+            });
+
             function copyTransactionId(id) {
                 navigator.clipboard.writeText(id).then(function() {
                     // Show success toast

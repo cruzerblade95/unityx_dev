@@ -36,18 +36,48 @@ class MarketplaceController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(16);
 
-        // Get user's own listings
-        $myListings = MarketplaceListing::bySeller(Auth::id())
+        // Get user's own listings by status
+        $myActiveListings = MarketplaceListing::bySeller(Auth::id())
+            ->active()
             ->orderBy('created_at', 'desc')
-            ->limit(10)
             ->get();
 
-        // Get user's pending verifications (as buyer)
-        $pendingVerifications = MarketplaceListing::byBuyer(Auth::id())
+        $mySoldListings = MarketplaceListing::bySeller(Auth::id())
+            ->sold()
+            ->orderBy('sold_at', 'desc')
+            ->get();
+
+        $myCancelledListings = MarketplaceListing::bySeller(Auth::id())
+            ->cancelled()
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        $myRejectedListings = MarketplaceListing::bySeller(Auth::id())
+            ->rejected()
+            ->with('rejectedBy')
+            ->orderBy('admin_rejected_at', 'desc')
+            ->get();
+
+        $myExpiredListings = MarketplaceListing::bySeller(Auth::id())
+            ->expired()
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        // Get user's purchases by status
+        $myPendingPurchases = MarketplaceListing::byBuyer(Auth::id())
             ->pendingVerification()
             ->with('seller')
             ->orderBy('verification_started_at', 'desc')
             ->get();
+
+        $myCompletedPurchases = MarketplaceListing::byBuyer(Auth::id())
+            ->sold()
+            ->with('seller')
+            ->orderBy('sold_at', 'desc')
+            ->get();
+
+        // Get user's pending verifications (as buyer) - keep for backward compatibility
+        $pendingVerifications = $myPendingPurchases;
 
         // Get user's verification requests (as seller)
         $verificationRequests = MarketplaceListing::bySeller(Auth::id())
@@ -56,7 +86,20 @@ class MarketplaceController extends Controller
             ->orderBy('verification_started_at', 'desc')
             ->get();
 
-        return view('user.content.marketplace', compact('listings', 'myListings', 'pendingVerifications', 'verificationRequests', 'cashBalance', 'profitBalance'));
+        return view('user.content.marketplace', compact(
+            'listings',
+            'myActiveListings',
+            'mySoldListings',
+            'myCancelledListings',
+            'myRejectedListings',
+            'myExpiredListings',
+            'myPendingPurchases',
+            'myCompletedPurchases',
+            'pendingVerifications',
+            'verificationRequests',
+            'cashBalance',
+            'profitBalance'
+        ));
     }
 
     /**

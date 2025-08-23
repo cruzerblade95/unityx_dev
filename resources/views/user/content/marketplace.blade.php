@@ -441,65 +441,365 @@
             </div>
         </div>
 
-        <!-- My Listings -->
-        @if ($myListings->count() > 0)
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-list me-2"></i>
-                        My Listings
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Amount</th>
-                                    <th>Multiplier</th>
-                                    <th>Total</th>
-                                    <th>Status</th>
-                                    <th>Created</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($myListings as $listing)
-                                    <tr>
-                                        <td><code>{{ $listing->unique_id }}</code></td>
-                                        <td>{{ number_format($listing->amount, 2) }} USDT</td>
-                                        <td>x{{ number_format($listing->price_per_usdt, 2) }}</td>
-                                        <td>${{ number_format($listing->total_price, 2) }}</td>
-                                        <td>
-                                            @if ($listing->status === 'active')
-                                                <span class="badge bg-success">Active</span>
-                                            @elseif($listing->status === 'sold')
-                                                <span class="badge bg-primary">Sold</span>
-                                            @else
-                                                <span class="badge bg-secondary">Cancelled</span>
-                                            @endif
-                                        </td>
-                                        <td>{{ $listing->created_at->diffForHumans() }}</td>
-                                        <td>
-                                            @if ($listing->status === 'active')
-                                                <button class="btn btn-danger btn-sm"
-                                                    onclick="cancelListing('{{ $listing->unique_id }}')">
-                                                    <i class="fas fa-times me-1"></i>
-                                                    Cancel
-                                                </button>
-                                            @else
-                                                -
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+        <!-- My Listings with Tabs -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    My Activity
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs" id="myActivityTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active"
+                            type="button" role="tab" aria-controls="active" aria-selected="true">
+                            Active Listings
+                            @if ($myActiveListings->count() > 0)
+                                <span class="badge bg-success ms-2">{{ $myActiveListings->count() }}</span>
+                            @endif
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pending-purchases-tab" data-bs-toggle="tab"
+                            data-bs-target="#pending-purchases" type="button" role="tab"
+                            aria-controls="pending-purchases" aria-selected="false">
+                            Pending Purchases
+                            @if ($myPendingPurchases->count() > 0)
+                                <span class="badge bg-warning ms-2">{{ $myPendingPurchases->count() }}</span>
+                            @endif
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="sold-tab" data-bs-toggle="tab" data-bs-target="#sold"
+                            type="button" role="tab" aria-controls="sold" aria-selected="false">
+                            Sold
+                            @if ($mySoldListings->count() > 0)
+                                <span class="badge bg-primary ms-2">{{ $mySoldListings->count() }}</span>
+                            @endif
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="completed-purchases-tab" data-bs-toggle="tab"
+                            data-bs-target="#completed-purchases" type="button" role="tab"
+                            aria-controls="completed-purchases" aria-selected="false">
+                            Completed Purchases
+                            @if ($myCompletedPurchases->count() > 0)
+                                <span class="badge bg-info ms-2">{{ $myCompletedPurchases->count() }}</span>
+                            @endif
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="cancelled-tab" data-bs-toggle="tab" data-bs-target="#cancelled"
+                            type="button" role="tab" aria-controls="cancelled" aria-selected="false">
+                            Cancelled
+                            @if ($myCancelledListings->count() > 0)
+                                <span class="badge bg-secondary ms-2">{{ $myCancelledListings->count() }}</span>
+                            @endif
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="rejected-tab" data-bs-toggle="tab" data-bs-target="#rejected"
+                            type="button" role="tab" aria-controls="rejected" aria-selected="false">
+                            Rejected
+                            @if ($myRejectedListings->count() > 0)
+                                <span class="badge bg-danger ms-2">{{ $myRejectedListings->count() }}</span>
+                            @endif
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="expired-tab" data-bs-toggle="tab" data-bs-target="#expired"
+                            type="button" role="tab" aria-controls="expired" aria-selected="false">
+                            Expired
+                            @if ($myExpiredListings->count() > 0)
+                                <span class="badge bg-dark ms-2">{{ $myExpiredListings->count() }}</span>
+                            @endif
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab content -->
+                <div class="tab-content mt-3" id="myActivityTabContent">
+                    <!-- Active Listings Tab -->
+                    <div class="tab-pane fade show active" id="active" role="tabpanel" aria-labelledby="active-tab">
+                        @if ($myActiveListings->count() > 0)
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Amount</th>
+                                            <th>Multiplier</th>
+                                            <th>Total</th>
+                                            <th>Created</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($myActiveListings as $listing)
+                                            <tr>
+                                                <td><code>{{ $listing->unique_id }}</code></td>
+                                                <td>{{ number_format($listing->amount, 2) }} USDT</td>
+                                                <td>x{{ number_format($listing->price_per_usdt, 2) }}</td>
+                                                <td>${{ number_format($listing->total_price, 2) }}</td>
+                                                <td>{{ $listing->created_at->diffForHumans() }}</td>
+                                                <td>
+                                                    <button class="btn btn-danger btn-sm"
+                                                        onclick="cancelListing('{{ $listing->unique_id }}')">
+                                                        <i class="fas fa-times me-1"></i>Cancel
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="text-center py-4">
+                                <i class="fas fa-list fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No active listings</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Pending Purchases Tab -->
+                    <div class="tab-pane fade" id="pending-purchases" role="tabpanel"
+                        aria-labelledby="pending-purchases-tab">
+                        @if ($myPendingPurchases->count() > 0)
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Seller</th>
+                                            <th>Amount</th>
+                                            <th>Total</th>
+                                            <th>Time Left</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($myPendingPurchases as $purchase)
+                                            <tr>
+                                                <td><code>{{ $purchase->unique_id }}</code></td>
+                                                <td>{{ $purchase->seller->username }}</td>
+                                                <td>{{ number_format($purchase->amount, 2) }} USDT</td>
+                                                <td>${{ number_format($purchase->total_price, 2) }}</td>
+                                                <td>
+                                                    @if ($purchase->remaining_verification_time > 0)
+                                                        <span
+                                                            class="badge bg-warning">{{ $purchase->remaining_verification_time }}m
+                                                            left</span>
+                                                    @else
+                                                        <span class="badge bg-danger">Expired</span>
+                                                    @endif
+                                                </td>
+                                                <td><span class="badge bg-info">Pending Verification</span></td>
+                                                <td>
+                                                    <button class="btn btn-warning btn-sm"
+                                                        onclick="cancelVerification('{{ $purchase->unique_id }}')">
+                                                        <i class="fas fa-times me-1"></i>Cancel
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="text-center py-4">
+                                <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No pending purchases</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Sold Tab -->
+                    <div class="tab-pane fade" id="sold" role="tabpanel" aria-labelledby="sold-tab">
+                        @if ($mySoldListings->count() > 0)
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Buyer</th>
+                                            <th>Amount</th>
+                                            <th>Total</th>
+                                            <th>Sold Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($mySoldListings as $listing)
+                                            <tr>
+                                                <td><code>{{ $listing->unique_id }}</code></td>
+                                                <td>{{ $listing->buyer ? $listing->buyer->username : 'N/A' }}</td>
+                                                <td>{{ number_format($listing->amount, 2) }} USDT</td>
+                                                <td>${{ number_format($listing->total_price, 2) }}</td>
+                                                <td>{{ $listing->sold_at ? $listing->sold_at->format('M d, Y H:i') : 'N/A' }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="text-center py-4">
+                                <i class="fas fa-check-circle fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No sold listings</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Completed Purchases Tab -->
+                    <div class="tab-pane fade" id="completed-purchases" role="tabpanel"
+                        aria-labelledby="completed-purchases-tab">
+                        @if ($myCompletedPurchases->count() > 0)
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Seller</th>
+                                            <th>Amount</th>
+                                            <th>Total Paid</th>
+                                            <th>Completed Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($myCompletedPurchases as $purchase)
+                                            <tr>
+                                                <td><code>{{ $purchase->unique_id }}</code></td>
+                                                <td>{{ $purchase->seller->username }}</td>
+                                                <td>{{ number_format($purchase->amount, 2) }} USDT</td>
+                                                <td>${{ number_format($purchase->total_price, 2) }}</td>
+                                                <td>{{ $purchase->sold_at ? $purchase->sold_at->format('M d, Y H:i') : 'N/A' }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="text-center py-4">
+                                <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No completed purchases</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Cancelled Tab -->
+                    <div class="tab-pane fade" id="cancelled" role="tabpanel" aria-labelledby="cancelled-tab">
+                        @if ($myCancelledListings->count() > 0)
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Amount</th>
+                                            <th>Total</th>
+                                            <th>Cancelled Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($myCancelledListings as $listing)
+                                            <tr>
+                                                <td><code>{{ $listing->unique_id }}</code></td>
+                                                <td>{{ number_format($listing->amount, 2) }} USDT</td>
+                                                <td>${{ number_format($listing->total_price, 2) }}</td>
+                                                <td>{{ $listing->updated_at->format('M d, Y H:i') }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="text-center py-4">
+                                <i class="fas fa-times-circle fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No cancelled listings</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Rejected Tab -->
+                    <div class="tab-pane fade" id="rejected" role="tabpanel" aria-labelledby="rejected-tab">
+                        @if ($myRejectedListings->count() > 0)
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Amount</th>
+                                            <th>Total</th>
+                                            <th>Rejection Reason</th>
+                                            <th>Rejected By</th>
+                                            <th>Rejected Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($myRejectedListings as $listing)
+                                            <tr>
+                                                <td><code>{{ $listing->unique_id }}</code></td>
+                                                <td>{{ number_format($listing->amount, 2) }} USDT</td>
+                                                <td>${{ number_format($listing->total_price, 2) }}</td>
+                                                <td>
+                                                    <div class="text-break" style="max-width: 300px;">
+                                                        {{ $listing->admin_rejection_reason ?: 'No reason provided' }}
+                                                    </div>
+                                                </td>
+                                                <td>{{ $listing->rejectedBy ? $listing->rejectedBy->username : 'System' }}
+                                                </td>
+                                                <td>{{ $listing->admin_rejected_at ? $listing->admin_rejected_at->format('M d, Y H:i') : 'N/A' }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="text-center py-4">
+                                <i class="fas fa-ban fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No rejected listings</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Expired Tab -->
+                    <div class="tab-pane fade" id="expired" role="tabpanel" aria-labelledby="expired-tab">
+                        @if ($myExpiredListings->count() > 0)
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Amount</th>
+                                            <th>Total</th>
+                                            <th>Expired Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($myExpiredListings as $listing)
+                                            <tr>
+                                                <td><code>{{ $listing->unique_id }}</code></td>
+                                                <td>{{ number_format($listing->amount, 2) }} USDT</td>
+                                                <td>${{ number_format($listing->total_price, 2) }}</td>
+                                                <td>{{ $listing->updated_at->format('M d, Y H:i') }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="text-center py-4">
+                                <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No expired listings</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
-        @endif
+        </div>
     </div>
 
     <!-- Create Listing Modal -->

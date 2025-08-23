@@ -63,5 +63,6 @@ Route::prefix('admin')->middleware('web')->group(function () {
         // Marketplace Management Routes
         Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('admin.marketplace.index');
         Route::get('/marketplace/{id}', [MarketplaceController::class, 'show'])->name('admin.marketplace.show');
+        Route::post('/marketplace/{id}/reject', [MarketplaceController::class, 'reject'])->name('admin.marketplace.reject');
     });
 });
