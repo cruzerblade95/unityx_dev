@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\MarketplaceListing;
+use App\Services\NotificationService;
 
 class UserController extends Controller
 {
@@ -13,6 +14,8 @@ class UserController extends Controller
     {
         $user = Auth::user();
         $wallet = $user->wallet;
+
+        // Test notifications removed - no longer creating default notifications for new users
 
         // Get 4 latest marketplace listings for mini display
         $miniMarketplaceListings = MarketplaceListing::with('seller')

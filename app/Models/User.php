@@ -11,6 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 use App\Models\Wallet;
 use App\Models\KycVerification;
+use App\Models\Notification;
 
 class User extends Authenticatable
 {
@@ -91,6 +92,22 @@ class User extends Authenticatable
     public function kycVerification()
     {
         return $this->hasOne(KycVerification::class);
+    }
+
+    /**
+     * Get notifications for the user.
+     */
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class)->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get unread notifications for the user.
+     */
+    public function unreadNotifications()
+    {
+        return $this->hasMany(Notification::class)->whereNull('read_at')->orderBy('created_at', 'desc');
     }
 
     /**

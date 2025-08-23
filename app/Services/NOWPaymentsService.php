@@ -16,10 +16,10 @@ class NOWPaymentsService
     public function __construct()
     {
         $this->apiKey = config('services.nowpayments.api_key');
-        $this->baseUrl = config('services.nowpayments.sandbox', true) 
-            ? 'https://api-sandbox.nowpayments.io' 
+        $this->baseUrl = config('services.nowpayments.sandbox', true)
+            ? 'https://api-sandbox.nowpayments.io'
             : 'https://api.nowpayments.io';
-        
+
         $this->client = new Client([
             'base_uri' => $this->baseUrl,
             'headers' => [
@@ -46,18 +46,18 @@ class NOWPaymentsService
                     'password' => config('services.nowpayments.password')
                 ]
             ]);
-            
+
             $result = json_decode($response->getBody()->getContents(), true);
-            
+
             if (isset($result['token'])) {
                 $this->jwtToken = $result['token'];
                 Log::info('NOWPayments: Successfully authenticated and got JWT token');
                 return $this->jwtToken;
             }
-            
+
             Log::error('NOWPayments Authentication failed: No token in response', $result);
             return false;
-            
+
         } catch (RequestException $e) {
             Log::error('NOWPayments Authentication Error: ' . $e->getMessage());
             if ($e->hasResponse()) {
@@ -74,7 +74,7 @@ class NOWPaymentsService
     private function getAuthenticatedClient()
     {
         $token = $this->authenticate();
-        
+
         if (!$token) {
             return false;
         }
@@ -97,60 +97,60 @@ class NOWPaymentsService
     {
         try {
             $client = $this->getAuthenticatedClient();
-            
+
             if (!$client) {
                 Log::error('NOWPayments: Failed to get authenticated client');
                 return false;
             }
-            
+
             // Try different endpoints that might work
             $endpoints = [
                 '/payments',           // Root level payments endpoint
-                '/payment',            // Root level payment endpoint  
+                '/payment',            // Root level payment endpoint
                 '/v1/payment',         // V1 payment endpoint
                 '/v1/payments',        // V1 payments endpoint
                 '/v2/payment',         // V2 payment endpoint
                 '/v2/payments'         // V2 payments endpoint
             ];
-            
+
             // Start with no default parameters
             $defaultParams = [];
             $params = array_merge($defaultParams, $params);
-            
+
             foreach ($endpoints as $endpoint) {
                 try {
                     Log::info("Trying NOWPayments endpoint: {$endpoint}");
-                    
+
                     $response = $client->get($endpoint, [
                         'query' => $params
                     ]);
-                    
+
                     $result = json_decode($response->getBody()->getContents(), true);
-                    
+
                     // Log the successful response
                     Log::info('NOWPayments API Success', [
                         'endpoint' => $endpoint,
                         'status_code' => $response->getStatusCode(),
                         'response_structure' => array_keys($result ?? [])
                     ]);
-                    
+
                     return $result;
-                    
+
                 } catch (RequestException $e) {
                     Log::warning("NOWPayments endpoint {$endpoint} failed", [
                         'status' => $e->hasResponse() ? $e->getResponse()->getStatusCode() : 'no_response',
                         'message' => $e->getMessage()
                     ]);
-                    
+
                     // Continue to next endpoint
                     continue;
                 }
             }
-            
+
             // If all endpoints failed, return false
             Log::error('All NOWPayments endpoints failed');
             return false;
-            
+
         } catch (RequestException $e) {
             Log::error('NOWPayments List Payments Error: ' . $e->getMessage());
             if ($e->hasResponse()) {
@@ -239,10 +239,76 @@ class NOWPaymentsService
     public function getPaymentStatus($paymentId)
     {
         try {
-            $response = $this->client->get("/v1/payment/{$paymentId}");
-            return json_decode($response->getBody()->getContents(), true);
+            // Try multiple endpoints for payment status
+            $endpoints = [
+                "/v1/payment/{$paymentId}",
+                "/v2/payment/{$paymentId}",
+                "/payment/{$paymentId}",
+                "/payments/{$paymentId}"
+            ];
+
+            // First try with basic client (no auth)
+            foreach ($endpoints as $endpoint) {
+                try {
+                    Log::info("Trying NOWPayments payment status endpoint: {$endpoint}");
+                    $response = $this->client->get($endpoint);
+                    $result = json_decode($response->getBody()->getContents(), true);
+
+                    Log::info('NOWPayments Payment Status Success', [
+                        'endpoint' => $endpoint,
+                        'payment_id' => $paymentId,
+                        'status_code' => $response->getStatusCode()
+                    ]);
+
+                    return $result;
+                } catch (RequestException $e) {
+                    Log::warning("NOWPayments payment status endpoint {$endpoint} failed", [
+                        'payment_id' => $paymentId,
+                        'status' => $e->hasResponse() ? $e->getResponse()->getStatusCode() : 'no_response',
+                        'message' => $e->getMessage()
+                    ]);
+                    continue;
+                }
+            }
+
+            // If basic client fails, try with authenticated client
+            $authClient = $this->getAuthenticatedClient();
+            if ($authClient) {
+                foreach ($endpoints as $endpoint) {
+                    try {
+                        Log::info("Trying authenticated NOWPayments payment status endpoint: {$endpoint}");
+                        $response = $authClient->get($endpoint);
+                        $result = json_decode($response->getBody()->getContents(), true);
+
+                        Log::info('NOWPayments Authenticated Payment Status Success', [
+                            'endpoint' => $endpoint,
+                            'payment_id' => $paymentId,
+                            'status_code' => $response->getStatusCode()
+                        ]);
+
+                        return $result;
+                    } catch (RequestException $e) {
+                        Log::warning("NOWPayments authenticated payment status endpoint {$endpoint} failed", [
+                            'payment_id' => $paymentId,
+                            'status' => $e->hasResponse() ? $e->getResponse()->getStatusCode() : 'no_response',
+                            'message' => $e->getMessage()
+                        ]);
+                        continue;
+                    }
+                }
+            }
+
+            Log::error('NOWPayments: All payment status endpoints failed', ['payment_id' => $paymentId]);
+            return false;
+
         } catch (RequestException $e) {
-            Log::error('NOWPayments Payment Status Error: ' . $e->getMessage());
+            Log::error('NOWPayments Payment Status Error: ' . $e->getMessage(), [
+                'payment_id' => $paymentId
+            ]);
+            if ($e->hasResponse()) {
+                Log::error('Payment Status Response Status: ' . $e->getResponse()->getStatusCode());
+                Log::error('Payment Status Response Body: ' . $e->getResponse()->getBody());
+            }
             return false;
         }
     }
@@ -300,12 +366,12 @@ class NOWPaymentsService
     {
         try {
             $client = $this->getAuthenticatedClient();
-            
+
             if (!$client) {
                 Log::error('NOWPayments: Failed to get authenticated client');
                 return false;
             }
-            
+
             // Try dashboard-related endpoints
             $endpoints = [
                 '/v1/account',
@@ -314,23 +380,23 @@ class NOWPaymentsService
                 '/v1/statistics',
                 '/v1/dashboard'
             ];
-            
+
             foreach ($endpoints as $endpoint) {
                 try {
                     Log::info("Trying NOWPayments dashboard endpoint: {$endpoint}");
-                    
+
                     $response = $client->get($endpoint);
-                    
+
                     $result = json_decode($response->getBody()->getContents(), true);
-                    
+
                     Log::info('NOWPayments Dashboard Success', [
                         'endpoint' => $endpoint,
                         'status_code' => $response->getStatusCode(),
                         'response_structure' => array_keys($result ?? [])
                     ]);
-                    
+
                     return $result;
-                    
+
                 } catch (RequestException $e) {
                     Log::warning("NOWPayments dashboard endpoint {$endpoint} failed", [
                         'status' => $e->hasResponse() ? $e->getResponse()->getStatusCode() : 'no_response',
@@ -339,9 +405,9 @@ class NOWPaymentsService
                     continue;
                 }
             }
-            
+
             return false;
-            
+
         } catch (RequestException $e) {
             Log::error('NOWPayments Dashboard Error: ' . $e->getMessage());
             return false;

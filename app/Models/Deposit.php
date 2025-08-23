@@ -9,13 +9,13 @@ class Deposit extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'user_id', 
-        'amount', 
-        'tax_percent', 
-        'tax_amount', 
-        'net_amount', 
-        'status', 
-        'reference', 
+        'user_id',
+        'amount',
+        'tax_percent',
+        'tax_amount',
+        'net_amount',
+        'status',
+        'reference',
         'note',
         'payment_method',
         'payment_id',
@@ -25,9 +25,12 @@ class Deposit extends Model
         'payment_address',
         'unique_address',
         'address_memo',
-        'address_expires_at'
+        'address_expires_at',
+        'rejection_reason',
+        'rejected_at',
+        'rejected_by'
     ];
-    
+
     public function user() {
         return $this->belongsTo(User::class);
     }
