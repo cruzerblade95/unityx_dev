@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 
@@ -283,7 +284,7 @@ class Helpers
   public static function insertAiTrade($user_id, $amount_invest)
   {
     $ending_amount = $amount_invest * 5;
-    return \DB::table('ai_trades')->insertGetId([
+    return DB::table('ai_trades')->insertGetId([
       'user_id' => $user_id,
       'amount_invest' => $amount_invest,
       'ending_amount' => $ending_amount,

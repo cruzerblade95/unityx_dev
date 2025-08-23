@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="card-body">
             <div class="alert alert-primary alert-dismissible" role="alert">
             <h5 class="alert-heading mb-2">Announcement!</h5>
-            <p class="mb-0">Deposit, withdrawal & p2p is available now! Next update will be Referral System Bonus. 
+            <p class="mb-0">Deposit, withdrawal & p2p is available now! Next update will be Referral System Bonus.
               {{-- <span id="sync-estimate" data-timestamp="2025-08-20T11:00:00"></span> --}}
             </p>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <h5 class="card-title mb-0">Hello, {{ Illuminate\Support\Facades\Auth::user()->firstname }} {{ Illuminate\Support\Facades\Auth::user()->lastname }}! 🎉</h5>
             <p class="mb-2">Welcome to UnityX</p>
             <h4 class="text-primary mb-1">0.0000 USDT</h4>
-            <a href="javascript:;" class="btn btn-primary">View Sales</a>
+            <a href="{{ route('user.ai_trades.index') }}" class="btn btn-primary">View AI Trades</a>
           </div>
         </div>
         <div class="col-5 text-center text-sm-left">
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
   <div class="col-xl-8 col-md-12">
     <div class="card h-100">
       <div class="card-header d-flex justify-content-between">
-        <h5 class="card-title mb-0">My Wallets</h5>
+        <h5 class="card-title mb-0">My Wallets : USDT</h5>
         <small class="text-body-secondary">
           @if(isset($wallet) && $wallet && $wallet->updated_at)
             Updated {{ $wallet->updated_at->diffForHumans() }}
@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
                   <i class="icon-base ti tabler-wallet icon-lg"></i>
                 </div>
                 <div class="card-info">
-                  <h5 class="mb-0">{{ number_format($wallet->deposit ?? 0, 4) }} USDT</h5>
+                  <h5 class="mb-0">{{ number_format($wallet->deposit ?? 0, 2) }}</h5>
                   <small class="text-uppercase">DEPOSIT</small>
                 </div>
               </div>
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="badge rounded bg-label-info me-4 p-2"><i class="icon-base ti tabler-trending-up icon-lg"></i>
                 </div>
                 <div class="card-info">
-                  <h5 class="mb-0">{{ number_format($wallet->profit ?? 0, 4) }} USDT</h5>
+                  <h5 class="mb-0">{{ number_format($wallet->profit ?? 0, 2) }}</h5>
                   <small class="text-uppercase">PROFIT</small>
                 </div>
               </div>
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
                   <i class="icon-base ti tabler-gift icon-lg"></i>
                 </div>
                 <div class="card-info">
-                  <h5 class="mb-0">{{ number_format($wallet->bonus ?? 0, 4) }} USDT</h5>
+                  <h5 class="mb-0">{{ number_format($wallet->bonus ?? 0, 2) }}</h5>
                   <small class="text-uppercase">BONUS</small>
                 </div>
               </div>
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
                   <i class="icon-base ti tabler-cash icon-lg"></i>
                 </div>
                 <div class="card-info">
-                  <h5 class="mb-0">{{ number_format($wallet->cash ?? 0, 4) }} USDT</h5>
+                  <h5 class="mb-0">{{ number_format($wallet->cash ?? 0, 2) }}</h5>
                   <small class="text-uppercase">CASH</small>
                 </div>
               </div>
@@ -254,7 +254,7 @@ document.addEventListener('DOMContentLoaded', function() {
             View All Listings
           </a>
         </div>
-        
+
         @if(isset($miniMarketplaceListings) && $miniMarketplaceListings->count() > 0)
           <div class="row g-3">
             @foreach($miniMarketplaceListings as $listing)
@@ -264,11 +264,11 @@ document.addEventListener('DOMContentLoaded', function() {
                   <div class="text-center mb-3">
                     <i class="fas fa-coins text-warning" style="font-size: 2rem;"></i>
                   </div>
-                  
+
                   <h6 class="card-title text-center mb-2">
                     {{ number_format($listing->amount, 2) }} USDT
                   </h6>
-                  
+
                   <div class="mb-3">
                     <div class="d-flex justify-content-between">
                       <small class="text-muted">Multiplier:</small>
@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', function() {
                       <strong class="text-primary">${{ number_format($listing->total_price * 1.018, 2) }}</strong>
                     </div>
                   </div>
-                  
+
                   <div class="d-flex justify-content-between align-items-center mb-3">
                     <small class="text-muted">
                       <i class="fas fa-user me-1"></i>
@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </small>
                     <small class="text-muted">{{ $listing->unique_id }}</small>
                   </div>
-                  
+
                   <a href="{{ route('user.marketplace.index') }}" class="btn btn-primary btn-sm w-100">
                     <i class="fas fa-shopping-cart me-2"></i>
                     Buy Now
