@@ -20,7 +20,7 @@ class Helpers
     $bonusBase = $amount * ($totalPercent / 100);
     $currentUserId = $userId;
     for ($level = 1; $level <= 10; $level++) {
-      $referrer = DB::table('users')->where('id', $currentUserId)->value('referral_id');
+      $referrer = DB::table('users')->where('id', $currentUserId)->value('upline_id');
       if (!$referrer) break;
       $percent = $percentages[$level-1];
       $bonus = $amount * ($percent / 100);
