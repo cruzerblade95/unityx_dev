@@ -55,15 +55,15 @@ class UserRegisterController extends Controller
         ]);
 
         // Insert default wallet for new user
-        DB::table('wallets')->insert([
-            'user_id' => $user->id,
-            'deposit' => 0,
-            'profit' => 0,
-            'bonus' => 0,
-            'cash' => 0,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // DB::table('wallets')->insert([
+        //     'user_id' => $user->id,
+        //     'deposit' => 0,
+        //     'profit' => 0,
+        //     'bonus' => 0,
+        //     'cash' => 0,
+        //     'created_at' => now(),
+        //     'updated_at' => now(),
+        // ]);
 
         Auth::guard('web')->login($user);
         return redirect()->route('connect-telegram')->with('notyf_success', 'Registration successful!');
