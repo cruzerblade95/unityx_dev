@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\WalletManagementController;
 use App\Http\Controllers\Admin\KycApprovalController;
 use App\Http\Controllers\Admin\NOWPaymentsController;
 use App\Http\Controllers\Admin\WithdrawalManagementController;
+use App\Http\Controllers\Admin\MarketplaceController;
 
 Route::prefix('admin')->middleware('web')->group(function () {
     // Guest routes
@@ -58,5 +59,9 @@ Route::prefix('admin')->middleware('web')->group(function () {
         Route::get('/withdrawals/{id}', [WithdrawalManagementController::class, 'show'])->name('admin.withdrawals.show');
         Route::post('/withdrawals/{id}/approve', [WithdrawalManagementController::class, 'approve'])->name('admin.withdrawals.approve');
         Route::post('/withdrawals/{id}/reject', [WithdrawalManagementController::class, 'reject'])->name('admin.withdrawals.reject');
+
+        // Marketplace Management Routes
+        Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('admin.marketplace.index');
+        Route::get('/marketplace/{id}', [MarketplaceController::class, 'show'])->name('admin.marketplace.show');
     });
 });

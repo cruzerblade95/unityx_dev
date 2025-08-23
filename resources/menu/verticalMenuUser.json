@@ -13,7 +13,7 @@
       "slug": "user.profile"
     },
     {
-      "name": "Wallet",
+      "name": "Wallet Transaction",
       "icon": "menu-icon icon-base ti tabler-wallet",
       "slug": "user.wallet",
       "submenu": [

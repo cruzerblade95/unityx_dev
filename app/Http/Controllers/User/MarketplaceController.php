@@ -18,19 +18,24 @@ class MarketplaceController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        
+
+        // Check if user has connected their Telegram account
+        if (empty($user->telegram_id)) {
+            return view('user.content.marketplace-telegram-required');
+        }
+
         // Get user wallet balances
         $wallet = $user->wallet;
         $cashBalance = $wallet ? $wallet->cash : 0;
         $profitBalance = $wallet ? $wallet->profit : 0;
-        
+
         // Get active listings with pagination (16 per page for 4x4 grid)
         $listings = MarketplaceListing::with('seller')
             ->active()
             ->where('seller_id', '!=', Auth::id()) // Don't show user's own listings
             ->orderBy('created_at', 'desc')
             ->paginate(16);
-        
+
         // Get user's own listings
         $myListings = MarketplaceListing::bySeller(Auth::id())
             ->orderBy('created_at', 'desc')
@@ -50,7 +55,7 @@ class MarketplaceController extends Controller
             ->with('buyer')
             ->orderBy('verification_started_at', 'desc')
             ->get();
-        
+
         return view('user.content.marketplace', compact('listings', 'myListings', 'pendingVerifications', 'verificationRequests', 'cashBalance', 'profitBalance'));
     }
 
@@ -59,6 +64,11 @@ class MarketplaceController extends Controller
      */
     public function createListing(Request $request)
     {
+        // Check if user has connected their Telegram account
+        if (empty(Auth::user()->telegram_id)) {
+            return redirect()->route('user.marketplace.index')->withErrors(['error' => 'Telegram connection required to create listings.']);
+        }
+
         $request->validate([
             'amount' => 'required|numeric|min:10',
             'price_per_usdt' => 'required|numeric|min:0.95|max:1.5',
@@ -75,8 +85,9 @@ class MarketplaceController extends Controller
         try {
             DB::beginTransaction();
 
-            // Deduct USDT from cash wallet
+            // Hold/escrow the USDT amount from cash to floating balance
             $wallet->cash -= $request->amount;
+            $wallet->floating += $request->amount;
             $wallet->save();
 
             // Create listing
@@ -91,9 +102,9 @@ class MarketplaceController extends Controller
             ]);
 
             DB::commit();
-            
-            return redirect()->back()->with('success', 'USDT listing created successfully! Listing ID: ' . $listing->unique_id);
-            
+
+            return redirect()->back()->with('success', 'USDT listing created successfully! ' . number_format($request->amount, 2) . ' USDT has been held in escrow. Listing ID: ' . $listing->unique_id);
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error creating marketplace listing: ' . $e->getMessage());
@@ -106,8 +117,13 @@ class MarketplaceController extends Controller
      */
     public function purchaseListing(Request $request, $listingId)
     {
+        // Check if user has connected their Telegram account
+        if (empty(Auth::user()->telegram_id)) {
+            return redirect()->route('user.marketplace.index')->withErrors(['error' => 'Telegram connection required to purchase listings.']);
+        }
+
         $listing = MarketplaceListing::where('unique_id', $listingId)->firstOrFail();
-        
+
         if (!$listing->isPurchasable()) {
             return redirect()->back()->withErrors(['error' => 'This listing is no longer available.']);
         }
@@ -116,17 +132,7 @@ class MarketplaceController extends Controller
             return redirect()->back()->withErrors(['error' => 'You cannot purchase your own listing.']);
         }
 
-        $user = Auth::user();
-        $wallet = $user->wallet;
-        
-        $feePercent = 1.8;
-        $feeAmount = $listing->total_price * ($feePercent / 100);
-        $totalCost = $listing->total_price + $feeAmount;
-
-        if (!$wallet || $wallet->cash < $totalCost) {
-            return redirect()->back()->withErrors(['error' => 'Insufficient cash balance. You need $' . number_format($totalCost, 2) . ' (including 1.8% fee).']);
-        }
-
+        // No need to check buyer's cash balance - payment will be processed when seller approves
         try {
             DB::beginTransaction();
 
@@ -134,9 +140,9 @@ class MarketplaceController extends Controller
             $listing->startVerification(Auth::id());
 
             DB::commit();
-            
+
             return redirect()->back()->with('success', 'Verification started! Please contact the seller via Telegram within 45 minutes. Check your "Pending Verifications" section.');
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error starting marketplace verification: ' . $e->getMessage());
@@ -149,6 +155,11 @@ class MarketplaceController extends Controller
      */
     public function approveVerification(Request $request, $listingId)
     {
+        // Check if user has connected their Telegram account
+        if (empty(Auth::user()->telegram_id)) {
+            return redirect()->route('user.marketplace.index')->withErrors(['error' => 'Telegram connection required for marketplace transactions.']);
+        }
+
         $listing = MarketplaceListing::where('unique_id', $listingId)
             ->where('seller_id', Auth::id())
             ->where('status', 'pending_verification')
@@ -165,32 +176,34 @@ class MarketplaceController extends Controller
             $buyer = $listing->buyer;
             $buyerWallet = $buyer->wallet;
             $sellerWallet = Auth::user()->wallet;
-            
-            $feePercent = 1.8;
-            $feeAmount = $listing->total_price * ($feePercent / 100);
-            $totalCost = $listing->total_price + $feeAmount;
 
-            // Verify buyer still has sufficient funds
-            if (!$buyerWallet || $buyerWallet->cash < $totalCost) {
-                DB::rollBack();
-                return redirect()->back()->withErrors(['error' => 'Buyer no longer has sufficient cash balance.']);
+            // Create buyer wallet if doesn't exist
+            if (!$buyerWallet) {
+                $buyerWallet = $buyer->wallet()->create([
+                    'cash' => 0,
+                    'deposit' => 0,
+                    'profit' => 0,
+                    'floating' => 0
+                ]);
             }
 
-            // Process the transaction
-            $buyerWallet->cash -= $totalCost;
-            $buyerWallet->deposit += $listing->amount;
+            // Calculate buyer receives amount (listing amount minus 1.8% fee)
+            $buyerReceives = $listing->amount * 0.982;
+
+            // Add USDT to buyer's deposit balance
+            $buyerWallet->deposit += $buyerReceives;
             $buyerWallet->save();
 
-            $sellerWallet->cash += $listing->total_price;
-            $sellerWallet->save();
-
-            // Complete the listing
-            $listing->completeTransaction(true, 'Transaction approved by seller');
+            // Release the full escrowed amount from seller's floating balance
+            // (The 1.8% fee is kept by the system/platform)
+            $sellerWallet->floating -= $listing->amount;
+            $sellerWallet->save();            // Complete the listing
+            $listing->completeTransaction();
 
             DB::commit();
-            
-            return redirect()->back()->with('success', 'Transaction approved! USDT has been transferred to the buyer.');
-            
+
+            return redirect()->back()->with('success', 'Transaction approved! ' . number_format($buyerReceives, 2) . ' USDT has been transferred to the buyer (after 1.8% fee deduction).');
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error approving marketplace verification: ' . $e->getMessage());
@@ -215,12 +228,12 @@ class MarketplaceController extends Controller
         try {
             DB::beginTransaction();
 
-            $listing->completeTransaction(false, $request->reason);
+            $listing->cancelVerification();
 
             DB::commit();
-            
+
             return redirect()->back()->with('success', 'Transaction rejected. Listing is now available again.');
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error rejecting marketplace verification: ' . $e->getMessage());
@@ -241,12 +254,12 @@ class MarketplaceController extends Controller
         try {
             DB::beginTransaction();
 
-            $listing->cancelVerification('Cancelled by buyer');
+            $listing->cancelVerification();
 
             DB::commit();
-            
+
             return redirect()->back()->with('success', 'Verification cancelled. Listing is now available again.');
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error cancelling marketplace verification: ' . $e->getMessage());
@@ -263,10 +276,11 @@ class MarketplaceController extends Controller
         try {
             DB::beginTransaction();
 
-            // Return USDT to seller's cash wallet
+            // Return escrowed USDT from floating back to seller's cash wallet
             $user = Auth::user();
             $wallet = $user->wallet;
             if ($wallet) {
+                $wallet->floating -= $listing->amount;
                 $wallet->cash += $listing->amount;
                 $wallet->save();
             }
@@ -275,9 +289,9 @@ class MarketplaceController extends Controller
             $listing->update(['status' => 'cancelled']);
 
             DB::commit();
-            
-            return redirect()->back()->with('success', 'Listing cancelled successfully. USDT returned to your cash wallet.');
-            
+
+            return redirect()->back()->with('success', 'Listing cancelled successfully. Escrowed USDT returned to your cash wallet.');
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error cancelling marketplace listing: ' . $e->getMessage());
@@ -296,7 +310,7 @@ class MarketplaceController extends Controller
 
         $user = Auth::user();
         $wallet = $user->wallet;
-        
+
         $feePercent = 1.5;
         $feeAmount = $request->amount * ($feePercent / 100);
         $totalDeduction = $request->amount + $feeAmount;
@@ -310,16 +324,16 @@ class MarketplaceController extends Controller
 
             // Deduct from profit wallet (including fee)
             $wallet->profit -= $totalDeduction;
-            
+
             // Add to cash wallet (without fee)
             $wallet->cash += $request->amount;
-            
+
             $wallet->save();
 
             DB::commit();
-            
+
             return redirect()->back()->with('success', 'Cash wallet topped up successfully! $' . number_format($request->amount, 2) . ' added to your cash wallet.');
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error topping up cash wallet: ' . $e->getMessage());

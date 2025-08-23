@@ -35,6 +35,12 @@
       "name": "Deposit Records",
       "icon": "menu-icon icon-base ti tabler-cash",
       "slug": "admin.nowpayments.index"
+    },
+    {
+      "url": "admin/marketplace",
+      "name": "Marketplace",
+      "icon": "menu-icon icon-base ti tabler-shopping-cart",
+      "slug": "admin.marketplace.index"
     }
   ]
 }

@@ -92,27 +92,12 @@
                     </div>
 
                     @if (\Illuminate\Support\Facades\Auth::user()->telegram_id)
-                        <!-- Telegram Test Section -->
-                        <div class="alert alert-info mt-3" role="alert">
-                            <h6 class="alert-heading mb-2">📱 Telegram Notifications Connected</h6>
-                            <p class="mb-2">Telegram ID:
-                                <strong>{{ \Illuminate\Support\Facades\Auth::user()->telegram_id }}</strong>
-                            </p>
-                            <p class="mb-3">Test your Telegram notification connection:</p>
-                            <button type="button" class="btn btn-sm btn-info" onclick="testTelegramNotification()">
-                                <i class="ti ti-send me-1"></i>Send Test Notification
-                            </button>
-                            <div id="telegram-test-result" class="mt-2"></div>
-                        </div>
-                    @else
-                        <!-- Telegram Connection Prompt -->
-                        <div class="alert alert-warning mt-3" role="alert">
-                            <h6 class="alert-heading mb-2">📱 Connect Telegram for Notifications</h6>
-                            <p class="mb-2">Get instant notifications on your Telegram account when you receive deposits,
-                                withdrawals, and other important updates.</p>
-                            <a href="{{ route('connect-telegram') }}" class="btn btn-sm btn-warning">
-                                <i class="ti ti-brand-telegram me-1"></i>Connect Telegram
-                            </a>
+                        <!-- Telegram Connected Status -->
+                        <div class="alert alert-success mt-3" role="alert">
+                            <h6 class="alert-heading mb-2">✅ Telegram Connected</h6>
+                            <p class="mb-2">Your Telegram account is connected and ready to receive notifications.</p>
+                            <p class="mb-0"><strong>Telegram ID:</strong>
+                                {{ \Illuminate\Support\Facades\Auth::user()->telegram_id }}</p>
                         </div>
                     @endif
                 </div>
