@@ -129,8 +129,8 @@
                             <h5 class="card-title mb-0">Hello, {{ Illuminate\Support\Facades\Auth::user()->firstname }}
                                 {{ Illuminate\Support\Facades\Auth::user()->lastname }}! 🎉</h5>
                             <p class="mb-2">Welcome to UnityX</p>
-                            <h4 class="text-primary mb-1">0.0000 USDT</h4>
-                            <a href="javascript:;" class="btn btn-primary">View Sales</a>
+                            <h4 class="text-primary mb-1">{{ number_format($wallet->profit ?? 0, 2) }} USDT</h4>
+                            <a href="{{ route('user.ai-trade') }}" class="btn btn-primary">View AI Trade</a>
                         </div>
                     </div>
                     <div class="col-5 text-center text-sm-left">
@@ -164,7 +164,7 @@
                                         <i class="icon-base ti tabler-wallet icon-lg"></i>
                                     </div>
                                     <div class="card-info">
-                                        <h5 class="mb-0">{{ number_format($wallet->deposit ?? 0, 4) }} USDT</h5>
+                                        <h5 class="mb-0">{{ number_format($wallet->deposit ?? 0, 2) }} USDT</h5>
                                         <small class="text-uppercase">DEPOSIT</small>
                                     </div>
                                 </div>
@@ -175,7 +175,7 @@
                                             class="icon-base ti tabler-trending-up icon-lg"></i>
                                     </div>
                                     <div class="card-info">
-                                        <h5 class="mb-0">{{ number_format($wallet->profit ?? 0, 4) }} USDT</h5>
+                                        <h5 class="mb-0">{{ number_format($wallet->profit ?? 0, 2) }} USDT</h5>
                                         <small class="text-uppercase">PROFIT</small>
                                     </div>
                                 </div>
@@ -186,7 +186,7 @@
                                         <i class="icon-base ti tabler-gift icon-lg"></i>
                                     </div>
                                     <div class="card-info">
-                                        <h5 class="mb-0">{{ number_format($wallet->bonus ?? 0, 4) }} USDT</h5>
+                                        <h5 class="mb-0">{{ number_format($wallet->bonus ?? 0, 2) }} USDT</h5>
                                         <small class="text-uppercase">BONUS</small>
                                     </div>
                                 </div>
@@ -197,7 +197,7 @@
                                         <i class="icon-base ti tabler-cash icon-lg"></i>
                                     </div>
                                     <div class="card-info">
-                                        <h5 class="mb-0">{{ number_format($wallet->cash ?? 0, 4) }} USDT</h5>
+                                        <h5 class="mb-0">{{ number_format($wallet->cash ?? 0, 2) }} USDT</h5>
                                         <small class="text-uppercase">CASH</small>
                                     </div>
                                 </div>
