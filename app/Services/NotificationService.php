@@ -16,7 +16,7 @@ class NotificationService
         // Create the web notification
         $notification = Notification::createNotification($userId, $type, $title, $message, $data);
 
-        // Also send to Telegram if user has telegram_id
+        // Also send to Telegram if user has telegram verification
         TelegramNotificationService::sendNotificationToTelegram($userId, $title, $message);
 
         return $notification;

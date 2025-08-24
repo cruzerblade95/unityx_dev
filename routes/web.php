@@ -495,7 +495,7 @@ Route::post('/test-telegram-notification', function (Request $request) {
 
     $user = Auth::user();
 
-    if (!$user->telegram_id) {
+    if (!$user->telegramVerification || !$user->telegramVerification->telegram_username) {
         return response()->json([
             'success' => false,
             'message' => 'No Telegram account connected. Please connect your Telegram first.'
@@ -514,7 +514,7 @@ Route::post('/test-telegram-notification', function (Request $request) {
     return response()->json([
         'success' => $result,
         'message' => $result ? 'Test notification sent successfully!' : 'Failed to send notification',
-        'telegram_id' => $user->telegram_id,
+        'telegram_username' => $user->telegramVerification->telegram_username,
         'username' => $user->username
     ]);
 })->middleware('web');

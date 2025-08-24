@@ -45,7 +45,7 @@ class CustomPasswordResetService
                 [
                     'token' => $telegramToken,
                     'telegram_username' => $existingVerification ? $existingVerification->telegram_username : null,
-                    'chat_id' => $user->telegram_id ?? null,
+                    'chat_id' => $existingVerification ? $existingVerification->chat_id : null,
                     'expires_at' => $expiresAt,
                 ]
             );
@@ -66,16 +66,16 @@ class CustomPasswordResetService
             // Send email notification
             $emailSent = self::sendEmailNotification($user, $token, $emailResetUrl);
 
-            // Send telegram notification if user has telegram_id
+            // Send telegram notification if user has telegram verification
             $telegramSent = false;
-            if ($user->telegram_id) {
+            if ($user->telegramVerification && $user->telegramVerification->telegram_username) {
                 $telegramSent = self::sendTelegramNotification($user, $telegramResetUrl);
             }
 
             $message = 'Password reset instructions have been sent to your email.';
             if ($telegramSent) {
                 $message .= ' You will also receive a notification on Telegram.';
-            } elseif ($user->telegram_id) {
+            } elseif ($user->telegramVerification && $user->telegramVerification->telegram_username) {
                 $message .= ' We attempted to send a Telegram notification but it may have failed.';
             }
 

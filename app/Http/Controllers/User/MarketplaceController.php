@@ -20,7 +20,12 @@ class MarketplaceController extends Controller
         $user = Auth::user();
 
         // Check if user has connected their Telegram account
-        if (empty($user->telegram_id)) {
+        $telegramVerification = DB::table('telegram_verifications')
+            ->where('user_id', $user->id)
+            ->whereNotNull('telegram_username')
+            ->first();
+
+        if (!$telegramVerification) {
             return view('user.content.marketplace-telegram-required');
         }
 
@@ -66,13 +71,17 @@ class MarketplaceController extends Controller
         // Get user's purchases by status
         $myPendingPurchases = MarketplaceListing::byBuyer(Auth::id())
             ->pendingVerification()
-            ->with('seller')
+            ->with(['seller', 'seller.telegramVerification' => function($query) {
+                $query->select('user_id', 'telegram_username');
+            }])
             ->orderBy('verification_started_at', 'desc')
             ->get();
 
         $myCompletedPurchases = MarketplaceListing::byBuyer(Auth::id())
             ->sold()
-            ->with('seller')
+            ->with(['seller', 'seller.telegramVerification' => function($query) {
+                $query->select('user_id', 'telegram_username');
+            }])
             ->orderBy('sold_at', 'desc')
             ->get();
 
@@ -82,7 +91,9 @@ class MarketplaceController extends Controller
         // Get user's verification requests (as seller)
         $verificationRequests = MarketplaceListing::bySeller(Auth::id())
             ->pendingVerification()
-            ->with('buyer')
+            ->with(['buyer', 'buyer.telegramVerification' => function($query) {
+                $query->select('user_id', 'telegram_username');
+            }])
             ->orderBy('verification_started_at', 'desc')
             ->get();
 
@@ -98,7 +109,8 @@ class MarketplaceController extends Controller
             'pendingVerifications',
             'verificationRequests',
             'cashBalance',
-            'profitBalance'
+            'profitBalance',
+            'telegramVerification'
         ));
     }
 
@@ -108,7 +120,12 @@ class MarketplaceController extends Controller
     public function createListing(Request $request)
     {
         // Check if user has connected their Telegram account
-        if (empty(Auth::user()->telegram_id)) {
+        $telegramVerification = DB::table('telegram_verifications')
+            ->where('user_id', Auth::id())
+            ->whereNotNull('telegram_username')
+            ->first();
+
+        if (!$telegramVerification) {
             return redirect()->route('user.marketplace.index')->withErrors(['error' => 'Telegram connection required to create listings.']);
         }
 
@@ -161,7 +178,12 @@ class MarketplaceController extends Controller
     public function purchaseListing(Request $request, $listingId)
     {
         // Check if user has connected their Telegram account
-        if (empty(Auth::user()->telegram_id)) {
+        $telegramVerification = DB::table('telegram_verifications')
+            ->where('user_id', Auth::id())
+            ->whereNotNull('telegram_username')
+            ->first();
+
+        if (!$telegramVerification) {
             return redirect()->route('user.marketplace.index')->withErrors(['error' => 'Telegram connection required to purchase listings.']);
         }
 
@@ -199,7 +221,12 @@ class MarketplaceController extends Controller
     public function approveVerification(Request $request, $listingId)
     {
         // Check if user has connected their Telegram account
-        if (empty(Auth::user()->telegram_id)) {
+        $telegramVerification = DB::table('telegram_verifications')
+            ->where('user_id', Auth::id())
+            ->whereNotNull('telegram_username')
+            ->first();
+
+        if (!$telegramVerification) {
             return redirect()->route('user.marketplace.index')->withErrors(['error' => 'Telegram connection required for marketplace transactions.']);
         }
 

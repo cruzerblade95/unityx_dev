@@ -113,7 +113,7 @@
             </div>
         @endif
 
-        @if (empty(auth()->user()->telegram_id))
+        @if (!$telegramVerification || empty($telegramVerification->telegram_username))
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
                 <i class="fab fa-telegram-plane me-2"></i>
                 <strong>Telegram Connection Required!</strong>
@@ -206,20 +206,17 @@
                                             <div class="row">
                                                 <div class="col-12">
                                                     <strong>Telegram Contact:</strong><br>
-                                                    @if ($verification->seller && $verification->seller->telegram_id)
-                                                        @if (is_numeric($verification->seller->telegram_id))
-                                                            <code>{{ $verification->seller->telegram_id }}</code>
-                                                            <small class="text-muted d-block">(Telegram ID - search in
-                                                                Telegram)</small>
-                                                        @else
-                                                            <a href="https://t.me/{{ $verification->seller->telegram_id }}"
-                                                                target="_blank" class="btn btn-outline-primary btn-sm">
-                                                                <i class="fab fa-telegram me-2"></i>
-                                                                {{ '@' . $verification->seller->telegram_id }}
-                                                            </a>
-                                                            <small class="text-muted d-block mt-1">(Click to open in
-                                                                Telegram)</small>
-                                                        @endif
+                                                    @if (
+                                                        $verification->seller &&
+                                                            $verification->seller->telegramVerification &&
+                                                            $verification->seller->telegramVerification->telegram_username)
+                                                        <a href="https://t.me/{{ $verification->seller->telegramVerification->telegram_username }}"
+                                                            target="_blank" class="btn btn-outline-primary btn-sm">
+                                                            <i class="fab fa-telegram me-2"></i>
+                                                            {{ '@' . $verification->seller->telegramVerification->telegram_username }}
+                                                        </a>
+                                                        <small class="text-muted d-block mt-1">(Click to open in
+                                                            Telegram)</small>
                                                     @else
                                                         <span class="text-muted">Not provided</span>
                                                     @endif

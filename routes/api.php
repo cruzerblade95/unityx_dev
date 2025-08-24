@@ -12,6 +12,7 @@ Route::get('/telegram/setup-webhook', [TelegramController::class, 'setupWebhook'
 
 // Telegram Debug routes
 Route::any('/telegram/debug', [TelegramDebugController::class, 'debug']);
+Route::any('/telegram/debug/logs', [TelegramDebugController::class, 'getLastLog']);
 Route::any('/telegram/test-message', [TelegramDebugController::class, 'testMessage']);
 Route::any('/telegram/config-test', [App\Http\Controllers\TelegramConfigTestController::class, 'testConfig']);
 

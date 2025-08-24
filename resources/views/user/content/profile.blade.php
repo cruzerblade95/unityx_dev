@@ -59,8 +59,9 @@
                             <div class="user-profile-info">
                                 <h4 class="mb-2 mt-lg-6">
                                     {{ auth()->user()->username }}
-                                    @if (auth()->user()->telegram_id)
-                                        <span class="text-muted fw-normal">({{ auth()->user()->telegram_id }})</span>
+                                    @if (auth()->user()->telegramVerification && auth()->user()->telegramVerification->telegram_username)
+                                        <span
+                                            class="text-muted fw-normal">({{ auth()->user()->telegramVerification->telegram_username }})</span>
                                     @endif
                                 </h4>
                                 <ul
@@ -158,11 +159,12 @@
                     <!-- Telegram Connection Status -->
                     <div class="mt-4 pt-3 border-top">
                         <h6 class="text-uppercase text-body-secondary small mb-3">Telegram Connection</h6>
-                        @if (auth()->user()->telegram_id)
+                        @if (auth()->user()->telegramVerification && auth()->user()->telegramVerification->telegram_username)
                             <div class="d-flex align-items-center">
                                 <i class="ti ti-brand-telegram text-success me-2"></i>
                                 <span class="fw-medium text-success">Connected</span>
-                                <span class="text-muted ms-2">(ID: {{ auth()->user()->telegram_id }})</span>
+                                <span
+                                    class="text-muted ms-2">({{ auth()->user()->telegramVerification->telegram_username }})</span>
                             </div>
                             <small class="text-muted">You will receive notifications on Telegram</small>
                         @else

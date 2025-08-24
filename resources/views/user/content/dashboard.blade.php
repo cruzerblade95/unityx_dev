@@ -91,13 +91,15 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
 
-                    @if (\Illuminate\Support\Facades\Auth::user()->telegram_id)
+                    @if (
+                        \Illuminate\Support\Facades\Auth::user()->telegramVerification &&
+                            \Illuminate\Support\Facades\Auth::user()->telegramVerification->telegram_username)
                         <!-- Telegram Connected Status -->
                         <div class="alert alert-success mt-3" role="alert">
                             <h6 class="alert-heading mb-2">✅ Telegram Connected</h6>
                             <p class="mb-2">Your Telegram account is connected and ready to receive notifications.</p>
-                            <p class="mb-0"><strong>Telegram ID:</strong>
-                                {{ \Illuminate\Support\Facades\Auth::user()->telegram_id }}</p>
+                            <p class="mb-0"><strong>Telegram Username:</strong>
+                                {{ \Illuminate\Support\Facades\Auth::user()->telegramVerification->telegram_username }}</p>
                         </div>
                     @endif
                 </div>
