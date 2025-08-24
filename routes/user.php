@@ -15,6 +15,7 @@ use App\Http\Controllers\User\MarketplaceController;
 use App\Http\Controllers\User\ReferralBonusHistoryController;
 use App\Http\Controllers\User\RoiMatchingBonusHistoryController;
 use App\Http\Controllers\KycController;
+use App\Http\Controllers\User\AiTradeActivateController;
 // Route::middleware(['web'])->group(function () {
 //     Route::get('login', [App\Http\Controllers\User\UserLoginController::class, 'showLoginForm'])->name('login'); // Main login route
 //     Route::post('login', [App\Http\Controllers\User\UserLoginController::class, 'login'])->name('user.login.submit');
@@ -60,6 +61,8 @@ Route::prefix('user')->middleware('web')->group(function () {
         Route::match(['put', 'post'], '/profile', [UserController::class, 'updateProfile'])->name('user.profile.update');
         Route::get('/profile/edit', [UserController::class, 'editProfile'])->name('user.profile.edit');
         Route::post('/profile/upload-photo', [UserController::class, 'uploadPhoto'])->name('user.profile.upload-photo');
+        // AI Trade Activation
+        Route::post('ai-trade-activate/toggle', [AiTradeActivateController::class, 'toggle'])->name('user.ai_trade_activate.toggle');
         Route::get('downline', [UserController::class, 'downline'])->name('user.downline');
         Route::get('/logout', [UserLoginController::class, 'logout']);
         // Route::get('/debug', [UserController::class, 'debug']);
