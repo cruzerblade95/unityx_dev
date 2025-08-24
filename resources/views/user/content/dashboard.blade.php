@@ -93,14 +93,33 @@
 
                     @if (
                         \Illuminate\Support\Facades\Auth::user()->telegramVerification &&
-                            \Illuminate\Support\Facades\Auth::user()->telegramVerification->telegram_username)
-                        <!-- Telegram Connected Status -->
-                        <div class="alert alert-success mt-3" role="alert">
-                            <h6 class="alert-heading mb-2">✅ Telegram Connected</h6>
-                            <p class="mb-2">Your Telegram account is connected and ready to receive notifications.</p>
-                            <p class="mb-0"><strong>Telegram Username:</strong>
-                                {{ \Illuminate\Support\Facades\Auth::user()->telegramVerification->telegram_username }}</p>
-                        </div>
+                            \Illuminate\Support\Facades\Auth::user()->telegramVerification->chat_id)
+                        @if(\Illuminate\Support\Facades\Auth::user()->telegramVerification->telegram_username)
+                            <!-- Telegram Connected with Username -->
+                            <div class="alert alert-success mt-3" role="alert">
+                                <h6 class="alert-heading mb-2">✅ Telegram Connected</h6>
+                                <p class="mb-2">Your Telegram account is connected and ready to receive notifications.</p>
+                                <p class="mb-0"><strong>Telegram Username:</strong>
+                                    {{ \Illuminate\Support\Facades\Auth::user()->telegramVerification->telegram_username }}</p>
+                            </div>
+                        @else
+                            <!-- Telegram Connected but No Username -->
+                            <div class="alert alert-warning mt-3" role="alert">
+                                <h6 class="alert-heading mb-2">⚠️ Telegram Username Required</h6>
+                                <p class="mb-2">Your Telegram is connected, but you need to set a username for marketplace transactions.</p>
+                                <div class="d-flex gap-2">
+                                    <span class="badge bg-info">Step 1:</span>
+                                    <small>Set your username in Telegram app settings</small>
+                                </div>
+                                <div class="d-flex gap-2 mt-1">
+                                    <span class="badge bg-info">Step 2:</span>
+                                    <small>Verify again using our bot to update your username</small>
+                                </div>
+                                <a href="{{ route('connect-telegram') }}" class="btn btn-sm btn-warning mt-2">
+                                    <i class="ti ti-brand-telegram me-1"></i>Update Telegram Username
+                                </a>
+                            </div>
+                        @endif
                     @endif
                 </div>
             </div>

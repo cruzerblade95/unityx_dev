@@ -19,10 +19,10 @@ class MarketplaceController extends Controller
     {
         $user = Auth::user();
 
-        // Check if user has connected their Telegram account
+        // Check if user has connected their Telegram account (using chat_id)
         $telegramVerification = DB::table('telegram_verifications')
             ->where('user_id', $user->id)
-            ->whereNotNull('telegram_username')
+            ->whereNotNull('chat_id')
             ->first();
 
         if (!$telegramVerification) {
@@ -119,10 +119,10 @@ class MarketplaceController extends Controller
      */
     public function createListing(Request $request)
     {
-        // Check if user has connected their Telegram account
+        // Check if user has connected their Telegram account (using chat_id)
         $telegramVerification = DB::table('telegram_verifications')
             ->where('user_id', Auth::id())
-            ->whereNotNull('telegram_username')
+            ->whereNotNull('chat_id')
             ->first();
 
         if (!$telegramVerification) {
@@ -177,10 +177,10 @@ class MarketplaceController extends Controller
      */
     public function purchaseListing(Request $request, $listingId)
     {
-        // Check if user has connected their Telegram account
+        // Check if user has connected their Telegram account (using chat_id)
         $telegramVerification = DB::table('telegram_verifications')
             ->where('user_id', Auth::id())
-            ->whereNotNull('telegram_username')
+            ->whereNotNull('chat_id')
             ->first();
 
         if (!$telegramVerification) {

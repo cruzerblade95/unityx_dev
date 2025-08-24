@@ -22,6 +22,7 @@
 <!-- Vendor Styles -->
 @section('vendor-style')
     @vite(['resources/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.scss', 'resources/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.scss'])
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 @endsection
 
 <!-- Page Styles -->
@@ -57,9 +58,10 @@
                             class="d-flex align-items-md-end align-items-sm-start align-items-center justify-content-md-between justify-content-start mx-5 flex-md-row flex-column gap-4">
                             <div class="user-profile-info">
                                 <h4 class="mb-2 mt-lg-6">
-                                             @if (auth()->user()->telegramVerification && auth()->user()->telegramVerification->telegram_username)
+                                    {{ auth()->user()->firstname }} {{ auth()->user()->lastname }}
+                                    @if (auth()->user()->telegramVerification && auth()->user()->telegramVerification->chat_id)
                                         <span
-                                            class="text-muted fw-normal">({{ auth()->user()->telegramVerification->telegram_username }})</span>
+                                            class="text-muted fw-normal">({{ auth()->user()->telegramVerification->telegram_username ?? 'No Username' }})</span>
                                     @endif
                                 </h4>
                                 <ul
@@ -67,14 +69,14 @@
                                     {{-- <li class="list-inline-item d-flex gap-2 align-items-center"><i class="icon-base ti tabler-palette icon-lg"></i><span class="fw-medium">UX Designer</span></li> --}}
                                     {{-- <li class="list-inline-item d-flex gap-2 align-items-center"><i class="icon-base ti tabler-map-pin  icon-lg"></i><span class="fw-medium">Vatican City</span></li> --}}
                                     <li class="list-inline-item d-flex gap-2 align-items-center"><i
-                                            class="icon-base ti tabler-calendar  icon-lg"></i><span class="fw-medium">
+                                            class="fas fa-calendar icon-lg"></i><span class="fw-medium">
                                             Joined
                                             {{ \Carbon\Carbon::parse(auth()->user()->created_at)->format('d F Y') }}</span>
                                     </li>
                                 </ul>
                             </div>
                             <a href="javascript:void(0)" class="btn btn-primary mb-1"> <i
-                                    class="icon-base ti tabler-user-check icon-xs me-2"></i>Connected </a>
+                                    class="fas fa-user-check icon-xs me-2"></i>Connected </a>
                         </div>
                     </div>
                 </div>
@@ -90,11 +92,11 @@
                 <ul class="nav nav-pills flex-column flex-sm-row mb-6 gap-sm-0 gap-2">
                     <li class="nav-item">
                         <a class="nav-link active" href="javascript:void(0);"><i
-                                class="icon-base ti tabler-user-check icon-sm me-1_5"></i> Profile</a>
+                                class="fas fa-user icon-sm me-1_5"></i> Profile</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('user.kyc.index') }}">
-                            <i class="icon-base ti tabler-users icon-sm me-1_5"></i>
+                            <i class="fas fa-users icon-sm me-1_5"></i>
                             KYC Verification
                             @if (auth()->user()->kycVerification)
                                 @if (auth()->user()->kycVerification->kyc_status === App\Models\KycVerification::STATUS_NOT_SUBMITTED)
@@ -120,7 +122,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('user.payment-info.index') }}">
-                            <i class="icon-base ti tabler-credit-card icon-sm me-1_5"></i>
+                            <i class="fas fa-credit-card icon-sm me-1_5"></i>
                             Payment Information
                             @if (auth()->user()->payment_info_completed)
                                 <span class="badge bg-success ms-2" data-bs-toggle="tooltip"
@@ -174,23 +176,35 @@
                     <!-- Telegram Connection Status -->
                     <div class="mt-4 pt-3 border-top">
                         <h6 class="text-uppercase text-body-secondary small mb-3">Telegram Connection</h6>
-                        @if (auth()->user()->telegramVerification && auth()->user()->telegramVerification->telegram_username)
+                        @if (auth()->user()->telegramVerification && auth()->user()->telegramVerification->chat_id)
                             <div class="d-flex align-items-center">
-                                <i class="ti ti-brand-telegram text-success me-2"></i>
+                                <i class="fab fa-telegram text-success me-2"></i>
                                 <span class="fw-medium text-success">Connected</span>
-                                <span
-                                    class="text-muted ms-2">({{ auth()->user()->telegramVerification->telegram_username }})</span>
+                                @if(auth()->user()->telegramVerification->telegram_username)
+                                    <span
+                                        class="text-muted ms-2">({{ auth()->user()->telegramVerification->telegram_username }})</span>
+                                @else
+                                    <span class="text-warning ms-2">(No Username Set)</span>
+                                @endif
                             </div>
-                            <small class="text-muted">You will receive notifications on Telegram</small>
+                            @if(auth()->user()->telegramVerification->telegram_username)
+                                <small class="text-muted">You will receive notifications on Telegram</small>
+                            @else
+                                <div class="alert alert-warning mt-2" role="alert">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Action Required:</strong> You need to set a Telegram username for others to contact you in the marketplace.
+                                    <br><small>Set your username in Telegram settings, then verify again using the bot.</small>
+                                </div>
+                            @endif
                         @else
                             <div class="d-flex align-items-center">
-                                <i class="ti ti-brand-telegram text-warning me-2"></i>
+                                <i class="fab fa-telegram text-warning me-2"></i>
                                 <span class="fw-medium text-warning">Not Connected</span>
                             </div>
                             <small class="text-muted">Connect Telegram to receive notifications</small>
                             <div class="mt-2">
                                 <a href="{{ route('connect-telegram') }}" class="btn btn-sm btn-outline-primary">
-                                    <i class="ti ti-brand-telegram me-1"></i>Connect Telegram
+                                    <i class="fab fa-telegram me-1"></i>Connect Telegram
                                 </a>
                             </div>
                         @endif
@@ -201,24 +215,24 @@
                         <h6 class="text-uppercase text-body-secondary small mb-3">Payment Information</h6>
                         @if (auth()->user()->payment_info_completed)
                             <div class="d-flex align-items-center">
-                                <i class="ti ti-check text-success me-2"></i>
+                                <i class="fas fa-check text-success me-2"></i>
                                 <span class="fw-medium text-success">Completed</span>
                             </div>
                             <small class="text-muted">Payment information verified. Withdrawals enabled.</small>
                             <div class="mt-2">
                                 <a href="{{ route('user.payment-info.index') }}" class="btn btn-sm btn-outline-info">
-                                    <i class="ti ti-credit-card me-1"></i>Update Info
+                                    <i class="fas fa-credit-card me-1"></i>Update Info
                                 </a>
                             </div>
                         @else
                             <div class="d-flex align-items-center">
-                                <i class="ti ti-alert-triangle text-warning me-2"></i>
+                                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
                                 <span class="fw-medium text-warning">Required</span>
                             </div>
                             <small class="text-muted">Complete payment information to enable withdrawals</small>
                             <div class="mt-2">
                                 <a href="{{ route('user.payment-info.index') }}" class="btn btn-sm btn-outline-warning">
-                                    <i class="ti ti-credit-card me-1"></i>Complete Info
+                                    <i class="fas fa-credit-card me-1"></i>Complete Info
                                 </a>
                             </div>
                         @endif
