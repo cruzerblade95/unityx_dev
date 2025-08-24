@@ -23,6 +23,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(LocaleMiddleware::class);
         $middleware->web(\App\Http\Middleware\AdminRouteProtection::class);
         $middleware->web(\App\Http\Middleware\GeneralRouteProtection::class);
+        
+        // Alias for payment info middleware
+        $middleware->alias([
+            'require.payment.info' => \App\Http\Middleware\RequirePaymentInfo::class,
+        ]);
     })
     ->withSchedule(function (Schedule $schedule) {
         // $schedule->command('investment:test-cron')->everyMinute();

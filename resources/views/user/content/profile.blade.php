@@ -1,5 +1,4 @@
-@push('scripts')
-    <script>
+@push('scripts')    <script>
         document.addEventListener('DOMContentLoaded', function() {
             @if (session('profile_updated'))
                 var toastEl = document.getElementById('profileToast');
@@ -58,8 +57,7 @@
                             class="d-flex align-items-md-end align-items-sm-start align-items-center justify-content-md-between justify-content-start mx-5 flex-md-row flex-column gap-4">
                             <div class="user-profile-info">
                                 <h4 class="mb-2 mt-lg-6">
-                                    {{ auth()->user()->username }}
-                                    @if (auth()->user()->telegramVerification && auth()->user()->telegramVerification->telegram_username)
+                                             @if (auth()->user()->telegramVerification && auth()->user()->telegramVerification->telegram_username)
                                         <span
                                             class="text-muted fw-normal">({{ auth()->user()->telegramVerification->telegram_username }})</span>
                                     @endif
@@ -120,6 +118,19 @@
                             @endif
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('user.payment-info.index') }}">
+                            <i class="icon-base ti tabler-credit-card icon-sm me-1_5"></i>
+                            Payment Information
+                            @if (auth()->user()->payment_info_completed)
+                                <span class="badge bg-success ms-2" data-bs-toggle="tooltip"
+                                    title="Payment information completed">Completed</span>
+                            @else
+                                <span class="badge bg-warning ms-2" data-bs-toggle="tooltip"
+                                    title="Payment information required for withdrawals">Required</span>
+                            @endif
+                        </a>
+                    </li>
                     {{-- <li class="nav-item">
           <a class="nav-link" href="{{ url('pages/profile-projects') }}"><i class="icon-base ti tabler-layout-grid icon-sm me-1_5"></i> Projects</a>
         </li>
@@ -152,8 +163,12 @@
                             <label class="form-label">Email</label>
                             <div class="form-control-plaintext">{{ auth()->user()->email }}</div>
                         </div>
-                        {{-- <button type="button" class="btn btn-primary">Edit Profile</button> --}}
-                        <a href="{{ url('/user/profile/edit') }}" class="btn btn-primary">Edit Profile</a>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url('/user/profile/edit') }}" class="btn btn-primary">Edit Profile</a>
+                            <a href="{{ route('user.payment-info.index') }}" class="btn btn-outline-info">
+                                <i class="fas fa-credit-card me-1"></i>Payment Info
+                            </a>
+                        </div>
                     </form>
 
                     <!-- Telegram Connection Status -->
@@ -176,6 +191,34 @@
                             <div class="mt-2">
                                 <a href="{{ route('connect-telegram') }}" class="btn btn-sm btn-outline-primary">
                                     <i class="ti ti-brand-telegram me-1"></i>Connect Telegram
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Payment Information Status -->
+                    <div class="mt-4 pt-3 border-top">
+                        <h6 class="text-uppercase text-body-secondary small mb-3">Payment Information</h6>
+                        @if (auth()->user()->payment_info_completed)
+                            <div class="d-flex align-items-center">
+                                <i class="ti ti-check text-success me-2"></i>
+                                <span class="fw-medium text-success">Completed</span>
+                            </div>
+                            <small class="text-muted">Payment information verified. Withdrawals enabled.</small>
+                            <div class="mt-2">
+                                <a href="{{ route('user.payment-info.index') }}" class="btn btn-sm btn-outline-info">
+                                    <i class="ti ti-credit-card me-1"></i>Update Info
+                                </a>
+                            </div>
+                        @else
+                            <div class="d-flex align-items-center">
+                                <i class="ti ti-alert-triangle text-warning me-2"></i>
+                                <span class="fw-medium text-warning">Required</span>
+                            </div>
+                            <small class="text-muted">Complete payment information to enable withdrawals</small>
+                            <div class="mt-2">
+                                <a href="{{ route('user.payment-info.index') }}" class="btn btn-sm btn-outline-warning">
+                                    <i class="ti ti-credit-card me-1"></i>Complete Info
                                 </a>
                             </div>
                         @endif
@@ -314,129 +357,43 @@
     </div> --}}
             <!--/ Activity Timeline -->
             <div class="row">
-                <!-- Connections -->
-                <div class="col-lg-12 col-xl-12">
-                    <div class="card card-action mb-6">
-                        <div class="card-header align-items-center">
-                            <h5 class="card-action-title mb-0">Referral</h5>
-                            <div class="card-action-element">
-                                <div class="dropdown">
-                                    <button type="button"
-                                        class="btn btn-icon btn-text-secondary rounded-pill dropdown-toggle hide-arrow p-0 text-body-secondary"
-                                        data-bs-toggle="dropdown" aria-expanded="false"><i
-                                            class="icon-base ti tabler-dots-vertical icon-md text-body-secondary"></i></button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li><a class="dropdown-item" href="javascript:void(0);">Share referrals</a></li>
-                                        <li><a class="dropdown-item" href="javascript:void(0);">Suggest edits</a></li>
-                                        <li>
-                                            <hr class="dropdown-divider" />
-                                        </li>
-                                        <li><a class="dropdown-item" href="javascript:void(0);">Report bug</a></li>
-                                    </ul>
-                                </div>
+              <!-- Downlines -->
+              <div class="col-lg-12 col-xl-12">
+                <div class="card card-action mb-6">
+                  <div class="card-header align-items-center">
+                    <h5 class="card-action-title mb-0">Referral Downlines</h5>
+                  </div>
+                  <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                      @foreach(auth()->user()->downlines->take(5) as $downline)
+                        <li class="mb-4">
+                          <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center">
+                              <div class="avatar me-2">
+                                <img src="{{ asset('assets/img/icons/unityx.png') }}" alt="Avatar" class="rounded-circle" />
+                              </div>
+                              <div class="me-2">
+                                <h6 class="mb-0">{{ $downline->username }}</h6>
+                                <small>{{ $downline->email }}</small>
+                              </div>
                             </div>
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-unstyled mb-0">
-                                <li class="mb-4">
-                                    <div class="d-flex align-items-center">
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar me-2">
-                                                <img src="{{ asset('assets/img/avatars/2.png') }}" alt="Avatar"
-                                                    class="rounded-circle" />
-                                            </div>
-                                            <div class="me-2">
-                                                <h6 class="mb-0">Cecilia Payne</h6>
-                                                <small>45 Referrals</small>
-                                            </div>
-                                        </div>
-                                        <div class="ms-auto">
-                                            <button class="btn btn-label-primary btn-icon"><i
-                                                    class="icon-base ti tabler-user-check icon-22px"></i></button>
-                                        </div>
-                                    </div>
-                                </li>
-                                <li class="mb-4">
-                                    <div class="d-flex align-items-center">
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar me-2">
-                                                <img src="{{ asset('assets/img/avatars/3.png') }}" alt="Avatar"
-                                                    class="rounded-circle" />
-                                            </div>
-                                            <div class="me-2">
-                                                <h6 class="mb-0">Curtis Fletcher</h6>
-                                                <small>1.32k Referrals</small>
-                                            </div>
-                                        </div>
-                                        <div class="ms-auto">
-                                            <button class="btn btn-primary btn-icon"><i
-                                                    class="icon-base ti tabler-user-x icon-22px"></i></button>
-                                        </div>
-                                    </div>
-                                </li>
-                                <li class="mb-4">
-                                    <div class="d-flex align-items-center">
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar me-2">
-                                                <img src="{{ asset('assets/img/avatars/10.png') }}" alt="Avatar"
-                                                    class="rounded-circle" />
-                                            </div>
-                                            <div class="me-2">
-                                                <h6 class="mb-0">Alice Stone</h6>
-                                                <small>125 Referrals</small>
-                                            </div>
-                                        </div>
-                                        <div class="ms-auto">
-                                            <button class="btn btn-primary btn-icon"><i
-                                                    class="icon-base ti tabler-user-x icon-22px"></i></button>
-                                        </div>
-                                    </div>
-                                </li>
-                                <li class="mb-4">
-                                    <div class="d-flex align-items-center">
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar me-2">
-                                                <img src="{{ asset('assets/img/avatars/7.png') }}" alt="Avatar"
-                                                    class="rounded-circle" />
-                                            </div>
-                                            <div class="me-2">
-                                                <h6 class="mb-0">Darrell Barnes</h6>
-                                                <small>456 Referrals</small>
-                                            </div>
-                                        </div>
-                                        <div class="ms-auto">
-                                            <button class="btn btn-label-primary btn-icon"><i
-                                                    class="icon-base ti tabler-user-check icon-22px"></i></button>
-                                        </div>
-                                    </div>
-                                </li>
-
-                                <li class="mb-6">
-                                    <div class="d-flex align-items-center">
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar me-2">
-                                                <img src="{{ asset('assets/img/avatars/12.png') }}" alt="Avatar"
-                                                    class="rounded-circle" />
-                                            </div>
-                                            <div class="me-2">
-                                                <h6 class="mb-0">Eugenia Moore</h6>
-                                                <small>1.2k Referrals</small>
-                                            </div>
-                                        </div>
-                                        <div class="ms-auto">
-                                            <button class="btn btn-label-primary btn-icon"><i
-                                                    class="icon-base ti tabler-user-check icon-22px"></i></button>
-                                        </div>
-                                    </div>
-                                </li>
-                                <li class="text-center">
-                                    <a href="javascript:;">View all referrals</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+                            <div class="ms-auto">
+                              <span class="badge bg-primary">Level 1</span>
+                            </div>
+                          </div>
+                        </li>
+                      @endforeach
+                      @if(auth()->user()->downlines->isEmpty())
+                        <li class="text-center">No downlines found.</li>
+                      @endif
+                    <li class="text-center mt-3">
+                      <a href="{{ route('user.downline') }}" class="btn btn-outline-primary">Show all referral</a>
+                    </li>
+                    </ul>
+                  </div>
                 </div>
-                <!--/ Connections -->
+              </div>
+              <!--/ Downlines -->
                 <!-- Teams -->
                 {{-- <div class="col-lg-12 col-xl-6">
         <div class="card card-action mb-6">

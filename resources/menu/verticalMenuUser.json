@@ -19,8 +19,13 @@
       "submenu": [
         {
           "url": "user/deposit",
-          "name": "Deposit",
+          "name": "Deposit Crypto",
           "slug": "user.deposit"
+        },
+        {
+          "url": "user/deposit/direct",
+          "name": "Deposit Direct",
+          "slug": "user.deposit.direct"
         },
         {
           "url": "user/withdrawal",

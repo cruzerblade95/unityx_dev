@@ -152,7 +152,7 @@
                                         <i class="icon-base ti tabler-wallet icon-lg"></i>
                                     </div>
                                     <div class="card-info">
-                                        <h5 class="mb-0">{{ number_format($wallet->deposit ?? 0, 2) }} USDT</h5>
+                                        <h5 class="mb-0">{{ number_format($wallet->deposit ?? 0, 2) }}</h5>
                                         <small class="text-uppercase">DEPOSIT</small>
                                     </div>
                                 </div>
@@ -163,7 +163,7 @@
                                             class="icon-base ti tabler-trending-up icon-lg"></i>
                                     </div>
                                     <div class="card-info">
-                                        <h5 class="mb-0">{{ number_format($wallet->profit ?? 0, 2) }} USDT</h5>
+                                        <h5 class="mb-0">{{ number_format($wallet->profit ?? 0, 2) }}</h5>
                                         <small class="text-uppercase">PROFIT</small>
                                     </div>
                                 </div>
@@ -174,7 +174,7 @@
                                         <i class="icon-base ti tabler-gift icon-lg"></i>
                                     </div>
                                     <div class="card-info">
-                                        <h5 class="mb-0">{{ number_format($wallet->bonus ?? 0, 2) }} USDT</h5>
+                                        <h5 class="mb-0">{{ number_format($wallet->bonus ?? 0, 2) }}</h5>
                                         <small class="text-uppercase">BONUS</small>
                                     </div>
                                 </div>
@@ -185,7 +185,7 @@
                                         <i class="icon-base ti tabler-cash icon-lg"></i>
                                     </div>
                                     <div class="card-info">
-                                        <h5 class="mb-0">{{ number_format($wallet->cash ?? 0, 2) }} USDT</h5>
+                                        <h5 class="mb-0">{{ number_format($wallet->cash ?? 0, 2) }}</h5>
                                         <small class="text-uppercase">CASH</small>
                                     </div>
                                 </div>
@@ -209,7 +209,7 @@
                         <div class="card-body">
                             <div id="profitLastMonth"></div>
                             <div class="d-flex justify-content-between align-items-center mt-3 gap-3">
-                                <h4 class="mb-0">0.000</h4>
+                                <h4 class="mb-0">{{ number_format($wallet->profit ?? 0, 2) }}</h4>
                                 <small class="text-success">+8.24%</small>
                             </div>
                         </div>

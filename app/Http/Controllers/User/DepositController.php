@@ -30,6 +30,13 @@ class DepositController extends Controller
         return view('user.content.deposit', compact('deposits', 'cryptoCurrencies'));
     }
 
+    public function direct()
+    {
+        $deposits = Deposit::where('user_id', Auth::id())->latest()->get();
+        
+        return view('user.content.deposit-direct', compact('deposits'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([
