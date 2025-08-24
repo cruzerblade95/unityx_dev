@@ -312,39 +312,43 @@
     </div> --}}
             <!--/ Activity Timeline -->
             <div class="row">
-                                    <!-- Downlines -->
-                                    <div class="col-lg-12 col-xl-12">
-                                      <div class="card card-action mb-6">
-                                        <div class="card-header align-items-center">
-                                          <h5 class="card-action-title mb-0">Referral Downlines</h5>
-                                        </div>
-                                        <div class="card-body">
-                                          <ul class="list-unstyled mb-0">
-                                            @forelse(auth()->user()->downlines as $downline)
-                                              <li class="mb-4">
-                                                <div class="d-flex align-items-center">
-                                                  <div class="d-flex align-items-center">
-                                                    <div class="avatar me-2">
-                                                      <img src="{{ asset('assets/img/icons/unityx.png') }}" alt="Avatar" class="rounded-circle" />
-                                                    </div>
-                                                    <div class="me-2">
-                                                      <h6 class="mb-0">{{ $downline->username }}</h6>
-                                                      <small>{{ $downline->email }}</small>
-                                                    </div>
-                                                  </div>
-                                                  <div class="ms-auto">
-                                                    <span class="badge bg-primary">Level 1</span>
-                                                  </div>
-                                                </div>
-                                              </li>
-                                            @empty
-                                              <li class="text-center">No downlines found.</li>
-                                            @endforelse
-                                          </ul>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <!--/ Downlines -->
+              <!-- Downlines -->
+              <div class="col-lg-12 col-xl-12">
+                <div class="card card-action mb-6">
+                  <div class="card-header align-items-center">
+                    <h5 class="card-action-title mb-0">Referral Downlines</h5>
+                  </div>
+                  <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                      @foreach(auth()->user()->downlines->take(5) as $downline)
+                        <li class="mb-4">
+                          <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center">
+                              <div class="avatar me-2">
+                                <img src="{{ asset('assets/img/icons/unityx.png') }}" alt="Avatar" class="rounded-circle" />
+                              </div>
+                              <div class="me-2">
+                                <h6 class="mb-0">{{ $downline->username }}</h6>
+                                <small>{{ $downline->email }}</small>
+                              </div>
+                            </div>
+                            <div class="ms-auto">
+                              <span class="badge bg-primary">Level 1</span>
+                            </div>
+                          </div>
+                        </li>
+                      @endforeach
+                      @if(auth()->user()->downlines->isEmpty())
+                        <li class="text-center">No downlines found.</li>
+                      @endif
+                    <li class="text-center mt-3">
+                      <a href="{{ route('user.downline') }}" class="btn btn-outline-primary">Show all referral</a>
+                    </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <!--/ Downlines -->
                 <!-- Teams -->
                 {{-- <div class="col-lg-12 col-xl-6">
         <div class="card card-action mb-6">
