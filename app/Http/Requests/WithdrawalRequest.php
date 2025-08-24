@@ -27,18 +27,46 @@ class WithdrawalRequest extends FormRequest
         $user = $this->user();
         $maxBalance = $user ? $user->getWithdrawableBalance() : 0;
 
-        return [
+        // Determine limits based on withdrawal type
+        $minAmount = 100;
+        $maxAmount = $maxBalance;
+        
+        switch($this->withdrawal_type) {
+            case 'crypto':
+                $minAmount = 50;
+                $maxAmount = min(300, $maxBalance);
+                break;
+            case 'etc_black':
+                $minAmount = 100;
+                $maxAmount = min(300, $maxBalance);
+                break;
+            case 'gold':
+                $minAmount = 300;
+                $maxAmount = min(3000, $maxBalance);
+                break;
+        }
+
+        $rules = [
             'amount' => [
                 'required',
                 'numeric',
-                'min:100',
-                "max:{$maxBalance}"
+                "min:{$minAmount}",
+                "max:{$maxAmount}"
             ],
-            'currency' => 'required|string|in:USDT,USDTBEP20,USDC,FDUSD',
-            'wallet_address' => 'required|string|max:255',
+            'withdrawal_type' => 'required|string|in:crypto,etc_black,gold',
             'reference' => 'nullable|string|max:255',
             'note' => 'nullable|string|max:1000',
         ];
+
+        // Add conditional rules based on withdrawal type
+        if ($this->withdrawal_type === 'crypto') {
+            $rules['currency'] = 'required|string|in:USDTBEP20,USDCBEP20,FDUSDBEP20';
+            $rules['wallet_address'] = 'required|string|max:255';
+        } elseif ($this->withdrawal_type === 'gold') {
+            $rules['branch_name'] = 'required|string|in:SHAH ALAM,BANGI,BANTING,ALOR SETAR,JELAWAT,KOTA TINGGI,BANDAR BARU UDA';
+        }
+
+        return $rules;
     }
 
     /**
@@ -51,12 +79,34 @@ class WithdrawalRequest extends FormRequest
         $user = $this->user();
         $maxBalance = $user ? $user->getWithdrawableBalance() : 0;
 
+        // Determine limits based on withdrawal type
+        $minAmount = 100;
+        $maxAmount = $maxBalance;
+        
+        switch($this->withdrawal_type) {
+            case 'crypto':
+                $minAmount = 50;
+                $maxAmount = min(300, $maxBalance);
+                break;
+            case 'etc_black':
+                $minAmount = 100;
+                $maxAmount = min(300, $maxBalance);
+                break;
+            case 'gold':
+                $minAmount = 300;
+                $maxAmount = min(3000, $maxBalance);
+                break;
+        }
+
         return [
-            'amount.max' => "The withdrawal amount cannot exceed your available profit balance of $" . number_format($maxBalance, 2),
-            'amount.min' => 'The minimum withdrawal amount is $100.00',
+            'amount.max' => "The withdrawal amount cannot exceed $" . number_format($maxAmount, 2),
+            'amount.min' => "The minimum withdrawal amount is $" . number_format($minAmount, 2),
+            'withdrawal_type.required' => 'Please select a withdrawal type',
             'currency.required' => 'Please select a currency',
             'currency.in' => 'Invalid currency selected',
             'wallet_address.required' => 'Wallet address is required',
+            'branch_name.required' => 'Please select a branch for gold pickup',
+            'branch_name.in' => 'Invalid branch selected',
         ];
     }
 

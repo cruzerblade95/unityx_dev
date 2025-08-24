@@ -14,6 +14,7 @@ use App\Http\Controllers\User\AiTradeController;
 use App\Http\Controllers\User\MarketplaceController;
 use App\Http\Controllers\User\ReferralBonusHistoryController;
 use App\Http\Controllers\User\RoiMatchingBonusHistoryController;
+use App\Http\Controllers\User\PaymentInfoController;
 use App\Http\Controllers\KycController;
 // Route::middleware(['web'])->group(function () {
 //     Route::get('login', [App\Http\Controllers\User\UserLoginController::class, 'showLoginForm'])->name('login'); // Main login route
@@ -74,15 +75,21 @@ Route::prefix('user')->middleware('web')->group(function () {
     Route::get('kyc', [KycController::class, 'index'])->name('user.kyc.index');
     Route::post('kyc', [KycController::class, 'store'])->name('user.kyc.store');
 
+    // Payment Information
+    Route::get('payment-info', [PaymentInfoController::class, 'index'])->name('user.payment-info.index');
+    Route::post('payment-info', [PaymentInfoController::class, 'store'])->name('user.payment-info.store');
+
     // Deposit & Withdrawal
     Route::get('deposit', [DepositController::class, 'index'])->name('user.deposit.index');
+    Route::get('deposit/direct', [DepositController::class, 'direct'])->name('user.deposit.direct');
     Route::post('deposit', [DepositController::class, 'store'])->name('user.deposit.store');
     Route::post('deposit/unique-address', [DepositController::class, 'getUniqueAddress'])->name('user.deposit.unique-address');
     Route::post('deposit/crypto', [DepositController::class, 'createCryptoPayment'])->name('user.deposit.crypto');
     Route::get('deposit/success', [DepositController::class, 'success'])->name('user.deposit.success');
     Route::get('deposit/cancel', [DepositController::class, 'cancel'])->name('user.deposit.cancel');
-    Route::get('withdrawal', [WithdrawalController::class, 'index'])->name('user.withdrawal.index');
-    Route::post('withdrawal', [WithdrawalController::class, 'store'])->name('user.withdrawal.store');
+    Route::get('withdrawal', [WithdrawalController::class, 'index'])->name('user.withdrawal.index')->middleware('require.payment.info');
+    Route::post('withdrawal', [WithdrawalController::class, 'store'])->name('user.withdrawal.store')->middleware('require.payment.info');
+    Route::post('withdrawal/{withdrawalId}/select-branch', [WithdrawalController::class, 'selectBranch'])->name('user.withdrawal.select-branch')->middleware('require.payment.info');
 
     // Investment
     Route::get('investment', [InvestmentController::class, 'index'])->name('user.investment.index');

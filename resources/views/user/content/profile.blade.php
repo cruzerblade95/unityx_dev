@@ -120,6 +120,19 @@
                             @endif
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('user.payment-info.index') }}">
+                            <i class="icon-base ti tabler-credit-card icon-sm me-1_5"></i>
+                            Payment Information
+                            @if (auth()->user()->payment_info_completed)
+                                <span class="badge bg-success ms-2" data-bs-toggle="tooltip"
+                                    title="Payment information completed">Completed</span>
+                            @else
+                                <span class="badge bg-warning ms-2" data-bs-toggle="tooltip"
+                                    title="Payment information required for withdrawals">Required</span>
+                            @endif
+                        </a>
+                    </li>
                     {{-- <li class="nav-item">
           <a class="nav-link" href="{{ url('pages/profile-projects') }}"><i class="icon-base ti tabler-layout-grid icon-sm me-1_5"></i> Projects</a>
         </li>
@@ -152,8 +165,12 @@
                             <label class="form-label">Email</label>
                             <div class="form-control-plaintext">{{ auth()->user()->email }}</div>
                         </div>
-                        {{-- <button type="button" class="btn btn-primary">Edit Profile</button> --}}
-                        <a href="{{ url('/user/profile/edit') }}" class="btn btn-primary">Edit Profile</a>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url('/user/profile/edit') }}" class="btn btn-primary">Edit Profile</a>
+                            <a href="{{ route('user.payment-info.index') }}" class="btn btn-outline-info">
+                                <i class="fas fa-credit-card me-1"></i>Payment Info
+                            </a>
+                        </div>
                     </form>
 
                     <!-- Telegram Connection Status -->
@@ -176,6 +193,34 @@
                             <div class="mt-2">
                                 <a href="{{ route('connect-telegram') }}" class="btn btn-sm btn-outline-primary">
                                     <i class="ti ti-brand-telegram me-1"></i>Connect Telegram
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Payment Information Status -->
+                    <div class="mt-4 pt-3 border-top">
+                        <h6 class="text-uppercase text-body-secondary small mb-3">Payment Information</h6>
+                        @if (auth()->user()->payment_info_completed)
+                            <div class="d-flex align-items-center">
+                                <i class="ti ti-check text-success me-2"></i>
+                                <span class="fw-medium text-success">Completed</span>
+                            </div>
+                            <small class="text-muted">Payment information verified. Withdrawals enabled.</small>
+                            <div class="mt-2">
+                                <a href="{{ route('user.payment-info.index') }}" class="btn btn-sm btn-outline-info">
+                                    <i class="ti ti-credit-card me-1"></i>Update Info
+                                </a>
+                            </div>
+                        @else
+                            <div class="d-flex align-items-center">
+                                <i class="ti ti-alert-triangle text-warning me-2"></i>
+                                <span class="fw-medium text-warning">Required</span>
+                            </div>
+                            <small class="text-muted">Complete payment information to enable withdrawals</small>
+                            <div class="mt-2">
+                                <a href="{{ route('user.payment-info.index') }}" class="btn btn-sm btn-outline-warning">
+                                    <i class="ti ti-credit-card me-1"></i>Complete Info
                                 </a>
                             </div>
                         @endif

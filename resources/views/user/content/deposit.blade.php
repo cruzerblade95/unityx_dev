@@ -1,24 +1,345 @@
 @extends('user.layouts.layoutMaster')
 
-@section('title', 'Deposit')
+@section('title', 'Deposit Crypto')
 
 @section('vendor-style')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
 
+<style>
+    /* Enhanced deposit form styling - Crypto green theme like withdrawal */
+    .deposit-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 3px solid var(--bs-success);
+        user-select: none;
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, var(--bs-body-bg) 0%, var(--bs-secondary-bg) 100%);
+        box-shadow: 0 4px 15px rgba(var(--bs-success-rgb), 0.15);
+    }
+    
+    .deposit-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, var(--bs-success), var(--bs-info));
+        transition: all 0.3s ease;
+    }
+    
+    .deposit-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(var(--bs-success-rgb), 0.3);
+        border-color: rgba(var(--bs-success-rgb), 0.8);
+        background: linear-gradient(135deg, var(--bs-success-bg-subtle) 0%, rgba(var(--bs-success-rgb), 0.1) 100%);
+    }
+    
+    .card-header-custom {
+        background: linear-gradient(135deg, var(--bs-success) 0%, rgba(var(--bs-success-rgb), 0.8) 100%);
+        color: white;
+        text-align: center;
+        font-weight: 700;
+        font-size: 1.5rem;
+        padding: 2rem 1.5rem;
+        border: none;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .card-body {
+        padding: 2rem 1.5rem;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .form-control {
+        font-size: 1.1rem;
+        padding: 1rem 1.25rem;
+        border: 2px solid var(--bs-border-color);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        background-color: var(--bs-body-bg);
+        color: var(--bs-body-color);
+    }
+    
+    .form-control:focus {
+        border-color: var(--bs-success);
+        box-shadow: 0 0 0 0.3rem rgba(var(--bs-success-rgb), 0.25);
+        transform: scale(1.02);
+        background-color: var(--bs-body-bg);
+    }
+    
+    .form-label {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--bs-emphasis-color);
+        margin-bottom: 0.75rem;
+    }
+    
+    .btn {
+        font-size: 1.1rem;
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, var(--bs-success) 0%, rgba(var(--bs-success-rgb), 0.8) 100%);
+        border: none;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, rgba(var(--bs-success-rgb), 0.9) 0%, var(--bs-success) 100%);
+        color: white;
+    }
+    
+    .btn-danger {
+        background: linear-gradient(135deg, var(--bs-danger) 0%, rgba(var(--bs-danger-rgb), 0.8) 100%);
+        border: none;
+    }
+    
+    .btn-danger:hover {
+        background: linear-gradient(135deg, rgba(var(--bs-danger-rgb), 0.9) 0%, var(--bs-danger) 100%);
+    }
+    
+    .alert {
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        border: 2px solid;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .alert::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        transition: all 0.3s ease;
+    }
+    
+    .alert-info {
+        background: linear-gradient(135deg, var(--bs-info-bg-subtle) 0%, rgba(var(--bs-info-rgb), 0.1) 100%);
+        border-color: var(--bs-info);
+        color: var(--bs-info-text-emphasis);
+    }
+    
+    .alert-info::before {
+        background: linear-gradient(90deg, var(--bs-info), var(--bs-success));
+    }
+    
+    .alert-warning {
+        background: linear-gradient(135deg, var(--bs-warning-bg-subtle) 0%, rgba(var(--bs-warning-rgb), 0.1) 100%);
+        border-color: var(--bs-warning);
+        color: var(--bs-warning-text-emphasis);
+    }
+    
+    .alert-warning::before {
+        background: linear-gradient(90deg, var(--bs-warning), #fd7e14);
+    }
+    
+    .alert-success {
+        background: linear-gradient(135deg, var(--bs-success-bg-subtle) 0%, rgba(var(--bs-success-rgb), 0.1) 100%);
+        border-color: var(--bs-success);
+        color: var(--bs-success-text-emphasis);
+    }
+    
+    .alert-success::before {
+        background: linear-gradient(90deg, var(--bs-success), var(--bs-info));
+    }
+    
+    .alert-danger {
+        background: linear-gradient(135deg, var(--bs-danger-bg-subtle) 0%, rgba(var(--bs-danger-rgb), 0.1) 100%);
+        border-color: var(--bs-danger);
+        color: var(--bs-danger-text-emphasis);
+    }
+    
+    .alert-danger::before {
+        background: linear-gradient(90deg, var(--bs-danger), #dc3545);
+    }
+    
+    .input-group-text {
+        background: var(--bs-tertiary-bg);
+        border: 2px solid var(--bs-border-color);
+        color: var(--bs-body-color);
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    
+    .deposit-section {
+        background: var(--bs-body-bg);
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .conversion-info {
+        background: linear-gradient(135deg, var(--bs-secondary-bg) 0%, var(--bs-tertiary-bg) 100%);
+        border: 3px solid var(--bs-success);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(var(--bs-success-rgb), 0.15);
+    }
+    
+    .conversion-info::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, var(--bs-success), var(--bs-info));
+        transition: all 0.3s ease;
+    }
+    
+    .conversion-info:hover {
+        box-shadow: 0 8px 25px rgba(var(--bs-success-rgb), 0.25);
+        transform: translateY(-2px);
+    }
+    
+    .conversion-info h6 {
+        color: var(--bs-success);
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+    
+    .conversion-rate {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--bs-success);
+        text-align: center;
+        padding: 1rem;
+        background: rgba(var(--bs-success-rgb), 0.1);
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(var(--bs-success-rgb), 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .conversion-rate::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--bs-success), var(--bs-info));
+    }
+    
+    /* Enhanced visibility for required fields */
+    .text-danger {
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+    
+    /* Better error styling */
+    .is-invalid {
+        border-color: var(--bs-danger);
+        box-shadow: 0 0 0 0.3rem rgba(var(--bs-danger-rgb), 0.25);
+    }
+    
+    .invalid-feedback {
+        font-size: 1rem;
+        font-weight: 700;
+    }
+    
+    /* Loading state styling */
+    .loading-overlay {
+        background: rgba(var(--bs-body-color-rgb), 0.1);
+        backdrop-filter: blur(5px);
+    }
+    
+    /* Better spacing for older users */
+    .form-group {
+        margin-bottom: 2rem;
+    }
+    
+    .d-grid {
+        margin-top: 2rem;
+    }
+
+    /* Dark theme specific adjustments */
+    [data-bs-theme="dark"] .deposit-card {
+        background: linear-gradient(135deg, var(--bs-body-bg) 0%, rgba(var(--bs-secondary-rgb), 0.3) 100%);
+    }
+    
+    [data-bs-theme="dark"] .deposit-card:hover {
+        background: linear-gradient(135deg, rgba(var(--bs-primary-rgb), 0.15) 0%, rgba(var(--bs-primary-rgb), 0.05) 100%);
+    }
+    
+    [data-bs-theme="dark"] .conversion-info {
+        background: linear-gradient(135deg, rgba(var(--bs-secondary-rgb), 0.3) 0%, rgba(var(--bs-tertiary-rgb), 0.3) 100%);
+    }
+    
+    [data-bs-theme="dark"] .conversion-rate {
+        background: rgba(var(--bs-success-rgb), 0.15);
+    }
+    
+    [data-bs-theme="dark"] .alert-info {
+        background: linear-gradient(135deg, rgba(13, 202, 240, 0.15) 0%, rgba(13, 202, 240, 0.05) 100%);
+    }
+    
+    [data-bs-theme="dark"] .alert-warning {
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 193, 7, 0.05) 100%);
+    }
+    
+    [data-bs-theme="dark"] .alert-success {
+        background: linear-gradient(135deg, rgba(25, 135, 84, 0.15) 0%, rgba(25, 135, 84, 0.05) 100%);
+    }
+    
+    [data-bs-theme="dark"] .alert-danger {
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.15) 0%, rgba(220, 53, 69, 0.05) 100%);
+    }
+</style>
+
 @section('content')
     {{-- @include('components.coming-soon-overlay') --}}
     <div class="container py-4 position-relative" style="z-index: 1;">
-        <h2>Deposit</h2>
+        <div class="deposit-header">
+            <h2>
+                <i class="fab fa-bitcoin me-2"></i>
+                Deposit Crypto
+            </h2>
+        </div>
+        
         @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle me-2"></i>
+                {{ session('success') }}
+            </div>
         @endif
         @if (session('warning'))
-            <div class="alert alert-warning">{{ session('warning') }}</div>
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                {{ session('warning') }}
+            </div>
         @endif
         @if ($errors->any())
             <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>
                 @foreach ($errors->all() as $error)
                     <div>{{ $error }}</div>
                 @endforeach
@@ -26,162 +347,9 @@
         @endif
 
         <div class="row">
-            <!-- Manual Deposit Form -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-wallet me-2"></i>
-                            USDT Deposit
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <form method="POST" action="{{ route('user.deposit.store') }}" id="usdtDepositForm">
-                            @csrf
-                            <div class="mb-3">
-                                <label for="amount" class="form-label">USDT Amount</label>
-                                <div class="input-group">
-                                    <input type="number" step="0.01" class="form-control" id="amount" name="amount"
-                                        required min="100">
-                                    <span class="input-group-text">USDT</span>
-                                </div>
-                                <div class="form-text">Minimum deposit: 100 USDT</div>
-
-                                <!-- Fee Calculation Display -->
-                                <div id="feeCalculation" class="mt-2" style="display: none;">
-                                    <div class="card card-body bg-light border-0">
-                                        <div class="row g-2 small">
-                                            <div class="col-6">
-                                                <div class="d-flex justify-content-between">
-                                                    <span class="text-muted">Deposit Amount:</span>
-                                                    <span class="fw-medium">$<span id="displayAmount">0.00</span></span>
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <div class="d-flex justify-content-between">
-                                                    <span class="text-muted">Processing Fee (2.5%):</span>
-                                                    <span class="text-warning fw-medium">-$<span
-                                                            id="displayFee">0.00</span></span>
-                                                </div>
-                                            </div>
-                                            <div class="col-12">
-                                                <hr class="my-2">
-                                                <div class="d-flex justify-content-between">
-                                                    <span class="fw-semibold">You will receive:</span>
-                                                    <span class="fw-semibold text-success">$<span
-                                                            id="displayNetAmount">0.00</span></span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="reference" class="form-label">Reference</label>
-                                <input type="text" class="form-control" id="reference" name="reference"
-                                    placeholder="Optional reference">
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="note" class="form-label">Note</label>
-                                <textarea class="form-control" id="note" name="note" placeholder="Optional note for this deposit"></textarea>
-                            </div>
-
-                            <!-- Payment Instructions (Initially Hidden) -->
-                            <div id="paymentInstructions" class="alert alert-info" style="display: none;">
-                                <h6><i class="fas fa-info-circle me-2"></i>Payment Instructions</h6>
-                                <div id="loadingAddress" class="text-center py-3">
-                                    <i class="fas fa-spinner fa-spin me-2"></i>Generating unique wallet address...
-                                </div>
-                                <div id="addressContent" style="display: none;">
-                                    <p><strong>Please transfer your USDT to the following wallet address:</strong></p>
-                                    <div class="bg-light p-3 rounded mb-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <small class="text-muted">Wallet Address:</small>
-                                            <button type="button" class="btn btn-sm btn-outline-primary"
-                                                onclick="copyToClipboard('walletAddress')">
-                                                <i class="fas fa-copy"></i> Copy
-                                            </button>
-                                        </div>
-                                        <code class="text-dark d-block" id="walletAddress">Loading...</code>
-                                    </div>
-                                    <div class="alert alert-success">
-                                        <small><strong>✅ Reference code will be automatically included when you submit this
-                                                form</strong></small>
-                                        <ul class="mb-0 mt-1 small">
-                                            <li>No need to manually add memo or reference</li>
-                                            <li>Just send USDT to the address above</li>
-                                            <li>Enter your transaction hash below and submit</li>
-                                        </ul>
-                                    </div>
-                                    <div class="alert alert-warning">
-                                        <small><strong>Important Security Notes:</strong></small>
-                                        <ul class="mb-0 mt-1 small">
-                                            <li>This address is unique to your deposit and expires in 24 hours</li>
-                                            <li>Only send USDT to this address</li>
-                                            <li>Sending other cryptocurrencies may result in permanent loss</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Payment ID Field (Initially Hidden) -->
-                            <div id="paymentIdField" style="display: none;">
-                                <div class="mb-3">
-                                    <label for="payment_id" class="form-label">Payment ID / Transaction Hash <span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="payment_id" name="payment_id"
-                                        placeholder="Enter your transaction hash after sending USDT">
-                                    <div class="form-text">Please enter the transaction hash from your USDT transfer</div>
-                                </div>
-
-                                <!-- Show auto-generated reference for user records -->
-                                <div class="alert alert-light border">
-                                    <small class="text-muted"><strong>Auto-generated Reference (for your
-                                            records):</strong></small>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <code class="text-primary" id="referencePreview">Generating...</code>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary"
-                                            onclick="copyToClipboard('referencePreview')">
-                                            <i class="fas fa-copy"></i> Copy
-                                        </button>
-                                    </div>
-                                    <small class="text-muted d-block mt-1">This reference will be automatically included in
-                                        your deposit request</small>
-                                </div>
-                            </div>
-
-                            <!-- Hidden fields for auto-generated reference -->
-                            <input type="hidden" id="auto_reference" name="auto_reference" value="">
-                            <input type="hidden" id="deposit_address" name="deposit_address" value="">
-
-                            <button type="button" class="btn btn-primary w-100" id="showInstructionsBtn">
-                                <i class="fas fa-arrow-right me-2"></i>
-                                Continue to Payment
-                            </button>
-
-                            <div id="paymentButtons" style="display: none;">
-                                <div class="d-flex gap-2">
-                                    <button type="button" class="btn btn-outline-secondary flex-fill"
-                                        id="cancelPaymentBtn">
-                                        <i class="fas fa-times me-2"></i>
-                                        Cancel
-                                    </button>
-                                    <button type="submit" class="btn btn-success flex-fill" id="submitDepositBtn">
-                                        <i class="fas fa-check me-2"></i>
-                                        Submit Deposit Request
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
             <!-- Cryptocurrency Deposit Form -->
-            <div class="col-md-6">
-                <div class="card">
+            <div class="col-md-8 mx-auto">
+                <div class="card deposit-card">
                     <div class="card-header">
                         <h5 class="mb-0">
                             <i class="fab fa-bitcoin me-2"></i>
@@ -189,7 +357,7 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <div class="alert alert-info mb-3">
+                        <div class="info-alert">
                             <small><i class="fas fa-info-circle me-1"></i><strong>How it works:</strong> Send any supported
                                 cryptocurrency and it will be automatically converted to USDT in your wallet.</small>
                         </div>
@@ -197,7 +365,10 @@
                         <form method="POST" action="{{ route('user.deposit.crypto') }}" id="cryptoDepositForm">
                             @csrf
                             <div class="mb-3">
-                                <label for="crypto_amount" class="form-label">Amount (USD Value)</label>
+                                <label for="crypto_amount" class="form-label">
+                                    <i class="fas fa-dollar-sign me-1"></i>
+                                    Amount (USD Value) <span class="text-danger">*</span>
+                                </label>
                                 <div class="input-group">
                                     <input type="number" step="0.01" class="form-control" id="crypto_amount"
                                         name="amount" required min="100">
@@ -207,7 +378,10 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="crypto_currency" class="form-label">Send From Currency</label>
+                                <label for="crypto_currency" class="form-label">
+                                    <i class="fab fa-bitcoin me-1"></i>
+                                    Send From Currency <span class="text-danger">*</span>
+                                </label>
                                 <select class="form-select" id="crypto_currency" name="crypto_currency" required>
                                     <option value="">Select cryptocurrency to send</option>
                                     <option value="usdt_bsc">USDT BSC → USDT </option>
@@ -227,13 +401,16 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="crypto_note" class="form-label">Note</label>
+                                <label for="crypto_note" class="form-label">
+                                    <i class="fas fa-sticky-note me-1"></i>
+                                    Note (Optional)
+                                </label>
                                 <textarea class="form-control" id="crypto_note" name="note" placeholder="Optional note for this deposit"></textarea>
                             </div>
 
-                            <div class="alert alert-warning" id="cryptoWarningAlert">
-                                <small><strong>Important:</strong></small>
-                                <ul class="mb-0 mt-1 small" id="cryptoWarningList">
+                            <div class="warning-alert">
+                                <h6><strong>Important Information</strong></h6>
+                                <ul class="mb-0 mt-1" id="cryptoWarningList">
                                     <li>You'll receive a unique address for your selected cryptocurrency</li>
                                     <li>Your deposit will be converted to USDT at current market rates</li>
                                     <li>Conversion rate is locked when you send the transaction</li>
@@ -257,7 +434,7 @@
             <div class="card-header">
                 <h5 class="mb-0">
                     <i class="fas fa-history me-2"></i>
-                    Deposit History
+                    Crypto Deposit History
                 </h5>
             </div>
             <div class="card-body">
@@ -280,7 +457,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($deposits as $deposit)
+                            @forelse($deposits->where('payment_method', 'crypto') as $deposit)
                                 <tr>
                                     <td>{{ $deposit->id }}</td>
                                     <td>${{ number_format($deposit->amount, 2) }}</td>
@@ -288,25 +465,18 @@
                                     <td>${{ number_format($deposit->tax_amount, 2) }}</td>
                                     <td>${{ number_format($deposit->net_amount, 2) }}</td>
                                     <td>
-                                        @if ($deposit->payment_method === 'crypto')
-                                            @php
-                                                $cryptoDisplay = str_replace(
-                                                    '_TO_USDT',
-                                                    '',
-                                                    $deposit->crypto_currency ?? 'CRYPTO',
-                                                );
-                                                $cryptoDisplay = str_replace('_', ' ', $cryptoDisplay);
-                                            @endphp
-                                            <span class="badge bg-info">
-                                                <i class="fab fa-bitcoin me-1"></i>
-                                                {{ strtoupper($cryptoDisplay) }} → USDT
-                                            </span>
-                                        @else
-                                            <span class="badge bg-secondary">
-                                                <i class="fas fa-wallet me-1"></i>
-                                                USDT Direct
-                                            </span>
-                                        @endif
+                                        @php
+                                            $cryptoDisplay = str_replace(
+                                                '_TO_USDT',
+                                                '',
+                                                $deposit->crypto_currency ?? 'CRYPTO',
+                                            );
+                                            $cryptoDisplay = str_replace('_', ' ', $cryptoDisplay);
+                                        @endphp
+                                        <span class="badge bg-info">
+                                            <i class="fab fa-bitcoin me-1"></i>
+                                            {{ strtoupper($cryptoDisplay) }} → USDT
+                                        </span>
                                     </td>
                                     <td>
                                         @if ($deposit->status === 'completed')
@@ -342,7 +512,7 @@
                             @empty
                                 <tr>
                                     <td colspan="12" class="text-center text-muted py-4">
-                                        No deposits found
+                                        No crypto deposits found
                                     </td>
                                 </tr>
                             @endforelse
@@ -355,221 +525,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const showInstructionsBtn = document.getElementById('showInstructionsBtn');
-            const submitDepositBtn = document.getElementById('submitDepositBtn');
-            const cancelPaymentBtn = document.getElementById('cancelPaymentBtn');
-            const paymentButtons = document.getElementById('paymentButtons');
-            const paymentInstructions = document.getElementById('paymentInstructions');
-            const paymentIdField = document.getElementById('paymentIdField');
-            const amountInput = document.getElementById('amount');
-            const referenceInput = document.getElementById('reference');
-            const noteInput = document.getElementById('note');
-            const paymentIdInput = document.getElementById('payment_id');
-            const form = document.getElementById('usdtDepositForm');
-            const feeCalculation = document.getElementById('feeCalculation');
-
-            // Fee calculation on amount input
-            amountInput.addEventListener('input', function() {
-                calculateFee();
-            });
-
-            function calculateFee() {
-                const amount = parseFloat(amountInput.value) || 0;
-
-                if (amount >= 100) {
-                    const feePercent = 2.5;
-                    const feeAmount = amount * (feePercent / 100);
-                    const netAmount = amount - feeAmount;
-
-                    document.getElementById('displayAmount').textContent = amount.toFixed(2);
-                    document.getElementById('displayFee').textContent = feeAmount.toFixed(2);
-                    document.getElementById('displayNetAmount').textContent = netAmount.toFixed(2);
-
-                    feeCalculation.style.display = 'block';
-                } else {
-                    feeCalculation.style.display = 'none';
-                }
-            }
-
-            // Show payment instructions when continue button is clicked
-            showInstructionsBtn.addEventListener('click', function() {
-                const amount = amountInput.value;
-
-                if (!amount || amount < 100) {
-                    alert('Please enter a valid USDT amount (minimum 100 USDT).');
-                    amountInput.focus();
-                    return;
-                }
-
-                // Lock the form fields
-                lockFormFields();
-
-                // Show payment instructions
-                paymentInstructions.style.display = 'block';
-
-                // Hide continue button, show payment buttons
-                showInstructionsBtn.style.display = 'none';
-                paymentButtons.style.display = 'block';
-
-                // Fetch unique wallet address
-                fetchUniqueAddress(amount);
-            });
-
-            // Cancel payment and reset form
-            cancelPaymentBtn.addEventListener('click', function() {
-                if (confirm('Are you sure you want to cancel? This will reset the form.')) {
-                    resetForm();
-                }
-            });
-
-            function lockFormFields() {
-                amountInput.readOnly = true;
-                referenceInput.readOnly = true;
-                noteInput.readOnly = true;
-
-                // Add visual indication that fields are locked
-                amountInput.classList.add('bg-light');
-                referenceInput.classList.add('bg-light');
-                noteInput.classList.add('bg-light');
-            }
-
-            function unlockFormFields() {
-                amountInput.readOnly = false;
-                referenceInput.readOnly = false;
-                noteInput.readOnly = false;
-
-                // Remove visual indication
-                amountInput.classList.remove('bg-light');
-                referenceInput.classList.remove('bg-light');
-                noteInput.classList.remove('bg-light');
-            }
-
-            function resetForm() {
-                // Reset form fields
-                form.reset();
-
-                // Unlock fields
-                unlockFormFields();
-
-                // Hide payment sections
-                paymentInstructions.style.display = 'none';
-                paymentIdField.style.display = 'none';
-                paymentButtons.style.display = 'none';
-                feeCalculation.style.display = 'none';
-
-                // Show continue button
-                showInstructionsBtn.style.display = 'block';
-
-                // Reset payment ID requirement
-                paymentIdInput.required = false;
-
-                // Clear hidden fields
-                document.getElementById('auto_reference').value = '';
-                document.getElementById('deposit_address').value = '';
-
-                // Reset loading states
-                document.getElementById('loadingAddress').style.display = 'block';
-                document.getElementById('addressContent').style.display = 'none';
-                document.getElementById('loadingAddress').innerHTML =
-                    '<i class="fas fa-spinner fa-spin me-2"></i>Generating unique wallet address...';
-            }
-
-            // Function to fetch unique wallet address
-            function fetchUniqueAddress(amount) {
-                const loadingDiv = document.getElementById('loadingAddress');
-                const contentDiv = document.getElementById('addressContent');
-
-                fetch('{{ route('user.deposit.unique-address') }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                                'content')
-                        },
-                        body: JSON.stringify({
-                            amount: amount
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        loadingDiv.style.display = 'none';
-
-                        if (data.success) {
-                            // Update address and store auto-generated reference
-                            document.getElementById('walletAddress').textContent = data.address;
-                            document.getElementById('auto_reference').value = data.memo || '';
-                            document.getElementById('deposit_address').value = data.address;
-                            document.getElementById('referencePreview').textContent = data.memo || 'AUTO_REF_' +
-                                Date.now();
-
-                            contentDiv.style.display = 'block';
-
-                            // Show payment ID field and submit button
-                            paymentIdField.style.display = 'block';
-                            paymentIdInput.required = true;
-
-                        } else {
-                            loadingDiv.innerHTML =
-                                '<div class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Failed to generate address: ' +
-                                data.message + '</div>';
-
-                            // Show fallback address
-                            setTimeout(() => {
-                                const fallbackRef = 'FALLBACK_' + Date.now();
-                                document.getElementById('walletAddress').textContent =
-                                    '0x8cAA7c9988E731F68598941503C41E00339de533';
-                                document.getElementById('auto_reference').value = fallbackRef;
-                                document.getElementById('deposit_address').value =
-                                    '0x8cAA7c9988E731F68598941503C41E00339de533';
-                                document.getElementById('referencePreview').textContent = fallbackRef;
-                                loadingDiv.style.display = 'none';
-                                contentDiv.style.display = 'block';
-                                paymentIdField.style.display = 'block';
-                                paymentIdInput.required = true;
-                            }, 2000);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        loadingDiv.innerHTML =
-                            '<div class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Network error. Using fallback address.</div>';
-
-                        // Show fallback address
-                        setTimeout(() => {
-                            const fallbackRef = 'FALLBACK_' + Date.now();
-                            document.getElementById('walletAddress').textContent =
-                                '0x8cAA7c9988E731F68598941503C41E00339de533';
-                            document.getElementById('auto_reference').value = fallbackRef;
-                            document.getElementById('deposit_address').value =
-                                '0x8cAA7c9988E731F68598941503C41E00339de533';
-                            document.getElementById('referencePreview').textContent = fallbackRef;
-                            loadingDiv.style.display = 'none';
-                            contentDiv.style.display = 'block';
-                            paymentIdField.style.display = 'block';
-                            paymentIdInput.required = true;
-                        }, 2000);
-                    });
-            }
-
-            // Form validation before submit
-            form.addEventListener('submit', function(e) {
-                const paymentId = paymentIdInput.value.trim();
-
-                if (!paymentId) {
-                    e.preventDefault();
-                    alert('Please enter your payment ID / transaction hash.');
-                    paymentIdInput.focus();
-                    return;
-                }
-
-                if (paymentId.length < 10) {
-                    e.preventDefault();
-                    alert('Please enter a valid transaction hash.');
-                    paymentIdInput.focus();
-                    return;
-                }
-            });
-
             // Crypto form validation
             const cryptoForm = document.getElementById('cryptoDepositForm');
             const cryptoAmountInput = document.getElementById('crypto_amount');
@@ -640,39 +595,6 @@
                 }
             }
         });
-
-        // Function to copy text to clipboard
-        function copyToClipboard(elementId) {
-            const element = document.getElementById(elementId);
-            const text = element.textContent;
-
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(text).then(function() {
-                    // Show success message
-                    const button = event.target.closest('button');
-                    const originalText = button.innerHTML;
-                    button.innerHTML = '<i class="fas fa-check"></i> Copied!';
-                    button.classList.remove('btn-outline-primary', 'btn-outline-dark');
-                    button.classList.add('btn-success');
-
-                    setTimeout(function() {
-                        button.innerHTML = originalText;
-                        button.classList.remove('btn-success');
-                        button.classList.add(elementId === 'memoCode' ? 'btn-outline-dark' :
-                            'btn-outline-primary');
-                    }, 2000);
-                });
-            } else {
-                // Fallback for older browsers
-                const textArea = document.createElement('textarea');
-                textArea.value = text;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                alert('Copied to clipboard: ' + text);
-            }
-        }
     </script>
 
 @endsection

@@ -64,6 +64,14 @@ class User extends Authenticatable
         'currency',
         'telegram_username',
         'profile_photo_path',
+        'national_id',
+        'crypto_wallet_address',
+        'usdt_bep20_address',
+        'usdc_bep20_address',
+        'fdusd_bep20_address',
+        'etc_black_card_number',
+        'cardholder_name',
+        'payment_info_completed',
     ];
 
     /**
