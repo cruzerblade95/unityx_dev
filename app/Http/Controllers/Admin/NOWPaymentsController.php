@@ -8,6 +8,7 @@ use App\Models\Deposit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
+use App\Helpers\Helpers;
 
 class NOWPaymentsController extends Controller
 {
@@ -133,6 +134,9 @@ class NOWPaymentsController extends Controller
                 $deposit->user->wallet->deposit += $deposit->net_amount;
                 $deposit->user->wallet->save();
             }
+
+            // Add bonus to upline
+            Helpers::depositBonus($deposit->user_id, $deposit->net_amount);
 
             // Create success notification for the user
             NotificationService::createDepositSuccessNotification(
