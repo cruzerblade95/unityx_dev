@@ -17,51 +17,96 @@ class TelegramController extends Controller
     // Telegram webhook handler
     public function webhook(Request $request)
     {
-        // Debug: log all incoming requests to a file
-        file_put_contents(storage_path('logs/telegram_test.log'), json_encode($request->all()) . PHP_EOL, FILE_APPEND);
-        Log::info('TELEGRAM WEBHOOK', $request->all());
-        $data = $request->all();
-        if (isset($data['message']) && isset($data['message']['chat']['id'])) {
-            $chatId = $data['message']['chat']['id'];
-            $text = $data['message']['text'] ?? '';
+        try {
+            // Enhanced logging for debugging
+            $rawContent = $request->getContent();
+            $data = $request->all();
 
-            // Extract telegram username from the webhook data
-            $telegramUsername = $data['message']['from']['username'] ?? null;
+            // Log everything for debugging
+            Log::info('TELEGRAM WEBHOOK RECEIVED', [
+                'headers' => $request->headers->all(),
+                'raw_content' => $rawContent,
+                'parsed_data' => $data,
+                'method' => $request->method(),
+                'ip' => $request->ip(),
+                'url' => $request->fullUrl()
+            ]);
 
-            if ($text === '/start') {
-                $reply = "Welcome! Please type /verify to link your account.";
-                $this->sendTelegramMessage($chatId, $reply);
-            } elseif ($text === '/verify') {
-                $reply = "Please enter your email to link your account.";
-                $this->sendTelegramMessage($chatId, $reply);
-            } elseif (filter_var($text, FILTER_VALIDATE_EMAIL)) {
-                $user = User::where('email', $text)->first();
-                if ($user) {
-                    $token = Str::random(40);
-                    DB::table('telegram_verifications')->updateOrInsert(
-                        ['user_id' => $user->id],
-                        [
-                            'token' => $token,
-                            'expires_at' => Carbon::now()->addMinutes(30),
-                            'telegram_username' => $telegramUsername,
-                            'chat_id' => $chatId,
-                            'updated_at' => now(),
-                            'created_at' => now(),
-                        ]
-                    );
-                    // Include token for verification
-                    $link = URL::to('/telegram/verify?token=' . $token);
-                    $this->sendTelegramMessage($chatId, "Click to verify your profile: $link");
+            // Also log to file for easier debugging
+            file_put_contents(
+                storage_path('logs/telegram_webhook_' . date('Y-m-d') . '.log'),
+                "[" . date('Y-m-d H:i:s') . "] " . json_encode([
+                    'data' => $data,
+                    'raw' => $rawContent
+                ], JSON_PRETTY_PRINT) . PHP_EOL,
+                FILE_APPEND
+            );
+
+            if (isset($data['message']) && isset($data['message']['chat']['id'])) {
+                $chatId = $data['message']['chat']['id'];
+                $text = $data['message']['text'] ?? '';
+
+                Log::info('Processing Telegram message', [
+                    'chat_id' => $chatId,
+                    'text' => $text,
+                    'from' => $data['message']['from'] ?? 'unknown'
+                ]);
+
+                // Extract telegram username from the webhook data
+                $telegramUsername = $data['message']['from']['username'] ?? null;
+
+                if ($text === '/start') {
+                    $reply = "Welcome! Please type /verify to link your account.";
+                    Log::info('Sending start message', ['chat_id' => $chatId]);
+                    $this->sendTelegramMessage($chatId, $reply);
+                } elseif ($text === '/verify') {
+                    $reply = "Please enter your email to link your account.";
+                    Log::info('Sending verify message', ['chat_id' => $chatId]);
+                    $this->sendTelegramMessage($chatId, $reply);
+                } elseif (filter_var($text, FILTER_VALIDATE_EMAIL)) {
+                    Log::info('Processing email verification', ['email' => $text, 'chat_id' => $chatId]);
+                    $user = User::where('email', $text)->first();
+                    if ($user) {
+                        $token = Str::random(40);
+                        DB::table('telegram_verifications')->updateOrInsert(
+                            ['user_id' => $user->id],
+                            [
+                                'token' => $token,
+                                'expires_at' => Carbon::now()->addMinutes(30),
+                                'telegram_username' => $telegramUsername,
+                                'chat_id' => $chatId,
+                                'updated_at' => now(),
+                                'created_at' => now(),
+                            ]
+                        );
+                        // Include token for verification
+                        $link = URL::to('/telegram/verify?token=' . $token);
+                        $this->sendTelegramMessage($chatId, "Click to verify your profile: $link");
+                        Log::info('Verification link sent', ['user_id' => $user->id, 'chat_id' => $chatId]);
+                    } else {
+                        $this->sendTelegramMessage($chatId, "No user found for this email.");
+                        Log::warning('User not found for email', ['email' => $text, 'chat_id' => $chatId]);
+                    }
                 } else {
-                    $this->sendTelegramMessage($chatId, "No user found for this email.");
+                    // For any other message that's not /start, /verify, or email
+                    $reply = "Please type /start to begin.";
+                    Log::info('Sending default message', ['chat_id' => $chatId, 'text' => $text]);
+                    $this->sendTelegramMessage($chatId, $reply);
                 }
             } else {
-                // For any other message that's not /start, /verify, or email
-                $reply = "Please type /start to begin.";
-                $this->sendTelegramMessage($chatId, $reply);
+                Log::warning('Invalid webhook data received', ['data' => $data]);
             }
+
+            return response('ok', 200);
+
+        } catch (\Exception $e) {
+            Log::error('Telegram webhook error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'data' => $request->all()
+            ]);
+            return response('error', 500);
         }
-        return response('ok', 200);
     }
 
     // Verification link handler
@@ -75,12 +120,9 @@ class TelegramController extends Controller
             $user = User::find($row->user_id);
             if ($user) {
                 $user->profile_complete = 1;
-                // Store the chat_id for sending notifications (not the username)
-                if ($row->chat_id) {
-                    $user->telegram_id = $row->chat_id;
-                } elseif ($row->telegram_username) {
-                    // Fallback to username if no chat_id (shouldn't happen)
-                    $user->telegram_id = $row->telegram_username;
+                // Store the telegram_username for marketplace display and profile
+                if ($row->telegram_username) {
+                    $user->telegram_username = $row->telegram_username;
                 }
                 $user->save();
                 // Keep the verification row for potential future use (don't delete)

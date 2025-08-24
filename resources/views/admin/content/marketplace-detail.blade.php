@@ -211,11 +211,10 @@
                                             <td class="pe-0">{{ $transaction->buyer->email }}</td>
                                         </tr>
                                         <tr>
-                                            <td class="ps-0 fw-medium">Telegram ID:</td>
+                                            <td class="ps-0 fw-medium">Telegram Username:</td>
                                             <td class="pe-0">
-                                                @if ($transaction->buyer->telegram_id)
-                                                    <span
-                                                        class="badge bg-label-success">{{ $transaction->buyer->telegram_id }}</span>
+                                                @if ($transaction->buyer->telegramVerification && $transaction->buyer->telegramVerification->telegram_username)
+                                                    <span class="badge bg-label-success">@{{ $transaction - > buyer - > telegramVerification - > telegram_username }}</span>
                                                 @else
                                                     <span class="text-muted">Not connected</span>
                                                 @endif
@@ -269,11 +268,10 @@
                                         <td class="pe-0">{{ $transaction->seller->email }}</td>
                                     </tr>
                                     <tr>
-                                        <td class="ps-0 fw-medium">Telegram ID:</td>
+                                        <td class="ps-0 fw-medium">Telegram Username:</td>
                                         <td class="pe-0">
-                                            @if ($transaction->seller->telegram_id)
-                                                <span
-                                                    class="badge bg-label-success">{{ $transaction->seller->telegram_id }}</span>
+                                            @if ($transaction->seller->telegramVerification && $transaction->seller->telegramVerification->telegram_username)
+                                                <span class="badge bg-label-success">@{{ $transaction - > seller - > telegramVerification - > telegram_username }}</span>
                                             @else
                                                 <span class="text-muted">Not connected</span>
                                             @endif

@@ -62,7 +62,7 @@ class User extends Authenticatable
         'language',
         'timezone',
         'currency',
-        'telegram_id',
+        'telegram_username',
         'profile_photo_path',
     ];
 
@@ -160,5 +160,13 @@ class User extends Authenticatable
 
         // Subtract floating amount from profit as it's locked for pending withdrawals
         return $this->wallet->profit - $this->wallet->floating;
+    }
+
+    /**
+     * Get the user's telegram verification record.
+     */
+    public function telegramVerification()
+    {
+        return $this->hasOne(\App\Models\TelegramVerification::class);
     }
 }

@@ -63,6 +63,30 @@ class TelegramDebugController extends Controller
         ], 200);
     }
 
+    public function getLastLog(Request $request)
+    {
+        $logFile = storage_path('logs/telegram_debug_' . date('Y-m-d') . '.log');
+
+        if (!file_exists($logFile)) {
+            return response()->json([
+                'error' => 'No log file found for today',
+                'file_path' => $logFile
+            ], 404);
+        }
+
+        $logContent = file_get_contents($logFile);
+        $logLines = explode(PHP_EOL, trim($logContent));
+
+        // Get the last few log entries
+        $lastEntries = array_slice($logLines, -3);
+
+        return response()->json([
+            'log_file' => $logFile,
+            'last_entries' => $lastEntries,
+            'total_lines' => count($logLines)
+        ]);
+    }
+
     public function testMessage(Request $request)
     {
         $chatId = $request->input('chat_id', '123456789');

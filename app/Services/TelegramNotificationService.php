@@ -18,8 +18,19 @@ class TelegramNotificationService
         try {
             $user = User::find($userId);
 
-            if (!$user || !$user->telegram_id) {
-                Log::info('User not found or no telegram_id', ['user_id' => $userId]);
+            // Check if user has telegram verification record
+            if (!$user) {
+                Log::info('User not found', ['user_id' => $userId]);
+                return false;
+            }
+
+            $telegramVerification = DB::table('telegram_verifications')
+                ->where('user_id', $user->id)
+                ->whereNotNull('chat_id')
+                ->first();
+
+            if (!$telegramVerification) {
+                Log::info('User has no telegram verification or chat_id', ['user_id' => $userId]);
                 return false;
             }
 
@@ -36,39 +47,13 @@ class TelegramNotificationService
 
             $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
 
-            // Use telegram_id from user table - should be chat_id (numeric)
-            $chatId = $user->telegram_id;
-
-            // If telegram_id is not numeric (old username format), try to get chat_id from verification table
-            if (!is_numeric($chatId)) {
-                Log::info('telegram_id is not numeric, checking verification table', [
-                    'user_id' => $userId,
-                    'telegram_id' => $user->telegram_id
-                ]);
-
-                $verification = DB::table('telegram_verifications')
-                    ->where('user_id', $user->id)
-                    ->first();
-
-                if ($verification && $verification->chat_id) {
-                    $chatId = $verification->chat_id;
-                    Log::info('Found chat_id in verification table', [
-                        'user_id' => $userId,
-                        'chat_id' => $chatId
-                    ]);
-                } else {
-                    Log::warning('No chat_id found in verification table', [
-                        'user_id' => $userId,
-                        'telegram_id' => $user->telegram_id
-                    ]);
-                }
-            }
+            // Use chat_id from telegram verification table
+            $chatId = $telegramVerification->chat_id;
 
             if (!$chatId || !is_numeric($chatId)) {
                 Log::warning('No valid numeric chat_id found for user', [
                     'user_id' => $userId,
-                    'telegram_id' => $user->telegram_id,
-                    'final_chat_id' => $chatId
+                    'chat_id' => $chatId
                 ]);
                 return false;
             }
