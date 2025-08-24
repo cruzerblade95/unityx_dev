@@ -9,19 +9,85 @@
 
 @section('vendor-script')
 @vite(['resources/assets/vendor/libs/moment/moment.js', 'resources/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js', 'resources/assets/vendor/libs/select2/select2.js', 'resources/assets/vendor/libs/@form-validation/popular.js', 'resources/assets/vendor/libs/@form-validation/bootstrap5.js', 'resources/assets/vendor/libs/@form-validation/auto-focus.js', 'resources/assets/vendor/libs/cleave-zen/cleave-zen.js'])
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection
 
 @section('page-script')
 @vite('resources/assets/js/app-user-list.js')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.getElementById('ai-trade-toggle-btn');
+    if (btn) {
+        btn.addEventListener('click', function() {
+            btn.disabled = true;
+            fetch("{{ route('user.ai_trade_activate.toggle') }}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 1) {
+                    document.getElementById('ai-trade-status').innerHTML = '<span class="text-success">Activated</span>';
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-danger');
+                    btn.textContent = 'Deactivate';
+                } else {
+                    document.getElementById('ai-trade-status').innerHTML = '<span class="text-danger">Not Activated</span>';
+                    btn.classList.remove('btn-danger');
+                    btn.classList.add('btn-success');
+                    btn.textContent = 'Activate';
+                }
+                btn.disabled = false;
+                Swal.fire({
+                    icon: 'success',
+                    title: data.message,
+                    timer: 1200,
+                    showConfirmButton: false
+                });
+            })
+            .catch(() => {
+                btn.disabled = false;
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Could not update activation status.'
+                });
+            });
+        });
+    }
+});
+</script>
 @endsection
 
 @section('content')
-<div class="row g-6 mb-6">
-    <div class="col-sm-6 col-xl-3">
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">AI Trade Activation</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mt-3">
+                    <span>Status:
+                        <span id="ai-trade-status" class="fw-bold">
+                            @if(isset($aiTradeActivate) && $aiTradeActivate->status)
+                                <span class="text-success">Activated</span>
+                            @else
+                                <span class="text-danger">Not Activated</span>
+                            @endif
+                        </span>
+                    </span>
+                    <button id="ai-trade-toggle-btn" class="btn btn-{{ (isset($aiTradeActivate) && $aiTradeActivate->status) ? 'danger' : 'success' }}">
+                        {{ (isset($aiTradeActivate) && $aiTradeActivate->status) ? 'Deactivate' : 'Activate' }}
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-
 <div class="row g-6 mb-6">
     <div class="col-12">
         <div class="card mb-4">

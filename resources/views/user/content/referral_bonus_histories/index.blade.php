@@ -47,7 +47,7 @@
         </div> --}}
         <div class="col-12">
             <div class="card">
-                <div class="card-header bg-success text-white">
+                <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">Deposit Bonus History</h5>
                 </div>
                 <div class="card-body p-0">

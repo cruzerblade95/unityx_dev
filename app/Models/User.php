@@ -12,6 +12,7 @@ use Laravel\Sanctum\HasApiTokens;
 use App\Models\Wallet;
 use App\Models\KycVerification;
 use App\Models\Notification;
+use App\Models\AiTradeActivate;
 
 class User extends Authenticatable
 {
@@ -176,5 +177,10 @@ class User extends Authenticatable
     public function telegramVerification()
     {
         return $this->hasOne(\App\Models\TelegramVerification::class);
+    }
+
+    public function aiTradeActivate()
+    {
+        return $this->hasOne(AiTradeActivate::class);
     }
 }
