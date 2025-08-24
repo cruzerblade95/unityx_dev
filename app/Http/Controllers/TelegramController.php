@@ -94,7 +94,12 @@ class TelegramController extends Controller
     // Helper to send message via Telegram API
     private function sendTelegramMessage($chatId, $text)
     {
-        $token = Config::get('services.telegram.bot_token');
+        $token = env('TELEGRAM_BOT_TOKEN'); // Changed from Config::get('services.telegram.bot_token')
+        if (!$token) {
+            Log::error('Telegram bot token not configured');
+            return;
+        }
+
         $url = "https://api.telegram.org/bot{$token}/sendMessage";
         $params = [
             'chat_id' => $chatId,
@@ -103,7 +108,8 @@ class TelegramController extends Controller
         ];
         try {
             $client = new \GuzzleHttp\Client();
-            $client->post($url, ['form_params' => $params]);
+            $response = $client->post($url, ['form_params' => $params]);
+            Log::info('Telegram message sent successfully', ['chat_id' => $chatId]);
         } catch (\Exception $e) {
             Log::error('Telegram send error: ' . $e->getMessage());
         }
