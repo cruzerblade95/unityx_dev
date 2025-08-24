@@ -214,7 +214,8 @@
                                             <td class="ps-0 fw-medium">Telegram Username:</td>
                                             <td class="pe-0">
                                                 @if ($transaction->buyer->telegramVerification && $transaction->buyer->telegramVerification->telegram_username)
-                                                    <span class="badge bg-label-success">@{{ $transaction - > buyer - > telegramVerification - > telegram_username }}</span>
+                                                    <span
+                                                        class="badge bg-label-success">{{ $transaction->buyer->telegramVerification->telegram_username }}</span>
                                                 @else
                                                     <span class="text-muted">Not connected</span>
                                                 @endif
@@ -271,7 +272,8 @@
                                         <td class="ps-0 fw-medium">Telegram Username:</td>
                                         <td class="pe-0">
                                             @if ($transaction->seller->telegramVerification && $transaction->seller->telegramVerification->telegram_username)
-                                                <span class="badge bg-label-success">@{{ $transaction - > seller - > telegramVerification - > telegram_username }}</span>
+                                                <span
+                                                    class="badge bg-label-success">{{ $transaction->seller->telegramVerification->telegram_username }}</span>
                                             @else
                                                 <span class="text-muted">Not connected</span>
                                             @endif
