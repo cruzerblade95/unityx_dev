@@ -9,6 +9,7 @@ use App\Models\Wallet;
 use App\Services\NOWPaymentsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Helpers\Helpers;
 
 class NOWPaymentsWebhookController extends Controller
 {
@@ -32,7 +33,7 @@ class NOWPaymentsWebhookController extends Controller
             }
 
             $data = json_decode($payload, true);
-            
+
             if (!$data || !isset($data['payment_id'])) {
                 Log::warning('NOWPayments webhook: Invalid payload', ['payload' => $payload]);
                 return response()->json(['error' => 'Invalid payload'], 400);
@@ -47,7 +48,7 @@ class NOWPaymentsWebhookController extends Controller
             }
 
             $paymentStatus = $data['payment_status'];
-            
+
             Log::info('NOWPayments webhook received', [
                 'payment_id' => $data['payment_id'],
                 'status' => $paymentStatus,
@@ -60,22 +61,22 @@ class NOWPaymentsWebhookController extends Controller
                 case 'confirmed':
                     $this->processSuccessfulPayment($deposit, $data);
                     break;
-                    
+
                 case 'failed':
                 case 'expired':
                 case 'refunded':
                     $deposit->update(['status' => 'failed']);
                     break;
-                    
+
                 case 'partially_paid':
                     $deposit->update(['status' => 'partially_paid']);
                     break;
-                    
+
                 case 'sending':
                 case 'confirming':
                     $deposit->update(['status' => 'processing']);
                     break;
-                    
+
                 default:
                     Log::info('NOWPayments webhook: Unknown status', ['status' => $paymentStatus]);
                     break;
@@ -102,7 +103,7 @@ class NOWPaymentsWebhookController extends Controller
 
         // Update user wallet
         $user = $deposit->user;
-        
+
         // Check if user has a wallet, create one if not
         $wallet = Wallet::firstOrCreate(
             ['user_id' => $user->id],
@@ -112,6 +113,9 @@ class NOWPaymentsWebhookController extends Controller
         // Add the net amount to user's deposit wallet
         $wallet->deposit += $deposit->net_amount;
         $wallet->save();
+
+        // Add bonus to upline
+        Helpers::depositBonus($user->id, $deposit->net_amount);
 
         Log::info('Payment processed successfully', [
             'deposit_id' => $deposit->id,
