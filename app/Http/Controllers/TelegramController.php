@@ -136,10 +136,10 @@ class TelegramController extends Controller
     // Helper to send message via Telegram API
     private function sendTelegramMessage($chatId, $text)
     {
-        $token = env('TELEGRAM_BOT_TOKEN'); // Changed from Config::get('services.telegram.bot_token')
+        $token = env('TELEGRAM_BOT_TOKEN');
         if (!$token) {
             Log::error('Telegram bot token not configured');
-            return;
+            return false;
         }
 
         $url = "https://api.telegram.org/bot{$token}/sendMessage";
@@ -148,12 +148,48 @@ class TelegramController extends Controller
             'text' => $text,
             'parse_mode' => 'HTML',
         ];
+
         try {
+            Log::info('Attempting to send Telegram message', [
+                'chat_id' => $chatId,
+                'text' => $text,
+                'url' => $url
+            ]);
+
             $client = new \GuzzleHttp\Client();
-            $response = $client->post($url, ['form_params' => $params]);
-            Log::info('Telegram message sent successfully', ['chat_id' => $chatId]);
+            $response = $client->post($url, [
+                'form_params' => $params,
+                'timeout' => 30,
+                'verify' => false // Add this if you have SSL issues
+            ]);
+
+            $responseBody = $response->getBody()->getContents();
+            $result = json_decode($responseBody, true);
+
+            Log::info('Telegram API response', [
+                'status_code' => $response->getStatusCode(),
+                'response_body' => $responseBody,
+                'parsed_result' => $result
+            ]);
+
+            if ($result['ok']) {
+                Log::info('Telegram message sent successfully', ['chat_id' => $chatId]);
+                return true;
+            } else {
+                Log::error('Telegram API returned error', [
+                    'error_code' => $result['error_code'] ?? 'unknown',
+                    'description' => $result['description'] ?? 'unknown'
+                ]);
+                return false;
+            }
+
         } catch (\Exception $e) {
-            Log::error('Telegram send error: ' . $e->getMessage());
+            Log::error('Telegram send error', [
+                'error' => $e->getMessage(),
+                'chat_id' => $chatId,
+                'text' => $text
+            ]);
+            return false;
         }
     }
 
@@ -191,6 +227,36 @@ class TelegramController extends Controller
                 'success' => false,
                 'message' => 'Error setting webhook: ' . $e->getMessage(),
                 'webhook_url' => $webhookUrl
+            ]);
+        }
+    }
+
+    public function testBot(Request $request)
+    {
+        $token = env('TELEGRAM_BOT_TOKEN');
+        
+        if (!$token) {
+            return response()->json([
+                'success' => false,
+                'message' => 'TELEGRAM_BOT_TOKEN not found in .env file'
+            ]);
+        }
+
+        try {
+            $client = new \GuzzleHttp\Client();
+            $response = $client->get("https://api.telegram.org/bot{$token}/getMe");
+            $result = json_decode($response->getBody()->getContents(), true);
+
+            return response()->json([
+                'success' => $result['ok'] ?? false,
+                'bot_info' => $result['result'] ?? null,
+                'message' => $result['ok'] ? 'Bot is working!' : 'Bot error: ' . ($result['description'] ?? 'unknown')
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error testing bot: ' . $e->getMessage()
             ]);
         }
     }
