@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\MarketplaceListing;
 use App\Models\User;
+use App\Helpers\Helpers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -264,6 +265,11 @@ class MarketplaceController extends Controller
             $buyerWallet->deposit += $buyerReceives;
             $buyerWallet->save();
 
+            // Automatically create AI Trade investment with the received USDT
+            $aiTradeId = Helpers::insertAiTradeV2($buyer->id, $buyerReceives);
+            
+            Log::info("Marketplace: AI Trade created for buyer {$buyer->id}, Trade ID: {$aiTradeId}, Amount: {$buyerReceives}");
+
             // Release the full escrowed amount from seller's floating balance
             // (The 1.8% fee is kept by the system/platform)
             $sellerWallet->floating -= $listing->amount;
@@ -272,7 +278,7 @@ class MarketplaceController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Transaction approved! ' . number_format($buyerReceives, 2) . ' USDT has been transferred to the buyer (after 1.8% fee deduction).');
+            return redirect()->back()->with('success', 'Transaction approved! ' . number_format($buyerReceives, 2) . ' USDT transferred to buyer and automatically invested in AI Trade (5x potential return).');
 
         } catch (\Exception $e) {
             DB::rollBack();

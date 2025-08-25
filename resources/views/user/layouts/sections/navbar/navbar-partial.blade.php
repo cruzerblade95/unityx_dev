@@ -146,6 +146,15 @@
                         </div>
                         <div class="dropdown-shortcuts-item col">
                             <span class="dropdown-shortcuts-icon rounded-circle mb-3">
+                                <i class="icon-base ti tabler-recycle icon-26px text-heading"></i>
+                            </span>
+                            <a href="{{ route('user.re-invest.index') }}" class="stretched-link">Re-Invest</a>
+                            <small>Profit to AI Trade</small>
+                        </div>
+                    </div>
+                    <div class="row row-bordered overflow-visible g-0">
+                        <div class="dropdown-shortcuts-item col">
+                            <span class="dropdown-shortcuts-icon rounded-circle mb-3">
                                 <i class="icon-base ti tabler-robot icon-26px text-heading"></i>
                             </span>
                             <a href="{{ route('user.ai_trades.index') }}" class="stretched-link">AI Trades</a>

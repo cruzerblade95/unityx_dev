@@ -42,6 +42,12 @@
       "slug": "user.ai_trades.index"
     },
     {
+      "name": "Re-Invest",
+      "icon": "menu-icon icon-base ti tabler-recycle",
+      "url": "user/re-invest",
+      "slug": "user.re_invest.index"
+    },
+    {
       "name": "Bonus",
       "icon": "menu-icon icon-base ti tabler-wallet",
       "slug": "user.bonus",

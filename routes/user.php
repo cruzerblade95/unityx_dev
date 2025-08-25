@@ -14,6 +14,7 @@ use App\Http\Controllers\User\MarketplaceController;
 use App\Http\Controllers\User\ReferralBonusHistoryController;
 use App\Http\Controllers\User\RoiMatchingBonusHistoryController;
 use App\Http\Controllers\User\PaymentInfoController;
+use App\Http\Controllers\User\ReInvestController;
 use App\Http\Controllers\KycController;
 use App\Http\Controllers\User\AiTradeActivateController;
 // Route::middleware(['web'])->group(function () {
@@ -80,6 +81,10 @@ Route::prefix('user')->middleware('web')->group(function () {
     // Payment Information
     Route::get('payment-info', [PaymentInfoController::class, 'index'])->name('user.payment-info.index');
     Route::post('payment-info', [PaymentInfoController::class, 'store'])->name('user.payment-info.store');
+
+    // Re-Investment
+    Route::get('re-invest', [ReInvestController::class, 'index'])->name('user.re-invest.index')->middleware('require.payment.info');
+    Route::post('re-invest', [ReInvestController::class, 'store'])->name('user.re-invest.store')->middleware('require.payment.info');
 
     // Deposit & Withdrawal
     Route::get('deposit', [DepositController::class, 'index'])->name('user.deposit.index');

@@ -140,6 +140,7 @@ class WithdrawalController extends Controller
                 return [
                     'type' => 'etc_black',
                     'etc_black_card_number' => $user->etc_black_card_number,
+                    'account_number' => $user->account_number,
                     'cardholder_name' => $user->cardholder_name,
                 ];
                 

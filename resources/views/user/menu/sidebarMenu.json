@@ -36,6 +36,12 @@
     "url": "/user/investment"
   },
   {
+    "title": "Re-Invest",
+    "icon": "ti ti-recycle",
+    "url": "/user/re-invest",
+    "badge": "NEW"
+  },
+  {
     "title": "AI Trades",
     "icon": "ti ti-robot",
     "url": "/user/ai-trades"
