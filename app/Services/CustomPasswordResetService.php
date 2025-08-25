@@ -8,6 +8,7 @@ use App\Services\TelegramNotificationService;
 use App\Services\NotificationService;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
@@ -87,7 +88,7 @@ class CustomPasswordResetService
             ];
 
         } catch (\Exception $e) {
-            \Log::error('Password reset service error: ' . $e->getMessage(), [
+            Log::error('Password reset service error: ' . $e->getMessage(), [
                 'email' => $email,
                 'trace' => $e->getTraceAsString()
             ]);
@@ -108,7 +109,7 @@ class CustomPasswordResetService
             $user->sendPasswordResetNotification($token);
             return true;
         } catch (\Exception $e) {
-            \Log::error('Email notification failed: ' . $e->getMessage());
+            Log::error('Email notification failed: ' . $e->getMessage());
             return false;
         }
     }
@@ -140,7 +141,7 @@ class CustomPasswordResetService
                 $message
             );
         } catch (\Exception $e) {
-            \Log::error('Telegram notification failed: ' . $e->getMessage());
+            Log::error('Telegram notification failed: ' . $e->getMessage());
             return false;
         }
     }
@@ -222,7 +223,7 @@ class CustomPasswordResetService
                     }
                 );
 
-                if ($status == \Password::PASSWORD_RESET && $passwordResetSuccess) {
+                if ($status == Password::PASSWORD_RESET && $passwordResetSuccess) {
                     return [
                         'success' => true,
                         'message' => 'Your password has been reset successfully! You can now log in with your new password.'
@@ -236,7 +237,7 @@ class CustomPasswordResetService
             }
 
         } catch (\Exception $e) {
-            \Log::error('Password reset error: ' . $e->getMessage(), [
+            Log::error('Password reset error: ' . $e->getMessage(), [
                 'email' => $email,
                 'trace' => $e->getTraceAsString()
             ]);
