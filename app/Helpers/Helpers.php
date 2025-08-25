@@ -4,7 +4,10 @@ namespace App\Helpers;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use App\Services\TelegramNotificationService;
+use App\Models\User;
 
 class Helpers
 {
@@ -18,7 +21,7 @@ class Helpers
   public static function insertAiTradeV2($user_id, $amount_invest)
   {
     $ending_amount = $amount_invest * 5;
-    return DB::table('ai_trades')->insertGetId([
+    $tradeId = DB::table('ai_trades')->insertGetId([
       'user_id' => $user_id,
       'amount_invest' => $amount_invest,
       'ending_amount' => $ending_amount,
@@ -26,6 +29,37 @@ class Helpers
       'created_at' => now(),
       'updated_at' => now(),
     ]);
+
+    // Send Telegram notification to user about new AI Trade
+    if ($tradeId) {
+      try {
+        $user = User::find($user_id);
+        if ($user) {
+          $title = '🤖 New AI Trade Started';
+          $message = "Your AI Trade has been successfully created!\n\n";
+          $message .= "💰 Investment Amount: $" . number_format($amount_invest, 2) . "\n";
+          $message .= "🎯 Target Amount: $" . number_format($ending_amount, 2) . " (5x potential return)\n";
+          $message .= "📊 Trade ID: #{$tradeId}\n";
+          $message .= "⏰ Status: Running\n\n";
+          $message .= "Your AI Trade is now active and working to generate profits. You can monitor its progress in your dashboard.";
+
+          TelegramNotificationService::sendNotificationToTelegram(
+            $user_id,
+            $title,
+            $message
+          );
+        }
+      } catch (\Exception $e) {
+        // Log error but don't fail the trade creation
+        Log::error('Failed to send Telegram notification for new AI Trade', [
+          'user_id' => $user_id,
+          'trade_id' => $tradeId,
+          'error' => $e->getMessage()
+        ]);
+      }
+    }
+
+    return $tradeId;
   }
   /**
    * Distribute ROI Matching Bonus to 10-level referral downline

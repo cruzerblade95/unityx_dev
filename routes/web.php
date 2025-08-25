@@ -171,66 +171,12 @@ use App\Http\Controllers\TelegramController;
 // Route to process wallets and insert into ai_trades if not already present
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-
-// Manual trigger for TestInvestmentCron job
-use App\Jobs\TestInvestmentCron;
-
 use App\Http\Controllers\CalculationDepositProfitController;
-
 use App\Models\User;
-
-// Route to update ai_trades ending_amount to 500% of wallets.deposit
-Route::get('/update-ai-trades-ending-amount', function () {
-    $wallets = DB::table('wallets')->get();
-    $updated = [];
-    foreach ($wallets as $wallet) {
-        $ending_amount = $wallet->deposit * 5;
-        $affected = DB::table('ai_trades')
-            ->where('user_id', $wallet->user_id)
-            ->update(['ending_amount' => $ending_amount]);
-        if ($affected) {
-            $updated[] = [
-                'user_id' => $wallet->user_id,
-                'ending_amount' => $ending_amount
-            ];
-        }
-    }
-    return response()->json([
-        'updated' => $updated,
-        'message' => 'Updated ending_amount to 500% of deposit for all users with ai_trades.'
-    ]);
-});
-
-// Route to fill empty referral_code for users
-Route::get('/fill-missing-referral-codes', function () {
-    $users = User::whereNull('referral_code')->orWhere('referral_code', '')->get();
-    $updated = [];
-    foreach ($users as $user) {
-        // Generate a unique 6-character uppercase referral code
-        do {
-            $code = strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
-        } while (User::where('referral_code', $code)->exists());
-        $user->referral_code = $code;
-        $user->save();
-        $updated[] = [
-            'user_id' => $user->id,
-            'referral_code' => $user->referral_code
-        ];
-    }
-    return response()->json([
-        'updated' => $updated,
-        'message' => 'Referral codes filled for users with empty values.'
-    ]);
-});
+use Illuminate\Support\Facades\Log;
 
 // Manual trigger for calculation of deposit profit
 Route::get('/calculate-deposit-profit', [CalculationDepositProfitController::class, 'calculate']);
-Route::get('/run-test-investment-cron', [TestInvestmentCron::class, 'calculatesss']);
-
-// Route::get('/run-test-investment-cron', function () {
-//     dispatch(new TestInvestmentCron());
-//     return response()->json(['message' => 'TestInvestmentCron job dispatched.']);
-// });
 
 Route::get('/process-wallets-to-ai-trades', function () {
     $users = DB::table('users')->get();
@@ -271,8 +217,6 @@ Route::get('/process-wallets-to-ai-trades', function () {
 //telegram bot hehe
 Route::get('/connect-telegram', [ConnectTelegramController::class, 'index'])->name('connect-telegram');
 Route::get('/telegram/verify', [TelegramController::class, 'verify'])->name('telegram.verify');
-Route::post('/test-csrf', function() { die('test csrf'); })->middleware('web');
-Route::get('/test-csrf', function() { die('test csrf get'); });
 
 // Main Page Route
 Route::get('/', [Landing::class, 'index'])->name('front-pages-landing');
@@ -486,38 +430,6 @@ Route::get('/maps/leaflet', [Leaflet::class, 'index'])->name('maps-leaflet');
 // laravel example
 Route::get('/laravel/user-management', [UserManagement::class, 'UserManagement'])->name('laravel-example-user-management');
 Route::resource('/user-list', UserManagement::class);
-
-// Telegram notification test route
-Route::post('/test-telegram-notification', function (Request $request) {
-    if (!Auth::check()) {
-        return response()->json(['error' => 'Unauthorized'], 401);
-    }
-
-    $user = Auth::user();
-
-    if (!$user->telegramVerification || !$user->telegramVerification->telegram_username) {
-        return response()->json([
-            'success' => false,
-            'message' => 'No Telegram account connected. Please connect your Telegram first.'
-        ]);
-    }
-
-    $title = $request->input('title', '🧪 Test Notification');
-    $message = $request->input('message', 'This is a test notification to verify Telegram integration is working properly.');
-
-    $result = \App\Services\TelegramNotificationService::sendNotificationToTelegram(
-        $user->id,
-        $title,
-        $message
-    );
-
-    return response()->json([
-        'success' => $result,
-        'message' => $result ? 'Test notification sent successfully!' : 'Failed to send notification',
-        'telegram_username' => $user->telegramVerification->telegram_username,
-        'username' => $user->username
-    ]);
-})->middleware('web');
 
 Route::middleware([
     'auth:sanctum',
