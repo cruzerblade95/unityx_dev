@@ -21,28 +21,60 @@ class UserRegisterController extends Controller
 
     public function register(Request $request)
     {
-
         $request->validate([
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
-            'referral_code' => 'required|string|size:6|exists:users,referral_code',
+            'referral_code' => 'required|string|size:6',
+        ], [
+            'referral_code.required' => 'Referral code is required to register.',
+            'referral_code.size' => 'Referral code must be exactly 6 characters.',
+            'username.unique' => 'This username is already taken. Please choose another one.',
+            'email.unique' => 'This email is already registered. Please use a different email or try logging in.',
+            'password.confirmed' => 'Password confirmation does not match.',
+            'password.min' => 'Password must be at least 6 characters long.',
         ]);
+
+        // Check if referral code exists and is valid
+        if ($request->filled('referral_code')) {
+            $referralCode = strtoupper(trim($request->referral_code)); // Normalize the code
+            $upline = User::where('referral_code', $referralCode)->first();
+            
+            if (!$upline) {
+                return redirect()->back()
+                    ->withInput($request->except('password', 'password_confirmation'))
+                    ->withErrors([
+                        'referral_code' => 'The referral code "' . $referralCode . '" was not found. Please check with your referrer for the correct code.'
+                    ]);
+            }
+            
+            // Additional check: Make sure the upline account is active
+            if (!$upline || $upline->deleted_at) {
+                return redirect()->back()
+                    ->withInput($request->except('password', 'password_confirmation'))
+                    ->withErrors([
+                        'referral_code' => 'The referral code is no longer valid. Please contact your referrer for assistance.'
+                    ]);
+            }
+        } else {
+            return redirect()->back()
+                ->withInput($request->except('password', 'password_confirmation'))
+                ->withErrors([
+                    'referral_code' => 'Referral code is required to register.'
+                ]);
+        }
 
         // Generate unique 6-character referral code
         do {
             $newReferralCode = strtoupper(Str::random(6));
         } while (User::where('referral_code', $newReferralCode)->exists());
 
-        $uplineId = null;
-        if ($request->filled('referral_code')) {
-            $upline = User::where('referral_code', $request->referral_code)->first();
-            if ($upline) {
-                $uplineId = $upline->id;
-            }
-        }
+        // Get upline user (already verified above)
+        $referralCode = strtoupper(trim($request->referral_code));
+        $upline = User::where('referral_code', $referralCode)->first();
+        $uplineId = $upline->id;
 
         $user = User::create([
             'firstname' => $request->firstname,
