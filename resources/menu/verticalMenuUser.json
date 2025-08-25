@@ -13,26 +13,27 @@
       "slug": "user.profile"
     },
     {
-      "name": "Wallet Transaction",
+      "name": "Desposit",
       "icon": "menu-icon icon-base ti tabler-wallet",
       "slug": "user.wallet",
       "submenu": [
         {
           "url": "user/deposit",
-          "name": "Deposit Crypto",
+          "name": "Crypto",
           "slug": "user.deposit"
         },
         {
           "url": "user/deposit/direct",
-          "name": "Deposit Direct",
+          "name": "Direct",
           "slug": "user.deposit.direct"
-        },
-        {
-          "url": "user/withdrawal",
-          "name": "Withdraw",
-          "slug": "user.withdrawal"
         }
       ]
+    },
+    {
+      "url": "user/withdrawal",
+      "icon": "menu-icon icon-base ti tabler-currency-dollar",
+      "name": "Withdraw",
+      "slug": "user.withdrawal"
     },
     {
       "name": "AI Trades",

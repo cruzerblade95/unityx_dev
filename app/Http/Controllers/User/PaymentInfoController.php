@@ -25,6 +25,7 @@ class PaymentInfoController extends Controller
             'usdc_bep20_address' => 'required|string|max:255|regex:/^[A-Za-z0-9]+$/',
             'fdusd_bep20_address' => 'required|string|max:255|regex:/^[A-Za-z0-9]+$/',
             'etc_black_card_number' => 'required|string|max:19|regex:/^[0-9\s]+$/',
+            'account_number' => 'required|string|max:20|regex:/^[0-9]+$/',
             'cardholder_name' => 'required|string|max:100|regex:/^[A-Za-z\s\.]+$/',
         ], [
             'national_id.regex' => 'National ID must contain only letters, numbers, and hyphens.',
@@ -32,6 +33,7 @@ class PaymentInfoController extends Controller
             'usdc_bep20_address.regex' => 'USDC wallet address must contain only letters and numbers.',
             'fdusd_bep20_address.regex' => 'FDUSD wallet address must contain only letters and numbers.',
             'etc_black_card_number.regex' => 'Card number must contain only numbers and spaces.',
+            'account_number.regex' => 'Account number must contain only numbers.',
             'cardholder_name.regex' => 'Cardholder name must contain only letters, spaces, and periods.',
         ]);
 
@@ -42,6 +44,7 @@ class PaymentInfoController extends Controller
             'usdc_bep20_address' => $request->usdc_bep20_address,
             'fdusd_bep20_address' => $request->fdusd_bep20_address,
             'etc_black_card_number' => preg_replace('/\s+/', ' ', $request->etc_black_card_number),
+            'account_number' => $request->account_number,
             'cardholder_name' => ucwords(strtolower($request->cardholder_name)),
             'payment_info_completed' => true,
         ]);

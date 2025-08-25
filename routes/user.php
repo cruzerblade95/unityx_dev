@@ -121,5 +121,6 @@ Route::prefix('user')->middleware('web')->group(function () {
     Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('user.notifications.read');
     Route::delete('notifications/{id}', [NotificationController::class, 'destroy'])->name('user.notifications.destroy');
     Route::post('notifications/test', [NotificationController::class, 'testNotification'])->name('user.notifications.test');
+    Route::get('notifications/test', [NotificationController::class, 'testNotification'])->name('user.notifications.test.get');
     });
 });

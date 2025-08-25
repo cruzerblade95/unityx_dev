@@ -72,6 +72,7 @@ class User extends Authenticatable
         'fdusd_bep20_address',
         'etc_black_card_number',
         'cardholder_name',
+        'account_number',
         'payment_info_completed',
     ];
 
