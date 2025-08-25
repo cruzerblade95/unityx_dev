@@ -41,6 +41,12 @@
       "name": "Marketplace",
       "icon": "menu-icon icon-base ti tabler-shopping-cart",
       "slug": "admin.marketplace.index"
+    },
+    {
+      "url": "admin/fix-cron-value",
+      "name": "Fix Cron Value",
+      "icon": "menu-icon icon-base ti tabler-shopping-cart",
+      "slug": "admin.fix_cron_value.index"
     }
   ]
 }
