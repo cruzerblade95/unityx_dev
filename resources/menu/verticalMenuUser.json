@@ -59,7 +59,7 @@
         },
         {
           "url": "user/roi-matching-bonus-histories",
-          "name": "ROI Matching Bonus",
+          "name": "ROI Network",
           "slug": "user.roi_matching_bonus_histories.index"
         }
       ]
