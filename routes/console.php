@@ -14,5 +14,5 @@ Schedule::call(function () {
     logger("Trading Cron Running Function1");
 })->everyMinute();
 
-// Schedule::call(new \App\TradingCron())->cron('0 1,5,9,13,17,21 * * *');
-Schedule::call(new \App\TradingCron())->everyMinute();
+Schedule::call(new \App\TradingCron())->cron('0 1,5,9,13,17,21 * * *');
+// Schedule::call(new \App\TradingCron())->everyMinute();
