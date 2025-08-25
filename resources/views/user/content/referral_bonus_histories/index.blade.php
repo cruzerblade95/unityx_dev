@@ -59,7 +59,7 @@
                                     <th>From User</th>
                                     <th>Amount</th>
                                     <th>Level</th>
-                                    <th>Description</th>
+                                    {{-- <th>Description</th> --}}
                                 </tr>
                             </thead>
                             <tbody>
@@ -69,7 +69,7 @@
                                         <td>{{ optional(App\Models\User::find($bonus->from_user_id))->username ?? $bonus->from_user_id }}</td>
                                         <td>{{ number_format($bonus->amount, 2) }}</td>
                                         <td>{{ $bonus->level ?? '-' }}</td>
-                                        <td>{{ $bonus->description ?? '-' }}</td>
+                                        {{-- <td>{{ $bonus->description ?? '-' }}</td> --}}
                                     </tr>
                                 @empty
                                     <tr>
