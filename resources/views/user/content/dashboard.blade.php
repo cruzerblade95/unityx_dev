@@ -36,6 +36,12 @@
     @vite(['resources/assets/js/app-ecommerce-dashboard.js'])
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tooltips for banner descriptions
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
             var el = document.getElementById('sync-estimate');
             var customTimestamp = el.getAttribute('data-timestamp');
 
@@ -77,6 +83,104 @@
 
 @section('content')
     <div class="row g-6">
+        <!-- Advertisement Banner Carousel -->
+        <div class="col-xl-12 mb-4">
+            @if(isset($bannerAdvertisements) && $bannerAdvertisements->count() > 0)
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="ti ti-speakerphone me-2"></i>
+                            Promotions & Updates
+                        </h5>
+                        <div class="dropdown">
+                            <button class="btn btn-text-secondary rounded-pill text-body-secondary border-0 p-2 me-n1" type="button" id="bannerDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="ti ti-dots-vertical"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="bannerDropdown">
+                                <a class="dropdown-item" href="javascript:void(0);">Hide Banners</a>
+                                <a class="dropdown-item" href="javascript:void(0);">Report Issue</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="advertisementCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+                            @if($bannerAdvertisements->count() > 1)
+                                <div class="carousel-indicators">
+                                    @foreach($bannerAdvertisements as $index => $banner)
+                                        <button type="button" data-bs-target="#advertisementCarousel" data-bs-slide-to="{{ $index }}" 
+                                                class="{{ $index === 0 ? 'active' : '' }}" 
+                                                aria-current="{{ $index === 0 ? 'true' : 'false' }}" 
+                                                aria-label="Slide {{ $index + 1 }}"></button>
+                                    @endforeach
+                                </div>
+                            @endif
+                            <div class="carousel-inner" style="border-radius: 0.375rem;">
+                                @foreach($bannerAdvertisements as $index => $banner)
+                                    <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                                        <div class="position-relative" 
+                                             style="height: 200px; 
+                                                    background: {{ $banner->gradient_color ? 
+                                                        'linear-gradient(135deg, ' . $banner->background_color . ' 0%, ' . $banner->gradient_color . ' 100%)' : 
+                                                        $banner->background_color }}; 
+                                                    overflow: hidden;
+                                                    {{ $banner->image_path ? 'background-image: url(' . $banner->image_url . '); background-size: cover; background-position: center;' : '' }}"
+                                             title="{{ $banner->description }}"
+                                             data-bs-toggle="tooltip"
+                                             data-bs-placement="top">
+                                            
+                                            @if($banner->image_path)
+                                                <!-- Overlay for better text readability on images -->
+                                                <div class="position-absolute top-0 start-0 w-100 h-100" 
+                                                     style="background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 100%);"></div>
+                                            @endif
+                                            
+                                            <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center">
+                                                <div class="container-fluid">
+                                                    <div class="row align-items-center">
+                                                        <div class="col-md-8">
+                                                            <h3 class="fw-bold mb-2" style="color: {{ $banner->text_color ?? '#ffffff' }};">
+                                                                {{ $banner->title }}
+                                                            </h3>
+                                                            <p class="mb-3" style="color: {{ $banner->text_color ?? '#ffffff' }}; opacity: 0.8;">
+                                                                {{ $banner->description }}
+                                                            </p>
+                                                            @if($banner->link_url && $banner->button_text)
+                                                                <a href="{{ $banner->link_url }}" 
+                                                                   target="_blank" 
+                                                                   rel="noopener noreferrer"
+                                                                   class="btn btn-light btn-sm">
+                                                                    <i class="ti ti-external-link me-1"></i>
+                                                                    {{ $banner->button_text }}
+                                                                </a>
+                                                            @endif
+                                                        </div>
+                                                        <div class="col-md-4 text-end">
+                                                            <i class="ti ti-ad-2" style="font-size: 5rem; opacity: 0.3; color: {{ $banner->text_color ?? '#ffffff' }};"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            @if($bannerAdvertisements->count() > 1)
+                                <button class="carousel-control-prev" type="button" data-bs-target="#advertisementCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#advertisementCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endif
+        </div>
+        <!--/ Advertisement Banner Carousel -->
+
         <!-- Alerts with headings -->
         <div class="col-xl-12 mb-4">
             <div class="card">

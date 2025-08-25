@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\MarketplaceListing;
+use App\Models\BannerAdvertisement;
 use App\Services\NotificationService;
 
 class UserController extends Controller
@@ -25,7 +26,12 @@ class UserController extends Controller
             ->limit(4)
             ->get();
 
-        return view('user.content.dashboard', compact('wallet', 'miniMarketplaceListings'));
+        // Get active banner advertisements
+        $bannerAdvertisements = BannerAdvertisement::active()
+            ->ordered()
+            ->get();
+
+        return view('user.content.dashboard', compact('wallet', 'miniMarketplaceListings', 'bannerAdvertisements'));
     }
 
     public function profile()
