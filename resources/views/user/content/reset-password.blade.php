@@ -20,7 +20,7 @@
 @endsection
 
 @section('page-script')
-    @vite(['resources/assets/js/pages-auth.js'])
+    @vite(['resources/assets/js/pages-auth-reset.js'])
 @endsection
 
 @section('content')
