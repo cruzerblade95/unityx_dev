@@ -249,7 +249,7 @@
                                 <small class="text-body-secondary mt-3">$21k Expenses more than last month</small>
                             </div>
                             <!-- Overlay -->
-                            @include('components.coming-soon-overlay')
+                            {{-- @include('components.coming-soon-overlay') --}}
                         </div>
                     </div>
                 </div>
@@ -272,7 +272,7 @@
                             </div>
                             <div id="generatedLeadsChart"></div>
                             <!-- Overlay -->
-                            @include('components.coming-soon-overlay')
+                            {{-- @include('components.coming-soon-overlay') --}}
                         </div>
                     </div>
                 </div>
