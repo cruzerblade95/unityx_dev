@@ -3,7 +3,6 @@
 @section('title', 'Banner Advertisements')
 
 @section('vendor-style')
-@vite(['resources/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.scss', 'resources/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.scss', 'resources/assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.scss'])
 <style>
 .banner-preview {
     height: 100px;
@@ -35,43 +34,16 @@
 @endsection
 
 @section('vendor-script')
-@vite(['resources/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js'])
 @endsection
 
 @section('page-script')
 <script>
-// Function to initialize DataTable when jQuery is ready
-function initializeBannerScripts() {
-    if (typeof $ === 'undefined') {
-        console.warn('jQuery not available for DataTable');
-        return;
-    }
-    
-    // jQuery is available
-    $(document).ready(function() {
-        // Initialize DataTable
-        if ($.fn.DataTable) {
-            $('.datatable-banner-advertisements').DataTable({
-                responsive: true,
-                order: [[4, 'asc']], // Sort by sort_order
-                columnDefs: [
-                    { orderable: false, targets: [0, 6] } // Disable sorting for image and actions
-                ]
-            });
-        }
-    });
-}
-
-// Wait for DOM and then try to initialize
 document.addEventListener('DOMContentLoaded', function() {
-    initializeBannerScripts();
-    
-    // If jQuery still not available, wait a bit and try again
-    if (typeof $ === 'undefined') {
-        setTimeout(initializeBannerScripts, 100);
-    }
+    console.log('Banner advertisements table initialized without DataTables');
+
+    // Add any custom table interactions here if needed
+    // For example, row hover effects, custom sorting, etc.
 });
-</script>
 </script>
 @endsection
 
@@ -113,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>
                 <div class="table-responsive text-nowrap">
-                    <table class="table table-hover datatable-banner-advertisements">
+                    <table id="banner-advertisements-table" class="table table-hover">
                         <thead>
                             <tr>
                                 <th>Preview</th>
@@ -169,14 +141,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                         @else
                                             <span class="badge bg-secondary">Disabled</span>
                                         @endif
-                                        
+
                                         @if($banner->isCurrentlyActive())
                                             <small class="badge bg-success-subtle text-success">Currently Active</small>
                                         @else
                                             <small class="badge bg-secondary-subtle text-secondary">Not Active</small>
                                         @endif
                                     </div>
-                                    
+
                                     @if($banner->start_date || $banner->end_date)
                                         <div class="mt-1">
                                             <small class="text-muted">
@@ -205,9 +177,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                             <div class="dropdown-divider"></div>
                                             <form action="{{ route('admin.banner-advertisements.toggle-status', $banner) }}" method="POST" class="d-inline">
                                                 @csrf
-                                                <button type="submit" class="dropdown-item" 
+                                                <button type="submit" class="dropdown-item"
                                                         onclick="return confirm('Are you sure you want to toggle this banner status?')">
-                                                    <i class="tabler-toggle-{{ $banner->is_active ? 'left' : 'right' }} me-1"></i> 
+                                                    <i class="tabler-toggle-{{ $banner->is_active ? 'left' : 'right' }} me-1"></i>
                                                     {{ $banner->is_active ? 'Deactivate' : 'Activate' }}
                                                 </button>
                                             </form>
@@ -215,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                             <form action="{{ route('admin.banner-advertisements.destroy', $banner) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="dropdown-item text-danger" 
+                                                <button type="submit" class="dropdown-item text-danger"
                                                         onclick="return confirm('Are you sure you want to delete this banner?')">
                                                     <i class="tabler-trash me-1"></i> Delete
                                                 </button>
@@ -242,7 +214,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </tbody>
                     </table>
                 </div>
-                
+
                 @if($banners->hasPages())
                 <div class="card-footer">
                     {{ $banners->links() }}

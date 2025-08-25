@@ -137,6 +137,7 @@
             });
 
             var el = document.getElementById('sync-estimate');
+            if (!el) return; // Exit if element doesn't exist
             var customTimestamp = el.getAttribute('data-timestamp');
 
             function pad(n) {
@@ -206,12 +207,12 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">
-                            <i class="ti ti-speakerphone me-2"></i>
+                            <i class="ti tabler-speakerphone me-2"></i>
                             Promotions & Updates
                         </h5>
                         <div class="dropdown">
                             <button class="btn btn-text-secondary rounded-pill text-body-secondary border-0 p-2 me-n1" type="button" id="bannerDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="ti ti-dots-vertical"></i>
+                                <i class="ti tabler-dots-vertical"></i>
                             </button>
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="bannerDropdown">
                                 <a class="dropdown-item" href="javascript:void(0);">Hide Banners</a>
@@ -266,13 +267,13 @@
                                                                    target="_blank"
                                                                    rel="noopener noreferrer"
                                                                    class="btn btn-light btn-sm">
-                                                                    <i class="ti ti-external-link me-1"></i>
+                                                                    <i class="ti tabler-external-link me-1"></i>
                                                                     {{ $banner->button_text }}
                                                                 </a>
                                                             @endif
                                                         </div>
                                                         <div class="col-md-4 text-end">
-                                                            <i class="ti ti-ad-2" style="font-size: 5rem; opacity: 0.3; color: {{ $banner->text_color ?? '#ffffff' }};"></i>
+                                                            <i class="ti tabler-ad-2" style="font-size: 5rem; opacity: 0.3; color: {{ $banner->text_color ?? '#ffffff' }};"></i>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -298,19 +299,28 @@
         </div>
         <!--/ Advertisement Banner Carousel -->
 
-        <!-- Alerts with headings -->
+        <!-- Announcements -->
         <div class="col-xl-12 mb-4">
             <div class="card">
-                {{-- <h5 class="card-header">Alerts with Heading</h5> --}}
                 <div class="card-body">
-                    <div class="alert alert-primary alert-dismissible" role="alert">
-                        <h5 class="alert-heading mb-2">Announcement!</h5>
-                        <p class="mb-0">Deposit, withdrawal & p2p is available now! Next update will be Referral System
-                            Bonus.
-                            {{-- <span id="sync-estimate" data-timestamp="2025-08-20T11:00:00"></span> --}}
-                        </p>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
+                    @if(isset($announcements) && $announcements->count() > 0)
+                        @foreach($announcements as $announcement)
+                            <div class="alert alert-{{ $announcement->type }} {{ $announcement->is_dismissible ? 'alert-dismissible' : '' }}" role="alert">
+                                <h5 class="alert-heading mb-2">{{ $announcement->title }}</h5>
+                                <div class="mb-0">{!! $announcement->content !!}</div>
+                                @if($announcement->is_dismissible)
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                @endif
+                            </div>
+                        @endforeach
+                    @else
+                        <!-- Fallback to default announcement if no database announcements -->
+                        <div class="alert alert-primary alert-dismissible" role="alert">
+                            <h5 class="alert-heading mb-2">Announcement!</h5>
+                            <p class="mb-0">Deposit, withdrawal & p2p is available now! Next update will be Referral System Bonus.</p>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
 
                     @if (
                         \Illuminate\Support\Facades\Auth::user()->telegramVerification &&
@@ -337,7 +347,7 @@
                                     <small>Verify again using our bot to update your username</small>
                                 </div>
                                 <a href="{{ route('connect-telegram') }}" class="btn btn-sm btn-warning mt-2">
-                                    <i class="ti ti-brand-telegram me-1"></i>Update Telegram Username
+                                    <i class="ti tabler-brand-telegram me-1"></i>Update Telegram Username
                                 </a>
                             </div>
                         @endif
@@ -1159,18 +1169,28 @@
             const button = document.querySelector('button[onclick="testTelegramNotification()"]');
             const resultDiv = document.getElementById('telegram-test-result');
 
+            // Add null checks for DOM elements
+            if (!button || !resultDiv) {
+                console.error('Required DOM elements not found for Telegram notification test');
+                return;
+            }
+
             // Disable button and show loading
             button.disabled = true;
-            button.innerHTML = '<i class="ti ti-loader ti-spin me-1"></i>Sending...';
+            button.innerHTML = '<i class="ti tabler-loader ti-spin me-1"></i>Sending...';
 
             // Clear previous results
             resultDiv.innerHTML = '';
+
+            // Get CSRF token safely
+            const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+            const csrfToken = csrfTokenElement ? csrfTokenElement.getAttribute('content') : '';
 
             fetch('/test-telegram-notification', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        'X-CSRF-TOKEN': csrfToken
                     },
                     body: JSON.stringify({
                         title: '🧪 Test Notification',
@@ -1179,37 +1199,45 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // Re-enable button
-                    button.disabled = false;
-                    button.innerHTML = '<i class="ti ti-send me-1"></i>Send Test Notification';
+                    // Re-enable button - check if still exists
+                    if (button) {
+                        button.disabled = false;
+                        button.innerHTML = '<i class="ti tabler-send me-1"></i>Send Test Notification';
+                    }
 
-                    if (data.success) {
-                        resultDiv.innerHTML = `
-                <div class="alert alert-success alert-dismissible mt-2 mb-0" role="alert">
-                    <strong>✅ Success!</strong> ${data.message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            `;
-                    } else {
+                    if (resultDiv) {
+                        if (data.success) {
+                            resultDiv.innerHTML = `
+                    <div class="alert alert-success alert-dismissible mt-2 mb-0" role="alert">
+                        <strong>✅ Success!</strong> ${data.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+                        } else {
+                            resultDiv.innerHTML = `
+                    <div class="alert alert-danger alert-dismissible mt-2 mb-0" role="alert">
+                        <strong>❌ Failed!</strong> ${data.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+                        }
+                    }
+                })
+                .catch(error => {
+                    // Re-enable button - check if still exists
+                    if (button) {
+                        button.disabled = false;
+                        button.innerHTML = '<i class="ti tabler-send me-1"></i>Send Test Notification';
+                    }
+
+                    if (resultDiv) {
                         resultDiv.innerHTML = `
                 <div class="alert alert-danger alert-dismissible mt-2 mb-0" role="alert">
-                    <strong>❌ Failed!</strong> ${data.message}
+                    <strong>❌ Error!</strong> Something went wrong. Please try again.
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             `;
                     }
-                })
-                .catch(error => {
-                    // Re-enable button
-                    button.disabled = false;
-                    button.innerHTML = '<i class="ti ti-send me-1"></i>Send Test Notification';
-
-                    resultDiv.innerHTML = `
-            <div class="alert alert-danger alert-dismissible mt-2 mb-0" role="alert">
-                <strong>❌ Error!</strong> Something went wrong. Please try again.
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        `;
                     console.error('Error:', error);
                 });
         }

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\MarketplaceListing;
 use App\Models\BannerAdvertisement;
+use App\Models\Announcement;
 use App\Services\NotificationService;
 
 class UserController extends Controller
@@ -31,7 +32,12 @@ class UserController extends Controller
             ->ordered()
             ->get();
 
-        return view('user.content.dashboard', compact('wallet', 'miniMarketplaceListings', 'bannerAdvertisements'));
+        // Get active announcements
+        $announcements = Announcement::currentlyActive()
+            ->ordered()
+            ->get();
+
+        return view('user.content.dashboard', compact('wallet', 'miniMarketplaceListings', 'bannerAdvertisements', 'announcements'));
     }
 
     public function profile()

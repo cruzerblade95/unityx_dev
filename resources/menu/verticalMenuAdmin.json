@@ -59,6 +59,12 @@
       "name": "Banner Advertisements",
       "icon": "menu-icon icon-base ti tabler-ad",
       "slug": "admin.banner-advertisements.index"
+    },
+    {
+      "url": "admin/announcements",
+      "name": "Announcements",
+      "icon": "menu-icon icon-base ti tabler-speakerphone",
+      "slug": "admin.announcements.index"
     }
 
   ]

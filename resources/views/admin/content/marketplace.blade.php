@@ -3,14 +3,11 @@
 @section('title', 'Marketplace Transactions')
 
 @section('vendor-style')
-    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/flatpickr/flatpickr.css') }}">
 @endsection
 
 @section('vendor-script')
     <script src="{{ asset('assets/vendor/libs/moment/moment.js') }}"></script>
-    <script src="{{ asset('assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js') }}"></script>
     <script src="{{ asset('assets/vendor/libs/flatpickr/flatpickr.js') }}"></script>
 @endsection
 
@@ -207,7 +204,7 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-sm">
+                            <table id="marketplace-transactions-table" class="table table-sm">
                                 <thead>
                                     <tr>
                                         <th>ID</th>
@@ -430,6 +427,11 @@
         </div>
 
         <script>
+            // Table is using server-side pagination, no DataTables needed
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('Marketplace transactions table initialized');
+            });
+
             let currentTransactionId = null;
 
             function rejectTransaction(transactionId) {

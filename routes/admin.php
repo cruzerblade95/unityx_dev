@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\WithdrawalManagementController;
 use App\Http\Controllers\Admin\MarketplaceController;
 use App\Http\Controllers\Admin\FixCronValueController;
 use App\Http\Controllers\Admin\BannerAdvertisementController;
+use App\Http\Controllers\Admin\AnnouncementController;
 
 Route::prefix('admin')->middleware('web')->group(function () {
     // Guest routes
@@ -91,5 +92,17 @@ Route::prefix('admin')->middleware('web')->group(function () {
         ]);
         Route::post('/banner-advertisements/{bannerAdvertisement}/toggle-status', [BannerAdvertisementController::class, 'toggleStatus'])->name('admin.banner-advertisements.toggle-status');
         Route::post('/banner-advertisements/update-order', [BannerAdvertisementController::class, 'updateOrder'])->name('admin.banner-advertisements.update-order');
+
+        // Announcement Management Routes
+        Route::resource('announcements', AnnouncementController::class)->names([
+            'index' => 'admin.announcements.index',
+            'create' => 'admin.announcements.create',
+            'store' => 'admin.announcements.store',
+            'show' => 'admin.announcements.show',
+            'edit' => 'admin.announcements.edit',
+            'update' => 'admin.announcements.update',
+            'destroy' => 'admin.announcements.destroy',
+        ]);
+        Route::post('/announcements/{announcement}/toggle-status', [AnnouncementController::class, 'toggleStatus'])->name('admin.announcements.toggle-status');
     });
 });
