@@ -16,7 +16,13 @@ class UserRegisterController extends Controller
     public function showRegisterForm()
     {
         $pageConfigs = ['myLayout' => 'blank'];
-        return view('user.register', compact('pageConfigs'));
+
+        // Add security headers to response
+        return response()
+            ->view('user.register', compact('pageConfigs'))
+            ->header('X-Frame-Options', 'DENY')
+            ->header('X-Content-Type-Options', 'nosniff')
+            ->header('X-XSS-Protection', '1; mode=block');
     }
 
     public function register(Request $request)
@@ -28,6 +34,8 @@ class UserRegisterController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
             'referral_code' => 'required|string|size:6',
+            'terms' => 'required|accepted',
+            'g-recaptcha-response' => 'required|captcha',
         ], [
             'referral_code.required' => 'Referral code is required to register.',
             'referral_code.size' => 'Referral code must be exactly 6 characters.',
@@ -35,35 +43,48 @@ class UserRegisterController extends Controller
             'email.unique' => 'This email is already registered. Please use a different email or try logging in.',
             'password.confirmed' => 'Password confirmation does not match.',
             'password.min' => 'Password must be at least 6 characters long.',
+            'terms.required' => 'You must agree to the privacy policy and terms.',
+            'terms.accepted' => 'You must agree to the privacy policy and terms.',
+            'g-recaptcha-response.required' => 'Please complete the CAPTCHA verification.',
+            'g-recaptcha-response.captcha' => 'CAPTCHA verification failed. Please try again.',
         ]);
 
         // Check if referral code exists and is valid
         if ($request->filled('referral_code')) {
             $referralCode = strtoupper(trim($request->referral_code)); // Normalize the code
             $upline = User::where('referral_code', $referralCode)->first();
-            
+
             if (!$upline) {
                 return redirect()->back()
                     ->withInput($request->except('password', 'password_confirmation'))
                     ->withErrors([
                         'referral_code' => 'The referral code "' . $referralCode . '" was not found. Please check with your referrer for the correct code.'
-                    ]);
+                    ])
+                    ->header('X-Frame-Options', 'DENY')
+                    ->header('X-Content-Type-Options', 'nosniff')
+                    ->header('X-XSS-Protection', '1; mode=block');
             }
-            
+
             // Additional check: Make sure the upline account is active
             if (!$upline || $upline->deleted_at) {
                 return redirect()->back()
                     ->withInput($request->except('password', 'password_confirmation'))
                     ->withErrors([
                         'referral_code' => 'The referral code is no longer valid. Please contact your referrer for assistance.'
-                    ]);
+                    ])
+                    ->header('X-Frame-Options', 'DENY')
+                    ->header('X-Content-Type-Options', 'nosniff')
+                    ->header('X-XSS-Protection', '1; mode=block');
             }
         } else {
             return redirect()->back()
                 ->withInput($request->except('password', 'password_confirmation'))
                 ->withErrors([
                     'referral_code' => 'Referral code is required to register.'
-                ]);
+                ])
+                ->header('X-Frame-Options', 'DENY')
+                ->header('X-Content-Type-Options', 'nosniff')
+                ->header('X-XSS-Protection', '1; mode=block');
         }
 
         // Generate unique 6-character referral code
@@ -98,7 +119,11 @@ class UserRegisterController extends Controller
         // ]);
 
         Auth::guard('web')->login($user);
-        return redirect()->route('connect-telegram')->with('notyf_success', 'Registration successful!');
+        return redirect()->route('connect-telegram')
+            ->with('notyf_success', 'Registration successful!')
+            ->header('X-Frame-Options', 'DENY')
+            ->header('X-Content-Type-Options', 'nosniff')
+            ->header('X-XSS-Protection', '1; mode=block');
         // return redirect()->route('user.dashboard')->with('notyf_success', 'Registration successful!');
     }
 }
