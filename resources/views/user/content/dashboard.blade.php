@@ -25,6 +25,100 @@
             transform: translateY(-2px);
             box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
         }
+
+        /* Dashboard Banner Carousel Fix - Prevent button overlap */
+        #advertisementCarousel {
+            position: relative;
+        }
+
+        /* Ensure carousel controls have higher z-index than banner content */
+        #advertisementCarousel .carousel-control-prev,
+        #advertisementCarousel .carousel-control-next {
+            z-index: 10;
+            width: 50px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 50%;
+            margin: auto 10px;
+            height: 50px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        #advertisementCarousel .carousel-control-prev:hover,
+        #advertisementCarousel .carousel-control-next:hover {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Adjust banner content area to avoid overlap with navigation buttons */
+        #advertisementCarousel .carousel-item .container-fluid {
+            margin-left: 60px;
+            margin-right: 60px;
+        }
+
+        /* On smaller screens, adjust margin and hide navigation arrows to prevent overlap */
+        @media (max-width: 768px) {
+            #advertisementCarousel .carousel-item .container-fluid {
+                margin-left: 20px;
+                margin-right: 20px;
+            }
+
+            #advertisementCarousel .carousel-control-prev,
+            #advertisementCarousel .carousel-control-next {
+                width: 40px;
+                height: 40px;
+                margin: auto 5px;
+            }
+        }
+
+        /* Extra small screens - hide navigation arrows to prevent overlap */
+        @media (max-width: 576px) {
+            #advertisementCarousel .carousel-control-prev,
+            #advertisementCarousel .carousel-control-next {
+                display: none;
+            }
+
+            #advertisementCarousel .carousel-item .container-fluid {
+                margin-left: 15px;
+                margin-right: 15px;
+            }
+        }
+
+        /* Ensure banner buttons don't extend into navigation area */
+        #advertisementCarousel .carousel-item .btn {
+            position: relative;
+            z-index: 5;
+            max-width: calc(100% - 120px);
+            word-wrap: break-word;
+        }
+
+        @media (max-width: 768px) {
+            #advertisementCarousel .carousel-item .btn {
+                max-width: calc(100% - 80px);
+            }
+        }
+
+        @media (max-width: 576px) {
+            #advertisementCarousel .carousel-item .btn {
+                max-width: 100%;
+            }
+        }
+
+        /* Ensure navigation controls don't interfere with banner content clicks */
+        #advertisementCarousel .carousel-control-prev {
+            left: 10px;
+        }
+
+        #advertisementCarousel .carousel-control-next {
+            right: 10px;
+        }
+
+        /* Add slight padding to prevent button overlap on medium screens */
+        @media (min-width: 769px) and (max-width: 1200px) {
+            #advertisementCarousel .carousel-item .container-fluid {
+                margin-left: 50px;
+                margin-right: 50px;
+            }
+        }
     </style>
 @endsection
 
@@ -36,7 +130,14 @@
     @vite(['resources/assets/js/app-ecommerce-dashboard.js'])
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tooltips for banner descriptions
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
             var el = document.getElementById('sync-estimate');
+            if (!el) return; // Exit if element doesn't exist
             var customTimestamp = el.getAttribute('data-timestamp');
 
             function pad(n) {
@@ -72,24 +173,154 @@
                 el.textContent = estimate.toLocaleString(undefined, options);
             }
         });
+
+        // Banner Carousel Click Handler - Prevent overlap issues
+        document.addEventListener('DOMContentLoaded', function() {
+            const carousel = document.getElementById('advertisementCarousel');
+            if (carousel) {
+                // Prevent carousel controls from interfering with banner button clicks
+                const controlButtons = carousel.querySelectorAll('.carousel-control-prev, .carousel-control-next');
+                controlButtons.forEach(function(button) {
+                    button.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                    });
+                });
+
+                // Ensure banner buttons work properly
+                const bannerButtons = carousel.querySelectorAll('.carousel-item .btn');
+                bannerButtons.forEach(function(button) {
+                    button.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        // The link will work normally since we're not preventing default
+                    });
+                });
+            }
+        });
     </script>
 @endsection
 
 @section('content')
     <div class="row g-6">
-        <!-- Alerts with headings -->
+        <!-- Advertisement Banner Carousel -->
+        <div class="col-xl-12 mb-4">
+            @if(isset($bannerAdvertisements) && $bannerAdvertisements->count() > 0)
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="ti tabler-speakerphone me-2"></i>
+                            Promotions & Updates
+                        </h5>
+                        <div class="dropdown">
+                            <button class="btn btn-text-secondary rounded-pill text-body-secondary border-0 p-2 me-n1" type="button" id="bannerDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="ti tabler-dots-vertical"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="bannerDropdown">
+                                <a class="dropdown-item" href="javascript:void(0);">Hide Banners</a>
+                                <a class="dropdown-item" href="javascript:void(0);">Report Issue</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="advertisementCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+                            @if($bannerAdvertisements->count() > 1)
+                                <div class="carousel-indicators">
+                                    @foreach($bannerAdvertisements as $index => $banner)
+                                        <button type="button" data-bs-target="#advertisementCarousel" data-bs-slide-to="{{ $index }}"
+                                                class="{{ $index === 0 ? 'active' : '' }}"
+                                                aria-current="{{ $index === 0 ? 'true' : 'false' }}"
+                                                aria-label="Slide {{ $index + 1 }}"></button>
+                                    @endforeach
+                                </div>
+                            @endif
+                            <div class="carousel-inner" style="border-radius: 0.375rem;">
+                                @foreach($bannerAdvertisements as $index => $banner)
+                                    <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                                        <div class="position-relative"
+                                             style="height: 200px;
+                                                    background: {{ $banner->gradient_color ?
+                                                        'linear-gradient(135deg, ' . $banner->background_color . ' 0%, ' . $banner->gradient_color . ' 100%)' :
+                                                        $banner->background_color }};
+                                                    overflow: hidden;
+                                                    {{ $banner->image_path ? 'background-image: url(' . $banner->image_url . '); background-size: cover; background-position: center;' : '' }}"
+                                             title="{{ $banner->description }}"
+                                             data-bs-toggle="tooltip"
+                                             data-bs-placement="top">
+
+                                            @if($banner->image_path)
+                                                <!-- Overlay for better text readability on images -->
+                                                <div class="position-absolute top-0 start-0 w-100 h-100"
+                                                     style="background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 100%);"></div>
+                                            @endif
+
+                                            <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center">
+                                                <div class="container-fluid">
+                                                    <div class="row align-items-center">
+                                                        <div class="col-md-8">
+                                                            <h3 class="fw-bold mb-2" style="color: {{ $banner->text_color ?? '#ffffff' }};">
+                                                                {{ $banner->title }}
+                                                            </h3>
+                                                            <p class="mb-3" style="color: {{ $banner->text_color ?? '#ffffff' }}; opacity: 0.8;">
+                                                                {{ $banner->description }}
+                                                            </p>
+                                                            @if($banner->link_url && $banner->button_text)
+                                                                <a href="{{ $banner->link_url }}"
+                                                                   target="_blank"
+                                                                   rel="noopener noreferrer"
+                                                                   class="btn btn-light btn-sm">
+                                                                    <i class="ti tabler-external-link me-1"></i>
+                                                                    {{ $banner->button_text }}
+                                                                </a>
+                                                            @endif
+                                                        </div>
+                                                        <div class="col-md-4 text-end">
+                                                            <i class="ti tabler-ad-2" style="font-size: 5rem; opacity: 0.3; color: {{ $banner->text_color ?? '#ffffff' }};"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            @if($bannerAdvertisements->count() > 1)
+                                <button class="carousel-control-prev" type="button" data-bs-target="#advertisementCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#advertisementCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endif
+        </div>
+        <!--/ Advertisement Banner Carousel -->
+
+        <!-- Announcements -->
         <div class="col-xl-12 mb-4">
             <div class="card">
-                {{-- <h5 class="card-header">Alerts with Heading</h5> --}}
                 <div class="card-body">
-                    <div class="alert alert-primary alert-dismissible" role="alert">
-                        <h5 class="alert-heading mb-2">Announcement!</h5>
-                        <p class="mb-0">Deposit, withdrawal & p2p is available now! Next update will be Referral System
-                            Bonus.
-                            {{-- <span id="sync-estimate" data-timestamp="2025-08-20T11:00:00"></span> --}}
-                        </p>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
+                    @if(isset($announcements) && $announcements->count() > 0)
+                        @foreach($announcements as $announcement)
+                            <div class="alert alert-{{ $announcement->type }} {{ $announcement->is_dismissible ? 'alert-dismissible' : '' }}" role="alert">
+                                <h5 class="alert-heading mb-2">{{ $announcement->title }}</h5>
+                                <div class="mb-0">{!! $announcement->content !!}</div>
+                                @if($announcement->is_dismissible)
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                @endif
+                            </div>
+                        @endforeach
+                    @else
+                        <!-- Fallback to default announcement if no database announcements -->
+                        <div class="alert alert-primary alert-dismissible" role="alert">
+                            <h5 class="alert-heading mb-2">Announcement!</h5>
+                            <p class="mb-0">Deposit, withdrawal & p2p is available now! Next update will be Referral System Bonus.</p>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
 
                     @if (
                         \Illuminate\Support\Facades\Auth::user()->telegramVerification &&
@@ -116,7 +347,7 @@
                                     <small>Verify again using our bot to update your username</small>
                                 </div>
                                 <a href="{{ route('connect-telegram') }}" class="btn btn-sm btn-warning mt-2">
-                                    <i class="ti ti-brand-telegram me-1"></i>Update Telegram Username
+                                    <i class="ti tabler-brand-telegram me-1"></i>Update Telegram Username
                                 </a>
                             </div>
                         @endif
@@ -938,18 +1169,28 @@
             const button = document.querySelector('button[onclick="testTelegramNotification()"]');
             const resultDiv = document.getElementById('telegram-test-result');
 
+            // Add null checks for DOM elements
+            if (!button || !resultDiv) {
+                console.error('Required DOM elements not found for Telegram notification test');
+                return;
+            }
+
             // Disable button and show loading
             button.disabled = true;
-            button.innerHTML = '<i class="ti ti-loader ti-spin me-1"></i>Sending...';
+            button.innerHTML = '<i class="ti tabler-loader ti-spin me-1"></i>Sending...';
 
             // Clear previous results
             resultDiv.innerHTML = '';
+
+            // Get CSRF token safely
+            const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+            const csrfToken = csrfTokenElement ? csrfTokenElement.getAttribute('content') : '';
 
             fetch('/test-telegram-notification', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        'X-CSRF-TOKEN': csrfToken
                     },
                     body: JSON.stringify({
                         title: '🧪 Test Notification',
@@ -958,37 +1199,45 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // Re-enable button
-                    button.disabled = false;
-                    button.innerHTML = '<i class="ti ti-send me-1"></i>Send Test Notification';
+                    // Re-enable button - check if still exists
+                    if (button) {
+                        button.disabled = false;
+                        button.innerHTML = '<i class="ti tabler-send me-1"></i>Send Test Notification';
+                    }
 
-                    if (data.success) {
-                        resultDiv.innerHTML = `
-                <div class="alert alert-success alert-dismissible mt-2 mb-0" role="alert">
-                    <strong>✅ Success!</strong> ${data.message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            `;
-                    } else {
+                    if (resultDiv) {
+                        if (data.success) {
+                            resultDiv.innerHTML = `
+                    <div class="alert alert-success alert-dismissible mt-2 mb-0" role="alert">
+                        <strong>✅ Success!</strong> ${data.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+                        } else {
+                            resultDiv.innerHTML = `
+                    <div class="alert alert-danger alert-dismissible mt-2 mb-0" role="alert">
+                        <strong>❌ Failed!</strong> ${data.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+                        }
+                    }
+                })
+                .catch(error => {
+                    // Re-enable button - check if still exists
+                    if (button) {
+                        button.disabled = false;
+                        button.innerHTML = '<i class="ti tabler-send me-1"></i>Send Test Notification';
+                    }
+
+                    if (resultDiv) {
                         resultDiv.innerHTML = `
                 <div class="alert alert-danger alert-dismissible mt-2 mb-0" role="alert">
-                    <strong>❌ Failed!</strong> ${data.message}
+                    <strong>❌ Error!</strong> Something went wrong. Please try again.
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             `;
                     }
-                })
-                .catch(error => {
-                    // Re-enable button
-                    button.disabled = false;
-                    button.innerHTML = '<i class="ti ti-send me-1"></i>Send Test Notification';
-
-                    resultDiv.innerHTML = `
-            <div class="alert alert-danger alert-dismissible mt-2 mb-0" role="alert">
-                <strong>❌ Error!</strong> Something went wrong. Please try again.
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        `;
                     console.error('Error:', error);
                 });
         }

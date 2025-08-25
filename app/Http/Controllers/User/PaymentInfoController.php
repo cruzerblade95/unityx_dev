@@ -21,11 +21,11 @@ class PaymentInfoController extends Controller
 
         $request->validate([
             'national_id' => 'required|string|max:50|regex:/^[A-Za-z0-9\-]+$/',
-            'usdt_bep20_address' => 'required|string|max:255|regex:/^[A-Za-z0-9]+$/',
-            'usdc_bep20_address' => 'required|string|max:255|regex:/^[A-Za-z0-9]+$/',
-            'fdusd_bep20_address' => 'required|string|max:255|regex:/^[A-Za-z0-9]+$/',
-            'etc_black_card_number' => 'required|string|max:19|regex:/^[0-9\s]+$/',
-            'account_number' => 'required|string|max:20|regex:/^[0-9]+$/',
+            'usdt_bep20_address' => 'nullable|string|max:255|regex:/^[A-Za-z0-9]+$/',
+            'usdc_bep20_address' => 'nullable|string|max:255|regex:/^[A-Za-z0-9]+$/',
+            'fdusd_bep20_address' => 'nullable|string|max:255|regex:/^[A-Za-z0-9]+$/',
+            'etc_black_card_number' => 'nullable|string|max:19|regex:/^[0-9\s]+$/',
+            'account_number' => 'nullable|string|max:20|regex:/^[0-9]+$/',
             'cardholder_name' => 'required|string|max:100|regex:/^[A-Za-z\s\.]+$/',
         ], [
             'national_id.regex' => 'National ID must contain only letters, numbers, and hyphens.',
@@ -37,13 +37,22 @@ class PaymentInfoController extends Controller
             'cardholder_name.regex' => 'Cardholder name must contain only letters, spaces, and periods.',
         ]);
 
+        // Check that at least one crypto wallet address is provided
+        if (empty($request->usdt_bep20_address) &&
+            empty($request->usdc_bep20_address) &&
+            empty($request->fdusd_bep20_address)) {
+            return back()
+                ->withErrors(['crypto_addresses' => 'At least one crypto wallet address (USDT, USDC, or FDUSD) is required.'])
+                ->withInput();
+        }
+
         // Update user using the User model
         User::where('id', $user->id)->update([
             'national_id' => strtoupper($request->national_id),
             'usdt_bep20_address' => $request->usdt_bep20_address,
             'usdc_bep20_address' => $request->usdc_bep20_address,
             'fdusd_bep20_address' => $request->fdusd_bep20_address,
-            'etc_black_card_number' => preg_replace('/\s+/', ' ', $request->etc_black_card_number),
+            'etc_black_card_number' => $request->etc_black_card_number ? preg_replace('/\s+/', ' ', $request->etc_black_card_number) : null,
             'account_number' => $request->account_number,
             'cardholder_name' => ucwords(strtolower($request->cardholder_name)),
             'payment_info_completed' => true,

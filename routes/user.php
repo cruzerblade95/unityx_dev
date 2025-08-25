@@ -50,7 +50,9 @@ Route::prefix('user')->middleware('web')->group(function () {
         Route::get('/login', [UserLoginController::class, 'showLoginForm'])->name('user.login');
         Route::post('/login', [UserLoginController::class, 'login'])->name('user.login.submit');
         Route::get('/register', [UserRegisterController::class, 'showRegisterForm'])->name('user.register');
-        Route::post('/register', [UserRegisterController::class, 'register'])->name('user.register.submit');
+        Route::post('/register', [UserRegisterController::class, 'register'])
+            ->middleware('throttle:5,1') // 5 attempts per minute
+            ->name('user.register.submit');
         Route::get('/forgot-password', [UserForgotPasswordController::class, 'index'])->name('user.forgot-password');
         Route::post('/forgot-password', [UserForgotPasswordController::class, 'sendResetLink'])->name('user.password.forgot.send');
     });

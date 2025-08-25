@@ -3,57 +3,6 @@ $customizerHidden = 'customizer-hide';
 $configData = Helper::appClasses();
 @endphp
 
-{{-- @extends('layouts/layoutMaster')
-
-@section('title', 'Register - User')
-
-@section('content')
-<div class="authentication-wrapper authentication-cover">
-  <div class="authentication-inner row m-0">
-    <div class="d-flex col-12 col-xl-4 align-items-center authentication-bg p-sm-12 p-6 mx-auto">
-      <div class="w-px-400 mx-auto mt-12 pt-5">
-        <h4 class="mb-1">Create your account</h4>
-        <form id="formRegister" class="mb-6" action="{{ route('user.register.submit') }}" method="POST">
-          @csrf
-          <div class="mb-6">
-            <label for="firstname" class="form-label">First Name</label>
-            <input type="text" class="form-control" id="firstname" name="firstname" required autofocus />
-          </div>
-          <div class="mb-6">
-            <label for="lastname" class="form-label">Last Name</label>
-            <input type="text" class="form-control" id="lastname" name="lastname" required />
-          </div>
-          <div class="mb-6">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" class="form-control" id="username" name="username" required />
-          </div>
-          <div class="mb-6">
-            <label for="email" class="form-label">Email</label>
-            <input type="email" class="form-control" id="email" name="email" required />
-          </div>
-          <div class="mb-6">
-            <label for="password" class="form-label">Password</label>
-            <input type="password" class="form-control" id="password" name="password" required />
-          </div>
-          <div class="mb-6">
-            <label for="password_confirmation" class="form-label">Confirm Password</label>
-            <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required />
-          </div>
-          <button class="btn btn-primary d-grid w-100">Register</button>
-        </form>
-        <p class="text-center">
-          <span>Already have an account?</span>
-          <a href="{{ route('user.login') }}">
-            <span>Sign in</span>
-          </a>
-        </p>
-      </div>
-    </div>
-  </div>
-</div>
-@endsection --}}
-
-
 @extends('layouts/layoutMaster')
 
 @section('title', 'Register Cover - Pages')
@@ -64,16 +13,63 @@ $configData = Helper::appClasses();
 
 @section('page-style')
 @vite(['resources/assets/vendor/scss/pages/page-auth.scss'])
+<style>
+.captcha-container {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+.g-recaptcha {
+  transform: scale(0.9);
+  transform-origin: 0 0;
+}
+@media (max-width: 576px) {
+  .g-recaptcha {
+    transform: scale(0.8);
+  }
+}
+</style>
 @endsection
 
 @section('vendor-script')
 @vite(['resources/assets/vendor/libs/@form-validation/popular.js',
 'resources/assets/vendor/libs/@form-validation/bootstrap5.js',
 'resources/assets/vendor/libs/@form-validation/auto-focus.js'])
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 @endsection
 
 @section('page-script')
 @vite(['resources/assets/js/pages-auth.js'])
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add CAPTCHA callback function
+    window.recaptchaCallback = function() {
+        // Remove any previous CAPTCHA error styling
+        const captchaContainer = document.querySelector('.captcha-container');
+        const errorDiv = captchaContainer?.parentElement?.querySelector('.invalid-feedback');
+        if (errorDiv) {
+            errorDiv.style.display = 'none';
+        }
+
+        // Add visual feedback that CAPTCHA is completed
+        if (captchaContainer) {
+            captchaContainer.style.border = '2px solid #28a745';
+            captchaContainer.style.borderRadius = '4px';
+            captchaContainer.style.padding = '2px';
+        }
+    };
+
+    window.recaptchaExpiredCallback = function() {
+        // Remove success styling when CAPTCHA expires
+        const captchaContainer = document.querySelector('.captcha-container');
+        if (captchaContainer) {
+            captchaContainer.style.border = '';
+            captchaContainer.style.borderRadius = '';
+            captchaContainer.style.padding = '';
+        }
+    };
+});
+</script>
 @endsection
 
 @section('content')
@@ -107,7 +103,7 @@ $configData = Helper::appClasses();
 
         <form id="formAuthentication" class="mb-6" action="{{ route('user.register.submit') }}" method="POST">
           @csrf
-          
+
           {{-- Display general errors --}}
           @if ($errors->any())
             <div class="alert alert-danger alert-dismissible" role="alert">
@@ -119,11 +115,11 @@ $configData = Helper::appClasses();
               </ul>
             </div>
           @endif
-          
+
           <div class="row">
             <div class="col-6 mb-6 form-control-validation">
               <label for="firstname" class="form-label">First Name</label>
-              <input type="text" class="form-control @error('firstname') is-invalid @enderror" 
+              <input type="text" class="form-control @error('firstname') is-invalid @enderror"
                      id="firstname" name="firstname" value="{{ old('firstname') }}" required autofocus />
               @error('firstname')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -131,7 +127,7 @@ $configData = Helper::appClasses();
             </div>
             <div class="col-6 mb-6 form-control-validation">
               <label for="lastname" class="form-label">Last Name</label>
-              <input type="text" class="form-control @error('lastname') is-invalid @enderror" 
+              <input type="text" class="form-control @error('lastname') is-invalid @enderror"
                      id="lastname" name="lastname" value="{{ old('lastname') }}" required />
               @error('lastname')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -139,7 +135,7 @@ $configData = Helper::appClasses();
             </div>
             <div class="col-6 mb-6 form-control-validation">
               <label for="username" class="form-label">Username</label>
-              <input type="text" class="form-control @error('username') is-invalid @enderror" 
+              <input type="text" class="form-control @error('username') is-invalid @enderror"
                      id="username" name="username" value="{{ old('username') }}" required />
               @error('username')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -147,8 +143,8 @@ $configData = Helper::appClasses();
             </div>
             <div class="col-6 mb-6 form-control-validation">
               <label for="referral_code" class="form-label">Referral Code</label>
-              <input type="text" class="form-control @error('referral_code') is-invalid @enderror" 
-                     id="referral_code" name="referral_code" value="{{ old('referral_code') }}" 
+              <input type="text" class="form-control @error('referral_code') is-invalid @enderror"
+                     id="referral_code" name="referral_code" value="{{ old('referral_code') }}"
                      placeholder="Eg. ASDWFCS" required/>
               @error('referral_code')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -156,7 +152,7 @@ $configData = Helper::appClasses();
             </div>
             <div class="col-12 mb-6 form-control-validation">
               <label for="email" class="form-label">Email</label>
-              <input type="text" class="form-control @error('email') is-invalid @enderror" 
+              <input type="text" class="form-control @error('email') is-invalid @enderror"
                      id="email" name="email" value="{{ old('email') }}" placeholder="Enter your email" />
               @error('email')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -165,7 +161,7 @@ $configData = Helper::appClasses();
             <div class="col-6 mb-6 form-password-toggle form-control-validation">
               <label class="form-label" for="password">Password</label>
               <div class="input-group input-group-merge">
-                <input type="password" id="password" class="form-control @error('password') is-invalid @enderror" 
+                <input type="password" id="password" class="form-control @error('password') is-invalid @enderror"
                        name="password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
                        aria-describedby="password" />
                 <span class="input-group-text cursor-pointer"><i class="icon-base ti tabler-eye-off"></i></span>
@@ -176,20 +172,38 @@ $configData = Helper::appClasses();
             </div>
             <div class="col-6 mb-6 form-control-validation">
               <label for="password_confirmation" class="form-label">Confirm Password</label>
-              <input type="password" class="form-control @error('password_confirmation') is-invalid @enderror" 
+              <input type="password" class="form-control @error('password_confirmation') is-invalid @enderror"
                      id="password_confirmation" name="password_confirmation" required />
               @error('password_confirmation')
                 <div class="invalid-feedback">{{ $message }}</div>
               @enderror
             </div>
           </div>
+
+          {{-- reCAPTCHA --}}
+          <div class="mb-6 form-control-validation">
+            <label class="form-label">Security Verification</label>
+            <div class="captcha-container">
+              <div class="g-recaptcha"
+                   data-sitekey="{{ config('captcha.sitekey') }}"
+                   data-callback="recaptchaCallback"
+                   data-expired-callback="recaptchaExpiredCallback"></div>
+            </div>
+            @error('g-recaptcha-response')
+              <div class="invalid-feedback d-block">{{ $message }}</div>
+            @enderror
+          </div>
+
           <div class="mb-6 mt-8">
             <div class="form-check mb-8 ms-2 form-control-validation">
-              <input class="form-check-input" type="checkbox" id="terms-conditions" name="terms" />
+              <input class="form-check-input @error('terms') is-invalid @enderror" type="checkbox" id="terms-conditions" name="terms" />
               <label class="form-check-label" for="terms-conditions">
                 I agree to
                 <a href="javascript:void(0);">privacy policy & terms</a>
               </label>
+              @error('terms')
+                <div class="invalid-feedback d-block">{{ $message }}</div>
+              @enderror
             </div>
           </div>
           <button class="btn btn-primary d-grid w-100">Sign up</button>
