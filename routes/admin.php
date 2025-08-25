@@ -36,7 +36,11 @@ Route::prefix('admin')->middleware('web')->group(function () {
 
         // Wallet Management Routes
         Route::get('/wallets', [WalletManagementController::class, 'index'])->name('admin.wallets.index');
+        Route::get('/wallets/list', [WalletManagementController::class, 'list'])->name('admin.wallets.list');
         Route::post('/wallets/create', [WalletManagementController::class, 'createWallet'])->name('admin.wallets.create');
+        Route::get('/wallets/{id}', [WalletManagementController::class, 'getWallet'])->name('admin.wallets.show');
+        Route::post('/wallets/adjust', [WalletManagementController::class, 'adjustBalance'])->name('admin.wallets.adjust');
+        Route::get('/wallets/{id}/history', [WalletManagementController::class, 'getTransactionHistory'])->name('admin.wallets.history');
 
         // KYC Approval Routes
         Route::get('/kyc', [KycApprovalController::class, 'index'])->name('admin.kyc.index');
@@ -76,7 +80,15 @@ Route::prefix('admin')->middleware('web')->group(function () {
         Route::post('/recovery-accounts/{id}/reject', [App\Http\Controllers\Admin\RecoveryAccountController::class, 'reject'])->name('admin.recovery_accounts.reject');
 
         // Banner Advertisement Management Routes
-        Route::resource('banner-advertisements', BannerAdvertisementController::class);
+        Route::resource('banner-advertisements', BannerAdvertisementController::class)->names([
+            'index' => 'admin.banner-advertisements.index',
+            'create' => 'admin.banner-advertisements.create',
+            'store' => 'admin.banner-advertisements.store',
+            'show' => 'admin.banner-advertisements.show',
+            'edit' => 'admin.banner-advertisements.edit',
+            'update' => 'admin.banner-advertisements.update',
+            'destroy' => 'admin.banner-advertisements.destroy',
+        ]);
         Route::post('/banner-advertisements/{bannerAdvertisement}/toggle-status', [BannerAdvertisementController::class, 'toggleStatus'])->name('admin.banner-advertisements.toggle-status');
         Route::post('/banner-advertisements/update-order', [BannerAdvertisementController::class, 'updateOrder'])->name('admin.banner-advertisements.update-order');
     });

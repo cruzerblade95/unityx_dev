@@ -407,6 +407,146 @@
     [data-bs-theme="dark"] code {
         background: rgba(var(--bs-secondary-rgb), 0.3);
     }
+    
+    /* Enhanced Wallet Address Styling */
+    .wallet-address-container {
+        background: var(--bs-body-bg);
+        border: 1px solid var(--bs-primary);
+        border-radius: 6px;
+        padding: 0.75rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .wallet-address-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #28a745, #20c997);
+    }
+    
+    .wallet-address-header h6 {
+        font-size: 1.1rem;
+        color: #28a745 !important;
+    }
+    
+    .wallet-address-box {
+        position: relative;
+        background: #ffffff;
+        border: 2px solid #28a745;
+        border-radius: 12px;
+        padding: 0;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.1);
+    }
+    
+    .wallet-address-box:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.2);
+        border-color: #20c997;
+    }
+    
+    .wallet-address-content {
+        padding: 0.75rem;
+        background: var(--bs-body-bg);
+        position: relative;
+        z-index: 2;
+    }
+    
+    .wallet-address-text {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--bs-emphasis-color) !important;
+        background: none !important;
+        border: none;
+        word-break: break-all;
+        line-height: 1.4;
+        display: block;
+        letter-spacing: 0.3px;
+        font-family: 'Courier New', monospace;
+    }
+    
+    .wallet-address-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(40, 167, 69, 0.95) 0%, rgba(32, 201, 151, 0.95) 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 3;
+        backdrop-filter: blur(2px);
+    }
+    
+    .wallet-address-box:hover .wallet-address-overlay {
+        opacity: 1;
+    }
+    
+    .wallet-address-overlay i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .wallet-address-overlay span {
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .wallet-network-info {
+        background: rgba(255, 193, 7, 0.1);
+        border: 1px solid #ffc107;
+        border-radius: 8px;
+        padding: 0.75rem;
+        text-align: center;
+    }
+    
+    /* Dark theme adjustments */
+    [data-bs-theme="dark"] .wallet-address-container {
+        background: var(--bs-body-bg);
+        border-color: var(--bs-primary);
+    }
+    
+    [data-bs-theme="dark"] .wallet-address-content {
+        background: var(--bs-body-bg);
+    }
+    
+    [data-bs-theme="dark"] .wallet-address-text {
+        color: var(--bs-body-color) !important;
+    }
+    
+    [data-bs-theme="dark"] .wallet-network-info {
+        background: rgba(255, 193, 7, 0.15);
+        border-color: #ffc107;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .wallet-address-text {
+            font-size: 0.9rem;
+            letter-spacing: 0.2px;
+        }
+        
+        .wallet-address-overlay i {
+            font-size: 1.5rem;
+        }
+        
+        .wallet-address-overlay span {
+            font-size: 0.9rem;
+        }
+    }
 </style>
 
 @section('vendor-style')
@@ -503,15 +643,12 @@
                                 </div>
                                 <div id="addressContent" style="display: none;">
                                     <p><strong>Please transfer your USDT to the following wallet address:</strong></p>
-                                    <div class="bg-light p-3 rounded mb-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <small class="text-muted">Wallet Address:</small>
-                                            <button type="button" class="btn btn-sm btn-outline-primary"
-                                                onclick="copyToClipboard('walletAddress')">
-                                                <i class="fas fa-copy"></i> Copy
-                                            </button>
+                                    
+                                    <!-- Enhanced Wallet Address Display -->
+                                    <div class="wallet-address-container mb-3">
+                                        <div class="wallet-address-content">
+                                            <code class="wallet-address-text" id="walletAddress">Loading...</code>
                                         </div>
-                                        <code class="text-dark d-block" id="walletAddress">Loading...</code>
                                     </div>
                                     <div class="alert alert-success">
                                         <small><strong>✅ Reference code will be automatically included when you submit this
@@ -917,6 +1054,25 @@
                 alert('Copied to clipboard: ' + text);
             }
         }
+        
+        // Make wallet address box clickable for copying
+        $(document).ready(function() {
+            $(document).on('click', '.wallet-address-box', function() {
+                copyToClipboard('walletAddress');
+                
+                // Visual feedback
+                const overlay = $(this).find('.wallet-address-overlay');
+                const originalContent = overlay.html();
+                
+                overlay.html('<i class="fas fa-check-circle"></i><span>Copied!</span>');
+                overlay.css('opacity', '1');
+                
+                setTimeout(function() {
+                    overlay.html(originalContent);
+                    overlay.css('opacity', '0');
+                }, 1500);
+            });
+        });
     </script>
 
 @endsection

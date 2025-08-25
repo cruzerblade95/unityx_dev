@@ -53,6 +53,13 @@
       "name": "Recovery Accounts",
       "icon": "menu-icon icon-base ti tabler-shield-check",
       "slug": "admin.recovery_accounts.index"
+    },
+    {
+      "url": "admin/banner-advertisements",
+      "name": "Banner Advertisements",
+      "icon": "menu-icon icon-base ti tabler-ad",
+      "slug": "admin.banner-advertisements.index"
     }
+
   ]
 }

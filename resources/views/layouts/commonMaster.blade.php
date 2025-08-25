@@ -19,7 +19,7 @@
   $contentLayout = isset($container) ? ($container === 'container-xxl' ? 'layout-compact' : 'layout-wide') : '';
 
   // Get skin name from configData - only applies to admin layouts
-  $isAdminLayout = !Str::contains($configData['layout'] ?? '', 'front');
+  $isAdminLayout = !\Illuminate\Support\Str::contains($configData['layout'] ?? '', 'front');
   $skinName = $isAdminLayout ? $configData['skinName'] ?? 'default' : 'default';
 
   // Get semiDark value from configData - only applies to admin layouts

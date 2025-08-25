@@ -147,12 +147,18 @@ class BannerAdvertisementController extends Controller
      */
     public function toggleStatus(BannerAdvertisement $bannerAdvertisement)
     {
+        $oldStatus = $bannerAdvertisement->is_active;
+        $newStatus = !$bannerAdvertisement->is_active;
+        
         $bannerAdvertisement->update([
-            'is_active' => !$bannerAdvertisement->is_active
+            'is_active' => $newStatus
         ]);
 
+        // Refresh the model to ensure we have the latest data
+        $bannerAdvertisement->refresh();
+
         return redirect()->back()
-                        ->with('success', 'Banner status updated successfully!');
+                        ->with('success', "Banner status updated from " . ($oldStatus ? 'Active' : 'Inactive') . " to " . ($newStatus ? 'Active' : 'Inactive'));
     }
 
     /**

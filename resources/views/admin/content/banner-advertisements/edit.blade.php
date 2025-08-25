@@ -99,21 +99,28 @@ $(document).ready(function() {
         }
     });
 
-    // Color picker simulation
-    $('.color-preview').on('click', function() {
-        $(this).siblings('input[type="color"]').click();
-    });
-
+    // Color picker functionality
     $('input[type="color"]').on('change', function() {
-        $(this).siblings('.color-preview').css('background-color', $(this).val());
-        $(this).siblings('input[type="text"]').val($(this).val());
+        const colorValue = $(this).val();
+        $(this).siblings('input[type="text"]').val(colorValue);
         updatePreview();
     });
 
-    // Initialize color previews
+    // Initialize color text inputs
     $('input[type="color"]').each(function() {
-        $(this).siblings('.color-preview').css('background-color', $(this).val());
-        $(this).siblings('input[type="text"]').val($(this).val());
+        const colorValue = $(this).val();
+        $(this).siblings('input[type="text"]').val(colorValue);
+    });
+
+    // Status toggle functionality
+    $('#is_active').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#status-active').show();
+            $('#status-inactive').hide();
+        } else {
+            $('#status-active').hide();
+            $('#status-inactive').show();
+        }
     });
 
     // Initialize preview with current image if exists
@@ -145,11 +152,11 @@ $(document).ready(function() {
                 </div>
                 <div class="d-flex gap-2">
                     <a href="{{ route('admin.banner-advertisements.show', $bannerAdvertisement) }}" class="btn btn-outline-info">
-                        <i class="ti ti-eye me-1"></i>
+                        <i class="tabler-eye me-1"></i>
                         View
                     </a>
                     <a href="{{ route('admin.banner-advertisements.index') }}" class="btn btn-outline-secondary">
-                        <i class="ti ti-arrow-left me-1"></i>
+                        <i class="tabler-arrow-left me-1"></i>
                         Back to List
                     </a>
                 </div>
@@ -236,9 +243,8 @@ $(document).ready(function() {
                                         <label class="form-label" for="background_color">Background Color</label>
                                         <div class="d-flex align-items-center gap-2">
                                             <input type="color" class="form-control @error('background_color') is-invalid @enderror" 
-                                                   id="background_color" name="background_color" value="{{ old('background_color', $bannerAdvertisement->background_color) }}" style="display: none;">
-                                            <div class="color-preview"></div>
-                                            <input type="text" class="form-control" readonly>
+                                                   id="background_color" name="background_color" value="{{ old('background_color', $bannerAdvertisement->background_color ?? '#667eea') }}">
+                                            <input type="text" class="form-control" value="{{ old('background_color', $bannerAdvertisement->background_color ?? '#667eea') }}" readonly>
                                         </div>
                                         @error('background_color')
                                             <div class="invalid-feedback">{{ $message }}</div>
@@ -249,9 +255,8 @@ $(document).ready(function() {
                                         <label class="form-label" for="gradient_color">Gradient Color</label>
                                         <div class="d-flex align-items-center gap-2">
                                             <input type="color" class="form-control @error('gradient_color') is-invalid @enderror" 
-                                                   id="gradient_color" name="gradient_color" value="{{ old('gradient_color', $bannerAdvertisement->gradient_color) }}" style="display: none;">
-                                            <div class="color-preview"></div>
-                                            <input type="text" class="form-control" readonly>
+                                                   id="gradient_color" name="gradient_color" value="{{ old('gradient_color', $bannerAdvertisement->gradient_color ?? '#764ba2') }}">
+                                            <input type="text" class="form-control" value="{{ old('gradient_color', $bannerAdvertisement->gradient_color ?? '#764ba2') }}" readonly>
                                         </div>
                                         @error('gradient_color')
                                             <div class="invalid-feedback">{{ $message }}</div>
@@ -262,9 +267,8 @@ $(document).ready(function() {
                                         <label class="form-label" for="text_color">Text Color</label>
                                         <div class="d-flex align-items-center gap-2">
                                             <input type="color" class="form-control @error('text_color') is-invalid @enderror" 
-                                                   id="text_color" name="text_color" value="{{ old('text_color', $bannerAdvertisement->text_color) }}" style="display: none;">
-                                            <div class="color-preview"></div>
-                                            <input type="text" class="form-control" readonly>
+                                                   id="text_color" name="text_color" value="{{ old('text_color', $bannerAdvertisement->text_color ?? '#ffffff') }}">
+                                            <input type="text" class="form-control" value="{{ old('text_color', $bannerAdvertisement->text_color ?? '#ffffff') }}" readonly>
                                         </div>
                                         @error('text_color')
                                             <div class="invalid-feedback">{{ $message }}</div>
@@ -309,11 +313,22 @@ $(document).ready(function() {
                                     </div>
 
                                     <div class="col-12">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" value="1" id="is_active" name="is_active" {{ old('is_active', $bannerAdvertisement->is_active) ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="is_active">
-                                                Banner is active
-                                            </label>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" role="switch" id="is_active" name="is_active" value="1" {{ old('is_active', $bannerAdvertisement->is_active) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="is_active">
+                                                    <span class="fw-semibold">Banner Status</span>
+                                                    <small class="d-block text-muted">Enable or disable this banner advertisement</small>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <span class="badge bg-success" id="status-active" style="{{ old('is_active', $bannerAdvertisement->is_active) ? '' : 'display: none;' }}">
+                                                    <i class="tabler-check me-1"></i>Active
+                                                </span>
+                                                <span class="badge bg-secondary" id="status-inactive" style="{{ old('is_active', $bannerAdvertisement->is_active) ? 'display: none;' : '' }}">
+                                                    <i class="tabler-x me-1"></i>Inactive
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -322,7 +337,7 @@ $(document).ready(function() {
                                 <div class="row mt-4">
                                     <div class="col-12">
                                         <button type="submit" class="btn btn-primary me-2">
-                                            <i class="ti ti-check me-1"></i>
+                                            <i class="tabler-check me-1"></i>
                                             Update Banner
                                         </button>
                                         <a href="{{ route('admin.banner-advertisements.index') }}" class="btn btn-outline-secondary">
@@ -351,7 +366,7 @@ $(document).ready(function() {
                             </div>
                             <div class="mt-3">
                                 <small class="text-muted">
-                                    <i class="ti ti-info-circle me-1"></i>
+                                    <i class="tabler-info-circle me-1"></i>
                                     This preview shows how your banner will appear on the user dashboard.
                                 </small>
                             </div>

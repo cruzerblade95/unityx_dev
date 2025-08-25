@@ -40,32 +40,38 @@
 
 @section('page-script')
 <script>
-$(document).ready(function() {
-    $('.datatable-banner-advertisements').DataTable({
-        responsive: true,
-        order: [[4, 'asc']], // Sort by sort_order
-        columnDefs: [
-            { orderable: false, targets: [0, 6] } // Disable sorting for image and actions
-        ]
-    });
-
-    // Toggle status
-    $('.toggle-status').on('click', function(e) {
-        e.preventDefault();
-        const url = $(this).data('url');
-        const bannerId = $(this).data('id');
-        
-        if (confirm('Are you sure you want to toggle this banner status?')) {
-            $.post(url, {
-                _token: $('meta[name="csrf-token"]').attr('content')
-            }).done(function(response) {
-                location.reload();
-            }).fail(function() {
-                alert('Error updating banner status');
+// Function to initialize DataTable when jQuery is ready
+function initializeBannerScripts() {
+    if (typeof $ === 'undefined') {
+        console.warn('jQuery not available for DataTable');
+        return;
+    }
+    
+    // jQuery is available
+    $(document).ready(function() {
+        // Initialize DataTable
+        if ($.fn.DataTable) {
+            $('.datatable-banner-advertisements').DataTable({
+                responsive: true,
+                order: [[4, 'asc']], // Sort by sort_order
+                columnDefs: [
+                    { orderable: false, targets: [0, 6] } // Disable sorting for image and actions
+                ]
             });
         }
     });
+}
+
+// Wait for DOM and then try to initialize
+document.addEventListener('DOMContentLoaded', function() {
+    initializeBannerScripts();
+    
+    // If jQuery still not available, wait a bit and try again
+    if (typeof $ === 'undefined') {
+        setTimeout(initializeBannerScripts, 100);
+    }
 });
+</script>
 </script>
 @endsection
 
@@ -82,7 +88,7 @@ $(document).ready(function() {
                     <p class="text-muted">Manage promotional banners displayed on user dashboard</p>
                 </div>
                 <a href="{{ route('admin.banner-advertisements.create') }}" class="btn btn-primary">
-                    <i class="ti ti-plus me-1"></i>
+                    <i class="tabler-plus me-1"></i>
                     Add New Banner
                 </a>
             </div>
@@ -101,7 +107,7 @@ $(document).ready(function() {
                     <h5 class="mb-0">Banner Advertisements ({{ $banners->total() }})</h5>
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#orderModal">
-                            <i class="ti ti-arrows-sort me-1"></i>
+                            <i class="tabler-arrows-sort me-1"></i>
                             Sort Order
                         </button>
                     </div>
@@ -128,7 +134,7 @@ $(document).ready(function() {
                                             <img src="{{ $banner->image_url }}" alt="{{ $banner->title }}" title="{{ $banner->description }}">
                                         @endif
                                         <div class="overlay">
-                                            <small>{{ Str::limit($banner->title, 15) }}</small>
+                                            <small>{{ \Illuminate\Support\Str::limit($banner->title, 15) }}</small>
                                         </div>
                                     </div>
                                 </td>
@@ -140,14 +146,14 @@ $(document).ready(function() {
                                 </td>
                                 <td>
                                     <span title="{{ $banner->description }}">
-                                        {{ Str::limit($banner->description, 50) }}
+                                        {{ \Illuminate\Support\Str::limit($banner->description, 50) }}
                                     </span>
                                 </td>
                                 <td>
                                     @if($banner->link_url)
                                         <a href="{{ $banner->link_url }}" target="_blank" class="text-primary">
-                                            <i class="ti ti-external-link me-1"></i>
-                                            {{ Str::limit($banner->link_url, 30) }}
+                                            <i class="tabler-external-link me-1"></i>
+                                            {{ \Illuminate\Support\Str::limit($banner->link_url, 30) }}
                                         </a>
                                     @else
                                         <span class="text-muted">No link</span>
@@ -157,50 +163,61 @@ $(document).ready(function() {
                                     <span class="badge bg-label-info">{{ $banner->sort_order }}</span>
                                 </td>
                                 <td>
-                                    @if($banner->isCurrentlyActive())
-                                        <span class="badge bg-success">Active</span>
-                                    @else
-                                        <span class="badge bg-secondary">Inactive</span>
-                                    @endif
+                                    <div class="d-flex flex-column gap-1">
+                                        @if($banner->is_active)
+                                            <span class="badge bg-success">Enabled</span>
+                                        @else
+                                            <span class="badge bg-secondary">Disabled</span>
+                                        @endif
+                                        
+                                        @if($banner->isCurrentlyActive())
+                                            <small class="badge bg-success-subtle text-success">Currently Active</small>
+                                        @else
+                                            <small class="badge bg-secondary-subtle text-secondary">Not Active</small>
+                                        @endif
+                                    </div>
                                     
                                     @if($banner->start_date || $banner->end_date)
-                                        <br>
-                                        <small class="text-muted">
-                                            @if($banner->start_date)
-                                                From: {{ $banner->start_date->format('M d, Y') }}
-                                            @endif
-                                            @if($banner->end_date)
-                                                <br>To: {{ $banner->end_date->format('M d, Y') }}
-                                            @endif
-                                        </small>
+                                        <div class="mt-1">
+                                            <small class="text-muted">
+                                                @if($banner->start_date)
+                                                    From: {{ $banner->start_date->format('M d, Y') }}
+                                                @endif
+                                                @if($banner->end_date)
+                                                    <br>To: {{ $banner->end_date->format('M d, Y') }}
+                                                @endif
+                                            </small>
+                                        </div>
                                     @endif
                                 </td>
                                 <td>
                                     <div class="dropdown">
-                                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                            <i class="ti ti-dots-vertical"></i>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Actions
                                         </button>
                                         <div class="dropdown-menu">
                                             <a class="dropdown-item" href="{{ route('admin.banner-advertisements.show', $banner) }}">
-                                                <i class="ti ti-eye me-1"></i> View
+                                                <i class="tabler-eye me-1"></i> View
                                             </a>
                                             <a class="dropdown-item" href="{{ route('admin.banner-advertisements.edit', $banner) }}">
-                                                <i class="ti ti-pencil me-1"></i> Edit
+                                                <i class="tabler-pencil me-1"></i> Edit
                                             </a>
                                             <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item toggle-status" href="#" 
-                                               data-url="{{ route('admin.banner-advertisements.toggle-status', $banner) }}" 
-                                               data-id="{{ $banner->id }}">
-                                                <i class="ti ti-toggle-{{ $banner->is_active ? 'left' : 'right' }} me-1"></i> 
-                                                {{ $banner->is_active ? 'Deactivate' : 'Activate' }}
-                                            </a>
+                                            <form action="{{ route('admin.banner-advertisements.toggle-status', $banner) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                <button type="submit" class="dropdown-item" 
+                                                        onclick="return confirm('Are you sure you want to toggle this banner status?')">
+                                                    <i class="tabler-toggle-{{ $banner->is_active ? 'left' : 'right' }} me-1"></i> 
+                                                    {{ $banner->is_active ? 'Deactivate' : 'Activate' }}
+                                                </button>
+                                            </form>
                                             <div class="dropdown-divider"></div>
                                             <form action="{{ route('admin.banner-advertisements.destroy', $banner) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="dropdown-item text-danger" 
                                                         onclick="return confirm('Are you sure you want to delete this banner?')">
-                                                    <i class="ti ti-trash me-1"></i> Delete
+                                                    <i class="tabler-trash me-1"></i> Delete
                                                 </button>
                                             </form>
                                         </div>
@@ -211,11 +228,11 @@ $(document).ready(function() {
                             <tr>
                                 <td colspan="7" class="text-center py-5">
                                     <div class="d-flex flex-column align-items-center">
-                                        <i class="ti ti-photo-off mb-2" style="font-size: 3rem; color: #ddd;"></i>
+                                        <i class="tabler-photo-off mb-2" style="font-size: 3rem; color: #ddd;"></i>
                                         <h6 class="text-muted">No banner advertisements found</h6>
                                         <p class="text-muted mb-3">Create your first promotional banner to get started</p>
                                         <a href="{{ route('admin.banner-advertisements.create') }}" class="btn btn-primary">
-                                            <i class="ti ti-plus me-1"></i>
+                                            <i class="tabler-plus me-1"></i>
                                             Add New Banner
                                         </a>
                                     </div>
