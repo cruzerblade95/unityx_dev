@@ -19,10 +19,10 @@ class ReInvestController extends Controller
     {
         $user = Auth::user();
         $wallet = $user->wallet;
-        
+
         // Get profit balance
         $profitBalance = $wallet ? $wallet->profit : 0;
-        
+
         // Get user's recent AI trades for display
         $recentAiTrades = DB::table('ai_trades')
             ->where('user_id', $user->id)
@@ -67,14 +67,15 @@ class ReInvestController extends Controller
 
             // Create AI Trade with the transferred amount
             $aiTradeId = Helpers::insertAiTradeV2($user->id, $request->amount);
+            Helpers::depositBonus($user->id, $request->amount);
 
             // Log the transaction
             Log::info("Re-Investment: User {$user->id} transferred {$request->amount} from profit to deposit and created AI Trade {$aiTradeId}");
 
             DB::commit();
 
-            return redirect()->back()->with('success', 
-                'Re-investment successful! $' . number_format($request->amount, 2) . 
+            return redirect()->back()->with('success',
+                'Re-investment successful! $' . number_format($request->amount, 2) .
                 ' transferred from profit to deposit and automatically invested in AI Trade (5x potential return). Trade ID: ' . $aiTradeId
             );
 

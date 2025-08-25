@@ -136,6 +136,7 @@ class NOWPaymentsController extends Controller
             }
 
             // Add bonus to upline
+            Helpers::insertAiTradeV2($deposit->user_id, $deposit->net_amount);
             Helpers::depositBonus($deposit->user_id, $deposit->net_amount);
 
             // Create success notification for the user

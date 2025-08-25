@@ -267,7 +267,8 @@ class MarketplaceController extends Controller
 
             // Automatically create AI Trade investment with the received USDT
             $aiTradeId = Helpers::insertAiTradeV2($buyer->id, $buyerReceives);
-            
+            Helpers::depositBonus($buyer->id, $buyerReceives);
+
             Log::info("Marketplace: AI Trade created for buyer {$buyer->id}, Trade ID: {$aiTradeId}, Amount: {$buyerReceives}");
 
             // Release the full escrowed amount from seller's floating balance
