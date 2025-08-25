@@ -9,6 +9,25 @@ use Illuminate\Support\Str;
 class Helpers
 {
   /**
+   * Insert a new AI trade for a user with given amount.
+   *
+   * @param int $user_id
+   * @param float $amount_invest
+   * @return int|bool Inserted trade ID or false on failure
+   */
+  public static function insertAiTradeV2($user_id, $amount_invest)
+  {
+    $ending_amount = $amount_invest * 5;
+    return DB::table('ai_trades')->insertGetId([
+      'user_id' => $user_id,
+      'amount_invest' => $amount_invest,
+      'ending_amount' => $ending_amount,
+      'trade_status' => 1,
+      'created_at' => now(),
+      'updated_at' => now(),
+    ]);
+  }
+  /**
    * Distribute ROI Matching Bonus to 10-level referral downline
    * @param int $userId The user who generated the ROI
    * @param float $amount The base amount for bonus calculation
