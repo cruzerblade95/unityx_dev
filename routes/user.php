@@ -37,13 +37,13 @@ Route::prefix('user')->middleware('web')->group(function () {
         ->name('user.password.reset.telegram');
 
     Route::get('/password/reset/{token}', [UserForgotPasswordController::class, 'showEmailResetForm'])
-        ->name('password.reset');
+        ->name('user.password.reset.email');
 
     Route::post('/password/reset', [UserForgotPasswordController::class, 'resetPassword'])
         ->name('user.password.reset.submit');
 
     Route::post('/password/update', [UserForgotPasswordController::class, 'resetPassword'])
-        ->name('password.update');
+        ->name('user.password.update');
 
     // Guest routes
     Route::middleware('guest')->group(function () {

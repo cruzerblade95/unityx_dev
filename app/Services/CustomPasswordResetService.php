@@ -52,7 +52,7 @@ class CustomPasswordResetService
 
             // Create reset URLs
             $emailResetUrl = URL::temporarySignedRoute(
-                'password.reset',
+                'user.password.reset.email',
                 now()->addHours(1),
                 ['token' => $token, 'email' => $user->email]
             );
