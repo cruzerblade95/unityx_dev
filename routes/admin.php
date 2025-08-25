@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\KycApprovalController;
 use App\Http\Controllers\Admin\NOWPaymentsController;
 use App\Http\Controllers\Admin\WithdrawalManagementController;
 use App\Http\Controllers\Admin\MarketplaceController;
+use App\Http\Controllers\Admin\FixCronValueController;
 
 Route::prefix('admin')->middleware('web')->group(function () {
     // Guest routes
@@ -64,5 +65,9 @@ Route::prefix('admin')->middleware('web')->group(function () {
         Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('admin.marketplace.index');
         Route::get('/marketplace/{id}', [MarketplaceController::class, 'show'])->name('admin.marketplace.show');
         Route::post('/marketplace/{id}/reject', [MarketplaceController::class, 'reject'])->name('admin.marketplace.reject');
+
+        // Admin: Fix Cron Value
+        Route::get('fix-cron-value', [FixCronValueController::class, 'index'])->name('admin.fix_cron_value.index');
+        Route::post('fix-cron-value', [FixCronValueController::class, 'process'])->name('admin.fix_cron_value.process');
     });
 });
