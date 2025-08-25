@@ -366,7 +366,7 @@
         <!--/ Mini Marketplace -->
 
         <!-- Earning Reports -->
-        <div class="col-xxl-6 col-md-6">
+        {{-- <div class="col-xxl-6 col-md-6">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between">
                     <div class="card-title mb-0">
@@ -452,7 +452,7 @@
                     @include('components.coming-soon-overlay')
                 </div>
             </div>
-        </div>
+        </div> --}}
         <!--/ Earning Reports -->
 
         <!-- Popular Product -->
@@ -781,7 +781,7 @@
         <!--/ Sales by Countries tabs -->
 
         <!-- Transactions -->
-        <div class="col-xxl-6 col-md-6">
+        {{-- <div class="col-xxl-6 col-md-6">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between">
                     <div class="card-title m-0 me-2">
@@ -906,7 +906,7 @@
                     @include('components.coming-soon-overlay')
                 </div>
             </div>
-        </div>
+        </div> --}}
         <!--/ Transactions -->
 
         <!-- Invoice table -->
