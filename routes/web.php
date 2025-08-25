@@ -31,6 +31,14 @@ use App\Http\Controllers\apps\Calendar;
 use App\Http\Controllers\apps\Kanban;
 use App\Http\Controllers\NOWPaymentsWebhookController;
 
+// Account Recovery Routes (High Priority - Must be at top)
+Route::get('/account-recovery', [App\Http\Controllers\AccountRecoveryController::class, 'showEmailForm'])
+    ->name('account-recovery.email');
+Route::post('/account-recovery/validate-email', [App\Http\Controllers\AccountRecoveryController::class, 'validateEmail'])->name('account-recovery.validate-email');
+Route::get('/account-recovery/details', [App\Http\Controllers\AccountRecoveryController::class, 'showDetailsForm'])->name('account-recovery.details');
+Route::post('/account-recovery/submit', [App\Http\Controllers\AccountRecoveryController::class, 'submitRecovery'])->name('account-recovery.submit');
+Route::get('/account-recovery/success', [App\Http\Controllers\AccountRecoveryController::class, 'showSuccess'])->name('account-recovery.success');
+
 // NOWPayments webhook route (public access)
 Route::post('/api/nowpayments/webhook', [NOWPaymentsWebhookController::class, 'handle'])->name('nowpayments.webhook');
 use App\Http\Controllers\apps\EcommerceDashboard;

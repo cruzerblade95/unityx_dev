@@ -35,9 +35,7 @@ Route::prefix('admin')->middleware('web')->group(function () {
 
         // Wallet Management Routes
         Route::get('/wallets', [WalletManagementController::class, 'index'])->name('admin.wallets.index');
-        Route::get('/wallets/list', [WalletManagementController::class, 'list'])->name('admin.wallets.list');
-        Route::post('/wallets/{user}', [WalletManagementController::class, 'updateBalance'])->name('admin.wallets.update');
-        Route::post('/wallets/{user}/create', [WalletManagementController::class, 'createWallet'])->name('admin.wallets.create');
+        Route::post('/wallets/create', [WalletManagementController::class, 'createWallet'])->name('admin.wallets.create');
 
         // KYC Approval Routes
         Route::get('/kyc', [KycApprovalController::class, 'index'])->name('admin.kyc.index');
@@ -69,5 +67,11 @@ Route::prefix('admin')->middleware('web')->group(function () {
         // Admin: Fix Cron Value
         Route::get('fix-cron-value', [FixCronValueController::class, 'index'])->name('admin.fix_cron_value.index');
         Route::post('fix-cron-value', [FixCronValueController::class, 'process'])->name('admin.fix_cron_value.process');
+
+        // Recovery Accounts Management
+        Route::get('/recovery-accounts', [App\Http\Controllers\Admin\RecoveryAccountController::class, 'index'])->name('admin.recovery_accounts.index');
+        Route::get('/recovery-accounts/{id}', [App\Http\Controllers\Admin\RecoveryAccountController::class, 'show'])->name('admin.recovery_accounts.show');
+        Route::post('/recovery-accounts/{id}/approve', [App\Http\Controllers\Admin\RecoveryAccountController::class, 'approve'])->name('admin.recovery_accounts.approve');
+        Route::post('/recovery-accounts/{id}/reject', [App\Http\Controllers\Admin\RecoveryAccountController::class, 'reject'])->name('admin.recovery_accounts.reject');
     });
 });

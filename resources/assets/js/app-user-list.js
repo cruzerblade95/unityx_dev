@@ -24,12 +24,12 @@ document.addEventListener('DOMContentLoaded', function () {
         data: 'firstname',
         render: function (data, type, row) {
           // Get the profile photo URL or use default avatar
-          const photoUrl = row.profile_photo_path 
+          const photoUrl = row.profile_photo_path
             ? `/storage/${row.profile_photo_path}`
             : '/assets/img/avatars/1.png';
-            
+
           const fullName = row.firstname + ' ' + row.lastname;
-          
+
           // Debug logging
           console.log('Row data:', {
             firstname: row.firstname,
@@ -172,6 +172,43 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
+  // Initialize Filters
+  initializeFilters();
+
+  function initializeFilters() {
+    // Role filter
+    const roleFilter = `
+      <select class="form-select text-capitalize" id="UserRole">
+        <option value="">Select Role</option>
+        <option value="admin">Admin</option>
+        <option value="user">User</option>
+      </select>
+    `;
+    $('.user_role').html(roleFilter);
+
+    // Status filter
+    const statusFilter = `
+      <select class="form-select text-capitalize" id="UserStatus">
+        <option value="">Select Status</option>
+        <option value="online">Online</option>
+        <option value="offline">Offline</option>
+      </select>
+    `;
+    $('.user_status').html(statusFilter);
+
+    // Role filter event
+    $('#UserRole').on('change', function() {
+      const role = $(this).val();
+      userTable.column(3).search(role).draw();
+    });
+
+    // Status filter event
+    $('#UserStatus').on('change', function() {
+      const status = $(this).val();
+      userTable.column(4).search(status).draw();
+    });
+  }
+
   // Edit Record
   $(document).on('click', '.edit-record', function() {
     const id = $(this).data('id');
@@ -206,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (data.success) {
           userTable.ajax.reload();
           $('#offcanvasEditUser').offcanvas('hide');
-          
+
           Swal.fire({
             icon: 'success',
             title: 'Updated!',
@@ -235,7 +272,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Delete Record
   $(document).on('click', '.delete-record', function() {
     const id = $(this).data('id');
-    
+
     Swal.fire({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
@@ -291,18 +328,18 @@ document.addEventListener('DOMContentLoaded', function () {
   $(document).on('submit', '#addNewUserForm', function (e) {
     e.preventDefault();
     console.log('Form submitted');
-    
+
     const form = $(this);
     const url = form.data('action');
     const formData = form.serialize();
     const token = $('meta[name="csrf-token"]').attr('content');
-    
+
     console.log('Submission details:', {
       url: url,
       formData: formData,
       hasToken: !!token
     });
-    
+
     $.ajax({
       url: url,
       type: 'POST',
@@ -315,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function () {
           userTable.ajax.reload();
           $('#offcanvasAddUser').offcanvas('hide');
           form[0].reset();
-          
+
           Swal.fire({
             icon: 'success',
             title: 'Added!',
@@ -330,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function () {
       error: function (error) {
         console.error('Full error details:', error);
         let errorMessage = 'Could not add the user.';
-        
+
         if (error.responseJSON) {
           console.log('Server response:', error.responseJSON);
           if (error.responseJSON.errors) {
@@ -348,7 +385,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
           }
         }
-        
+
         Swal.fire({
           icon: 'error',
           title: 'Error!',
