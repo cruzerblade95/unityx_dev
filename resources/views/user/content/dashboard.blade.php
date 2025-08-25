@@ -155,7 +155,7 @@
         <div class="col-xl-8 col-md-12">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between">
-                    <h5 class="card-title mb-0">My Wallets</h5>
+                    <h5 class="card-title mb-0">My Wallets (USD)</h5>
                     <small class="text-body-secondary">
                         @if (isset($wallet) && $wallet && $wallet->updated_at)
                             Updated {{ $wallet->updated_at->diffForHumans() }}
