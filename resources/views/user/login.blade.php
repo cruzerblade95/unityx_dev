@@ -108,6 +108,13 @@
                         </a>
                     </p>
 
+                    <p class="text-center mt-3">
+                        <span>Lost access to your account?</span>
+                        <a href="{{ route('account-recovery.email') }}">
+                            <span>Account Recovery</span>
+                        </a>
+                    </p>
+
                     {{-- <div class="divider my-6">
           <div class="divider-text">or</div>
         </div> --}}

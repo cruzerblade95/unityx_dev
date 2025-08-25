@@ -45,8 +45,14 @@
     {
       "url": "admin/fix-cron-value",
       "name": "Fix Cron Value",
-      "icon": "menu-icon icon-base ti tabler-shopping-cart",
+      "icon": "menu-icon icon-base ti tabler-refresh",
       "slug": "admin.fix_cron_value.index"
+    },
+    {
+      "url": "admin/recovery-accounts",
+      "name": "Recovery Accounts",
+      "icon": "menu-icon icon-base ti tabler-shield-check",
+      "slug": "admin.recovery_accounts.index"
     }
   ]
 }

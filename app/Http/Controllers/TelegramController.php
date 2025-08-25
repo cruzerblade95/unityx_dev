@@ -196,7 +196,8 @@ class TelegramController extends Controller
     public function setupWebhook(Request $request)
     {
         $botToken = env('TELEGRAM_BOT_TOKEN');
-        $webhookUrl = url('/api/telegram/webhook');
+        // Use the provided webhook URL or construct from current request
+        $webhookUrl = $request->input('webhook_url') ?: $request->getSchemeAndHttpHost() . '/api/telegram/webhook';
 
         if (!$botToken) {
             return response()->json([
@@ -227,36 +228,6 @@ class TelegramController extends Controller
                 'success' => false,
                 'message' => 'Error setting webhook: ' . $e->getMessage(),
                 'webhook_url' => $webhookUrl
-            ]);
-        }
-    }
-
-    public function testBot(Request $request)
-    {
-        $token = env('TELEGRAM_BOT_TOKEN');
-        
-        if (!$token) {
-            return response()->json([
-                'success' => false,
-                'message' => 'TELEGRAM_BOT_TOKEN not found in .env file'
-            ]);
-        }
-
-        try {
-            $client = new \GuzzleHttp\Client();
-            $response = $client->get("https://api.telegram.org/bot{$token}/getMe");
-            $result = json_decode($response->getBody()->getContents(), true);
-
-            return response()->json([
-                'success' => $result['ok'] ?? false,
-                'bot_info' => $result['result'] ?? null,
-                'message' => $result['ok'] ? 'Bot is working!' : 'Bot error: ' . ($result['description'] ?? 'unknown')
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error testing bot: ' . $e->getMessage()
             ]);
         }
     }

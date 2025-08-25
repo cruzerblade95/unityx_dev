@@ -107,39 +107,80 @@ $configData = Helper::appClasses();
 
         <form id="formAuthentication" class="mb-6" action="{{ route('user.register.submit') }}" method="POST">
           @csrf
+          
+          {{-- Display general errors --}}
+          @if ($errors->any())
+            <div class="alert alert-danger alert-dismissible" role="alert">
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                  <li>{{ $error }}</li>
+                @endforeach
+              </ul>
+            </div>
+          @endif
+          
           <div class="row">
             <div class="col-6 mb-6 form-control-validation">
               <label for="firstname" class="form-label">First Name</label>
-              <input type="text" class="form-control" id="firstname" name="firstname" required autofocus />
+              <input type="text" class="form-control @error('firstname') is-invalid @enderror" 
+                     id="firstname" name="firstname" value="{{ old('firstname') }}" required autofocus />
+              @error('firstname')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
             </div>
             <div class="col-6 mb-6 form-control-validation">
               <label for="lastname" class="form-label">Last Name</label>
-              <input type="text" class="form-control" id="lastname" name="lastname" required />
+              <input type="text" class="form-control @error('lastname') is-invalid @enderror" 
+                     id="lastname" name="lastname" value="{{ old('lastname') }}" required />
+              @error('lastname')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
             </div>
             <div class="col-6 mb-6 form-control-validation">
               <label for="username" class="form-label">Username</label>
-              <input type="text" class="form-control" id="username" name="username" required />
+              <input type="text" class="form-control @error('username') is-invalid @enderror" 
+                     id="username" name="username" value="{{ old('username') }}" required />
+              @error('username')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
             </div>
             <div class="col-6 mb-6 form-control-validation">
               <label for="referral_code" class="form-label">Referral Code</label>
-              <input type="text" class="form-control" id="referral_code" name="referral_code" placeholder="Eg. ASDWFCS" required/>
+              <input type="text" class="form-control @error('referral_code') is-invalid @enderror" 
+                     id="referral_code" name="referral_code" value="{{ old('referral_code') }}" 
+                     placeholder="Eg. ASDWFCS" required/>
+              @error('referral_code')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
             </div>
             <div class="col-12 mb-6 form-control-validation">
               <label for="email" class="form-label">Email</label>
-              <input type="text" class="form-control" id="email" name="email" placeholder="Enter your email" />
+              <input type="text" class="form-control @error('email') is-invalid @enderror" 
+                     id="email" name="email" value="{{ old('email') }}" placeholder="Enter your email" />
+              @error('email')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
             </div>
             <div class="col-6 mb-6 form-password-toggle form-control-validation">
               <label class="form-label" for="password">Password</label>
               <div class="input-group input-group-merge">
-                <input type="password" id="password" class="form-control" name="password"
-                placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                aria-describedby="password" />
+                <input type="password" id="password" class="form-control @error('password') is-invalid @enderror" 
+                       name="password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                       aria-describedby="password" />
                 <span class="input-group-text cursor-pointer"><i class="icon-base ti tabler-eye-off"></i></span>
               </div>
+              @error('password')
+                <div class="invalid-feedback d-block">{{ $message }}</div>
+              @enderror
             </div>
             <div class="col-6 mb-6 form-control-validation">
               <label for="password_confirmation" class="form-label">Confirm Password</label>
-              <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required />
+              <input type="password" class="form-control @error('password_confirmation') is-invalid @enderror" 
+                     id="password_confirmation" name="password_confirmation" required />
+              @error('password_confirmation')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
             </div>
           </div>
           <div class="mb-6 mt-8">

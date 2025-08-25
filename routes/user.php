@@ -14,6 +14,7 @@ use App\Http\Controllers\User\MarketplaceController;
 use App\Http\Controllers\User\ReferralBonusHistoryController;
 use App\Http\Controllers\User\RoiMatchingBonusHistoryController;
 use App\Http\Controllers\User\PaymentInfoController;
+use App\Http\Controllers\User\ReInvestController;
 use App\Http\Controllers\KycController;
 use App\Http\Controllers\User\AiTradeActivateController;
 // Route::middleware(['web'])->group(function () {
@@ -36,13 +37,13 @@ Route::prefix('user')->middleware('web')->group(function () {
         ->name('user.password.reset.telegram');
 
     Route::get('/password/reset/{token}', [UserForgotPasswordController::class, 'showEmailResetForm'])
-        ->name('password.reset');
+        ->name('user.password.reset.email');
 
     Route::post('/password/reset', [UserForgotPasswordController::class, 'resetPassword'])
         ->name('user.password.reset.submit');
 
     Route::post('/password/update', [UserForgotPasswordController::class, 'resetPassword'])
-        ->name('password.update');
+        ->name('user.password.update');
 
     // Guest routes
     Route::middleware('guest')->group(function () {
@@ -80,6 +81,10 @@ Route::prefix('user')->middleware('web')->group(function () {
     // Payment Information
     Route::get('payment-info', [PaymentInfoController::class, 'index'])->name('user.payment-info.index');
     Route::post('payment-info', [PaymentInfoController::class, 'store'])->name('user.payment-info.store');
+
+    // Re-Investment
+    Route::get('re-invest', [ReInvestController::class, 'index'])->name('user.re-invest.index')->middleware('require.payment.info');
+    Route::post('re-invest', [ReInvestController::class, 'store'])->name('user.re-invest.store')->middleware('require.payment.info');
 
     // Deposit & Withdrawal
     Route::get('deposit', [DepositController::class, 'index'])->name('user.deposit.index');
@@ -121,5 +126,6 @@ Route::prefix('user')->middleware('web')->group(function () {
     Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('user.notifications.read');
     Route::delete('notifications/{id}', [NotificationController::class, 'destroy'])->name('user.notifications.destroy');
     Route::post('notifications/test', [NotificationController::class, 'testNotification'])->name('user.notifications.test');
+    Route::get('notifications/test', [NotificationController::class, 'testNotification'])->name('user.notifications.test.get');
     });
 });

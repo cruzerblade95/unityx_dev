@@ -97,6 +97,7 @@ export default defineConfig({
         'resources/assets/js/pages-account-settings-billing.js',
         'resources/assets/js/pages-account-settings-security.js',
         'resources/assets/js/pages-auth.js',
+        'resources/assets/js/pages-auth-reset.js',
         'resources/assets/js/pages-pricing.js',
         'resources/assets/js/tables-datatables-advanced.js',
         'resources/assets/js/tables-datatables-basic.js',

@@ -17,7 +17,7 @@ class NotificationController extends Controller
      */
     public function getNotifications(Request $request)
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         // Clear any cached notifications first
         Cache::forget("user_notifications_{$user->id}");
@@ -57,7 +57,7 @@ class NotificationController extends Controller
      */
     public function markAsRead($id)
     {
-        $notification = Notification::where('user_id', auth()->id())
+        $notification = Notification::where('user_id', Auth::id())
             ->where('id', $id)
             ->firstOrFail();
 
@@ -71,7 +71,7 @@ class NotificationController extends Controller
      */
     public function markAllAsRead()
     {
-        Notification::where('user_id', auth()->id())
+        Notification::where('user_id', Auth::id())
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
 
@@ -83,7 +83,7 @@ class NotificationController extends Controller
      */
     public function destroy($id)
     {
-        $notification = Notification::where('user_id', auth()->id())
+        $notification = Notification::where('user_id', Auth::id())
             ->where('id', $id)
             ->firstOrFail();
 
@@ -98,7 +98,7 @@ class NotificationController extends Controller
     public function clearAll()
     {
         try {
-            $user = auth()->user();
+            $user = Auth::user();
 
             if (!$user) {
                 return response()->json(['success' => false, 'message' => 'User not authenticated'], 401);
@@ -146,7 +146,9 @@ class NotificationController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $notifications = $user->notifications()->paginate(20);
+        $notifications = Notification::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
 
         return view('user.notifications.index', compact('notifications'));
     }
@@ -154,21 +156,93 @@ class NotificationController extends Controller
     /**
      * Debug method to test notification creation
      */
-    public function testNotification()
+    public function testNotification(Request $request)
     {
-        $user = auth()->user();
+        $user = Auth::user();
+
+        // Get the notification type from the request, default to 'test'
+        $type = $request->get('type', 'test');
+        $title = $request->get('title', 'Test Notification');
+        $message = $request->get('message', 'This is a test notification created at ' . now());
+
+        // Predefined notification types for easy testing
+        $predefinedTypes = [
+            'deposit' => [
+                'title' => '💰 Deposit Successful',
+                'message' => 'Your deposit of $100.00 USDT has been processed successfully!'
+            ],
+            'withdrawal' => [
+                'title' => '💸 Withdrawal Approved',
+                'message' => 'Your withdrawal request of $50.00 has been approved and processed.'
+            ],
+            'trade' => [
+                'title' => '📈 AI Trade Completed',
+                'message' => 'Your AI trade has been completed with a profit of $25.50!'
+            ],
+            'marketplace' => [
+                'title' => '🛒 Marketplace Order',
+                'message' => 'New order received in marketplace for 100 USDT at $1.02 per USDT.'
+            ],
+            'kyc' => [
+                'title' => '✅ KYC Verification',
+                'message' => 'Your KYC verification has been approved. You can now access all features!'
+            ],
+            'telegram' => [
+                'title' => '📱 Telegram Connected',
+                'message' => 'Your Telegram account has been successfully linked to your profile.'
+            ]
+        ];
+
+        // Use predefined type if available
+        if (isset($predefinedTypes[$type])) {
+            $title = $predefinedTypes[$type]['title'];
+            $message = $predefinedTypes[$type]['message'];
+        }
 
         $notification = Notification::createNotification(
             $user->id,
-            'test',
-            'Test Notification',
-            'This is a test notification created at ' . now()
+            $type,
+            $title,
+            $message
         );
 
+        // If it's a web request, return JSON for AJAX calls or redirect for direct URL access
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Test notification created',
+                'notification_id' => $notification->id,
+                'type' => $type,
+                'title' => $title
+            ]);
+        }
+
+        // For direct URL access, return a simple page
         return response()->json([
             'success' => true,
-            'message' => 'Test notification created',
-            'notification_id' => $notification->id
-        ]);
+            'message' => 'Test notification created successfully!',
+            'notification' => [
+                'id' => $notification->id,
+                'type' => $type,
+                'title' => $title,
+                'message' => $message,
+                'created_at' => $notification->created_at
+            ],
+            'available_types' => array_keys($predefinedTypes),
+            'usage' => [
+                'url' => url('/user/notifications/test'),
+                'parameters' => [
+                    'type' => 'Optional: ' . implode(', ', array_keys($predefinedTypes)),
+                    'title' => 'Optional: Custom title',
+                    'message' => 'Optional: Custom message'
+                ],
+                'examples' => [
+                    url('/user/notifications/test?type=deposit'),
+                    url('/user/notifications/test?type=withdrawal'),
+                    url('/user/notifications/test?type=trade'),
+                    url('/user/notifications/test?title=Custom Title&message=Custom Message')
+                ]
+            ]
+        ], 200, [], JSON_PRETTY_PRINT);
     }
 }

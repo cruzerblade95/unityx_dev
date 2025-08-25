@@ -13,7 +13,8 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->call(function () {
-            dispatch(new \App\Jobs\TestInvestmentCron());
+            $tradingCron = new \App\TradingCron();
+            $tradingCron();
         })->everyMinute();
     }
 

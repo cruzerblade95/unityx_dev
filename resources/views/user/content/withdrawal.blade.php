@@ -267,6 +267,7 @@
         usdc_bep20_address: '{{ $user->usdc_bep20_address ?? '' }}',
         fdusd_bep20_address: '{{ $user->fdusd_bep20_address ?? '' }}',
         etc_black_card_number: '{{ $user->etc_black_card_number ?? '' }}',
+        account_number: '{{ $user->account_number ?? '' }}',
         cardholder_name: '{{ $user->cardholder_name ?? '' }}'
     };
 
@@ -407,14 +408,15 @@
                 break;
                 
             case 'etc_black':
-                if (paymentInfo.etc_black_card_number && paymentInfo.cardholder_name) {
+                if (paymentInfo.etc_black_card_number && paymentInfo.account_number && paymentInfo.cardholder_name) {
                     infoHTML = `
                         <div><strong>ETC Black Card:</strong> ****${paymentInfo.etc_black_card_number.slice(-4)}</div>
+                        <div><strong>Account Number:</strong> ****${paymentInfo.account_number.slice(-4)}</div>
                         <div><strong>Cardholder:</strong> ${paymentInfo.cardholder_name}</div>
                     `;
                     hasRequiredInfo = true;
                 } else {
-                    infoHTML = '<div class="text-danger">Please complete your ETC Black card information in Payment Information section.</div>';
+                    infoHTML = '<div class="text-danger">Please complete your ETC Black card information and account number in Payment Information section.</div>';
                 }
                 break;
                 

@@ -211,7 +211,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="current-info-display">
-                                        <strong>Cardholder Name:</strong><br>
+                                        <strong>Account Holder Name:</strong><br>
                                         <span class="text-muted">{{ auth()->user()->cardholder_name }}</span>
                                     </div>
                                 </div>
@@ -234,6 +234,10 @@
                             <div class="current-info-display">
                                 <strong>ETC Black Card:</strong><br>
                                 <span class="text-muted">**** **** **** {{ substr(auth()->user()->etc_black_card_number, -4) }}</span>
+                            </div>
+                            <div class="current-info-display">
+                                <strong>Account Number:</strong><br>
+                                <span class="text-muted">{{ auth()->user()->account_number ? '****' . substr(auth()->user()->account_number, -4) : 'Not set' }}</span>
                             </div>
                         </div>
                     </div>
@@ -289,7 +293,7 @@
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="cardholder_name" class="form-label">
-                                            Cardholder's Name <span class="text-danger">*</span>
+                                            Account Holder Name <span class="text-danger">*</span>
                                         </label>
                                         <input type="text" class="form-control @error('cardholder_name') is-invalid @enderror" 
                                                id="cardholder_name" name="cardholder_name" 
@@ -368,19 +372,39 @@
                                     <i class="fas fa-credit-card me-2"></i>
                                     ETC Black Card Information
                                 </h6>
-                                <div class="mb-3">
-                                    <label for="etc_black_card_number" class="form-label">
-                                        <i class="fas fa-credit-card me-1"></i>
-                                        ETC Black Card Number <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="text" class="form-control @error('etc_black_card_number') is-invalid @enderror" 
-                                           id="etc_black_card_number" name="etc_black_card_number" 
-                                           value="{{ old('etc_black_card_number', auth()->user()->etc_black_card_number) }}" 
-                                           required maxlength="19" placeholder="1234 5678 9012 3456">
-                                    @error('etc_black_card_number')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                    <div class="form-text">Your ETC Black Card number</div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="etc_black_card_number" class="form-label">
+                                                <i class="fas fa-credit-card me-1"></i>
+                                                ETC Black Card Number <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="text" class="form-control @error('etc_black_card_number') is-invalid @enderror" 
+                                                   id="etc_black_card_number" name="etc_black_card_number" 
+                                                   value="{{ old('etc_black_card_number', auth()->user()->etc_black_card_number) }}" 
+                                                   required maxlength="19" placeholder="1234 5678 9012 3456">
+                                            @error('etc_black_card_number')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <div class="form-text">Your ETC Black Card number</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="account_number" class="form-label">
+                                                <i class="fas fa-university me-1"></i>
+                                                Account Number <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="text" class="form-control @error('account_number') is-invalid @enderror" 
+                                                   id="account_number" name="account_number" 
+                                                   value="{{ old('account_number', auth()->user()->account_number) }}" 
+                                                   required maxlength="20" placeholder="1234567890123456">
+                                            @error('account_number')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <div class="form-text">Your bank account number</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
