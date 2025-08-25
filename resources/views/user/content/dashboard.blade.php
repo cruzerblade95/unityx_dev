@@ -25,6 +25,100 @@
             transform: translateY(-2px);
             box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
         }
+
+        /* Dashboard Banner Carousel Fix - Prevent button overlap */
+        #advertisementCarousel {
+            position: relative;
+        }
+
+        /* Ensure carousel controls have higher z-index than banner content */
+        #advertisementCarousel .carousel-control-prev,
+        #advertisementCarousel .carousel-control-next {
+            z-index: 10;
+            width: 50px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 50%;
+            margin: auto 10px;
+            height: 50px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        #advertisementCarousel .carousel-control-prev:hover,
+        #advertisementCarousel .carousel-control-next:hover {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Adjust banner content area to avoid overlap with navigation buttons */
+        #advertisementCarousel .carousel-item .container-fluid {
+            margin-left: 60px;
+            margin-right: 60px;
+        }
+
+        /* On smaller screens, adjust margin and hide navigation arrows to prevent overlap */
+        @media (max-width: 768px) {
+            #advertisementCarousel .carousel-item .container-fluid {
+                margin-left: 20px;
+                margin-right: 20px;
+            }
+
+            #advertisementCarousel .carousel-control-prev,
+            #advertisementCarousel .carousel-control-next {
+                width: 40px;
+                height: 40px;
+                margin: auto 5px;
+            }
+        }
+
+        /* Extra small screens - hide navigation arrows to prevent overlap */
+        @media (max-width: 576px) {
+            #advertisementCarousel .carousel-control-prev,
+            #advertisementCarousel .carousel-control-next {
+                display: none;
+            }
+
+            #advertisementCarousel .carousel-item .container-fluid {
+                margin-left: 15px;
+                margin-right: 15px;
+            }
+        }
+
+        /* Ensure banner buttons don't extend into navigation area */
+        #advertisementCarousel .carousel-item .btn {
+            position: relative;
+            z-index: 5;
+            max-width: calc(100% - 120px);
+            word-wrap: break-word;
+        }
+
+        @media (max-width: 768px) {
+            #advertisementCarousel .carousel-item .btn {
+                max-width: calc(100% - 80px);
+            }
+        }
+
+        @media (max-width: 576px) {
+            #advertisementCarousel .carousel-item .btn {
+                max-width: 100%;
+            }
+        }
+
+        /* Ensure navigation controls don't interfere with banner content clicks */
+        #advertisementCarousel .carousel-control-prev {
+            left: 10px;
+        }
+
+        #advertisementCarousel .carousel-control-next {
+            right: 10px;
+        }
+
+        /* Add slight padding to prevent button overlap on medium screens */
+        @media (min-width: 769px) and (max-width: 1200px) {
+            #advertisementCarousel .carousel-item .container-fluid {
+                margin-left: 50px;
+                margin-right: 50px;
+            }
+        }
     </style>
 @endsection
 
@@ -78,6 +172,29 @@
                 el.textContent = estimate.toLocaleString(undefined, options);
             }
         });
+
+        // Banner Carousel Click Handler - Prevent overlap issues
+        document.addEventListener('DOMContentLoaded', function() {
+            const carousel = document.getElementById('advertisementCarousel');
+            if (carousel) {
+                // Prevent carousel controls from interfering with banner button clicks
+                const controlButtons = carousel.querySelectorAll('.carousel-control-prev, .carousel-control-next');
+                controlButtons.forEach(function(button) {
+                    button.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                    });
+                });
+
+                // Ensure banner buttons work properly
+                const bannerButtons = carousel.querySelectorAll('.carousel-item .btn');
+                bannerButtons.forEach(function(button) {
+                    button.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        // The link will work normally since we're not preventing default
+                    });
+                });
+            }
+        });
     </script>
 @endsection
 
@@ -107,9 +224,9 @@
                             @if($bannerAdvertisements->count() > 1)
                                 <div class="carousel-indicators">
                                     @foreach($bannerAdvertisements as $index => $banner)
-                                        <button type="button" data-bs-target="#advertisementCarousel" data-bs-slide-to="{{ $index }}" 
-                                                class="{{ $index === 0 ? 'active' : '' }}" 
-                                                aria-current="{{ $index === 0 ? 'true' : 'false' }}" 
+                                        <button type="button" data-bs-target="#advertisementCarousel" data-bs-slide-to="{{ $index }}"
+                                                class="{{ $index === 0 ? 'active' : '' }}"
+                                                aria-current="{{ $index === 0 ? 'true' : 'false' }}"
                                                 aria-label="Slide {{ $index + 1 }}"></button>
                                     @endforeach
                                 </div>
@@ -117,23 +234,23 @@
                             <div class="carousel-inner" style="border-radius: 0.375rem;">
                                 @foreach($bannerAdvertisements as $index => $banner)
                                     <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                                        <div class="position-relative" 
-                                             style="height: 200px; 
-                                                    background: {{ $banner->gradient_color ? 
-                                                        'linear-gradient(135deg, ' . $banner->background_color . ' 0%, ' . $banner->gradient_color . ' 100%)' : 
-                                                        $banner->background_color }}; 
+                                        <div class="position-relative"
+                                             style="height: 200px;
+                                                    background: {{ $banner->gradient_color ?
+                                                        'linear-gradient(135deg, ' . $banner->background_color . ' 0%, ' . $banner->gradient_color . ' 100%)' :
+                                                        $banner->background_color }};
                                                     overflow: hidden;
                                                     {{ $banner->image_path ? 'background-image: url(' . $banner->image_url . '); background-size: cover; background-position: center;' : '' }}"
                                              title="{{ $banner->description }}"
                                              data-bs-toggle="tooltip"
                                              data-bs-placement="top">
-                                            
+
                                             @if($banner->image_path)
                                                 <!-- Overlay for better text readability on images -->
-                                                <div class="position-absolute top-0 start-0 w-100 h-100" 
+                                                <div class="position-absolute top-0 start-0 w-100 h-100"
                                                      style="background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 100%);"></div>
                                             @endif
-                                            
+
                                             <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center">
                                                 <div class="container-fluid">
                                                     <div class="row align-items-center">
@@ -145,8 +262,8 @@
                                                                 {{ $banner->description }}
                                                             </p>
                                                             @if($banner->link_url && $banner->button_text)
-                                                                <a href="{{ $banner->link_url }}" 
-                                                                   target="_blank" 
+                                                                <a href="{{ $banner->link_url }}"
+                                                                   target="_blank"
                                                                    rel="noopener noreferrer"
                                                                    class="btn btn-light btn-sm">
                                                                     <i class="ti ti-external-link me-1"></i>

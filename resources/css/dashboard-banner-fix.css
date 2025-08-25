@@ -1,0 +1,77 @@
+/* Dashboard Banner Carousel Fix - Prevent button overlap */
+
+#advertisementCarousel {
+    position: relative;
+}
+
+/* Ensure carousel controls have higher z-index than banner content */
+#advertisementCarousel .carousel-control-prev,
+#advertisementCarousel .carousel-control-next {
+    z-index: 10;
+    width: 50px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    margin: auto 10px;
+    height: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#advertisementCarousel .carousel-control-prev:hover,
+#advertisementCarousel .carousel-control-next:hover {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Adjust banner content area to avoid overlap with navigation buttons */
+#advertisementCarousel .carousel-item .container-fluid {
+    margin-left: 60px;
+    margin-right: 60px;
+}
+
+/* On smaller screens, adjust margin and hide navigation arrows to prevent overlap */
+@media (max-width: 768px) {
+    #advertisementCarousel .carousel-item .container-fluid {
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+
+    #advertisementCarousel .carousel-control-prev,
+    #advertisementCarousel .carousel-control-next {
+        width: 40px;
+        height: 40px;
+        margin: auto 5px;
+    }
+}
+
+/* Extra small screens - hide navigation arrows to prevent overlap */
+@media (max-width: 576px) {
+    #advertisementCarousel .carousel-control-prev,
+    #advertisementCarousel .carousel-control-next {
+        display: none;
+    }
+
+    #advertisementCarousel .carousel-item .container-fluid {
+        margin-left: 15px;
+        margin-right: 15px;
+    }
+}
+
+/* Ensure banner buttons don't extend into navigation area */
+#advertisementCarousel .carousel-item .btn {
+    position: relative;
+    z-index: 5;
+    max-width: calc(100% - 120px);
+    word-wrap: break-word;
+}
+
+@media (max-width: 768px) {
+    #advertisementCarousel .carousel-item .btn {
+        max-width: calc(100% - 80px);
+    }
+}
+
+@media (max-width: 576px) {
+    #advertisementCarousel .carousel-item .btn {
+        max-width: 100%;
+    }
+}
