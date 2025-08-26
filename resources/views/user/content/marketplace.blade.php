@@ -815,7 +815,8 @@
                     <div class="modal-body">
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle me-2"></i>
-                            <strong>Minimum:</strong> 10 USDT | <strong>Available Cash:</strong>
+                            <strong>Minimum:</strong> 10 USDT | <strong>Maximum:</strong> 200 USDT | <strong>Available
+                                Cash:</strong>
                             ${{ number_format($cashBalance, 2) }}
                         </div>
 
@@ -823,7 +824,7 @@
                             <label for="amount" class="form-label">USDT Amount</label>
                             <div class="input-group">
                                 <input type="number" step="0.01" class="form-control" id="amount" name="amount"
-                                    required min="10" max="{{ $cashBalance }}">
+                                    required min="10" max="{{ min(200, $cashBalance) }}">
                                 <span class="input-group-text">USDT</span>
                             </div>
                         </div>

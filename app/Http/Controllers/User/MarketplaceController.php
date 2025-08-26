@@ -131,7 +131,7 @@ class MarketplaceController extends Controller
         }
 
         $request->validate([
-            'amount' => 'required|numeric|min:10',
+            'amount' => 'required|numeric|min:10|max:200',
             'price_per_usdt' => 'required|numeric|min:0.95|max:1.5',
             'description' => 'nullable|string|max:500',
         ]);

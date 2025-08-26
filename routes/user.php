@@ -97,6 +97,9 @@ Route::prefix('user')->middleware('web')->group(function () {
     Route::get('deposit/success', [DepositController::class, 'success'])->name('user.deposit.success');
     Route::get('deposit/cancel', [DepositController::class, 'cancel'])->name('user.deposit.cancel');
     Route::get('withdrawal', [WithdrawalController::class, 'index'])->name('user.withdrawal.index')->middleware('require.payment.info');
+    Route::get('withdrawal/crypto', [WithdrawalController::class, 'crypto'])->name('user.withdrawal.crypto')->middleware('require.payment.info');
+    Route::get('withdrawal/etc-black', [WithdrawalController::class, 'etcBlack'])->name('user.withdrawal.etc-black')->middleware('require.payment.info');
+    Route::get('withdrawal/gold', [WithdrawalController::class, 'gold'])->name('user.withdrawal.gold')->middleware('require.payment.info');
     Route::post('withdrawal', [WithdrawalController::class, 'store'])->name('user.withdrawal.store')->middleware('require.payment.info');
     Route::post('withdrawal/{withdrawalId}/select-branch', [WithdrawalController::class, 'selectBranch'])->name('user.withdrawal.select-branch')->middleware('require.payment.info');
 
@@ -129,5 +132,10 @@ Route::prefix('user')->middleware('web')->group(function () {
     Route::delete('notifications/{id}', [NotificationController::class, 'destroy'])->name('user.notifications.destroy');
     Route::post('notifications/test', [NotificationController::class, 'testNotification'])->name('user.notifications.test');
     Route::get('notifications/test', [NotificationController::class, 'testNotification'])->name('user.notifications.test.get');
+
+    // Group Sales
+    Route::get('group-sales', [App\Http\Controllers\User\GroupSalesController::class, 'index'])->name('user.group-sales.index');
+    Route::post('group-sales/claim-reward', [App\Http\Controllers\User\GroupSalesController::class, 'claimReward'])->name('user.group-sales.claim-reward');
+    Route::get('group-sales/history', [App\Http\Controllers\User\GroupSalesController::class, 'history'])->name('user.group-sales.history');
     });
 });

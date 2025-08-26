@@ -20,8 +20,9 @@ class ReInvestController extends Controller
         $user = Auth::user();
         $wallet = $user->wallet;
 
-        // Get profit balance
+        // Get profit and bonus balances
         $profitBalance = $wallet ? $wallet->profit : 0;
+        $bonusBalance = $wallet ? $wallet->bonus : 0;
 
         // Get user's recent AI trades for display
         $recentAiTrades = DB::table('ai_trades')
@@ -30,7 +31,7 @@ class ReInvestController extends Controller
             ->limit(5)
             ->get();
 
-        return view('user.content.re-invest', compact('user', 'profitBalance', 'recentAiTrades'));
+        return view('user.content.re-invest', compact('user', 'profitBalance', 'bonusBalance', 'recentAiTrades'));
     }
 
     /**
@@ -40,28 +41,38 @@ class ReInvestController extends Controller
     {
         $request->validate([
             'amount' => 'required|numeric|min:1',
+            'wallet_type' => 'required|in:profit,bonus',
             'confirm_transfer' => 'required|accepted',
         ], [
             'amount.required' => 'Please enter an amount to re-invest.',
             'amount.min' => 'Minimum re-investment amount is $1.00.',
+            'wallet_type.required' => 'Please select a wallet type.',
+            'wallet_type.in' => 'Invalid wallet type selected.',
             'confirm_transfer.accepted' => 'Please confirm that you want to proceed with the transfer.',
         ]);
 
         $user = Auth::user();
         $wallet = $user->wallet;
 
-        // Check if user has sufficient profit balance
-        if (!$wallet || $wallet->profit < $request->amount) {
+        // Get the selected wallet balance
+        $selectedBalance = $request->wallet_type === 'profit' ? $wallet->profit : $wallet->bonus;
+
+        // Check if user has sufficient balance in selected wallet
+        if (!$wallet || $selectedBalance < $request->amount) {
             return redirect()->back()->withErrors([
-                'amount' => 'Insufficient profit balance. Available: $' . number_format($wallet ? $wallet->profit : 0, 2)
+                'amount' => "Insufficient {$request->wallet_type} balance. Available: $" . number_format($selectedBalance, 2)
             ]);
         }
 
         try {
             DB::beginTransaction();
 
-            // Transfer from profit to deposit
-            $wallet->profit -= $request->amount;
+            // Transfer from selected wallet to deposit
+            if ($request->wallet_type === 'profit') {
+                $wallet->profit -= $request->amount;
+            } else {
+                $wallet->bonus -= $request->amount;
+            }
             $wallet->deposit += $request->amount;
             $wallet->save();
 
@@ -70,13 +81,13 @@ class ReInvestController extends Controller
             Helpers::depositBonus($user->id, $request->amount);
 
             // Log the transaction
-            Log::info("Re-Investment: User {$user->id} transferred {$request->amount} from profit to deposit and created AI Trade {$aiTradeId}");
+            Log::info("Re-Investment: User {$user->id} transferred {$request->amount} from {$request->wallet_type} to deposit and created AI Trade {$aiTradeId}");
 
             DB::commit();
 
             return redirect()->back()->with('success',
                 'Re-investment successful! $' . number_format($request->amount, 2) .
-                ' transferred from profit to deposit and automatically invested in AI Trade (5x potential return). Trade ID: ' . $aiTradeId
+                " transferred from {$request->wallet_type} to deposit and automatically invested in AI Trade (5x potential return). Trade ID: " . $aiTradeId
             );
 
         } catch (\Exception $e) {
