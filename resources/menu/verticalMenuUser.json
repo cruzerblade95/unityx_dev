@@ -88,6 +88,12 @@
       "slug": "user.downline"
     },
     {
+      "name": "Performance Bonus",
+      "icon": "menu-icon icon-base ti tabler-chart-line",
+      "url": "user/group-sales",
+      "slug": "user.group-sales.index"
+    },
+    {
       "url": "user/marketplace",
       "name": "Marketplace",
       "icon": "menu-icon icon-base ti tabler-shopping-cart",
