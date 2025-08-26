@@ -194,18 +194,33 @@ Route::get('/process-wallets-to-ai-trades', function () {
         if (!$wallet) continue;
         $amount_invest = $wallet->deposit;
         $ending_amount = $amount_invest * 5;
-        $aiTrade = DB::table('ai_trades')->where('user_id', $user->id)->first();
-        if ($aiTrade) {
-            // Update existing
-            DB::table('ai_trades')->where('user_id', $user->id)->update([
+
+        // Get all AI trades for this user, ordered by creation date
+        $aiTrades = DB::table('ai_trades')->where('user_id', $user->id)->orderBy('created_at', 'asc')->get();
+
+        if ($aiTrades->count() >= 2) {
+            // If there are 2 or more rows, only update the earliest (first) row
+            $earliestTrade = $aiTrades->first();
+            DB::table('ai_trades')->where('id', $earliestTrade->id)->update([
                 'amount_invest' => $amount_invest,
                 'ending_amount' => $ending_amount,
+                'trade_status' => 1,
                 'updated_at' => now(),
             ]);
-            $upserts[] = ['user_id' => $user->id, 'action' => 'updated'];
+            $upserts[] = ['user_id' => $user->id, 'action' => 'updated_earliest_only', 'trade_id' => $earliestTrade->id, 'total_trades' => $aiTrades->count()];
+        } else if ($aiTrades->count() == 1) {
+            // If there's exactly 1 row, update it
+            $aiTrade = $aiTrades->first();
+            DB::table('ai_trades')->where('id', $aiTrade->id)->update([
+                'amount_invest' => $amount_invest,
+                'ending_amount' => $ending_amount,
+                'trade_status' => 1,
+                'updated_at' => now(),
+            ]);
+            $upserts[] = ['user_id' => $user->id, 'action' => 'updated', 'trade_id' => $aiTrade->id];
         } else {
-            // Insert new
-            DB::table('ai_trades')->insert([
+            // If there are no rows, insert new
+            $tradeId = DB::table('ai_trades')->insertGetId([
                 'user_id' => $user->id,
                 'amount_invest' => $amount_invest,
                 'trade_status' => 1,
@@ -213,12 +228,12 @@ Route::get('/process-wallets-to-ai-trades', function () {
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-            $upserts[] = ['user_id' => $user->id, 'action' => 'inserted'];
+            $upserts[] = ['user_id' => $user->id, 'action' => 'inserted', 'trade_id' => $tradeId];
         }
     }
     return response()->json([
         'upserts' => $upserts,
-        'message' => 'Processed wallets. Updated or inserted ai_trades as needed.'
+        'message' => 'Processed wallets. Updated or inserted ai_trades as needed. For users with 2+ trades, only earliest trade was updated.'
     ]);
 });
 
