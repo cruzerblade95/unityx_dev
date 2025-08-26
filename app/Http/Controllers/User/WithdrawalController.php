@@ -14,13 +14,13 @@ class WithdrawalController extends Controller
     public function index()
     {
         $user = Auth::user();
-        
+
         // Check if payment information is completed
         if (!$user->payment_info_completed) {
             return redirect()->route('user.payment-info.index')
                 ->with('warning', 'Please complete your payment information to access withdrawal features.');
         }
-        
+
         $withdrawals = Withdrawal::where('user_id', Auth::id())->latest()->get();
 
         // Check for pending withdrawal
@@ -35,30 +35,111 @@ class WithdrawalController extends Controller
         // Get wallet profit balance (only profit balance is available for withdrawal)
         $walletBalance = $user->getWithdrawableBalance();
 
-        return view('user.content.withdrawal', compact('withdrawals', 'isKycApproved', 'walletBalance', 'user', 'pendingWithdrawal'));
+        return view('user.content.withdrawal.index', compact('withdrawals', 'isKycApproved', 'walletBalance', 'user', 'pendingWithdrawal'));
     }
 
-    public function store(WithdrawalRequest $request)
+    public function crypto()
     {
         $user = Auth::user();
-        
+
         // Check if payment information is completed
         if (!$user->payment_info_completed) {
             return redirect()->route('user.payment-info.index')
                 ->with('warning', 'Please complete your payment information to access withdrawal features.');
         }
-        
+
+        $withdrawals = Withdrawal::where('user_id', Auth::id())->latest()->get();
+
+        // Check for pending withdrawal
+        $pendingWithdrawal = Withdrawal::where('user_id', Auth::id())
+            ->where('status', 'pending')
+            ->first();
+
+        // Check KYC status
+        $kycStatus = $user->kycVerification ? $user->kycVerification->kyc_status : KycVerification::STATUS_NOT_SUBMITTED;
+        $isKycApproved = $kycStatus === KycVerification::STATUS_APPROVED;
+
+        // Get wallet profit balance (only profit balance is available for withdrawal)
+        $walletBalance = $user->getWithdrawableBalance();
+
+        return view('user.content.withdrawal.crypto', compact('withdrawals', 'isKycApproved', 'walletBalance', 'user', 'pendingWithdrawal'));
+    }
+
+    public function etcBlack()
+    {
+        $user = Auth::user();
+
+        // Check if payment information is completed
+        if (!$user->payment_info_completed) {
+            return redirect()->route('user.payment-info.index')
+                ->with('warning', 'Please complete your payment information to access withdrawal features.');
+        }
+
+        $withdrawals = Withdrawal::where('user_id', Auth::id())->latest()->get();
+
+        // Check for pending withdrawal
+        $pendingWithdrawal = Withdrawal::where('user_id', Auth::id())
+            ->where('status', 'pending')
+            ->first();
+
+        // Check KYC status
+        $kycStatus = $user->kycVerification ? $user->kycVerification->kyc_status : KycVerification::STATUS_NOT_SUBMITTED;
+        $isKycApproved = $kycStatus === KycVerification::STATUS_APPROVED;
+
+        // Get wallet profit balance (only profit balance is available for withdrawal)
+        $walletBalance = $user->getWithdrawableBalance();
+
+        return view('user.content.withdrawal.etc-black', compact('withdrawals', 'isKycApproved', 'walletBalance', 'user', 'pendingWithdrawal'));
+    }
+
+    public function gold()
+    {
+        $user = Auth::user();
+
+        // Check if payment information is completed
+        if (!$user->payment_info_completed) {
+            return redirect()->route('user.payment-info.index')
+                ->with('warning', 'Please complete your payment information to access withdrawal features.');
+        }
+
+        $withdrawals = Withdrawal::where('user_id', Auth::id())->latest()->get();
+
+        // Check for pending withdrawal
+        $pendingWithdrawal = Withdrawal::where('user_id', Auth::id())
+            ->where('status', 'pending')
+            ->first();
+
+        // Check KYC status
+        $kycStatus = $user->kycVerification ? $user->kycVerification->kyc_status : KycVerification::STATUS_NOT_SUBMITTED;
+        $isKycApproved = $kycStatus === KycVerification::STATUS_APPROVED;
+
+        // Get wallet profit balance (only profit balance is available for withdrawal)
+        $walletBalance = $user->getWithdrawableBalance();
+
+        return view('user.content.withdrawal.gold', compact('withdrawals', 'isKycApproved', 'walletBalance', 'user', 'pendingWithdrawal'));
+    }
+
+    public function store(WithdrawalRequest $request)
+    {
+        $user = Auth::user();
+
+        // Check if payment information is completed
+        if (!$user->payment_info_completed) {
+            return redirect()->route('user.payment-info.index')
+                ->with('warning', 'Please complete your payment information to access withdrawal features.');
+        }
+
         // Check if user has any pending withdrawal requests
         $pendingWithdrawal = Withdrawal::where('user_id', $user->id)
             ->where('status', 'pending')
             ->first();
-            
+
         if ($pendingWithdrawal) {
             return redirect()->back()->withErrors([
                 'withdrawal_limit' => 'You already have a pending withdrawal request (#' . $pendingWithdrawal->id . '). Please wait for it to be processed before submitting a new request.'
             ]);
         }
-        
+
         $wallet = $user->wallet;
 
         // Check if user has sufficient withdrawable balance (profit - floating)
@@ -74,7 +155,7 @@ class WithdrawalController extends Controller
             'gold' => 7.0,
             default => 4.75
         };
-        
+
         $tax_amount = $request->amount * ($systemTaxPercent / 100);
         $net_amount = $request->amount - $tax_amount;
 
@@ -122,7 +203,7 @@ class WithdrawalController extends Controller
                     'currency' => $request->currency ?? '',
                     'wallet_address' => $request->wallet_address ?? '',
                 ];
-                
+
                 // Add available wallet addresses for reference
                 if ($user->usdt_bep20_address) {
                     $paymentDetails['usdt_bep20_address'] = $user->usdt_bep20_address;
@@ -133,9 +214,9 @@ class WithdrawalController extends Controller
                 if ($user->fdusd_bep20_address) {
                     $paymentDetails['fdusd_bep20_address'] = $user->fdusd_bep20_address;
                 }
-                
+
                 return $paymentDetails;
-                
+
             case 'etc_black':
                 return [
                     'type' => 'etc_black',
@@ -143,14 +224,14 @@ class WithdrawalController extends Controller
                     'account_number' => $user->account_number,
                     'cardholder_name' => $user->cardholder_name,
                 ];
-                
+
             case 'gold':
                 return [
                     'type' => 'gold',
                     'national_id' => $user->national_id,
                     'branch_name' => $request->branch_name ?? '',
                 ];
-                
+
             default:
                 return [];
         }
@@ -168,7 +249,7 @@ class WithdrawalController extends Controller
 
         $validBranches = [
             'SHAH ALAM',
-            'BANGI', 
+            'BANGI',
             'BANTING',
             'ALOR SETAR',
             'JELAWAT',

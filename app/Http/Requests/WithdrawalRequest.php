@@ -30,7 +30,7 @@ class WithdrawalRequest extends FormRequest
         // Determine limits based on withdrawal type
         $minAmount = 100;
         $maxAmount = $maxBalance;
-        
+
         switch($this->withdrawal_type) {
             case 'crypto':
                 $minAmount = 50;
@@ -60,10 +60,10 @@ class WithdrawalRequest extends FormRequest
 
         // Add conditional rules based on withdrawal type
         if ($this->withdrawal_type === 'crypto') {
-            $rules['currency'] = 'required|string|in:USDTBEP20,USDCBEP20,FDUSDBEP20';
+            $rules['currency'] = 'required|string|in:USDT,USDC,FDUSD';
             $rules['wallet_address'] = 'required|string|max:255';
         } elseif ($this->withdrawal_type === 'gold') {
-            $rules['branch_name'] = 'required|string|in:SHAH ALAM,BANGI,BANTING,ALOR SETAR,JELAWAT,KOTA TINGGI,BANDAR BARU UDA';
+            $rules['branch_name'] = 'nullable|string|in:SHAH ALAM,BANGI,BANTING,ALOR SETAR,JELAWAT,KOTA TINGGI,BANDAR BARU UDA';
         }
 
         return $rules;
@@ -82,7 +82,7 @@ class WithdrawalRequest extends FormRequest
         // Determine limits based on withdrawal type
         $minAmount = 100;
         $maxAmount = $maxBalance;
-        
+
         switch($this->withdrawal_type) {
             case 'crypto':
                 $minAmount = 50;

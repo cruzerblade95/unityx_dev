@@ -72,6 +72,7 @@
 
         /* Extra small screens - hide navigation arrows to prevent overlap */
         @media (max-width: 576px) {
+
             #advertisementCarousel .carousel-control-prev,
             #advertisementCarousel .carousel-control-next {
                 display: none;
@@ -132,7 +133,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize tooltips for banner descriptions
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
 
@@ -203,7 +204,7 @@
     <div class="row g-6">
         <!-- Advertisement Banner Carousel -->
         <div class="col-xl-12 mb-4">
-            @if(isset($bannerAdvertisements) && $bannerAdvertisements->count() > 0)
+            @if (isset($bannerAdvertisements) && $bannerAdvertisements->count() > 0)
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">
@@ -211,7 +212,9 @@
                             Promotions & Updates
                         </h5>
                         <div class="dropdown">
-                            <button class="btn btn-text-secondary rounded-pill text-body-secondary border-0 p-2 me-n1" type="button" id="bannerDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <button class="btn btn-text-secondary rounded-pill text-body-secondary border-0 p-2 me-n1"
+                                type="button" id="bannerDropdown" data-bs-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="false">
                                 <i class="ti tabler-dots-vertical"></i>
                             </button>
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="bannerDropdown">
@@ -221,59 +224,63 @@
                         </div>
                     </div>
                     <div class="card-body p-0">
-                        <div id="advertisementCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
-                            @if($bannerAdvertisements->count() > 1)
+                        <div id="advertisementCarousel" class="carousel slide" data-bs-ride="carousel"
+                            data-bs-interval="5000">
+                            @if ($bannerAdvertisements->count() > 1)
                                 <div class="carousel-indicators">
-                                    @foreach($bannerAdvertisements as $index => $banner)
-                                        <button type="button" data-bs-target="#advertisementCarousel" data-bs-slide-to="{{ $index }}"
-                                                class="{{ $index === 0 ? 'active' : '' }}"
-                                                aria-current="{{ $index === 0 ? 'true' : 'false' }}"
-                                                aria-label="Slide {{ $index + 1 }}"></button>
+                                    @foreach ($bannerAdvertisements as $index => $banner)
+                                        <button type="button" data-bs-target="#advertisementCarousel"
+                                            data-bs-slide-to="{{ $index }}"
+                                            class="{{ $index === 0 ? 'active' : '' }}"
+                                            aria-current="{{ $index === 0 ? 'true' : 'false' }}"
+                                            aria-label="Slide {{ $index + 1 }}"></button>
                                     @endforeach
                                 </div>
                             @endif
                             <div class="carousel-inner" style="border-radius: 0.375rem;">
-                                @foreach($bannerAdvertisements as $index => $banner)
+                                @foreach ($bannerAdvertisements as $index => $banner)
                                     <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
                                         <div class="position-relative"
-                                             style="height: 200px;
-                                                    background: {{ $banner->gradient_color ?
-                                                        'linear-gradient(135deg, ' . $banner->background_color . ' 0%, ' . $banner->gradient_color . ' 100%)' :
-                                                        $banner->background_color }};
+                                            style="height: 200px;
+                                                    background: {{ $banner->gradient_color
+                                                        ? 'linear-gradient(135deg, ' . $banner->background_color . ' 0%, ' . $banner->gradient_color . ' 100%)'
+                                                        : $banner->background_color }};
                                                     overflow: hidden;
                                                     {{ $banner->image_path ? 'background-image: url(' . $banner->image_url . '); background-size: cover; background-position: center;' : '' }}"
-                                             title="{{ $banner->description }}"
-                                             data-bs-toggle="tooltip"
-                                             data-bs-placement="top">
+                                            title="{{ $banner->description }}" data-bs-toggle="tooltip"
+                                            data-bs-placement="top">
 
-                                            @if($banner->image_path)
+                                            @if ($banner->image_path)
                                                 <!-- Overlay for better text readability on images -->
                                                 <div class="position-absolute top-0 start-0 w-100 h-100"
-                                                     style="background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 100%);"></div>
+                                                    style="background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 100%);">
+                                                </div>
                                             @endif
 
-                                            <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center">
+                                            <div
+                                                class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center">
                                                 <div class="container-fluid">
                                                     <div class="row align-items-center">
                                                         <div class="col-md-8">
-                                                            <h3 class="fw-bold mb-2" style="color: {{ $banner->text_color ?? '#ffffff' }};">
+                                                            <h3 class="fw-bold mb-2"
+                                                                style="color: {{ $banner->text_color ?? '#ffffff' }};">
                                                                 {{ $banner->title }}
                                                             </h3>
-                                                            <p class="mb-3" style="color: {{ $banner->text_color ?? '#ffffff' }}; opacity: 0.8;">
+                                                            <p class="mb-3"
+                                                                style="color: {{ $banner->text_color ?? '#ffffff' }}; opacity: 0.8;">
                                                                 {{ $banner->description }}
                                                             </p>
-                                                            @if($banner->link_url && $banner->button_text)
-                                                                <a href="{{ $banner->link_url }}"
-                                                                   target="_blank"
-                                                                   rel="noopener noreferrer"
-                                                                   class="btn btn-light btn-sm">
+                                                            @if ($banner->link_url && $banner->button_text)
+                                                                <a href="{{ $banner->link_url }}" target="_blank"
+                                                                    rel="noopener noreferrer" class="btn btn-light btn-sm">
                                                                     <i class="ti tabler-external-link me-1"></i>
                                                                     {{ $banner->button_text }}
                                                                 </a>
                                                             @endif
                                                         </div>
                                                         <div class="col-md-4 text-end">
-                                                            <i class="ti tabler-ad-2" style="font-size: 5rem; opacity: 0.3; color: {{ $banner->text_color ?? '#ffffff' }};"></i>
+                                                            <i class="ti tabler-ad-2"
+                                                                style="font-size: 5rem; opacity: 0.3; color: {{ $banner->text_color ?? '#ffffff' }};"></i>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -282,12 +289,14 @@
                                     </div>
                                 @endforeach
                             </div>
-                            @if($bannerAdvertisements->count() > 1)
-                                <button class="carousel-control-prev" type="button" data-bs-target="#advertisementCarousel" data-bs-slide="prev">
+                            @if ($bannerAdvertisements->count() > 1)
+                                <button class="carousel-control-prev" type="button" data-bs-target="#advertisementCarousel"
+                                    data-bs-slide="prev">
                                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                                     <span class="visually-hidden">Previous</span>
                                 </button>
-                                <button class="carousel-control-next" type="button" data-bs-target="#advertisementCarousel" data-bs-slide="next">
+                                <button class="carousel-control-next" type="button" data-bs-target="#advertisementCarousel"
+                                    data-bs-slide="next">
                                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                     <span class="visually-hidden">Next</span>
                                 </button>
@@ -303,13 +312,15 @@
         <div class="col-xl-12 mb-4">
             <div class="card">
                 <div class="card-body">
-                    @if(isset($announcements) && $announcements->count() > 0)
-                        @foreach($announcements as $announcement)
-                            <div class="alert alert-{{ $announcement->type }} {{ $announcement->is_dismissible ? 'alert-dismissible' : '' }}" role="alert">
+                    @if (isset($announcements) && $announcements->count() > 0)
+                        @foreach ($announcements as $announcement)
+                            <div class="alert alert-{{ $announcement->type }} {{ $announcement->is_dismissible ? 'alert-dismissible' : '' }}"
+                                role="alert">
                                 <h5 class="alert-heading mb-2">{{ $announcement->title }}</h5>
                                 <div class="mb-0">{!! $announcement->content !!}</div>
-                                @if($announcement->is_dismissible)
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                @if ($announcement->is_dismissible)
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
                                 @endif
                             </div>
                         @endforeach
@@ -317,7 +328,8 @@
                         <!-- Fallback to default announcement if no database announcements -->
                         <div class="alert alert-primary alert-dismissible" role="alert">
                             <h5 class="alert-heading mb-2">Announcement!</h5>
-                            <p class="mb-0">Deposit, withdrawal & p2p is available now! Next update will be Referral System Bonus.</p>
+                            <p class="mb-0">Deposit, withdrawal & p2p is available now! Next update will be Referral
+                                System Bonus.</p>
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     @endif
@@ -325,19 +337,21 @@
                     @if (
                         \Illuminate\Support\Facades\Auth::user()->telegramVerification &&
                             \Illuminate\Support\Facades\Auth::user()->telegramVerification->chat_id)
-                        @if(\Illuminate\Support\Facades\Auth::user()->telegramVerification->telegram_username)
+                        @if (\Illuminate\Support\Facades\Auth::user()->telegramVerification->telegram_username)
                             <!-- Telegram Connected with Username -->
                             <div class="alert alert-success mt-3" role="alert">
                                 <h6 class="alert-heading mb-2">✅ Telegram Connected</h6>
                                 <p class="mb-2">Your Telegram account is connected and ready to receive notifications.</p>
                                 <p class="mb-0"><strong>Telegram Username:</strong>
-                                    {{ \Illuminate\Support\Facades\Auth::user()->telegramVerification->telegram_username }}</p>
+                                    {{ \Illuminate\Support\Facades\Auth::user()->telegramVerification->telegram_username }}
+                                </p>
                             </div>
                         @else
                             <!-- Telegram Connected but No Username -->
                             <div class="alert alert-warning mt-3" role="alert">
                                 <h6 class="alert-heading mb-2">⚠️ Telegram Username Required</h6>
-                                <p class="mb-2">Your Telegram is connected, but you need to set a username for marketplace transactions.</p>
+                                <p class="mb-2">Your Telegram is connected, but you need to set a username for marketplace
+                                    transactions.</p>
                                 <div class="d-flex gap-2">
                                     <span class="badge bg-info">Step 1:</span>
                                     <small>Set your username in Telegram app settings</small>
@@ -368,7 +382,12 @@
                                 {{ Illuminate\Support\Facades\Auth::user()->lastname }}! 🎉</h5>
                             <p class="mb-2">Welcome to UnityX</p>
                             <h4 class="text-primary mb-1">{{ number_format($wallet->profit ?? 0, 2) }} USDT</h4>
-                            <a href="{{ route('user.ai_trades.index') }}" class="btn btn-primary">View AI Trade</a>
+                            <div class="d-flex gap-2">
+                                <a href="{{ route('user.ai_trades.index') }}" class="btn btn-primary">View AI Trade</a>
+                                <a href="{{ route('user.withdrawal.index') }}" class="btn btn-success">
+                                    <i class="fas fa-money-bill-wave me-1"></i>Withdraw
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <div class="col-5 text-center text-sm-left">

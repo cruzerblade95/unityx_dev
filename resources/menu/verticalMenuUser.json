@@ -33,7 +33,24 @@
       "url": "user/withdrawal",
       "icon": "menu-icon icon-base ti tabler-currency-dollar",
       "name": "Withdraw",
-      "slug": "user.withdrawal"
+      "slug": "user.withdrawal",
+      "submenu": [
+        {
+          "url": "user/withdrawal/crypto",
+          "name": "Crypto",
+          "slug": "user.withdrawal.crypto"
+        },
+        {
+          "url": "user/withdrawal/etc-black",
+          "name": "ETC Black",
+          "slug": "user.withdrawal.etc-black"
+        },
+        {
+          "url": "user/withdrawal/gold",
+          "name": "Gold",
+          "slug": "user.withdrawal.gold"
+        }
+      ]
     },
     {
       "name": "AI Trades",
