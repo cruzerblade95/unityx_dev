@@ -257,6 +257,19 @@
                         </div>
                     </div>
 
+                    <!-- Toggle Deposit Bonus Script -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="trigger_deposit_bonus" name="trigger_deposit_bonus" value="1">
+                                <label class="form-check-label" for="trigger_deposit_bonus">
+                                    <strong>Trigger Deposit Bonus</strong>
+                                    <small class="text-muted d-block">Check this to run the deposit bonus script when adding deposit balance</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-12">
                             <div class="alert alert-warning">
@@ -270,6 +283,9 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
                     <i class="ti ti-x me-1"></i>Cancel
+                </button>
+                <button type="submit" form="adjustWalletForm" class="btn btn-primary">
+                    <i class="ti ti-device-floppy me-1"></i>Adjust Balance
                 </button>
             </div>
         </div>

@@ -15,7 +15,7 @@ $(function () {
     console.log('DataTable AJAX URL:', ajaxUrl);
     console.log('Window baseUrl:', window.baseUrl);
     console.log('Constructed URL from origin:', ajaxUrl);
-    
+
     var dt_wallets = dt_wallets_table.DataTable({
       ajax: {
         url: ajaxUrl,
@@ -169,20 +169,37 @@ $(function () {
   $(document).on('click', '.btn-adjust-wallet', function() {
     var walletId = $(this).data('wallet-id');
     var userName = $(this).data('user-name');
-    
+
     // Set wallet ID and user name
     $('#wallet_id').val(walletId);
     $('#modal_user_name').text(userName);
-    
+
     // Reset form
     $('#adjustWalletForm')[0].reset();
     $('#wallet_id').val(walletId); // Keep wallet ID after reset
-    
+
+    // Hide deposit bonus checkbox initially
+    $('#trigger_deposit_bonus').closest('.row').hide();
+
     // Load current wallet data
     loadWalletData(walletId);
-    
+
     // Show modal
     $('#adjustWalletModal').modal('show');
+  });
+
+  // Handle balance type and action change to show/hide deposit bonus checkbox
+  $('#balance_type, #adjustment_action').on('change', function() {
+    var balanceType = $('#balance_type').val();
+    var action = $('#adjustment_action').val();
+
+    // Show checkbox only when adding to deposit balance
+    if (balanceType === 'deposit' && action === 'add') {
+      $('#trigger_deposit_bonus').closest('.row').show();
+    } else {
+      $('#trigger_deposit_bonus').closest('.row').hide();
+      $('#trigger_deposit_bonus').prop('checked', false);
+    }
   });
 
   // Function to load wallet data
@@ -215,14 +232,17 @@ $(function () {
   }
 
   // Handle form submission
-  $('#submitAdjustment').on('click', function() {
-    var form = $('#adjustWalletForm');
+  $('#adjustWalletForm').on('submit', function(e) {
+    e.preventDefault();
+
+    var form = $(this);
     var formData = {
       wallet_id: $('#wallet_id').val(),
       type: $('#balance_type').val(),
       action: $('#adjustment_action').val(),
       amount: $('#adjustment_amount').val(),
-      reason: $('#adjustment_reason').val()
+      reason: $('#adjustment_reason').val(),
+      trigger_deposit_bonus: $('#trigger_deposit_bonus').is(':checked') ? 1 : 0
     };
 
     // Validate form
@@ -246,21 +266,35 @@ $(function () {
 
     // Show confirmation
     var actionText = formData.action === 'add' ? 'add $' + formData.amount + ' to' : 'deduct $' + formData.amount + ' from';
-    
-    Swal.fire({
-      title: 'Confirm Wallet Adjustment',
-      html: 'Are you sure you want to <strong>' + actionText + '</strong> the <strong>' + formData.type + '</strong> balance?<br><br><strong>Reason:</strong> ' + formData.reason,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#696cff',
-      cancelButtonColor: '#8592a3',
-      confirmButtonText: 'Yes, proceed',
-      cancelButtonText: 'Cancel'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        submitWalletAdjustment(formData);
-      }
-    });
+    var bonusText = '';
+
+    if (formData.type === 'deposit' && formData.action === 'add' && formData.trigger_deposit_bonus) {
+      bonusText = '<br><br><span class="text-info"><i class="ti ti-info-circle me-1"></i><strong>Note:</strong> Deposit bonus script will be triggered for referral downline.</span>';
+    }
+
+    // Close modal first to ensure SweetAlert appears in front
+    $('#adjustWalletModal').modal('hide');
+
+    // Show confirmation after modal is hidden
+    setTimeout(function() {
+      Swal.fire({
+        title: 'Confirm Wallet Adjustment',
+        html: 'Are you sure you want to <strong>' + actionText + '</strong> the <strong>' + formData.type + '</strong> balance?<br><br><strong>Reason:</strong> ' + formData.reason + bonusText,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#696cff',
+        cancelButtonColor: '#8592a3',
+        confirmButtonText: 'Yes, proceed',
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          submitWalletAdjustment(formData);
+        } else {
+          // If user cancels, show the modal again
+          $('#adjustWalletModal').modal('show');
+        }
+      });
+    }, 300); // Small delay to ensure modal is fully hidden
   });
 
   // Function to submit wallet adjustment
@@ -273,7 +307,7 @@ $(function () {
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
       },
       beforeSend: function() {
-        $('#submitAdjustment').prop('disabled', true).html('<i class="ti ti-loader me-1"></i>Processing...');
+        $('button[type="submit"]', '#adjustWalletForm').prop('disabled', true).html('<i class="ti ti-loader me-1"></i>Processing...');
       },
       success: function(response) {
         if (response.success) {
@@ -284,9 +318,8 @@ $(function () {
             timer: 2000,
             showConfirmButton: false
           });
-          
-          // Close modal and refresh table
-          $('#adjustWalletModal').modal('hide');
+
+          // Refresh table
           dt_wallets.ajax.reload(null, false);
         } else {
           Swal.fire({
@@ -301,7 +334,7 @@ $(function () {
         if (xhr.responseJSON && xhr.responseJSON.message) {
           errorMessage = xhr.responseJSON.message;
         }
-        
+
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -309,7 +342,7 @@ $(function () {
         });
       },
       complete: function() {
-        $('#submitAdjustment').prop('disabled', false).html('<i class="ti ti-device-floppy me-1"></i>Apply Adjustment');
+        $('button[type="submit"]', '#adjustWalletForm').prop('disabled', false).html('<i class="ti ti-device-floppy me-1"></i>Adjust Balance');
       }
     });
   }
@@ -338,7 +371,7 @@ $(function () {
       success: function(walletResponse) {
         if (walletResponse.success) {
           var userId = walletResponse.user.id;
-          
+
           // Now get the full user details
           $.ajax({
             url: window.location.origin + '/admin/users/' + userId,
@@ -353,20 +386,20 @@ $(function () {
             success: function(user) {
               // Format the full name
               const fullName = `${user.firstname || ''} ${user.lastname || ''}`.trim() || 'N/A';
-              
+
               // Format email verification status
               const emailVerified = user.email_verified_at ? 'Verified' : 'Not Verified';
-              
+
               // Format profile completion
               const profileComplete = user.profile_complete ? 'Complete' : 'Incomplete';
-              
+
               // Format payment info status
               const paymentInfoComplete = user.payment_info_completed ? 'Complete' : 'Incomplete';
-              
+
               // Format wallet data
               const wallet = walletResponse.wallet;
               const totalBalance = (parseFloat(wallet.deposit) + parseFloat(wallet.profit) + parseFloat(wallet.bonus) + parseFloat(wallet.cash)).toFixed(2);
-              
+
               // Populate user details modal with real data
               $('#userDetailsModal .modal-body').html(`
                 <div class="row">
@@ -483,14 +516,14 @@ $(function () {
       success: function(response) {
         if (response.success) {
           $('#history_user_name').text(response.user_name);
-          
+
           if (response.transactions && response.transactions.length > 0) {
             var tbody = '';
             response.transactions.forEach(function(transaction) {
               var typeClass = transaction.type === 'add' ? 'text-success' : 'text-danger';
               var typeIcon = transaction.type === 'add' ? 'ti-plus' : 'ti-minus';
               var amountPrefix = transaction.type === 'add' ? '+' : '-';
-              
+
               tbody += `
                 <tr>
                   <td>${new Date(transaction.created_at).toLocaleString()}</td>
