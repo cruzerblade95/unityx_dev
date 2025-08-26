@@ -88,7 +88,7 @@
       "slug": "user.downline"
     },
     {
-      "name": "Group Sales",
+      "name": "Performance Bonus",
       "icon": "menu-icon icon-base ti tabler-chart-line",
       "url": "user/group-sales",
       "slug": "user.group-sales.index"

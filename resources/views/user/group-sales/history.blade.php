@@ -43,12 +43,12 @@
     <div class="d-flex justify-content-between align-items-center py-3 mb-4">
         <div>
             <h4 class="fw-bold mb-1">
-                <span class="text-muted fw-light">User / Group Sales / </span>Reward History
+                <span class="text-muted fw-light">User / Performance Bonus / </span>Reward History
             </h4>
-            <p class="text-muted mb-0">View your claimed group sales bonus rewards history</p>
+            <p class="text-muted mb-0">View your claimed performance bonus rewards history</p>
         </div>
         <a href="{{ route('user.group-sales.index') }}" class="btn btn-primary">
-            <i class="fas fa-arrow-left me-1"></i>Back to Group Sales
+            <i class="fas fa-arrow-left me-1"></i>Back to Performance Bonus
         </a>
     </div>
 
