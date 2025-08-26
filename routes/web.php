@@ -201,13 +201,36 @@ Route::get('/process-wallets-to-ai-trades', function () {
         if ($aiTrades->count() >= 2) {
             // If there are 2 or more rows, only update the earliest (first) row
             $earliestTrade = $aiTrades->first();
+
+            // Calculate sum of amount_invest from row 2 onwards (skip first row)
+            $sumFromRow2Onwards = $aiTrades->skip(1)->sum('amount_invest');
+
+            // Calculate the difference: sum from row 2+ minus first row's current amount_invest
+            // $difference = $sumFromRow2Onwards - $earliestTrade->amount_invest;
+            $difference = $amount_invest - $sumFromRow2Onwards;
+
+            // Update the earliest trade with wallet deposit amount plus the calculated difference
+            // $newAmountInvest = $amount_invest + $difference;
+            $newAmountInvest = $difference;
+            $newEndingAmount = $newAmountInvest * 5;
+
             DB::table('ai_trades')->where('id', $earliestTrade->id)->update([
-                'amount_invest' => $amount_invest,
-                'ending_amount' => $ending_amount,
+                'amount_invest' => $newAmountInvest,
+                'ending_amount' => $newEndingAmount,
                 'trade_status' => 1,
                 'updated_at' => now(),
             ]);
-            $upserts[] = ['user_id' => $user->id, 'action' => 'updated_earliest_only', 'trade_id' => $earliestTrade->id, 'total_trades' => $aiTrades->count()];
+
+            $upserts[] = [
+                'user_id' => $user->id,
+                'action' => 'updated_earliest_only',
+                'trade_id' => $earliestTrade->id,
+                'total_trades' => $aiTrades->count(),
+                'sum_from_row2_onwards' => $sumFromRow2Onwards,
+                'first_row_original_amount' => $earliestTrade->amount_invest,
+                'difference_calculated' => $difference,
+                'new_amount_invest' => $newAmountInvest
+            ];
         } else if ($aiTrades->count() == 1) {
             // If there's exactly 1 row, update it
             $aiTrade = $aiTrades->first();
