@@ -96,21 +96,12 @@ class UserManagementController extends Controller
             $validatedData = $request->validate([
                 'firstname' => 'required|string|max:255',
                 'lastname' => 'required|string|max:255',
+                'username' => 'required|string|max:255|unique:users,username',
                 'email' => 'required|string|email|max:255|unique:users,email',
                 'password' => 'required|string|min:8',
-                'role' => 'required|string|in:user,admin'
+                'password_confirmation' => 'required|string|same:password',
+                'upline_id' => 'nullable|exists:users,id'
             ]);
-
-            // Create base username
-            $baseUsername = strtolower($validatedData['firstname'] . '.' . $validatedData['lastname']);
-
-            // Check if username exists and append number if needed
-            $username = $baseUsername;
-            $counter = 1;
-            while (User::where('username', $username)->exists()) {
-                $username = $baseUsername . $counter;
-                $counter++;
-            }
 
             // Generate unique 6-character referral code
             do {
@@ -121,25 +112,26 @@ class UserManagementController extends Controller
             Log::info('Creating user with data:', [
                 'firstname' => $validatedData['firstname'],
                 'lastname' => $validatedData['lastname'],
-                'username' => $username,
+                'username' => $validatedData['username'],
                 'email' => $validatedData['email'],
-                'role' => $validatedData['role'],
+                'upline_id' => $validatedData['upline_id'] ?? null,
                 'referral_code' => $newReferralCode
             ]);
 
             $user = User::create([
                 'firstname' => (string) $validatedData['firstname'],
                 'lastname' => (string) $validatedData['lastname'],
+                'username' => (string) $validatedData['username'],
                 'email' => (string) $validatedData['email'],
                 'password' => Hash::make((string) $validatedData['password']),
-                'role' => (string) $validatedData['role'],
-                'username' => $username,
+                'role' => 'user', // Default role for new users
+                'upline_id' => $validatedData['upline_id'] ?? null,
                 'referral_code' => $newReferralCode
             ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'User created successfully'
+                'message' => 'User created successfully and added to downline'
             ]);
         } catch (\Exception $e) {
             Log::error('User creation failed: ' . $e->getMessage());
@@ -159,7 +151,50 @@ class UserManagementController extends Controller
     public function profile($id)
     {
         $user = User::with('wallet')->findOrFail($id);
-        return view('admin.userProfile', compact('user'));
+
+        // Get direct downlines
+        $downlines = User::with('wallet')
+            ->where('upline_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Calculate downline statistics
+        $downlineCount = $downlines->count();
+        $activeDownlines = $downlines->filter(function($downline) {
+            return $downline->last_active_at && $downline->last_active_at >= now()->subMinutes(15);
+        })->count();
+
+        // Calculate total network count (recursive)
+        $totalNetworkCount = $this->getTotalNetworkCount($user->id);
+
+        // Calculate total downline earnings
+        $totalDownlineEarnings = $downlines->sum(function($downline) {
+            return $downline->wallet ? $downline->wallet->total_balance : 0;
+        });
+
+        return view('admin.userProfile', compact(
+            'user',
+            'downlines',
+            'downlineCount',
+            'activeDownlines',
+            'totalNetworkCount',
+            'totalDownlineEarnings'
+        ));
+    }
+
+    /**
+     * Get total network count recursively
+     */
+    private function getTotalNetworkCount($userId)
+    {
+        $directDownlines = User::where('upline_id', $userId)->pluck('id');
+        $count = $directDownlines->count();
+
+        foreach ($directDownlines as $downlineId) {
+            $count += $this->getTotalNetworkCount($downlineId);
+        }
+
+        return $count;
     }
 
     public function update(Request $request, $id)

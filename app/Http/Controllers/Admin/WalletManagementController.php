@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
+use App\Helpers\Helpers;
 use Exception;
 
 class WalletManagementController extends Controller
@@ -154,7 +155,8 @@ class WalletManagementController extends Controller
                 'type' => 'required|string|in:deposit,profit,bonus,cash',
                 'action' => 'required|string|in:add,deduct',
                 'amount' => 'required|numeric|min:0.01',
-                'reason' => 'required|string|max:255'
+                'reason' => 'required|string|max:255',
+                'trigger_deposit_bonus' => 'nullable|boolean'
             ]);
 
             $wallet = Wallet::findOrFail($request->wallet_id);
@@ -162,6 +164,7 @@ class WalletManagementController extends Controller
             $type = $request->type;
             $action = $request->action;
             $reason = $request->reason;
+            $triggerDepositBonus = $request->has('trigger_deposit_bonus') && $request->trigger_deposit_bonus;
 
             DB::beginTransaction();
 
@@ -171,6 +174,15 @@ class WalletManagementController extends Controller
             if ($action === 'add') {
                 $wallet->$type += $amount;
                 $message = "Added $" . number_format($amount, 2) . " to {$type} balance";
+
+                // Only trigger deposit bonus if checkbox is checked and it's a deposit
+                if ($type === 'deposit') {
+                    Helpers::insertAiTradeV2($wallet->user_id, $amount);
+                    if($triggerDepositBonus){
+                      Helpers::depositBonus($wallet->user_id, $amount);
+                    }
+                }
+
             } else {
                 // Check if sufficient balance for deduction
                 if ($wallet->$type < $amount) {
@@ -214,7 +226,7 @@ class WalletManagementController extends Controller
         try {
             $wallet = Wallet::with('user')->findOrFail($id);
             $user = $wallet->user;
-            
+
             return response()->json([
                 'success' => true,
                 'wallet' => [
@@ -254,7 +266,7 @@ class WalletManagementController extends Controller
         try {
             $wallet = Wallet::with('user')->findOrFail($walletId);
             $user = $wallet->user;
-            
+
             // For now, we'll create sample transaction data
             // In a production system, you'd have a dedicated transactions table
             $transactions = [
@@ -292,7 +304,7 @@ class WalletManagementController extends Controller
                     'created_at' => now()->subWeek()
                 ]
             ];
-            
+
             return response()->json([
                 'success' => true,
                 'user_name' => $user ? trim($user->firstname . ' ' . $user->lastname) : 'N/A',
@@ -314,7 +326,7 @@ class WalletManagementController extends Controller
     private function logWalletTransaction($wallet, $type, $action, $amount, $beforeBalance, $afterBalance, $reason)
     {
         $admin = Auth::user();
-        
+
         Log::info('Wallet Transaction', [
             'admin_id' => $admin ? $admin->id : null,
             'admin_name' => $admin ? ($admin->name ?? $admin->username) : 'System',
