@@ -7,6 +7,7 @@ use App\Helpers\Helpers;
 use App\Models\AiTrade;
 use App\Models\AiTradeHistory;
 use App\Models\Wallet;
+use App\Services\TelegramNotificationService;
 
 class TradingCron
 {
@@ -71,6 +72,21 @@ class TradingCron
                         $wallet->save();
                     }
                 }
+
+                $title = '🤖 AI Trade has been credited';
+                $message = "Your AI Trade has been successfully credited into Profit!\n\n";
+                $message .= "💰 Investment Amount: $" . number_format($trade->amount_invest, 8) . "\n";
+                $message .= "🎯 Your Pnl(Profit and Lost): $" . number_format($profit, 8) . " (5x potential return)\n";
+                $message .= "📊 Trade ID: #{$trade->id}\n";
+                $message .= "⏰ Status: Running\n\n";
+                $message .= "Your AI Trade is now active. You can monitor its progress in your dashboard.";
+
+                TelegramNotificationService::sendNotificationToTelegram(
+                  $trade->user_id,
+                  $title,
+                  $message
+                );
+
             }
         } catch (\Exception $e) {
             // Log the error and optionally display it (for debugging)
