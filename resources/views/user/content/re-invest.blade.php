@@ -599,6 +599,168 @@
     </div>
     </div>
     </div>
+
+    <!-- Re-Investment History Section -->
+    <div class="container py-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow border-0">
+                    <div class="card-header bg-gradient-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-history me-2"></i>
+                            Re-Investment History
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        @if ($reInvestHistory->count() > 0)
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Amount Invested</th>
+                                            <th>Expected Return</th>
+                                            <th>Current Value</th>
+                                            <th>Status</th>
+                                            <th>Progress</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($reInvestHistory as $investment)
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex flex-column">
+                                                        <span
+                                                            class="fw-medium">{{ \Carbon\Carbon::parse($investment->created_at)->format('M d, Y') }}</span>
+                                                        <small
+                                                            class="text-muted">{{ \Carbon\Carbon::parse($investment->created_at)->format('H:i A') }}</small>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span
+                                                        class="fw-bold text-primary">${{ number_format($investment->amount_invest, 2) }}</span>
+                                                </td>
+                                                <td>
+                                                    <span
+                                                        class="fw-bold text-success">${{ number_format($investment->ending_amount, 2) }}</span>
+                                                    <small class="text-muted d-block">5x Return</small>
+                                                </td>
+                                                <td>
+                                                    @php
+                                                        $currentValue =
+                                                            $investment->current_amount ?? $investment->amount_invest;
+                                                        $profit = $currentValue - $investment->amount_invest;
+                                                        $profitClass = $profit >= 0 ? 'text-success' : 'text-danger';
+                                                    @endphp
+                                                    <div>
+                                                        <span
+                                                            class="fw-bold">${{ number_format($currentValue, 2) }}</span>
+                                                        <div>
+                                                            <small class="{{ $profitClass }}">
+                                                                {{ $profit >= 0 ? '+' : '' }}${{ number_format($profit, 2) }}
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    @if ($investment->status == 'active' || $investment->status == 'running')
+                                                        <span class="badge bg-primary">
+                                                            <i class="fas fa-cog fa-spin me-1"></i>Active
+                                                        </span>
+                                                    @elseif($investment->status == 'completed')
+                                                        <span class="badge bg-success">
+                                                            <i class="fas fa-check me-1"></i>Completed
+                                                        </span>
+                                                    @else
+                                                        <span
+                                                            class="badge bg-secondary">{{ ucfirst($investment->status ?? 'Pending') }}</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @php
+                                                        $progress = min(
+                                                            100,
+                                                            ($currentValue / $investment->ending_amount) * 100,
+                                                        );
+                                                        $progressClass =
+                                                            $progress >= 75
+                                                                ? 'bg-success'
+                                                                : ($progress >= 25
+                                                                    ? 'bg-warning'
+                                                                    : 'bg-info');
+                                                    @endphp
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                                            <div class="progress-bar {{ $progressClass }}"
+                                                                role="progressbar" style="width: {{ $progress }}%"
+                                                                aria-valuenow="{{ $progress }}" aria-valuemin="0"
+                                                                aria-valuemax="100">
+                                                            </div>
+                                                        </div>
+                                                        <small
+                                                            class="text-muted">{{ number_format($progress, 1) }}%</small>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="text-center py-5">
+                                <i class="fas fa-history fa-4x text-muted mb-3"></i>
+                                <h5 class="text-muted">No Re-Investment History</h5>
+                                <p class="text-muted">Your re-investment transactions will appear here once you start
+                                    investing.</p>
+                            </div>
+                        @endif
+                    </div>
+                    @if ($reInvestHistory->count() > 0)
+                        <div class="card-footer bg-light">
+                            <div class="row text-center">
+                                <div class="col-md-3">
+                                    <div class="d-flex flex-column">
+                                        <span
+                                            class="h5 mb-0 text-primary">${{ number_format($reInvestHistory->sum('amount_invest'), 2) }}</span>
+                                        <small class="text-muted">Total Invested</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="d-flex flex-column">
+                                        <span
+                                            class="h5 mb-0 text-success">${{ number_format($reInvestHistory->sum('ending_amount'), 2) }}</span>
+                                        <small class="text-muted">Expected Returns</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="d-flex flex-column">
+                                        @php
+                                            $totalCurrent =
+                                                $reInvestHistory->sum('current_amount') ?:
+                                                $reInvestHistory->sum('amount_invest');
+                                            $totalProfit = $totalCurrent - $reInvestHistory->sum('amount_invest');
+                                        @endphp
+                                        <span class="h5 mb-0 {{ $totalProfit >= 0 ? 'text-success' : 'text-danger' }}">
+                                            ${{ number_format($totalCurrent, 2) }}
+                                        </span>
+                                        <small class="text-muted">Current Value</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="d-flex flex-column">
+                                        <span class="h5 mb-0 {{ $totalProfit >= 0 ? 'text-success' : 'text-danger' }}">
+                                            {{ $totalProfit >= 0 ? '+' : '' }}${{ number_format($totalProfit, 2) }}
+                                        </span>
+                                        <small class="text-muted">Total P&L</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
     </div>
     </div>
 

@@ -31,7 +31,15 @@ class ReInvestController extends Controller
             ->limit(5)
             ->get();
 
-        return view('user.content.re-invest', compact('user', 'profitBalance', 'bonusBalance', 'recentAiTrades'));
+        // Get re-investment history (AI trades created through re-investment)
+        // We can identify re-investment trades by looking at created AI trades
+        $reInvestHistory = DB::table('ai_trades')
+            ->where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get();
+
+        return view('user.content.re-invest', compact('user', 'profitBalance', 'bonusBalance', 'recentAiTrades', 'reInvestHistory'));
     }
 
     /**
