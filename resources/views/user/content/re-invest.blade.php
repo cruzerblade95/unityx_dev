@@ -663,18 +663,36 @@
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    @if ($investment->status == 'active' || $investment->status == 'running')
-                                                        <span class="badge bg-primary">
-                                                            <i class="fas fa-cog fa-spin me-1"></i>Active
-                                                        </span>
-                                                    @elseif($investment->status == 'completed')
-                                                        <span class="badge bg-success">
-                                                            <i class="fas fa-check me-1"></i>Completed
-                                                        </span>
-                                                    @else
-                                                        <span
-                                                            class="badge bg-secondary">{{ ucfirst($investment->status ?? 'Pending') }}</span>
-                                                    @endif
+                                                    @php
+                                                        // Map trade_status values: 0=cancel, 1=running, 2=trade end
+                                                        $tradeStatus = $investment->trade_status ?? 1;
+                                                        $statusMap = [
+                                                            0 => [
+                                                                'label' => 'Cancelled',
+                                                                'class' => 'bg-danger',
+                                                                'icon' => 'fas fa-times',
+                                                            ],
+                                                            1 => [
+                                                                'label' => 'Active',
+                                                                'class' => 'bg-primary',
+                                                                'icon' => 'fas fa-cog fa-spin',
+                                                            ],
+                                                            2 => [
+                                                                'label' => 'Completed',
+                                                                'class' => 'bg-success',
+                                                                'icon' => 'fas fa-check',
+                                                            ],
+                                                        ];
+                                                        $statusInfo = $statusMap[$tradeStatus] ?? [
+                                                            'label' => 'Unknown',
+                                                            'class' => 'bg-secondary',
+                                                            'icon' => 'fas fa-question',
+                                                        ];
+                                                    @endphp
+                                                    <span class="badge {{ $statusInfo['class'] }}">
+                                                        <i
+                                                            class="{{ $statusInfo['icon'] }} me-1"></i>{{ $statusInfo['label'] }}
+                                                    </span>
                                                 </td>
                                                 <td>
                                                     @php
