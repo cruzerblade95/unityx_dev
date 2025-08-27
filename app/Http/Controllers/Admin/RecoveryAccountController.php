@@ -36,6 +36,8 @@ class RecoveryAccountController extends Controller
     {
         $request->validate([
             'admin_notes' => 'nullable|string|max:1000',
+            'deposit' => 'required|numeric|min:0',
+            'profit' => 'required|numeric|min:0',
         ]);
 
         $recovery = RecoveryAccount::findOrFail($id);
@@ -51,6 +53,10 @@ class RecoveryAccountController extends Controller
             return redirect()->back()->with('error', 'User not found for the provided email address.');
         }
 
+        // Get the adjusted amounts from the form
+        $adjustedDeposit = $request->deposit;
+        $adjustedProfit = $request->profit;
+
         // Get or create user's wallet
         $wallet = \App\Models\Wallet::firstOrCreate(
             ['user_id' => $user->id],
@@ -64,23 +70,27 @@ class RecoveryAccountController extends Controller
             ]
         );
 
-        // Update wallet with recovery values
+        // Update wallet with adjusted recovery values
         $wallet->update([
-            'deposit' => $recovery->deposit,
-            'profit' => $recovery->profit,
+            'deposit' => $adjustedDeposit,
+            'profit' => $adjustedProfit,
             'updated_at' => now(),
         ]);
 
-        // Update recovery request status
+        // Update recovery request status with adjusted amounts note
+        $originalNote = $request->admin_notes ? $request->admin_notes . "\n\n" : '';
+        $adjustmentNote = "Original amounts - Deposit: $" . number_format($recovery->deposit, 2) . ", Profit: $" . number_format($recovery->profit, 2);
+        $adjustmentNote .= "\nAdjusted amounts - Deposit: $" . number_format($adjustedDeposit, 2) . ", Profit: $" . number_format($adjustedProfit, 2);
+
         $recovery->update([
             'status' => 'approved',
-            'admin_notes' => $request->admin_notes,
+            'admin_notes' => $originalNote . $adjustmentNote,
             'processed_by' => Auth::id(),
             'processed_at' => now(),
         ]);
 
         return redirect()->route('admin.recovery_accounts.index')
-            ->with('success', "Recovery request approved successfully. User's wallet has been updated with deposit: $" . number_format($recovery->deposit, 2) . " and profit: $" . number_format($recovery->profit, 2) . ".");
+            ->with('success', "Recovery request approved successfully. User's wallet has been updated with deposit: $" . number_format($adjustedDeposit, 2) . " and profit: $" . number_format($adjustedProfit, 2) . ".");
     }
 
     public function reject(Request $request, $id)

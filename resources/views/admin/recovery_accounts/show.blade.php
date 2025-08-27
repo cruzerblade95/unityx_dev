@@ -116,11 +116,25 @@
                                 @csrf
                                 <div class="mb-3">
                                     <label class="form-label">
+                                        <i class="fas fa-dollar-sign me-1"></i>Adjust Deposit Amount
+                                    </label>
+                                    <input type="number" name="deposit" class="form-control" step="0.01" min="0" value="{{ $recovery->deposit }}" placeholder="Enter deposit amount">
+                                    <small class="text-muted">Original: ${{ number_format($recovery->deposit, 2) }}</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-chart-line me-1"></i>Adjust Profit Amount
+                                    </label>
+                                    <input type="number" name="profit" class="form-control" step="0.01" min="0" value="{{ $recovery->profit }}" placeholder="Enter profit amount">
+                                    <small class="text-muted">Original: ${{ number_format($recovery->profit, 2) }}</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">
                                         <i class="fas fa-comment me-1"></i>Admin Notes (Optional)
                                     </label>
                                     <textarea name="admin_notes" class="form-control" rows="3" placeholder="Add notes for approval..."></textarea>
                                 </div>
-                                <button type="submit" class="btn btn-success w-100" onclick="return confirm('Are you sure you want to approve this recovery request?')">
+                                <button type="submit" class="btn btn-success w-100" onclick="return confirm('Are you sure you want to approve this recovery request with the specified amounts?')">
                                     <i class="fas fa-check me-1"></i> Approve
                                 </button>
                             </form>
