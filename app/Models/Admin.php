@@ -42,4 +42,12 @@ class Admin extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get the transaction histories performed by this admin.
+     */
+    public function transactionHistories()
+    {
+        return $this->hasMany(TransactionHistory::class, 'admin_id');
+    }
 }

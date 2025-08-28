@@ -30,6 +30,8 @@ $(function () {
         // columns according to JSON
         { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
         { data: 'user', name: 'user' },
+        { data: 'username', name: 'username' },
+        { data: 'email', name: 'email' },
         { data: 'deposit', name: 'deposit' },
         { data: 'profit', name: 'profit' },
         { data: 'bonus', name: 'bonus' },
@@ -72,7 +74,7 @@ $(function () {
               text: '<i class="tabler-printer me-2"></i>Print',
               className: 'dropdown-item',
               exportOptions: {
-                columns: [1, 2, 3, 4, 5, 6, 7],
+                columns: [1, 2, 3, 4, 5, 6, 7, 8, 9],
                 format: {
                   body: function ( data, row, column, node ) {
                     return data;
@@ -93,7 +95,7 @@ $(function () {
               text: '<i class="tabler-file-text me-2"></i>CSV',
               className: 'dropdown-item',
               exportOptions: {
-                columns: [1, 2, 3, 4, 5, 6, 7]
+                columns: [1, 2, 3, 4, 5, 6, 7, 8, 9]
               }
             },
             {
@@ -101,7 +103,7 @@ $(function () {
               text: '<i class="tabler-file-spreadsheet me-2"></i>Excel',
               className: 'dropdown-item',
               exportOptions: {
-                columns: [1, 2, 3, 4, 5, 6, 7]
+                columns: [1, 2, 3, 4, 5, 6, 7, 8, 9]
               }
             },
             {
@@ -109,7 +111,7 @@ $(function () {
               text: '<i class="tabler-file-description me-2"></i>PDF',
               className: 'dropdown-item',
               exportOptions: {
-                columns: [1, 2, 3, 4, 5, 6, 7]
+                columns: [1, 2, 3, 4, 5, 6, 7, 8, 9]
               },
               customize: function (doc) {
                 doc.content[1].table.widths = ['20%', '12%', '12%', '12%', '12%', '15%', '17%'];
@@ -520,27 +522,26 @@ $(function () {
           if (response.transactions && response.transactions.length > 0) {
             var tbody = '';
             response.transactions.forEach(function(transaction) {
-              var typeClass = transaction.type === 'add' ? 'text-success' : 'text-danger';
-              var typeIcon = transaction.type === 'add' ? 'ti-plus' : 'ti-minus';
-              var amountPrefix = transaction.type === 'add' ? '+' : '-';
+              var typeClass = transaction.type.toLowerCase() === 'add' ? 'text-success' : 'text-danger';
+              var typeIcon = transaction.type.toLowerCase() === 'add' ? 'ti-plus' : 'ti-minus';
 
               tbody += `
                 <tr>
-                  <td>${new Date(transaction.created_at).toLocaleString()}</td>
+                  <td>${transaction.date}</td>
                   <td>
                     <span class="${typeClass}">
                       <i class="ti ${typeIcon} me-1"></i>
-                      ${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
+                      ${transaction.type}
                     </span>
                   </td>
                   <td class="${typeClass}">
-                    <strong>${amountPrefix}$${parseFloat(transaction.amount).toFixed(2)}</strong>
+                    <strong>${transaction.amount}</strong>
                   </td>
                   <td>
-                    <span class="badge bg-primary">${transaction.balance_type.charAt(0).toUpperCase() + transaction.balance_type.slice(1)}</span>
+                    <span class="badge bg-primary">${transaction.balance_type}</span>
                   </td>
-                  <td>$${parseFloat(transaction.balance_before).toFixed(2)}</td>
-                  <td>$${parseFloat(transaction.balance_after).toFixed(2)}</td>
+                  <td>${transaction.balance_before}</td>
+                  <td>${transaction.balance_after}</td>
                   <td>${transaction.reason || 'N/A'}</td>
                   <td>${transaction.admin_name || 'System'}</td>
                 </tr>
@@ -569,9 +570,7 @@ $(function () {
         });
       }
     });
-  }
-
-  // Clear form when modal is hidden
+  }  // Clear form when modal is hidden
   $('#adjustWalletModal').on('hidden.bs.modal', function() {
     $('#adjustWalletForm')[0].reset();
     $('#current_deposit, #current_profit, #current_bonus, #current_cash').text('0.00');

@@ -61,7 +61,7 @@
     .card-datatable {
         padding: 0;
     }
-    
+
     .dt-action-buttons {
         justify-content: center !important;
         margin-bottom: 1rem;
@@ -106,7 +106,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Filters Section -->
     <div class="card-body border-bottom">
         <div class="row g-3">
@@ -138,13 +138,15 @@
             </div>
         </div>
     </div>
-    
+
     <div class="card-datatable table-responsive">
         <table class="datatables-wallets table">
             <thead>
                 <tr>
                     <th></th>
                     <th>User</th>
+                    <th>Username</th>
+                    <th>Email</th>
                     <th>Deposit</th>
                     <th>Profit</th>
                     <th>Bonus</th>
@@ -171,7 +173,7 @@
             <div class="modal-body">
                 <form id="adjustWalletForm">
                     <input type="hidden" id="wallet_id" name="wallet_id">
-                    
+
                     <div class="row mb-3">
                         <div class="col-12">
                             <div class="alert alert-info">
@@ -247,12 +249,12 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="adjustment_amount" class="form-label">Amount ($)</label>
-                            <input type="number" class="form-control" id="adjustment_amount" name="amount" 
+                            <input type="number" class="form-control" id="adjustment_amount" name="amount"
                                    step="0.01" min="0.01" placeholder="0.00" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="adjustment_reason" class="form-label">Reason</label>
-                            <input type="text" class="form-control" id="adjustment_reason" name="reason" 
+                            <input type="text" class="form-control" id="adjustment_reason" name="reason"
                                    placeholder="Enter reason for adjustment" required>
                         </div>
                     </div>

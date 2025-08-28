@@ -45,6 +45,14 @@ class Wallet extends Model
     }
 
     /**
+     * Get the transaction history for this wallet.
+     */
+    public function transactionHistories()
+    {
+        return $this->hasMany(TransactionHistory::class);
+    }
+
+    /**
      * Get the total balance of the wallet.
      *
      * @return float

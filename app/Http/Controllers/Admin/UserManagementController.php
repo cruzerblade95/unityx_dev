@@ -69,6 +69,17 @@ class UserManagementController extends Controller
             ->editColumn('created_at', function ($user) {
                 return $user->created_at->format('Y-m-d H:i:s');
             })
+            ->filterColumn('firstname', function($query, $keyword) {
+                if (!empty($keyword)) {
+                    $query->where(function($q) use ($keyword) {
+                        $q->where('firstname', 'like', "%{$keyword}%")
+                          ->orWhere('lastname', 'like', "%{$keyword}%")
+                          ->orWhere('username', 'like', "%{$keyword}%")
+                          ->orWhere('email', 'like', "%{$keyword}%")
+                          ->orWhereRaw("CONCAT(firstname, ' ', lastname) like ?", ["%{$keyword}%"]);
+                    });
+                }
+            })
             ->filterColumn('role', function($query, $keyword) {
                 if (!empty($keyword)) {
                     $query->where('role', $keyword);

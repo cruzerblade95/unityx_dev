@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Models\TransactionHistory;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -42,6 +43,49 @@ class WalletManagementController extends Controller
                     $lastName = $user->lastname ?? '';
                     $fullName = trim($firstName . ' ' . $lastName);
                     return !empty($fullName) ? $fullName : ($user->username ?? $user->email ?? 'N/A');
+                })
+                ->addColumn('user_data', function ($wallet) {
+                    $user = $wallet->user;
+                    if (!$user) {
+                        return null;
+                    }
+                    return [
+                        'firstname' => $user->firstname ?? '',
+                        'lastname' => $user->lastname ?? '',
+                        'username' => $user->username ?? '',
+                        'email' => $user->email ?? ''
+                    ];
+                })
+                ->addColumn('username', function ($wallet) {
+                    $user = $wallet->user;
+                    return $user ? ($user->username ?? 'N/A') : 'N/A';
+                })
+                ->addColumn('email', function ($wallet) {
+                    $user = $wallet->user;
+                    return $user ? ($user->email ?? 'N/A') : 'N/A';
+                })
+                ->filterColumn('user', function($query, $keyword) {
+                    if (!empty($keyword)) {
+                        $query->whereHas('user', function($q) use ($keyword) {
+                            $q->where('firstname', 'like', "%{$keyword}%")
+                              ->orWhere('lastname', 'like', "%{$keyword}%")
+                              ->orWhereRaw("CONCAT(firstname, ' ', lastname) like ?", ["%{$keyword}%"]);
+                        });
+                    }
+                })
+                ->filterColumn('username', function($query, $keyword) {
+                    if (!empty($keyword)) {
+                        $query->whereHas('user', function($q) use ($keyword) {
+                            $q->where('username', 'like', "%{$keyword}%");
+                        });
+                    }
+                })
+                ->filterColumn('email', function($query, $keyword) {
+                    if (!empty($keyword)) {
+                        $query->whereHas('user', function($q) use ($keyword) {
+                            $q->where('email', 'like', "%{$keyword}%");
+                        });
+                    }
                 })
                 ->addColumn('deposit', function ($wallet) {
                     return '$' . number_format((float)($wallet->deposit ?? 0), 2);
@@ -267,43 +311,24 @@ class WalletManagementController extends Controller
             $wallet = Wallet::with('user')->findOrFail($walletId);
             $user = $wallet->user;
 
-            // For now, we'll create sample transaction data
-            // In a production system, you'd have a dedicated transactions table
-            $transactions = [
-                [
-                    'id' => 1,
-                    'type' => 'add',
-                    'amount' => 100.00,
-                    'balance_type' => 'deposit',
-                    'balance_before' => 500.00,
-                    'balance_after' => 600.00,
-                    'reason' => 'Admin adjustment - Bonus credit',
-                    'admin_name' => 'Admin User',
-                    'created_at' => now()->subDays(2)
-                ],
-                [
-                    'id' => 2,
-                    'type' => 'deduct',
-                    'amount' => 50.00,
-                    'balance_type' => 'cash',
-                    'balance_before' => 200.00,
-                    'balance_after' => 150.00,
-                    'reason' => 'Admin adjustment - Correction',
-                    'admin_name' => 'Admin User',
-                    'created_at' => now()->subDays(5)
-                ],
-                [
-                    'id' => 3,
-                    'type' => 'add',
-                    'amount' => 250.00,
-                    'balance_type' => 'profit',
-                    'balance_before' => 1000.00,
-                    'balance_after' => 1250.00,
-                    'reason' => 'Trading profit allocation',
-                    'admin_name' => 'System',
-                    'created_at' => now()->subWeek()
-                ]
-            ];
+            $transactions = TransactionHistory::with('admin')
+                ->forWallet($walletId)
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(function ($transaction) {
+                    return [
+                        'id' => $transaction->id,
+                        'date' => $transaction->created_at->format('M d, Y H:i:s'),
+                        'type' => ucfirst($transaction->transaction_type),
+                        'amount' => ($transaction->transaction_type === 'add' ? '+' : '-') . '$' . number_format($transaction->amount, 2),
+                        'balance_type' => ucfirst($transaction->balance_type),
+                        'balance_before' => '$' . number_format($transaction->balance_before, 2),
+                        'balance_after' => '$' . number_format($transaction->balance_after, 2),
+                        'reason' => $transaction->reason,
+                        'admin_name' => $transaction->admin ? $transaction->admin->username : 'System',
+                        'notes' => $transaction->notes
+                    ];
+                });
 
             return response()->json([
                 'success' => true,
@@ -318,18 +343,31 @@ class WalletManagementController extends Controller
                 'message' => 'Unable to fetch transaction history.'
             ], 500);
         }
-    }
-
-    /**
+    }    /**
      * Log wallet transaction for audit trail
      */
     private function logWalletTransaction($wallet, $type, $action, $amount, $beforeBalance, $afterBalance, $reason)
     {
-        $admin = Auth::user();
+        $admin = Auth::guard('admin')->user();
 
+        // Save to transaction_histories table
+        TransactionHistory::create([
+            'user_id' => $wallet->user_id,
+            'wallet_id' => $wallet->id,
+            'admin_id' => $admin ? $admin->id : null,
+            'transaction_type' => $action,
+            'balance_type' => $type,
+            'amount' => $amount,
+            'balance_before' => $beforeBalance,
+            'balance_after' => $afterBalance,
+            'reason' => $reason,
+            'notes' => "Transaction performed by " . ($admin ? $admin->username : 'System')
+        ]);
+
+        // Also log to Laravel log for backup
         Log::info('Wallet Transaction', [
             'admin_id' => $admin ? $admin->id : null,
-            'admin_name' => $admin ? ($admin->name ?? $admin->username) : 'System',
+            'admin_name' => $admin ? $admin->username : 'System',
             'wallet_id' => $wallet->id,
             'user_id' => $wallet->user_id,
             'user_name' => $wallet->user ? trim($wallet->user->firstname . ' ' . $wallet->user->lastname) : 'N/A',
