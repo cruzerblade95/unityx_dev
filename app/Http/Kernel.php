@@ -12,7 +12,7 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $middleware = [
-        \App\Http\Middleware\CheckMigrationDomain::class,
+        // \App\Http\Middleware\CheckMigrationDomain::class,
         // ...add global middleware here...
     ];
 
@@ -47,6 +47,7 @@ class Kernel extends HttpKernel
         'user' => \App\Http\Middleware\UserMiddleware::class,
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
         'admin.access' => \App\Http\Middleware\AdminAccess::class,
+        'migration.check' => \App\Http\Middleware\CheckMigrationDomain::class,
         'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
         'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
