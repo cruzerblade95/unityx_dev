@@ -39,6 +39,7 @@ class GeneralRouteProtection
             'connect-telegram', // Telegram connection route
             'account-recovery',
             'account-recovery/*',
+            'migration-notice',
         ];
 
         // Check if current route is public
