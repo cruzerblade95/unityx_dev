@@ -38,6 +38,8 @@ Route::post('/account-recovery/validate-email', [App\Http\Controllers\AccountRec
 Route::get('/account-recovery/details', [App\Http\Controllers\AccountRecoveryController::class, 'showDetailsForm'])->name('account-recovery.details');
 Route::post('/account-recovery/submit', [App\Http\Controllers\AccountRecoveryController::class, 'submitRecovery'])->name('account-recovery.submit');
 Route::get('/account-recovery/success', [App\Http\Controllers\AccountRecoveryController::class, 'showSuccess'])->name('account-recovery.success');
+Route::get('/account-recovery/search-referral-users', [App\Http\Controllers\AccountRecoveryController::class, 'searchReferralUsers'])->name('account-recovery.search-referral-users');
+Route::post('/account-recovery/reset', [App\Http\Controllers\AccountRecoveryController::class, 'resetRecovery'])->name('account-recovery.reset');
 
 // NOWPayments webhook route (public access)
 Route::post('/api/nowpayments/webhook', [NOWPaymentsWebhookController::class, 'handle'])->name('nowpayments.webhook');
