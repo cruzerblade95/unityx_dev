@@ -12,6 +12,7 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $middleware = [
+        \App\Http\Middleware\CheckMigrationDomain::class,
         // ...add global middleware here...
     ];
 
