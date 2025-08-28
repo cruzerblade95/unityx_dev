@@ -17,8 +17,13 @@ class CheckMigrationDomain
     {
         $host = $request->getHost();
 
+        // Debug: Log the host for testing
+        \Log::info('CheckMigrationDomain - Host: ' . $host);
+
         // Check if the host contains unityx.dev
         if (str_contains(strtolower($host), 'unityx.dev')) {
+            \Log::info('CheckMigrationDomain - unityx.dev domain detected');
+
             // Skip migration notice for certain routes (like API endpoints)
             $skipRoutes = [
                 'api/',
@@ -26,22 +31,27 @@ class CheckMigrationDomain
                 '_debugbar',
                 'livewire/',
                 'storage/',
-                'assets/'
+                'assets/',
+                'vendor/'
             ];
 
             $currentPath = $request->path();
+            \Log::info('CheckMigrationDomain - Current path: ' . $currentPath);
 
             // Don't redirect if already on migration notice page or excluded routes
             foreach ($skipRoutes as $skipRoute) {
                 if (str_starts_with($currentPath, $skipRoute)) {
+                    \Log::info('CheckMigrationDomain - Skipping route: ' . $skipRoute);
                     return $next($request);
                 }
             }
 
+            \Log::info('CheckMigrationDomain - Showing migration notice');
             // Redirect to migration notice
             return response()->view('migration_notice');
         }
 
+        \Log::info('CheckMigrationDomain - Not unityx.dev domain, continuing');
         return $next($request);
     }
 }

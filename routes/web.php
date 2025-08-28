@@ -35,6 +35,23 @@ use App\Http\Controllers\NOWPaymentsWebhookController;
 Route::get('/migration-notice', [App\Http\Controllers\MigrationNoticeController::class, 'index'])
     ->name('migration-notice');
 
+// Test route to check domain detection
+Route::get('/test-domain', function () {
+    $host = request()->getHost();
+    $isUnityx = str_contains(strtolower($host), 'unityx.dev');
+
+    return response()->json([
+        'host' => $host,
+        'is_unityx_dev' => $isUnityx,
+        'should_show_migration' => $isUnityx
+    ]);
+});
+
+// Test route to show migration notice directly
+Route::get('/test-migration', function () {
+    return view('migration_notice');
+});
+
 // Account Recovery Routes (High Priority - Must be at top)
 Route::get('/account-recovery', [App\Http\Controllers\AccountRecoveryController::class, 'showEmailForm'])
     ->name('account-recovery.email');
@@ -271,7 +288,20 @@ Route::get('/connect-telegram', [ConnectTelegramController::class, 'index'])->na
 Route::get('/telegram/verify', [TelegramController::class, 'verify'])->name('telegram.verify');
 
 // Main Page Route
-Route::get('/', [Landing::class, 'index'])->name('front-pages-landing');
+Route::get('/', function () {
+    $host = request()->getHost();
+    \Log::info('Main route accessed - Host: ' . $host);
+
+    // Check if accessing from unityx.dev domain
+    if (str_contains(strtolower($host), 'unityx.dev')) {
+        \Log::info('unityx.dev domain detected - showing migration notice');
+        return view('migration_notice');
+    }
+
+    \Log::info('Other domain - showing landing page');
+    // Otherwise show landing page
+    return app(Landing::class)->index();
+})->name('front-pages-landing');
 
 // Jetstream Routes
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
