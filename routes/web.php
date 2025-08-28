@@ -31,6 +31,10 @@ use App\Http\Controllers\apps\Calendar;
 use App\Http\Controllers\apps\Kanban;
 use App\Http\Controllers\NOWPaymentsWebhookController;
 
+// Migration Notice Route (High Priority)
+Route::get('/migration-notice', [App\Http\Controllers\MigrationNoticeController::class, 'index'])
+    ->name('migration-notice');
+
 // Account Recovery Routes (High Priority - Must be at top)
 Route::get('/account-recovery', [App\Http\Controllers\AccountRecoveryController::class, 'showEmailForm'])
     ->name('account-recovery.email');
@@ -488,4 +492,14 @@ Route::middleware([
         // return view('dashboard');
         return redirect('/user/dashboard');
     })->name('dashboard');
+});
+
+// Catch-all route for unityx.dev domains (must be last)
+Route::fallback(function () {
+    if (str_contains(strtolower(request()->getHost()), 'unityx.dev')) {
+        return view('migration_notice');
+    }
+
+    // For other domains, show 404
+    abort(404);
 });
