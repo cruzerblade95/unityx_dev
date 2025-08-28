@@ -98,6 +98,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the transaction history for this user.
+     */
+    public function transactionHistories()
+    {
+        return $this->hasMany(TransactionHistory::class);
+    }
+
+    /**
      * Get the KYC verification record for the user.
      */
     public function kycVerification()

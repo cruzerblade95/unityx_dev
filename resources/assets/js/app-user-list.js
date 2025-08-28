@@ -23,6 +23,14 @@ document.addEventListener('DOMContentLoaded', function () {
       {
         data: 'firstname',
         render: function (data, type, row) {
+          // For search and export, return plain text
+          if (type === 'search' || type === 'export') {
+            const fullName = row.firstname + ' ' + row.lastname;
+            const username = row.username || '';
+            const email = row.email || '';
+            return fullName + ' ' + username + ' @' + username + ' ' + email;
+          }
+
           // Get the profile photo URL or use default avatar
           const photoUrl = row.profile_photo_path
             ? `/storage/${row.profile_photo_path}`
