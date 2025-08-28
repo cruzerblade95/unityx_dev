@@ -38,6 +38,7 @@ class RecoveryAccountController extends Controller
             'admin_notes' => 'nullable|string|max:1000',
             'deposit' => 'required|numeric|min:0',
             'profit' => 'required|numeric|min:0',
+            'replace_upline' => 'nullable|boolean',
         ]);
 
         $recovery = RecoveryAccount::findOrFail($id);
@@ -56,6 +57,16 @@ class RecoveryAccountController extends Controller
         // Get the adjusted amounts from the form
         $adjustedDeposit = $request->deposit;
         $adjustedProfit = $request->profit;
+
+        // Handle upline_id replacement if checkbox is checked and referral_username exists
+        $uplineReplaced = false;
+        if ($request->replace_upline && $recovery->referral_username) {
+            $referralUser = \App\Models\User::where('username', $recovery->referral_username)->first();
+            if ($referralUser) {
+                $user->update(['upline_id' => $referralUser->id]);
+                $uplineReplaced = true;
+            }
+        }
 
         // Get or create user's wallet
         $wallet = \App\Models\Wallet::firstOrCreate(
@@ -82,6 +93,10 @@ class RecoveryAccountController extends Controller
         $adjustmentNote = "Original amounts - Deposit: $" . number_format($recovery->deposit, 2) . ", Profit: $" . number_format($recovery->profit, 2);
         $adjustmentNote .= "\nAdjusted amounts - Deposit: $" . number_format($adjustedDeposit, 2) . ", Profit: $" . number_format($adjustedProfit, 2);
 
+        if ($uplineReplaced) {
+            $adjustmentNote .= "\nUpline replaced with referral user: " . $recovery->referral_username;
+        }
+
         $recovery->update([
             'status' => 'approved',
             'admin_notes' => $originalNote . $adjustmentNote,
@@ -89,8 +104,13 @@ class RecoveryAccountController extends Controller
             'processed_at' => now(),
         ]);
 
+        $successMessage = "Recovery request approved successfully. User's wallet has been updated with deposit: $" . number_format($adjustedDeposit, 2) . " and profit: $" . number_format($adjustedProfit, 2) . ".";
+        if ($uplineReplaced) {
+            $successMessage .= " User's upline has been updated to: " . $recovery->referral_username . ".";
+        }
+
         return redirect()->route('admin.recovery_accounts.index')
-            ->with('success', "Recovery request approved successfully. User's wallet has been updated with deposit: $" . number_format($adjustedDeposit, 2) . " and profit: $" . number_format($adjustedProfit, 2) . ".");
+            ->with('success', $successMessage);
     }
 
     public function reject(Request $request, $id)

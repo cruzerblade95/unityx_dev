@@ -128,6 +128,17 @@
                                     <input type="number" name="profit" class="form-control" step="0.01" min="0" value="{{ $recovery->profit }}" placeholder="Enter profit amount">
                                     <small class="text-muted">Original: ${{ number_format($recovery->profit, 2) }}</small>
                                 </div>
+                                @if($recovery->referral_username)
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="replace_upline" id="replace_upline" value="1">
+                                        <label class="form-check-label" for="replace_upline">
+                                            <i class="fas fa-exchange-alt me-1"></i>Replace upline with referral user
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">This will update the user's upline_id to match the referral username: <strong>{{ $recovery->referral_username }}</strong></small>
+                                </div>
+                                @endif
                                 <div class="mb-3">
                                     <label class="form-label">
                                         <i class="fas fa-comment me-1"></i>Admin Notes (Optional)

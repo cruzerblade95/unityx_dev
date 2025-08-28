@@ -104,6 +104,14 @@ document.addEventListener('DOMContentLoaded', function() {
         <form id="formAuthentication" class="mb-6" action="{{ route('user.register.submit') }}" method="POST">
           @csrf
 
+          {{-- Display account recovery email not found alert --}}
+          @if (session('email_not_found'))
+            <div class="alert alert-warning alert-dismissible" role="alert">
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              <strong>Email not found!</strong> Please register first before continuing for account recovery.
+            </div>
+          @endif
+
           {{-- Display general errors --}}
           @if ($errors->any())
             <div class="alert alert-danger alert-dismissible" role="alert">
