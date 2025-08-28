@@ -20,7 +20,7 @@
         background: linear-gradient(135deg, var(--bs-body-bg) 0%, var(--bs-secondary-bg) 100%);
         box-shadow: 0 4px 15px rgba(var(--bs-success-rgb), 0.15);
     }
-    
+
     .deposit-card::before {
         content: '';
         position: absolute;
@@ -31,14 +31,14 @@
         background: linear-gradient(90deg, var(--bs-success), var(--bs-info));
         transition: all 0.3s ease;
     }
-    
+
     .deposit-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 8px 25px rgba(var(--bs-success-rgb), 0.3);
         border-color: rgba(var(--bs-success-rgb), 0.8);
         background: linear-gradient(135deg, var(--bs-success-bg-subtle) 0%, rgba(var(--bs-success-rgb), 0.1) 100%);
     }
-    
+
     .card-header-custom {
         background: linear-gradient(135deg, var(--bs-success) 0%, rgba(var(--bs-success-rgb), 0.8) 100%);
         color: white;
@@ -50,13 +50,13 @@
         position: relative;
         z-index: 1;
     }
-    
+
     .card-body {
         padding: 2rem 1.5rem;
         position: relative;
         z-index: 1;
     }
-    
+
     .form-control {
         font-size: 1.1rem;
         padding: 1rem 1.25rem;
@@ -66,21 +66,21 @@
         background-color: var(--bs-body-bg);
         color: var(--bs-body-color);
     }
-    
+
     .form-control:focus {
         border-color: var(--bs-success);
         box-shadow: 0 0 0 0.3rem rgba(var(--bs-success-rgb), 0.25);
         transform: scale(1.02);
         background-color: var(--bs-body-bg);
     }
-    
+
     .form-label {
         font-weight: 700;
         font-size: 1.1rem;
         color: var(--bs-emphasis-color);
         margin-bottom: 0.75rem;
     }
-    
+
     .btn {
         font-size: 1.1rem;
         padding: 1rem 2rem;
@@ -90,32 +90,32 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
-    
+
     .btn:hover {
         transform: translateY(-3px);
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     }
-    
+
     .btn-primary {
         background: linear-gradient(135deg, var(--bs-success) 0%, rgba(var(--bs-success-rgb), 0.8) 100%);
         border: none;
         color: white;
     }
-    
+
     .btn-primary:hover {
         background: linear-gradient(135deg, rgba(var(--bs-success-rgb), 0.9) 0%, var(--bs-success) 100%);
         color: white;
     }
-    
+
     .btn-danger {
         background: linear-gradient(135deg, var(--bs-danger) 0%, rgba(var(--bs-danger-rgb), 0.8) 100%);
         border: none;
     }
-    
+
     .btn-danger:hover {
         background: linear-gradient(135deg, rgba(var(--bs-danger-rgb), 0.9) 0%, var(--bs-danger) 100%);
     }
-    
+
     .alert {
         border-radius: 12px;
         font-size: 1rem;
@@ -126,7 +126,7 @@
         position: relative;
         overflow: hidden;
     }
-    
+
     .alert::before {
         content: '';
         position: absolute;
@@ -136,47 +136,47 @@
         height: 4px;
         transition: all 0.3s ease;
     }
-    
+
     .alert-info {
         background: linear-gradient(135deg, var(--bs-info-bg-subtle) 0%, rgba(var(--bs-info-rgb), 0.1) 100%);
         border-color: var(--bs-info);
         color: var(--bs-info-text-emphasis);
     }
-    
+
     .alert-info::before {
         background: linear-gradient(90deg, var(--bs-info), var(--bs-success));
     }
-    
+
     .alert-warning {
         background: linear-gradient(135deg, var(--bs-warning-bg-subtle) 0%, rgba(var(--bs-warning-rgb), 0.1) 100%);
         border-color: var(--bs-warning);
         color: var(--bs-warning-text-emphasis);
     }
-    
+
     .alert-warning::before {
         background: linear-gradient(90deg, var(--bs-warning), #fd7e14);
     }
-    
+
     .alert-success {
         background: linear-gradient(135deg, var(--bs-success-bg-subtle) 0%, rgba(var(--bs-success-rgb), 0.1) 100%);
         border-color: var(--bs-success);
         color: var(--bs-success-text-emphasis);
     }
-    
+
     .alert-success::before {
         background: linear-gradient(90deg, var(--bs-success), var(--bs-info));
     }
-    
+
     .alert-danger {
         background: linear-gradient(135deg, var(--bs-danger-bg-subtle) 0%, rgba(var(--bs-danger-rgb), 0.1) 100%);
         border-color: var(--bs-danger);
         color: var(--bs-danger-text-emphasis);
     }
-    
+
     .alert-danger::before {
         background: linear-gradient(90deg, var(--bs-danger), #dc3545);
     }
-    
+
     .input-group-text {
         background: var(--bs-tertiary-bg);
         border: 2px solid var(--bs-border-color);
@@ -184,14 +184,14 @@
         font-weight: 600;
         font-size: 1.1rem;
     }
-    
+
     .deposit-section {
         background: var(--bs-body-bg);
         padding: 2rem;
         border-radius: 12px;
         margin-bottom: 1.5rem;
     }
-    
+
     .conversion-info {
         background: linear-gradient(135deg, var(--bs-secondary-bg) 0%, var(--bs-tertiary-bg) 100%);
         border: 3px solid var(--bs-success);
@@ -202,7 +202,7 @@
         overflow: hidden;
         box-shadow: 0 4px 15px rgba(var(--bs-success-rgb), 0.15);
     }
-    
+
     .conversion-info::before {
         content: '';
         position: absolute;
@@ -213,18 +213,18 @@
         background: linear-gradient(90deg, var(--bs-success), var(--bs-info));
         transition: all 0.3s ease;
     }
-    
+
     .conversion-info:hover {
         box-shadow: 0 8px 25px rgba(var(--bs-success-rgb), 0.25);
         transform: translateY(-2px);
     }
-    
+
     .conversion-info h6 {
         color: var(--bs-success);
         font-weight: 700;
         margin-bottom: 1rem;
     }
-    
+
     .conversion-rate {
         font-size: 1.2rem;
         font-weight: 700;
@@ -238,7 +238,7 @@
         position: relative;
         overflow: hidden;
     }
-    
+
     .conversion-rate::before {
         content: '';
         position: absolute;
@@ -248,35 +248,35 @@
         height: 3px;
         background: linear-gradient(90deg, var(--bs-success), var(--bs-info));
     }
-    
+
     /* Enhanced visibility for required fields */
     .text-danger {
         font-weight: 700;
         font-size: 1.2rem;
     }
-    
+
     /* Better error styling */
     .is-invalid {
         border-color: var(--bs-danger);
         box-shadow: 0 0 0 0.3rem rgba(var(--bs-danger-rgb), 0.25);
     }
-    
+
     .invalid-feedback {
         font-size: 1rem;
         font-weight: 700;
     }
-    
+
     /* Loading state styling */
     .loading-overlay {
         background: rgba(var(--bs-body-color-rgb), 0.1);
         backdrop-filter: blur(5px);
     }
-    
+
     /* Better spacing for older users */
     .form-group {
         margin-bottom: 2rem;
     }
-    
+
     .d-grid {
         margin-top: 2rem;
     }
@@ -285,31 +285,31 @@
     [data-bs-theme="dark"] .deposit-card {
         background: linear-gradient(135deg, var(--bs-body-bg) 0%, rgba(var(--bs-secondary-rgb), 0.3) 100%);
     }
-    
+
     [data-bs-theme="dark"] .deposit-card:hover {
         background: linear-gradient(135deg, rgba(var(--bs-primary-rgb), 0.15) 0%, rgba(var(--bs-primary-rgb), 0.05) 100%);
     }
-    
+
     [data-bs-theme="dark"] .conversion-info {
         background: linear-gradient(135deg, rgba(var(--bs-secondary-rgb), 0.3) 0%, rgba(var(--bs-tertiary-rgb), 0.3) 100%);
     }
-    
+
     [data-bs-theme="dark"] .conversion-rate {
         background: rgba(var(--bs-success-rgb), 0.15);
     }
-    
+
     [data-bs-theme="dark"] .alert-info {
         background: linear-gradient(135deg, rgba(13, 202, 240, 0.15) 0%, rgba(13, 202, 240, 0.05) 100%);
     }
-    
+
     [data-bs-theme="dark"] .alert-warning {
         background: linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 193, 7, 0.05) 100%);
     }
-    
+
     [data-bs-theme="dark"] .alert-success {
         background: linear-gradient(135deg, rgba(25, 135, 84, 0.15) 0%, rgba(25, 135, 84, 0.05) 100%);
     }
-    
+
     [data-bs-theme="dark"] .alert-danger {
         background: linear-gradient(135deg, rgba(220, 53, 69, 0.15) 0%, rgba(220, 53, 69, 0.05) 100%);
     }
@@ -324,7 +324,7 @@
                 Deposit Crypto
             </h2>
         </div>
-        
+
         @if (session('success'))
             <div class="alert alert-success">
                 <i class="fas fa-check-circle me-2"></i>
@@ -353,13 +353,15 @@
                     <div class="card-header">
                         <h5 class="mb-0">
                             <i class="fab fa-bitcoin me-2"></i>
-                            Crypto to USDT Deposit
+                            NOWPayments Crypto Conversion
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="info-alert">
                             <small><i class="fas fa-info-circle me-1"></i><strong>How it works:</strong> Send any supported
-                                cryptocurrency and it will be automatically converted to USDT in your wallet.</small>
+                                cryptocurrency via NOWPayments and it will be automatically converted to USDT in your
+                                wallet.
+                                A 1.8% fee is added to the amount you need to send.</small>
                         </div>
 
                         <form method="POST" action="{{ route('user.deposit.crypto') }}" id="cryptoDepositForm">
@@ -375,6 +377,41 @@
                                     <span class="input-group-text">USD</span>
                                 </div>
                                 <div class="form-text">Minimum deposit: $100 USD equivalent</div>
+
+                                <!-- Fee Calculation Display -->
+                                <div id="cryptoFeeCalculation" class="mt-2" style="display: none;">
+                                    <div class="card card-body bg-light border-0">
+                                        <div class="row g-2 small">
+                                            <div class="col-6">
+                                                <div class="d-flex justify-content-between">
+                                                    <span class="text-muted">Requested Amount:</span>
+                                                    <span class="fw-medium">$<span
+                                                            id="cryptoDisplayAmount">0.00</span></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="d-flex justify-content-between">
+                                                    <span class="text-muted">NOWPayments Fee (1.8%):</span>
+                                                    <span class="text-info fw-medium">+$<span
+                                                            id="cryptoDisplayFee">0.00</span></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <hr class="my-2">
+                                                <div class="d-flex justify-content-between">
+                                                    <span class="fw-semibold">Total crypto value needed:</span>
+                                                    <span class="fw-semibold text-primary">$<span
+                                                            id="cryptoDisplayTotalAmount">0.00</span> worth</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between mt-1">
+                                                    <span class="fw-semibold text-success">You will receive:</span>
+                                                    <span class="fw-semibold text-success">$<span
+                                                            id="cryptoDisplayReceived">0.00</span> USDT</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="mb-3">
@@ -384,9 +421,6 @@
                                 </label>
                                 <select class="form-select" id="crypto_currency" name="crypto_currency" required>
                                     <option value="">Select cryptocurrency to send</option>
-                                    <option value="usdt_bsc">USDT BSC → USDT </option>
-                                    <option value="usdt_trc">USDT TRC → USDT </option>
-                                    <option value="usdt_erc">USDT ERC → USDT </option>
                                     <option value="btc">Bitcoin (BTC) → USDT</option>
                                     <option value="eth">Ethereum (ETH) → USDT</option>
                                     <option value="ltc">Litecoin (LTC) → USDT</option>
@@ -397,7 +431,13 @@
                                     <option value="bnb">Binance Coin (BNB) → USDT</option>
                                 </select>
                                 <div class="form-text">Choose the cryptocurrency you want to send. It will be converted to
-                                    USDT.</div>
+                                    USDT via NOWPayments.</div>
+                                <div class="text-info mt-2">
+                                    <small><i class="fas fa-info-circle me-1"></i><strong>Need USDT direct
+                                            transfer?</strong>
+                                        Use <a href="{{ route('user.deposit.direct') }}" class="text-primary">Manual
+                                            Deposit</a> instead.</small>
+                                </div>
                             </div>
 
                             <div class="mb-3">
@@ -411,9 +451,10 @@
                             <div class="warning-alert">
                                 <h6><strong>Important Information</strong></h6>
                                 <ul class="mb-0 mt-1" id="cryptoWarningList">
-                                    <li>You'll receive a unique address for your selected cryptocurrency</li>
+                                    <li>You'll be redirected to NOWPayments to complete the crypto transaction</li>
                                     <li>Your deposit will be converted to USDT at current market rates</li>
-                                    <li>Conversion rate is locked when you send the transaction</li>
+                                    <li>A 1.8% fee is added to the crypto amount you need to send</li>
+                                    <li>You will receive the full requested amount after conversion</li>
                                     <li>Processing time: 10-60 minutes depending on network</li>
                                 </ul>
                             </div>
@@ -529,6 +570,34 @@
             const cryptoForm = document.getElementById('cryptoDepositForm');
             const cryptoAmountInput = document.getElementById('crypto_amount');
             const cryptoCurrencySelect = document.getElementById('crypto_currency');
+            const cryptoFeeCalculation = document.getElementById('cryptoFeeCalculation');
+
+            // Fee calculation on amount input
+            if (cryptoAmountInput) {
+                cryptoAmountInput.addEventListener('input', function() {
+                    calculateCryptoFee();
+                });
+            }
+
+            function calculateCryptoFee() {
+                const amount = parseFloat(cryptoAmountInput.value) || 0;
+
+                if (amount >= 100) {
+                    // NOWPayments fee is 1.8% ADDED to the amount
+                    const feePercent = 1.8;
+                    const feeAmount = amount * (feePercent / 100);
+                    const totalAmount = amount + feeAmount; // User pays MORE
+
+                    document.getElementById('cryptoDisplayAmount').textContent = amount.toFixed(2);
+                    document.getElementById('cryptoDisplayFee').textContent = feeAmount.toFixed(2);
+                    document.getElementById('cryptoDisplayTotalAmount').textContent = totalAmount.toFixed(2);
+                    document.getElementById('cryptoDisplayReceived').textContent = amount.toFixed(2);
+
+                    cryptoFeeCalculation.style.display = 'block';
+                } else {
+                    cryptoFeeCalculation.style.display = 'none';
+                }
+            }
 
             if (cryptoForm && cryptoAmountInput) {
                 cryptoForm.addEventListener('submit', function(e) {

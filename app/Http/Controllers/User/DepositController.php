@@ -23,7 +23,13 @@ class DepositController extends Controller
 
     public function index()
     {
-        $deposits = Deposit::where('user_id', Auth::id())->latest()->get();
+        // NOWPayments ONLY page - for crypto conversion deposits
+        $deposits = Deposit::where('user_id', Auth::id())
+                          ->where('payment_method', 'crypto')
+                          ->whereNotIn('crypto_currency', ['usdt_bsc_TO_USDT', 'usdt_trc_TO_USDT', 'usdt_erc_TO_USDT'])
+                          ->latest()
+                          ->get();
+
         $currencies = $this->nowPayments->getAvailableCurrencies();
         $cryptoCurrencies = $currencies ? array_slice($currencies['currencies'], 0, 10) : [];
 
@@ -32,8 +38,12 @@ class DepositController extends Controller
 
     public function direct()
     {
-        $deposits = Deposit::where('user_id', Auth::id())->latest()->get();
-        
+        // Manual deposit ONLY page - 1.8% fee added to amount
+        $deposits = Deposit::where('user_id', Auth::id())
+                          ->where('payment_method', 'manual')
+                          ->latest()
+                          ->get();
+
         return view('user.content.deposit-direct', compact('deposits'));
     }
 
@@ -46,21 +56,22 @@ class DepositController extends Controller
             'deposit_address' => 'nullable|string',
         ]);
 
-        $systemTaxPercent = 2.5; // Set your system tax percent here
-        $tax_amount = $request->amount * ($systemTaxPercent / 100);
-        $net_amount = $request->amount - $tax_amount;
+        // Manual deposit fee is 1.8% ADDED to the amount (not deducted)
+        $manualFeePercent = 1.8;
+        $fee_amount = $request->amount * ($manualFeePercent / 100);
+        $total_amount = $request->amount + $fee_amount; // User pays MORE than requested
 
         // Generate fallback reference if not provided
         $autoReference = $request->auto_reference ?: 'DEP_' . Auth::id() . '_' . time();
         $depositAddress = $request->deposit_address ?: 'TXFBqBkAjdoBiXRVsRqPW7DGNYqCX6jY8V'; // Default USDT address
 
-        // Create the deposit with auto-generated reference
+        // Create the deposit with manual fee structure
         $deposit = Deposit::create([
             'user_id' => Auth::id(),
-            'amount' => $request->amount,
-            'tax_percent' => $systemTaxPercent,
-            'tax_amount' => $tax_amount,
-            'net_amount' => $net_amount,
+            'amount' => $request->amount, // Base amount user requested
+            'tax_percent' => $manualFeePercent,
+            'tax_amount' => $fee_amount, // Fee amount ADDED
+            'net_amount' => $request->amount, // User gets the full amount they requested
             'status' => 'pending',
             'reference' => $autoReference,
             'note' => $request->note,
@@ -72,7 +83,10 @@ class DepositController extends Controller
             'address_memo' => $autoReference,
         ]);
 
-        return redirect()->back()->with('success', 'USDT deposit request submitted! Your deposit will be approved once the transaction is verified. Reference: ' . $autoReference);
+        return redirect()->back()->with('success',
+            'USDT deposit request submitted! Please send $' . number_format($total_amount, 2) .
+            ' USD (includes 1.8% fee) to receive $' . number_format($request->amount, 2) .
+            ' USDT. Reference: ' . $autoReference);
     }
 
     /**
@@ -120,26 +134,22 @@ class DepositController extends Controller
         ]);
 
         try {
-            $systemTaxPercent = 2.5;
-            $tax_amount = $request->amount * ($systemTaxPercent / 100);
-            $net_amount = $request->amount - $tax_amount;
+            // NOWPayments fee is 1.8% ADDED to the requested amount (like manual deposits)
+            $nowPaymentsFeePercent = 1.8;
+            $fee_amount = $request->amount * ($nowPaymentsFeePercent / 100);
+            $total_amount_to_pay = $request->amount + $fee_amount; // User pays MORE
 
-            // Check if this is a USDT variant (BSC, TRC, ERC)
-            $isUsdtVariant = in_array($request->crypto_currency, ['usdt_bsc', 'usdt_trc', 'usdt_erc']);
-
-            if ($isUsdtVariant) {
-                // Handle USDT variants differently - they're 1:1 transfers, not conversions
-                return $this->handleUsdtVariantDeposit($request, $systemTaxPercent, $tax_amount, $net_amount);
-            }
-
-            // Create payment with NOWPayments for other cryptocurrencies
+            // All crypto currencies go through NOWPayments - NO USDT variants here
+            // USDT variants should be handled in manual deposit (/user/deposit/direct)
             $orderId = 'crypto_deposit_' . Auth::id() . '_' . time();
+
+            // Create payment with NOWPayments for the TOTAL amount (including our fee)
             $payment = $this->nowPayments->createPayment(
-                $request->amount,
+                $total_amount_to_pay, // Send total amount to NOWPayments
                 'USD',
                 $request->crypto_currency,
                 $orderId,
-                'Unity X Crypto to USDT Deposit'
+                'Unity X Crypto to USDT Deposit (includes 1.8% fee)'
             );
 
             if (!$payment) {
@@ -153,22 +163,27 @@ class DepositController extends Controller
                 return redirect()->back()->withErrors(['error' => 'Invalid payment response from NOWPayments.']);
             }
 
-            // For NOWPayments, we don't get a pay_url, instead we show payment details on success page
-            $paymentUrl = route('user.deposit.success') . '?payment_id=' . $payment['payment_id'];
+            // Check if NOWPayments returned a payment URL for redirect
+            if (!isset($payment['payment_url'])) {
+                Log::error('NOWPayments response missing payment_url', ['response' => $payment]);
+                return redirect()->back()->withErrors(['error' => 'Invalid payment response from NOWPayments - no payment URL provided.']);
+            }
 
-            // Store deposit in database - note that final currency will be USDT
+            $paymentUrl = $payment['payment_url']; // Use the actual NOWPayments payment URL
+
+            // Store deposit in database - user gets the full requested amount
             Deposit::create([
                 'user_id' => Auth::id(),
-                'amount' => $request->amount,
-                'tax_percent' => $systemTaxPercent,
-                'tax_amount' => $tax_amount,
-                'net_amount' => $net_amount,
+                'amount' => $request->amount, // Base amount user requested
+                'tax_percent' => $nowPaymentsFeePercent,
+                'tax_amount' => $fee_amount, // Fee amount ADDED
+                'net_amount' => $request->amount, // User gets the full amount they requested
                 'status' => 'pending',
                 'reference' => $orderId,
-                'note' => $request->note ?? 'Cryptocurrency deposit (converts to USDT)',
+                'note' => $request->note ?? 'NOWPayments cryptocurrency deposit (1.8% fee applied)',
                 'payment_method' => 'crypto',
                 'payment_id' => $payment['payment_id'],
-                'payment_url' => $paymentUrl,
+                'payment_url' => $payment['payment_url'], // Store the actual NOWPayments URL
                 'crypto_currency' => $request->crypto_currency . '_TO_USDT', // Indicate conversion
                 'crypto_amount' => $payment['pay_amount'] ?? null,
                 'payment_address' => $payment['pay_address'] ?? null,
@@ -176,7 +191,7 @@ class DepositController extends Controller
                 'address_memo' => 'CRYPTO_' . strtoupper($request->crypto_currency) . '_TO_USDT_' . time(),
             ]);
 
-            return redirect($paymentUrl);
+            return redirect($paymentUrl); // Redirect to actual NOWPayments payment page
 
         } catch (\Exception $e) {
             Log::error('Crypto payment creation exception: ' . $e->getMessage(), [
@@ -208,49 +223,4 @@ class DepositController extends Controller
         return redirect()->route('user.deposit.index')->with('warning', 'Payment was cancelled.');
     }
 
-    /**
-     * Handle USDT variant deposits (BSC, TRC, ERC) - these are 1:1 transfers
-     */
-    private function handleUsdtVariantDeposit($request, $systemTaxPercent, $tax_amount, $net_amount)
-    {
-        // Generate unique deposit address for USDT variant
-        $networkMap = [
-            'usdt_bsc' => 'BSC (BEP-20)',
-            'usdt_trc' => 'TRC-20',
-            'usdt_erc' => 'ERC-20'
-        ];
-
-        $network = $networkMap[$request->crypto_currency] ?? 'Unknown';
-
-        // Generate a unique address or use a default one for the network
-        $addressMap = [
-            'usdt_bsc' => '0x8cAA7c9988E731F68598941503C41E00339de533', // BSC address
-            'usdt_trc' => 'TRX9a5u5Gh2xPgVWbJRK5WaxqGE4vF2Jx5', // TRC-20 address
-            'usdt_erc' => '0x8cAA7c9988E731F68598941503C41E00339de533'  // ERC-20 address
-        ];
-
-        $depositAddress = $addressMap[$request->crypto_currency] ?? $addressMap['usdt_bsc'];
-        $memo = 'USDT_' . strtoupper(str_replace('usdt_', '', $request->crypto_currency)) . '_' . time();
-
-        // Create the deposit record
-        $deposit = Deposit::create([
-            'user_id' => Auth::id(),
-            'amount' => $request->amount,
-            'tax_percent' => $systemTaxPercent,
-            'tax_amount' => $tax_amount,
-            'net_amount' => $net_amount,
-            'note' => $request->note ?? "USDT {$network} deposit",
-            'payment_method' => 'crypto',
-            'status' => 'pending',
-            'unique_address' => $depositAddress,
-            'crypto_currency' => $request->crypto_currency . '_TO_USDT',
-            'crypto_amount' => $request->amount, // 1:1 ratio for USDT
-            'payment_address' => $depositAddress,
-            'payment_id' => 'USDT_PENDING_' . time(),
-            'address_memo' => $memo,
-        ]);
-
-        return redirect()->route('user.deposit.success', ['payment_id' => $deposit->payment_id])
-            ->with('success', "USDT {$network} deposit created successfully!");
-    }
 }
