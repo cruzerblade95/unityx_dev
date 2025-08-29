@@ -15,7 +15,7 @@
         background: linear-gradient(135deg, var(--bs-body-bg) 0%, var(--bs-secondary-bg) 100%);
         box-shadow: 0 4px 15px rgba(40, 167, 69, 0.12);
     }
-    
+
     .card::before {
         content: '';
         position: absolute;
@@ -26,14 +26,14 @@
         background: linear-gradient(90deg, #28a745, #20c997);
         transition: all 0.3s ease;
     }
-    
+
     .card:hover {
         transform: translateY(-4px);
         box-shadow: 0 8px 25px rgba(40, 167, 69, 0.2);
         border-color: #20c997;
         background: linear-gradient(135deg, rgba(40, 167, 69, 0.05) 0%, rgba(32, 201, 151, 0.03) 100%);
     }
-    
+
     .card-header {
         background: linear-gradient(135deg, #6f42c1 20%, #0d6efd 100%) !important;
         color: white !important;
@@ -45,18 +45,18 @@
         position: relative;
         z-index: 1;
     }
-    
+
     .card-header h5 {
         margin: 0;
         font-size: 1.1rem;
     }
-    
+
     .card-body {
         padding: 2rem 1.5rem;
         position: relative;
         z-index: 1;
     }
-    
+
     .form-control {
         font-size: 1.1rem;
         padding: 1rem 1.25rem;
@@ -66,21 +66,21 @@
         background-color: var(--bs-body-bg);
         color: var(--bs-body-color);
     }
-    
+
     .form-control:focus {
         border-color: #28a745;
         box-shadow: 0 0 0 0.3rem rgba(40, 167, 69, 0.15);
         transform: scale(1.02);
         background-color: var(--bs-body-bg);
     }
-    
+
     .form-label {
         font-weight: 700;
         font-size: 1.1rem;
         color: var(--bs-emphasis-color);
         margin-bottom: 0.75rem;
     }
-    
+
     .btn {
         font-size: 1.1rem;
         padding: 1rem 2rem;
@@ -90,46 +90,46 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
-    
+
     .btn:hover {
         transform: translateY(-3px);
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     }
-    
+
     .btn-primary {
         background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
         border: none;
         color: white;
     }
-    
+
     .btn-primary:hover {
         background: linear-gradient(135deg, #20c997 0%, #28a745 100%);
         color: white;
     }
-    
+
     .btn-success {
         background: linear-gradient(135deg, var(--bs-success) 0%, rgba(var(--bs-success-rgb), 0.8) 100%);
         border: none;
     }
-    
+
     .btn-success:hover {
         background: linear-gradient(135deg, rgba(var(--bs-success-rgb), 0.9) 0%, var(--bs-success) 100%);
     }
-    
+
     .btn-outline-secondary {
         border: 2px solid var(--bs-secondary);
         color: var(--bs-secondary);
         font-weight: 600;
         background: var(--bs-body-bg);
     }
-    
+
     .btn-outline-secondary:hover {
         background: var(--bs-secondary);
         color: var(--bs-white);
         transform: translateY(-3px);
         box-shadow: 0 8px 20px rgba(var(--bs-secondary-rgb), 0.3);
     }
-    
+
     .alert {
         border-radius: 12px;
         font-size: 1rem;
@@ -140,7 +140,7 @@
         position: relative;
         overflow: hidden;
     }
-    
+
     .alert::before {
         content: '';
         position: absolute;
@@ -150,47 +150,47 @@
         height: 4px;
         transition: all 0.3s ease;
     }
-    
+
     .alert-info {
         background: linear-gradient(135deg, var(--bs-info-bg-subtle) 0%, rgba(var(--bs-info-rgb), 0.1) 100%);
         border-color: var(--bs-info);
         color: var(--bs-info-text-emphasis);
     }
-    
+
     .alert-info::before {
         background: linear-gradient(90deg, var(--bs-info), #20c997);
     }
-    
+
     .alert-warning {
         background: linear-gradient(135deg, var(--bs-warning-bg-subtle) 0%, rgba(var(--bs-warning-rgb), 0.1) 100%);
         border-color: var(--bs-warning);
         color: var(--bs-warning-text-emphasis);
     }
-    
+
     .alert-warning::before {
         background: linear-gradient(90deg, var(--bs-warning), #fd7e14);
     }
-    
+
     .alert-success {
         background: linear-gradient(135deg, var(--bs-success-bg-subtle) 0%, rgba(var(--bs-success-rgb), 0.1) 100%);
         border-color: var(--bs-success);
         color: var(--bs-success-text-emphasis);
     }
-    
+
     .alert-success::before {
         background: linear-gradient(90deg, var(--bs-success), var(--bs-info));
     }
-    
+
     .alert-danger {
         background: linear-gradient(135deg, var(--bs-danger-bg-subtle) 0%, rgba(var(--bs-danger-rgb), 0.1) 100%);
         border-color: var(--bs-danger);
         color: var(--bs-danger-text-emphasis);
     }
-    
+
     .alert-danger::before {
         background: linear-gradient(90deg, var(--bs-danger), #dc3545);
     }
-    
+
     .alert-light {
         background: linear-gradient(135deg, var(--bs-light-bg-subtle, var(--bs-secondary-bg)) 0%, rgba(var(--bs-light-rgb, var(--bs-secondary-rgb)), 0.1) 100%);
         border-color: var(--bs-light, var(--bs-secondary));
@@ -200,11 +200,11 @@
         border: 3px solid var(--bs-secondary);
         box-shadow: 0 4px 15px rgba(var(--bs-secondary-rgb), 0.15);
     }
-    
+
     .alert-light::before {
         background: linear-gradient(90deg, var(--bs-secondary), #20c997);
     }
-    
+
     .input-group-text {
         background: var(--bs-tertiary-bg);
         border: 2px solid var(--bs-border-color);
@@ -212,14 +212,14 @@
         font-weight: 600;
         font-size: 1.1rem;
     }
-    
+
     .deposit-section {
         background: var(--bs-body-bg);
         padding: 2rem;
         border-radius: 12px;
         margin-bottom: 1.5rem;
     }
-    
+
     .payment-info {
         background: linear-gradient(135deg, var(--bs-secondary-bg) 0%, var(--bs-tertiary-bg) 100%);
         border: 3px solid #28a745;
@@ -230,7 +230,7 @@
         overflow: hidden;
         box-shadow: 0 4px 15px rgba(40, 167, 69, 0.12);
     }
-    
+
     .payment-info::before {
         content: '';
         position: absolute;
@@ -241,18 +241,18 @@
         background: linear-gradient(90deg, #28a745, #20c997);
         transition: all 0.3s ease;
     }
-    
+
     .payment-info:hover {
         box-shadow: 0 8px 25px rgba(40, 167, 69, 0.18);
         transform: translateY(-2px);
     }
-    
+
     .payment-info h6 {
         color: #28a745;
         font-weight: 700;
         margin-bottom: 1rem;
     }
-    
+
     .fee-display {
         font-size: 1.2rem;
         font-weight: 700;
@@ -266,7 +266,7 @@
         position: relative;
         overflow: hidden;
     }
-    
+
     .fee-display::before {
         content: '';
         position: absolute;
@@ -276,37 +276,37 @@
         height: 3px;
         background: linear-gradient(90deg, var(--bs-success), var(--bs-info));
     }
-    
+
     /* Enhanced visibility for required fields */
     .text-danger {
         font-weight: 700;
         font-size: 1.2rem;
     }
-    
+
     /* Better error styling */
     .is-invalid {
         border-color: var(--bs-danger);
         box-shadow: 0 0 0 0.3rem rgba(var(--bs-danger-rgb), 0.25);
     }
-    
+
     .invalid-feedback {
         font-size: 1rem;
         font-weight: 700;
     }
-    
+
     /* Better spacing for older users */
     .form-group {
         margin-bottom: 2rem;
     }
-    
+
     .mb-3 {
         margin-bottom: 2rem !important;
     }
-    
+
     .d-grid {
         margin-top: 2rem;
     }
-    
+
     /* Code and address styling */
     code {
         background: var(--bs-secondary-bg);
@@ -318,7 +318,7 @@
         position: relative;
         overflow: hidden;
     }
-    
+
     code::before {
         content: '';
         position: absolute;
@@ -328,12 +328,12 @@
         height: 2px;
         background: linear-gradient(90deg, #28a745, #20c997);
     }
-    
+
     /* Table styling for history */
     .table {
         margin-bottom: 0;
     }
-    
+
     .table th {
         background-color: var(--bs-secondary-bg);
         border-bottom: 2px solid var(--bs-border-color);
@@ -341,28 +341,28 @@
         color: var(--bs-emphasis-color);
         white-space: nowrap;
     }
-    
+
     .table td {
         vertical-align: middle;
         border-bottom: 1px solid var(--bs-border-color-translucent);
         color: var(--bs-body-color);
     }
-    
-    .table-striped > tbody > tr:nth-of-type(odd) > td {
+
+    .table-striped>tbody>tr:nth-of-type(odd)>td {
         background-color: var(--bs-tertiary-bg);
     }
-    
+
     .table tbody tr:hover {
         background-color: var(--bs-secondary-bg);
         transition: background-color 0.2s ease;
     }
-    
+
     /* Copy button styling */
     .btn-sm {
         font-size: 0.9rem;
         padding: 0.5rem 1rem;
     }
-    
+
     .btn-sm:hover {
         transform: translateY(-1px);
     }
@@ -371,43 +371,43 @@
     [data-bs-theme="dark"] .card {
         background: linear-gradient(135deg, var(--bs-body-bg) 0%, rgba(var(--bs-secondary-rgb), 0.3) 100%);
     }
-    
+
     [data-bs-theme="dark"] .card:hover {
         background: linear-gradient(135deg, rgba(var(--bs-primary-rgb), 0.15) 0%, rgba(var(--bs-primary-rgb), 0.05) 100%);
     }
-    
+
     [data-bs-theme="dark"] .payment-info {
         background: linear-gradient(135deg, rgba(var(--bs-secondary-rgb), 0.3) 0%, rgba(var(--bs-tertiary-rgb), 0.3) 100%);
     }
-    
+
     [data-bs-theme="dark"] .fee-display {
         background: rgba(var(--bs-success-rgb), 0.15);
     }
-    
+
     [data-bs-theme="dark"] .alert-info {
         background: linear-gradient(135deg, rgba(13, 202, 240, 0.15) 0%, rgba(13, 202, 240, 0.05) 100%);
     }
-    
+
     [data-bs-theme="dark"] .alert-warning {
         background: linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 193, 7, 0.05) 100%);
     }
-    
+
     [data-bs-theme="dark"] .alert-success {
         background: linear-gradient(135deg, rgba(25, 135, 84, 0.15) 0%, rgba(25, 135, 84, 0.05) 100%);
     }
-    
+
     [data-bs-theme="dark"] .alert-danger {
         background: linear-gradient(135deg, rgba(220, 53, 69, 0.15) 0%, rgba(220, 53, 69, 0.05) 100%);
     }
-    
+
     [data-bs-theme="dark"] .alert-light {
         background: linear-gradient(135deg, rgba(108, 117, 125, 0.15) 0%, rgba(108, 117, 125, 0.05) 100%);
     }
-    
+
     [data-bs-theme="dark"] code {
         background: rgba(var(--bs-secondary-rgb), 0.3);
     }
-    
+
     /* Enhanced Wallet Address Styling */
     .wallet-address-container {
         background: var(--bs-body-bg);
@@ -417,7 +417,7 @@
         position: relative;
         overflow: hidden;
     }
-    
+
     .wallet-address-container::before {
         content: '';
         position: absolute;
@@ -427,12 +427,12 @@
         height: 4px;
         background: linear-gradient(90deg, #28a745, #20c997);
     }
-    
+
     .wallet-address-header h6 {
         font-size: 1.1rem;
         color: #28a745 !important;
     }
-    
+
     .wallet-address-box {
         position: relative;
         background: #ffffff;
@@ -444,20 +444,20 @@
         transition: all 0.3s ease;
         box-shadow: 0 4px 15px rgba(40, 167, 69, 0.1);
     }
-    
+
     .wallet-address-box:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(40, 167, 69, 0.2);
         border-color: #20c997;
     }
-    
+
     .wallet-address-content {
         padding: 0.75rem;
         background: var(--bs-body-bg);
         position: relative;
         z-index: 2;
     }
-    
+
     .wallet-address-text {
         font-size: 0.95rem;
         font-weight: 600;
@@ -470,7 +470,7 @@
         letter-spacing: 0.3px;
         font-family: 'Courier New', monospace;
     }
-    
+
     .wallet-address-overlay {
         position: absolute;
         top: 0;
@@ -488,23 +488,23 @@
         z-index: 3;
         backdrop-filter: blur(2px);
     }
-    
+
     .wallet-address-box:hover .wallet-address-overlay {
         opacity: 1;
     }
-    
+
     .wallet-address-overlay i {
         font-size: 2rem;
         margin-bottom: 0.5rem;
     }
-    
+
     .wallet-address-overlay span {
         font-weight: 600;
         font-size: 1.1rem;
         text-transform: uppercase;
         letter-spacing: 1px;
     }
-    
+
     .wallet-network-info {
         background: rgba(255, 193, 7, 0.1);
         border: 1px solid #ffc107;
@@ -512,37 +512,37 @@
         padding: 0.75rem;
         text-align: center;
     }
-    
+
     /* Dark theme adjustments */
     [data-bs-theme="dark"] .wallet-address-container {
         background: var(--bs-body-bg);
         border-color: var(--bs-primary);
     }
-    
+
     [data-bs-theme="dark"] .wallet-address-content {
         background: var(--bs-body-bg);
     }
-    
+
     [data-bs-theme="dark"] .wallet-address-text {
         color: var(--bs-body-color) !important;
     }
-    
+
     [data-bs-theme="dark"] .wallet-network-info {
         background: rgba(255, 193, 7, 0.15);
         border-color: #ffc107;
     }
-    
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
         .wallet-address-text {
             font-size: 0.9rem;
             letter-spacing: 0.2px;
         }
-        
+
         .wallet-address-overlay i {
             font-size: 1.5rem;
         }
-        
+
         .wallet-address-overlay span {
             font-size: 0.9rem;
         }
@@ -579,7 +579,7 @@
                     <div class="card-header">
                         <h5 class="mb-0">
                             <i class="fas fa-wallet me-2"></i>
-                            USDT Direct Deposit
+                            Manual USDT Deposit (1.8% Fee)
                         </h5>
                     </div>
                     <div class="card-body">
@@ -600,23 +600,23 @@
                                         <div class="row g-2 small">
                                             <div class="col-6">
                                                 <div class="d-flex justify-content-between">
-                                                    <span class="text-muted">Deposit Amount:</span>
+                                                    <span class="text-muted">Requested Amount:</span>
                                                     <span class="fw-medium">$<span id="displayAmount">0.00</span></span>
                                                 </div>
                                             </div>
                                             <div class="col-6">
                                                 <div class="d-flex justify-content-between">
-                                                    <span class="text-muted">Processing Fee (2.5%):</span>
-                                                    <span class="text-warning fw-medium">-$<span
+                                                    <span class="text-muted">Manual Fee (1.8%):</span>
+                                                    <span class="text-info fw-medium">+$<span
                                                             id="displayFee">0.00</span></span>
                                                 </div>
                                             </div>
                                             <div class="col-12">
                                                 <hr class="my-2">
                                                 <div class="d-flex justify-content-between">
-                                                    <span class="fw-semibold">You will receive:</span>
-                                                    <span class="fw-semibold text-success">$<span
-                                                            id="displayNetAmount">0.00</span></span>
+                                                    <span class="fw-semibold">You must send:</span>
+                                                    <span class="fw-semibold text-primary">$<span
+                                                            id="displayTotalAmount">0.00</span> USDT</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -643,7 +643,7 @@
                                 </div>
                                 <div id="addressContent" style="display: none;">
                                     <p><strong>Please transfer your USDT to the following wallet address:</strong></p>
-                                    
+
                                     <!-- Enhanced Wallet Address Display -->
                                     <div class="wallet-address-container mb-3">
                                         <div class="wallet-address-content">
@@ -828,13 +828,14 @@
                 const amount = parseFloat(amountInput.value) || 0;
 
                 if (amount >= 100) {
-                    const feePercent = 2.5;
+                    // Manual deposit fee is 1.8% ADDED to the amount
+                    const feePercent = 1.8;
                     const feeAmount = amount * (feePercent / 100);
-                    const netAmount = amount - feeAmount;
+                    const totalAmount = amount + feeAmount; // User pays MORE
 
                     document.getElementById('displayAmount').textContent = amount.toFixed(2);
                     document.getElementById('displayFee').textContent = feeAmount.toFixed(2);
-                    document.getElementById('displayNetAmount').textContent = netAmount.toFixed(2);
+                    document.getElementById('displayTotalAmount').textContent = totalAmount.toFixed(2);
 
                     feeCalculation.style.display = 'block';
                 } else {
@@ -1054,19 +1055,19 @@
                 alert('Copied to clipboard: ' + text);
             }
         }
-        
+
         // Make wallet address box clickable for copying
         $(document).ready(function() {
             $(document).on('click', '.wallet-address-box', function() {
                 copyToClipboard('walletAddress');
-                
+
                 // Visual feedback
                 const overlay = $(this).find('.wallet-address-overlay');
                 const originalContent = overlay.html();
-                
+
                 overlay.html('<i class="fas fa-check-circle"></i><span>Copied!</span>');
                 overlay.css('opacity', '1');
-                
+
                 setTimeout(function() {
                     overlay.html(originalContent);
                     overlay.css('opacity', '0');
