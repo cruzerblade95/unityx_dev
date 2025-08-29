@@ -417,7 +417,8 @@
                             </div>
                         </div>
 
-                        <!-- QR Code Section -->
+                        {{-- QR Code Section - Temporarily Hidden --}}
+                        {{--
                         <div class="card qr-card mb-4">
                             <div class="card-header">
                                 <h5><i class="fas fa-qrcode me-2"></i>QR Code</h5>
@@ -428,6 +429,7 @@
                                     address</p>
                             </div>
                         </div>
+                        --}}
 
                         <!-- Fee Breakdown -->
                         <div class="card fee-breakdown-card mb-4">
@@ -480,8 +482,25 @@
     @endsection
 
     @section('vendor-script')
-        <!-- Include QR Code library -->
+        {{-- QR Code libraries - Temporarily disabled --}}
+        {{--
+        <!-- Include QR Code library with fallback -->
         <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+        <script>
+            // Fallback QR code library if CDN fails
+            if (typeof QRCode === 'undefined') {
+                console.log('Primary QR library failed, trying fallback...');
+                var script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js';
+                script.onload = function() {
+                    console.log('Fallback QR library loaded');
+                    // Set a flag that we're using the fallback
+                    window.usingQRFallback = true;
+                };
+                document.head.appendChild(script);
+            }
+        </script>
+        --}}
     @endsection
 
     @section('page-script')
@@ -524,27 +543,94 @@
                 location.reload();
             }
 
+            {{-- QR Code Generation - Temporarily disabled --}}
+            {{--
             // Generate QR Code
             document.addEventListener('DOMContentLoaded', function() {
+                console.log('DOM loaded, starting QR code generation...');
+
+                // Wait a bit for fallback library to load if needed
+                setTimeout(function() {
+                    generateQRCode();
+                }, 500);
+            });
+
+            function generateQRCode() {
                 const address = '{{ $deposit->payment_address }}';
                 const amount = '{{ $deposit->crypto_amount }}';
                 const currency = '{{ strtoupper(str_replace('_TO_USDT', '', $deposit->crypto_currency)) }}';
 
-                // Create QR code with payment URI format
-                const qrData = `${currency.toLowerCase()}:${address}?amount=${amount}`;
-
-                QRCode.toCanvas(document.getElementById('qrcode'), qrData, {
-                    width: 200,
-                    height: 200,
-                    colorDark: '#000000',
-                    colorLight: '#ffffff'
-                }, function(error) {
-                    if (error) {
-                        console.error('QR Code generation failed:', error);
-                        document.getElementById('qrcode').innerHTML =
-                            '<p class="text-muted">QR code generation failed</p>';
-                    }
+                console.log('Payment details:', {
+                    address,
+                    amount,
+                    currency
                 });
-            });
+
+                // Create QR code data
+                const qrData = `${currency.toLowerCase()}:${address}?amount=${amount}`;
+                console.log('QR Data:', qrData);
+
+                const qrElement = document.getElementById('qrcode');
+                if (!qrElement) {
+                    console.error('QR code element not found');
+                    return;
+                }
+
+                // Try primary QRCode library
+                if (typeof QRCode !== 'undefined') {
+                    console.log('Using QRCode library');
+                    try {
+                        QRCode.toCanvas(qrElement, qrData, {
+                            width: 200,
+                            height: 200,
+                            colorDark: '#000000',
+                            colorLight: '#ffffff',
+                            margin: 2
+                        }, function(error) {
+                            if (error) {
+                                console.error('QR Code generation failed:', error);
+                                qrElement.innerHTML = '<p class="text-muted">QR code generation failed: ' + error
+                                    .message + '</p>';
+                            } else {
+                                console.log('QR Code generated successfully');
+                            }
+                        });
+                        return;
+                    } catch (e) {
+                        console.error('Exception during QR generation:', e);
+                    }
+                }
+
+                // Try fallback QRious library
+                if (typeof QRious !== 'undefined') {
+                    console.log('Using QRious fallback library');
+                    try {
+                        const canvas = document.createElement('canvas');
+                        const qr = new QRious({
+                            element: canvas,
+                            value: qrData,
+                            size: 200,
+                            foreground: '#000000',
+                            background: '#ffffff'
+                        });
+                        qrElement.appendChild(canvas);
+                        console.log('QR Code generated successfully with fallback');
+                        return;
+                    } catch (e) {
+                        console.error('Exception during fallback QR generation:', e);
+                    }
+                }
+
+                // If both libraries fail, show manual info
+                console.error('No QR libraries available');
+                qrElement.innerHTML = `
+                    <div class="text-center p-3 border rounded">
+                        <i class="fas fa-qrcode fa-3x text-muted mb-2"></i>
+                        <p class="text-muted mb-1">QR Code not available</p>
+                        <small class="text-muted">Please copy the address manually</small>
+                    </div>
+                `;
+            }
+            --}}
         </script>
     @endsection
