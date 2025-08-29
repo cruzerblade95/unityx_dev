@@ -27,6 +27,13 @@ class NOWPaymentsService
                 'Content-Type' => 'application/json',
             ],
             'timeout' => 30,
+            // IMPORTANT: SSL verification disabled for Windows development environment
+            // For production, remove these options and ensure proper SSL certificate configuration
+            'verify' => false,
+            'curl' => [
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_SSL_VERIFYHOST => false,
+            ],
         ]);
     }
 
@@ -222,7 +229,16 @@ class NOWPaymentsService
                 'json' => $data
             ]);
 
-            return json_decode($response->getBody()->getContents(), true);
+            $result = json_decode($response->getBody()->getContents(), true);
+
+            // Log successful response for debugging
+            Log::info('NOWPayments Create Payment Success', [
+                'status_code' => $response->getStatusCode(),
+                'response' => $result,
+                'request_data' => $data
+            ]);
+
+            return $result;
         } catch (RequestException $e) {
             Log::error('NOWPayments Create Payment Error: ' . $e->getMessage());
             Log::error('Request Data: ' . json_encode($data ?? []));
