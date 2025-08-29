@@ -421,22 +421,41 @@
                                 </label>
                                 <select class="form-select" id="crypto_currency" name="crypto_currency" required>
                                     <option value="">Select cryptocurrency to send</option>
-                                    <option value="btc">Bitcoin (BTC) → USDT</option>
-                                    <option value="eth">Ethereum (ETH) → USDT</option>
-                                    <option value="ltc">Litecoin (LTC) → USDT</option>
-                                    <option value="bch">Bitcoin Cash (BCH) → USDT</option>
-                                    <option value="xrp">Ripple (XRP) → USDT</option>
-                                    <option value="ada">Cardano (ADA) → USDT</option>
-                                    <option value="dot">Polkadot (DOT) → USDT</option>
-                                    <option value="bnb">Binance Coin (BNB) → USDT</option>
+
+                                    <!-- USDT Variants -->
+                                    <optgroup label="USDT (Tether) - Popular Stablecoins">
+                                        <option value="usdttrc20">USDT TRC-20 (Tron) → USDT</option>
+                                        <option value="usdterc20">USDT ERC-20 (Ethereum) → USDT</option>
+                                        <option value="usdtbsc">USDT BEP-20 (BSC) → USDT</option>
+                                        <option value="usdtpoly">USDT Polygon → USDT</option>
+                                        <option value="usdtsol">USDT Solana → USDT</option>
+                                    </optgroup>
+
+                                    <!-- Other Stablecoins -->
+                                    <optgroup label="Other Stablecoins">
+                                        <option value="usdcsol">USDC Solana → USDT</option>
+                                        <option value="usdcerc20">USDC ERC-20 → USDT</option>
+                                        <option value="usdcbsc">USDC BEP-20 → USDT</option>
+                                    </optgroup>
+
+                                    <!-- Major Cryptocurrencies -->
+                                    <optgroup label="Major Cryptocurrencies">
+                                        <option value="btc">Bitcoin (BTC) → USDT</option>
+                                        <option value="eth">Ethereum (ETH) → USDT</option>
+                                        <option value="bnb">Binance Coin (BNB) → USDT</option>
+                                        <option value="ltc">Litecoin (LTC) → USDT</option>
+                                        <option value="bch">Bitcoin Cash (BCH) → USDT</option>
+                                        <option value="xrp">Ripple (XRP) → USDT</option>
+                                        <option value="ada">Cardano (ADA) → USDT</option>
+                                        <option value="dot">Polkadot (DOT) → USDT</option>
+                                    </optgroup>
                                 </select>
-                                <div class="form-text">Choose the cryptocurrency you want to send. It will be converted to
-                                    USDT via NOWPayments.</div>
-                                <div class="text-info mt-2">
-                                    <small><i class="fas fa-info-circle me-1"></i><strong>Need USDT direct
-                                            transfer?</strong>
-                                        Use <a href="{{ route('user.deposit.direct') }}" class="text-primary">Manual
-                                            Deposit</a> instead.</small>
+                                <div class="form-text">Choose the cryptocurrency you want to send. All payments are
+                                    processed through NOWPayments and converted to USDT.</div>
+                                <div class="text-success mt-2">
+                                    <small><i class="fas fa-info-circle me-1"></i><strong>USDT users:</strong>
+                                        You can now send USDT directly! Choose your preferred network (TRC-20, ERC-20,
+                                        BEP-20, etc.)</small>
                                 </div>
                             </div>
 

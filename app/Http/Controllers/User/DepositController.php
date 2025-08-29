@@ -139,8 +139,8 @@ class DepositController extends Controller
             $fee_amount = $request->amount * ($nowPaymentsFeePercent / 100);
             $total_amount_to_pay = $request->amount + $fee_amount; // User pays MORE
 
-            // All crypto currencies go through NOWPayments - NO USDT variants here
-            // USDT variants should be handled in manual deposit (/user/deposit/direct)
+            // All crypto currencies go through NOWPayments - INCLUDING USDT variants
+            // USDT variants can be processed through NOWPayments for consistency
             $orderId = 'crypto_deposit_' . Auth::id() . '_' . time();
 
             // Create payment with NOWPayments for the TOTAL amount (including our fee)
