@@ -139,8 +139,8 @@ class DepositController extends Controller
             $fee_amount = $request->amount * ($nowPaymentsFeePercent / 100);
             $total_amount_to_pay = $request->amount + $fee_amount; // User pays MORE
 
-            // All crypto currencies go through NOWPayments - NO USDT variants here
-            // USDT variants should be handled in manual deposit (/user/deposit/direct)
+            // All crypto currencies go through NOWPayments - INCLUDING USDT variants
+            // USDT variants can be processed through NOWPayments for consistency
             $orderId = 'crypto_deposit_' . Auth::id() . '_' . time();
 
             // Create payment with NOWPayments for the TOTAL amount (including our fee)
@@ -157,22 +157,36 @@ class DepositController extends Controller
                 return redirect()->back()->withErrors(['error' => 'Failed to create crypto payment. Please check the logs and try again.']);
             }
 
+            // Log the full payment response for debugging
+            Log::info('NOWPayments response received', [
+                'user_id' => Auth::id(),
+                'response' => $payment,
+                'response_keys' => array_keys($payment ?? [])
+            ]);
+
             // Check if the payment response has the required fields
             if (!isset($payment['payment_id'])) {
                 Log::error('NOWPayments response missing payment_id', ['response' => $payment]);
                 return redirect()->back()->withErrors(['error' => 'Invalid payment response from NOWPayments.']);
             }
 
-            // Check if NOWPayments returned a payment URL for redirect
-            if (!isset($payment['payment_url'])) {
-                Log::error('NOWPayments response missing payment_url', ['response' => $payment]);
-                return redirect()->back()->withErrors(['error' => 'Invalid payment response from NOWPayments - no payment URL provided.']);
+            // Check if NOWPayments returned payment details (NOWPayments doesn't provide hosted URLs)
+            if (!isset($payment['pay_address']) || !isset($payment['pay_amount']) || !isset($payment['pay_currency'])) {
+                Log::error('NOWPayments response missing required payment details', [
+                    'response' => $payment,
+                    'available_keys' => array_keys($payment ?? [])
+                ]);
+
+                return redirect()->back()->withErrors(['error' => 'Invalid payment response from NOWPayments - missing payment details. Available fields: ' . implode(', ', array_keys($payment ?? []))]);
             }
 
-            $paymentUrl = $payment['payment_url']; // Use the actual NOWPayments payment URL
+            $paymentAddress = $payment['pay_address'];
+            $payAmount = $payment['pay_amount'];
+            $payCurrency = strtoupper($payment['pay_currency']);
+            $expirationDate = $payment['expiration_estimate_date'] ?? null;
 
             // Store deposit in database - user gets the full requested amount
-            Deposit::create([
+            $deposit = Deposit::create([
                 'user_id' => Auth::id(),
                 'amount' => $request->amount, // Base amount user requested
                 'tax_percent' => $nowPaymentsFeePercent,
@@ -183,15 +197,17 @@ class DepositController extends Controller
                 'note' => $request->note ?? 'NOWPayments cryptocurrency deposit (1.8% fee applied)',
                 'payment_method' => 'crypto',
                 'payment_id' => $payment['payment_id'],
-                'payment_url' => $payment['payment_url'], // Store the actual NOWPayments URL
-                'crypto_currency' => $request->crypto_currency . '_TO_USDT', // Indicate conversion
-                'crypto_amount' => $payment['pay_amount'] ?? null,
-                'payment_address' => $payment['pay_address'] ?? null,
-                'unique_address' => $payment['pay_address'] ?? null,
-                'address_memo' => 'CRYPTO_' . strtoupper($request->crypto_currency) . '_TO_USDT_' . time(),
+                'payment_url' => null, // NOWPayments doesn't provide hosted URLs
+                'crypto_currency' => $payCurrency . '_TO_USDT', // Indicate conversion
+                'crypto_amount' => $payAmount,
+                'payment_address' => $paymentAddress,
+                'unique_address' => $paymentAddress,
+                'address_memo' => 'CRYPTO_' . $payCurrency . '_TO_USDT_' . time(),
             ]);
 
-            return redirect($paymentUrl); // Redirect to actual NOWPayments payment page
+            // Redirect to payment details page instead of external URL
+            return redirect()->route('user.deposit.crypto.details', ['deposit' => $deposit->id])
+                           ->with('success', 'Crypto payment created! Please send the exact amount to complete your deposit.');
 
         } catch (\Exception $e) {
             Log::error('Crypto payment creation exception: ' . $e->getMessage(), [
@@ -202,6 +218,21 @@ class DepositController extends Controller
             ]);
             return redirect()->back()->withErrors(['error' => 'Payment creation failed: ' . $e->getMessage()]);
         }
+    }
+
+    public function cryptoDetails(Deposit $deposit)
+    {
+        // Ensure user can only view their own deposits
+        if ($deposit->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized access to deposit details.');
+        }
+
+        // Ensure this is a crypto deposit
+        if ($deposit->payment_method !== 'crypto') {
+            return redirect()->route('user.deposit.index')->with('error', 'Invalid deposit type.');
+        }
+
+        return view('user.content.crypto-payment-details', compact('deposit'));
     }
 
     public function success(Request $request)
