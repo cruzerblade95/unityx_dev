@@ -8,7 +8,27 @@ document.addEventListener('DOMContentLoaded', function () {
     serverSide: true,
     ajax: {
       url: baseUrl + 'admin/nowpayments/list',
-      type: 'GET'
+      type: 'GET',
+      data: function (d) {
+        // Only add filter parameters if they have actual values
+        const statusFilter = $('#DepositStatus').val();
+        const paymentMethodFilter = $('#PaymentMethod').val();
+
+        if (statusFilter && statusFilter !== '') {
+          d.status_filter = statusFilter;
+        }
+
+        if (paymentMethodFilter && paymentMethodFilter !== '') {
+          d.payment_method_filter = paymentMethodFilter;
+        }
+
+        // Debug logging
+        console.log('DataTable sending filters:', {
+          status_filter: d.status_filter || 'not sent',
+          payment_method_filter: d.payment_method_filter || 'not sent',
+          all_params: d
+        });
+      }
     },
     columns: [
       // ID column
@@ -138,56 +158,33 @@ document.addEventListener('DOMContentLoaded', function () {
       processing: 'Processing...',
       emptyTable: 'No deposits found',
       zeroRecords: 'No matching deposits found'
-    },
-    initComplete: function () {
-      // Adding status filter once table initialized
-      this.api()
-        .columns(4) // Status column
-        .every(function () {
-          const column = this;
-          const select = $(
-            '<select id="DepositStatus" class="form-select text-capitalize"><option value="">All Statuses</option></select>'
-          )
-            .appendTo('.deposit_status')
-            .on('change', function () {
-              const val = $.fn.dataTable.util.escapeRegex($(this).val());
-              column.search(val ? '^' + val + '$' : '', true, false).draw();
-            });
-
-          // Add status options
-          select.append('<option value="pending">Pending</option>');
-          select.append('<option value="completed">Completed</option>');
-          select.append('<option value="failed">Failed</option>');
-          select.append('<option value="rejected">Rejected</option>');
-        });
-
-      // Adding payment method filter
-      this.api()
-        .columns(3) // Payment ID column (we'll use this to filter by payment method)
-        .every(function () {
-          const column = this;
-          const select = $(
-            '<select id="PaymentMethod" class="form-select text-capitalize"><option value="">All Payment Methods</option></select>'
-          )
-            .appendTo('.payment_method')
-            .on('change', function () {
-              const val = $(this).val();
-              if (val === 'nowpayments') {
-                // Show only records with payment_id (NOWPayments)
-                column.search('.+', true, false).draw();
-              } else if (val === 'manual') {
-                // Show only records without payment_id (Manual)
-                column.search('^$', true, false).draw();
-              } else {
-                // Show all
-                column.search('', true, false).draw();
-              }
-            });
-
-          // Add payment method options
-          select.append('<option value="nowpayments">NOWPayments</option>');
-          select.append('<option value="manual">Manual</option>');
-        });
     }
   });
+
+  // Add event listeners for filters (with existence check)
+  const statusFilter = $('#DepositStatus');
+  const paymentMethodFilter = $('#PaymentMethod');
+
+  console.log('Filter elements found:', {
+    statusFilter: statusFilter.length,
+    paymentMethodFilter: paymentMethodFilter.length
+  });
+
+  if (statusFilter.length > 0) {
+    statusFilter.on('change', function () {
+      console.log('Status filter changed to:', $(this).val());
+      depositsTable.ajax.reload();
+    });
+  } else {
+    console.error('DepositStatus filter element not found');
+  }
+
+  if (paymentMethodFilter.length > 0) {
+    paymentMethodFilter.on('change', function () {
+      console.log('Payment method filter changed to:', $(this).val());
+      depositsTable.ajax.reload();
+    });
+  } else {
+    console.error('PaymentMethod filter element not found');
+  }
 });
