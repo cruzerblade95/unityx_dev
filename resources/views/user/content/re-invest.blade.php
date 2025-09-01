@@ -444,7 +444,8 @@
                                         <div class="input-group">
                                             <span class="input-group-text">$</span>
                                             <input type="number" class="form-control @error('amount') is-invalid @enderror"
-                                                id="amount" name="amount" step="0.01" min="1"
+                                                id="amount" name="amount" step="0.01"
+                                                min="{{ min($profitSettings ? $profitSettings->min_amount : 1, $bonusSettings ? $bonusSettings->min_amount : 1) }}"
                                                 max="{{ max($profitBalance, $bonusBalance) }}" placeholder="0.00"
                                                 value="{{ old('amount') }}" required>
                                             @error('amount')
@@ -455,6 +456,10 @@
                                             <i class="fas fa-info-circle me-1"></i>
                                             Amount will be transferred from selected wallet to deposit, then automatically
                                             invested in AI Trading
+                                            <br>
+                                            <small id="wallet-limits-info" class="text-muted">
+                                                <!-- Dynamic limits will be shown here -->
+                                            </small>
                                         </div>
                                     </div>
                                 </div>
@@ -471,7 +476,7 @@
                             <!-- Expected Returns Info -->
                             <div class="investment-preview mb-4 p-3 rounded bg-light" id="investmentPreview"
                                 style="display: none;">
-                                <h6 class="text-primary mb-2">
+                                                                <h6 class="mb-3">
                                     <i class="fas fa-chart-line me-2"></i>Investment Preview
                                 </h6>
                                 <div class="row">
@@ -482,6 +487,16 @@
                                     <div class="col-md-6">
                                         <small class="text-muted">Expected Return (5x):</small>
                                         <div class="font-weight-bold text-success" id="previewReturn">$0.00</div>
+                                    </div>
+                                </div>
+                                <div class="row mt-2" id="taxPreview" style="display: none;">
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Tax Amount:</small>
+                                        <div class="font-weight-bold text-warning" id="previewTax">$0.00</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Net Investment:</small>
+                                        <div class="font-weight-bold text-info" id="previewNet">$0.00</div>
                                     </div>
                                 </div>
                             </div>
@@ -1159,43 +1174,74 @@
             const profitBalance = {{ $profitBalance }};
             const bonusBalance = {{ $bonusBalance }};
 
+            // Reinvestment settings
+            const profitSettings = @json($profitSettings);
+            const bonusSettings = @json($bonusSettings);
+
             // Generate quick amount buttons based on selected wallet
             function generateQuickAmountButtons() {
                 const selectedWallet = document.querySelector('input[name="wallet_type"]:checked');
-                const selectedBalance = selectedWallet && selectedWallet.value === 'bonus' ? bonusBalance :
-                    profitBalance;
+                const selectedBalance = selectedWallet && selectedWallet.value === 'bonus' ? bonusBalance : profitBalance;
+                const settings = selectedWallet && selectedWallet.value === 'bonus' ? bonusSettings : profitSettings;
 
-                // Update amount input max value
-                amountInput.max = selectedBalance;
+                // Update limits info
+                updateWalletLimitsInfo(selectedWallet ? selectedWallet.value : 'profit');
+
+                // Update amount input limits
+                if (settings) {
+                    amountInput.min = settings.min_amount;
+                    amountInput.max = Math.min(settings.max_amount, selectedBalance);
+                } else {
+                    amountInput.min = 1;
+                    amountInput.max = selectedBalance;
+                }
 
                 let buttonsHTML = '';
+                const minAmount = settings ? settings.min_amount : 1;
+                const maxAmount = settings ? Math.min(settings.max_amount, selectedBalance) : selectedBalance;
 
-                if (selectedBalance >= 10) {
-                    buttonsHTML +=
-                        '<button type="button" class="btn btn-outline-primary btn-sm quick-amount" data-amount="10">$10</button>';
+                // Generate buttons based on settings and balance
+                const buttonAmounts = [10, 25, 50, 100, 250, 500, 1000];
+
+                buttonAmounts.forEach(amount => {
+                    if (amount >= minAmount && amount <= maxAmount && selectedBalance >= amount) {
+                        buttonsHTML += `<button type="button" class="btn btn-outline-primary btn-sm quick-amount" data-amount="${amount}">$${amount}</button>`;
+                    }
+                });
+
+                // Add 50% and All buttons if within limits
+                const halfBalance = selectedBalance / 2;
+                if (halfBalance >= minAmount && halfBalance <= maxAmount) {
+                    buttonsHTML += `<button type="button" class="btn btn-outline-info btn-sm quick-amount" data-amount="${halfBalance}">50% ($${halfBalance.toFixed(2)})</button>`;
                 }
-                if (selectedBalance >= 25) {
-                    buttonsHTML +=
-                        '<button type="button" class="btn btn-outline-primary btn-sm quick-amount" data-amount="25">$25</button>';
-                }
-                if (selectedBalance >= 50) {
-                    buttonsHTML +=
-                        '<button type="button" class="btn btn-outline-primary btn-sm quick-amount" data-amount="50">$50</button>';
-                }
-                if (selectedBalance >= 100) {
-                    buttonsHTML +=
-                        '<button type="button" class="btn btn-outline-primary btn-sm quick-amount" data-amount="100">$100</button>';
-                }
-                if (selectedBalance > 0) {
-                    buttonsHTML +=
-                        '<button type="button" class="btn btn-outline-success btn-sm quick-amount" data-amount="' +
-                        selectedBalance + '">All ($' + selectedBalance.toFixed(2) + ')</button>';
+
+                if (selectedBalance >= minAmount && selectedBalance <= maxAmount) {
+                    buttonsHTML += `<button type="button" class="btn btn-outline-success btn-sm quick-amount" data-amount="${selectedBalance}">All ($${selectedBalance.toFixed(2)})</button>`;
                 }
 
                 quickAmountContainer.innerHTML = buttonsHTML;
 
                 // Reattach event listeners to new buttons
                 attachQuickAmountListeners();
+            }
+
+            // Update wallet limits information
+            function updateWalletLimitsInfo(walletType) {
+                const limitsInfo = document.getElementById('wallet-limits-info');
+                const settings = walletType === 'bonus' ? bonusSettings : profitSettings;
+
+                if (settings) {
+                    let infoText = `Min: $${settings.min_amount}, Max: $${settings.max_amount}`;
+                    if (settings.tax_percent > 0) {
+                        infoText += `, Tax: ${settings.tax_percent}%`;
+                    }
+                    if (!settings.is_enabled) {
+                        infoText = '<span class="text-danger">⚠️ Reinvestment disabled for this wallet</span>';
+                    }
+                    limitsInfo.innerHTML = infoText;
+                } else {
+                    limitsInfo.innerHTML = 'No specific limits configured';
+                }
             }
 
             // Attach event listeners to quick amount buttons
@@ -1230,11 +1276,37 @@
             // Update investment preview
             function updatePreview() {
                 const amount = parseFloat(amountInput.value) || 0;
+                const selectedWallet = document.querySelector('input[name="wallet_type"]:checked');
+                const settings = selectedWallet && selectedWallet.value === 'bonus' ? bonusSettings : profitSettings;
 
                 if (amount > 0) {
-                    const returnAmount = amount * 5;
+                    let taxAmount = 0;
+                    let netAmount = amount;
+
+                    // Calculate tax if settings exist
+                    if (settings && settings.tax_percent > 0) {
+                        taxAmount = (amount * settings.tax_percent) / 100;
+                        netAmount = amount - taxAmount;
+                    }
+
+                    const returnAmount = netAmount * 5; // Return is based on net amount
+
                     previewAmount.textContent = '$' + amount.toFixed(2);
                     previewReturn.textContent = '$' + returnAmount.toFixed(2);
+
+                    // Show/hide tax preview
+                    const taxPreview = document.getElementById('taxPreview');
+                    const previewTax = document.getElementById('previewTax');
+                    const previewNet = document.getElementById('previewNet');
+
+                    if (taxAmount > 0) {
+                        previewTax.textContent = '$' + taxAmount.toFixed(2);
+                        previewNet.textContent = '$' + netAmount.toFixed(2);
+                        taxPreview.style.display = 'block';
+                    } else {
+                        taxPreview.style.display = 'none';
+                    }
+
                     investmentPreview.style.display = 'block';
                     investmentPreview.classList.add('show');
                 } else {

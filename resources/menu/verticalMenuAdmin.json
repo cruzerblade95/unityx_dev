@@ -71,6 +71,12 @@
       "name": "Withdrawal Settings",
       "icon": "menu-icon icon-base ti tabler-settings",
       "slug": "admin.withdrawal_settings.index"
+    },
+    {
+      "url": "admin/reinvestment-settings",
+      "name": "Reinvestment Settings",
+      "icon": "menu-icon icon-base ti tabler-repeat",
+      "slug": "admin.reinvestment_settings.index"
     }
 
   ]

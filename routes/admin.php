@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\FixCronValueController;
 use App\Http\Controllers\Admin\BannerAdvertisementController;
 use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\AdminWithdrawalSettingsController;
+use App\Http\Controllers\Admin\AdminReinvestmentSettingsController;
 
 Route::prefix('admin')->middleware('web')->group(function () {
     // Guest routes
@@ -120,6 +121,18 @@ Route::prefix('admin')->middleware('web')->group(function () {
             Route::post('/enable-withdrawals', [AdminWithdrawalSettingsController::class, 'enableWithdrawals'])->name('enable-withdrawals');
             Route::get('/global-defaults', [AdminWithdrawalSettingsController::class, 'globalDefaults'])->name('global-defaults');
             Route::post('/global-defaults/update', [AdminWithdrawalSettingsController::class, 'updateGlobalDefaults'])->name('global-defaults.update');
+        });
+
+        // Reinvestment Settings Management Routes
+        Route::prefix('reinvestment-settings')->name('admin.reinvestment-settings.')->group(function () {
+            Route::get('/', [AdminReinvestmentSettingsController::class, 'index'])->name('index');
+            Route::get('/users-data', [AdminReinvestmentSettingsController::class, 'getUsersData'])->name('users-data');
+            Route::get('/user/{userId}/settings', [AdminReinvestmentSettingsController::class, 'getUserSettings'])->name('user.settings');
+            Route::post('/user/{userId}/update', [AdminReinvestmentSettingsController::class, 'updateUserSettings'])->name('user.update');
+            Route::post('/bulk-update', [AdminReinvestmentSettingsController::class, 'bulkUpdate'])->name('bulk-update');
+            Route::get('/settings-preview', [AdminReinvestmentSettingsController::class, 'getSettingsPreview'])->name('settings-preview');
+            Route::post('/global-defaults/update', [AdminReinvestmentSettingsController::class, 'updateGlobalDefaults'])->name('global-defaults.update');
+            Route::delete('/user/{userId}/settings', [AdminReinvestmentSettingsController::class, 'deleteUserSettings'])->name('user.delete');
         });
     });
 });
