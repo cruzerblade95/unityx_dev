@@ -13,17 +13,51 @@ class RecoveryAccountController extends Controller
 {
     public function index(Request $request)
     {
-        $status = $request->get('status', 'all');
+        return view('admin.recovery_accounts.index');
+    }
 
-        $query = RecoveryAccount::with('processedBy')->orderBy('created_at', 'desc');
+    public function getRecoveryData(Request $request)
+    {
+        $query = RecoveryAccount::with(['processedBy'])
+            ->leftJoin('users', 'recovery_accounts.email', '=', 'users.email')
+            ->select('recovery_accounts.*', 'users.username')
+            ->orderBy('recovery_accounts.created_at', 'desc');
 
-        if ($status !== 'all') {
-            $query->where('status', $status);
-        }
-
-        $recoveries = $query->paginate(15);
-
-        return view('admin.recovery_accounts.index', compact('recoveries', 'status'));
+        return datatables($query)
+            ->addColumn('username', function ($recovery) {
+                return $recovery->username ?: '-';
+            })
+            ->addColumn('deposit_formatted', function ($recovery) {
+                return '$' . number_format($recovery->deposit, 2);
+            })
+            ->addColumn('profit_formatted', function ($recovery) {
+                return '$' . number_format($recovery->profit, 2);
+            })
+            ->addColumn('status_badge', function ($recovery) {
+                if ($recovery->status == 'pending') {
+                    return '<span class="badge bg-warning"><i class="fas fa-clock me-1"></i>Pending</span>';
+                } elseif ($recovery->status == 'approved') {
+                    return '<span class="badge bg-success"><i class="fas fa-check me-1"></i>Approved</span>';
+                } else {
+                    return '<span class="badge bg-danger"><i class="fas fa-times me-1"></i>Rejected</span>';
+                }
+            })
+            ->addColumn('submitted_at', function ($recovery) {
+                return $recovery->created_at->format('M d, Y H:i');
+            })
+            ->addColumn('actions', function ($recovery) {
+                return '<a href="' . route('admin.recovery_accounts.show', $recovery->id) . '" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye me-1"></i>View
+                        </a>';
+            })
+            ->filterColumn('email', function ($query, $keyword) {
+                $query->where('recovery_accounts.email', 'like', "%{$keyword}%");
+            })
+            ->filterColumn('username', function ($query, $keyword) {
+                $query->where('users.username', 'like', "%{$keyword}%");
+            })
+            ->rawColumns(['status_badge', 'actions'])
+            ->make(true);
     }
 
     public function show($id)

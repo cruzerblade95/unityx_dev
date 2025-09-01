@@ -66,17 +66,18 @@
 
           @yield('content')
 
-        </div>
-        <!-- / Content -->
+          </div>
+          <!-- / Content -->
 
-        <!-- Footer -->
-        @if ($isFooter)
-          @include('admin/layouts/footer')
-        @endif
-        <!-- / Footer -->
-        <div class="content-backdrop fade"></div>
-      </div>
-      <!--/ Content wrapper -->
+          <!-- Footer -->
+          @if ($isFooter)
+            @include('admin/layouts/footer')
+          @endif
+          <!-- / Footer -->
+
+          <div class="content-backdrop fade"></div>
+        </div>
+        <!--/ Content wrapper -->
     </div>
     <!-- / Layout page -->
   </div>
