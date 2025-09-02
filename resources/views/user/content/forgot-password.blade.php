@@ -5,7 +5,7 @@
 
 @extends('layouts/layoutMaster')
 
-@section('title', 'Forgot Password - User')
+@section('title', 'Forgot Password')
 
 @section('vendor-style')
     @vite(['resources/assets/vendor/libs/@form-validation/form-validation.scss'])
@@ -29,7 +29,7 @@
         <a href="{{ url('/') }}" class="app-brand auth-cover-brand">
             <span class="app-brand-logo demo"><img src="{{ asset('assets/img/icons/logo-new-unityx.png') }}" alt="UnityX Logo"
                     width="200"></span>
-            <span class="app-brand-text demo text-heading fw-bold">{{ config('variables.templateName') }}</span>
+            {{-- <span class="app-brand-text demo text-heading fw-bold">{{ config('variables.templateName') }}</span> --}}
         </a>
         <!-- /Logo -->
         <div class="authentication-inner row m-0">
