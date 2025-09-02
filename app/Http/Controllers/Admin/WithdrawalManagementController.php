@@ -18,6 +18,15 @@ class WithdrawalManagementController extends Controller
         $totalWithdrawals = Withdrawal::count();
         $pendingWithdrawals = Withdrawal::where('status', 'pending')->count();
         $approvedWithdrawals = Withdrawal::where('status', 'approved')->count();
+        $rejectedWithdrawals = Withdrawal::where('status', 'rejected')->count();
+
+        // Calculate net amounts for each status
+        $totalNetAmount = Withdrawal::sum('net_amount');
+        $pendingNetAmount = Withdrawal::where('status', 'pending')->sum('net_amount');
+        $approvedNetAmount = Withdrawal::where('status', 'approved')->sum('net_amount');
+        $rejectedNetAmount = Withdrawal::where('status', 'rejected')->sum('net_amount');
+
+        // Keep original amount calculations for backward compatibility
         $totalAmount = Withdrawal::sum('amount');
         $pendingAmount = Withdrawal::where('status', 'pending')->sum('amount');
 
@@ -25,6 +34,11 @@ class WithdrawalManagementController extends Controller
             'totalWithdrawals',
             'pendingWithdrawals',
             'approvedWithdrawals',
+            'rejectedWithdrawals',
+            'totalNetAmount',
+            'pendingNetAmount',
+            'approvedNetAmount',
+            'rejectedNetAmount',
             'totalAmount',
             'pendingAmount'
         ));
