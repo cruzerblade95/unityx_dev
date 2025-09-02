@@ -157,6 +157,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the upline (parent) user
+     */
+    public function upline()
+    {
+        return $this->belongsTo(User::class, 'upline_id');
+    }
+
+    /**
      * Check if user's KYC is approved.
      *
      * @return bool

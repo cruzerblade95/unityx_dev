@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\BannerAdvertisementController;
 use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\AdminWithdrawalSettingsController;
 use App\Http\Controllers\Admin\AdminReinvestmentSettingsController;
+use App\Http\Controllers\Admin\UplineManagementController;
 
 Route::prefix('admin')->middleware('web')->group(function () {
     // Guest routes
@@ -134,6 +135,17 @@ Route::prefix('admin')->middleware('web')->group(function () {
             Route::post('/global-defaults/update', [AdminReinvestmentSettingsController::class, 'updateGlobalDefaults'])->name('global-defaults.update');
             Route::delete('/user/{userId}/settings', [AdminReinvestmentSettingsController::class, 'deleteUserSettings'])->name('user.delete');
             Route::post('/user/{userId}/follow-defaults', [AdminReinvestmentSettingsController::class, 'setUserToFollowDefaults'])->name('user.follow-defaults');
+        });
+
+        // Upline Management Routes
+        Route::prefix('upline-management')->name('admin.upline-management.')->group(function () {
+            Route::get('/', [UplineManagementController::class, 'index'])->name('index');
+            Route::get('/users-data', [UplineManagementController::class, 'getUsersData'])->name('users-data');
+            Route::get('/search-users', [UplineManagementController::class, 'searchUsers'])->name('search-users');
+            Route::get('/user-tree/{userId}', [UplineManagementController::class, 'getUserTree'])->name('user-tree');
+            Route::get('/user-downlines/{userId}', [UplineManagementController::class, 'getAllDownlines'])->name('user-downlines');
+            Route::post('/update-upline', [UplineManagementController::class, 'updateUpline'])->name('update-upline');
+            Route::post('/bulk-update-upline', [UplineManagementController::class, 'bulkUpdateUpline'])->name('bulk-update-upline');
         });
     });
 });
