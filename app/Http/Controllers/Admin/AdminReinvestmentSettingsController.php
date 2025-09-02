@@ -95,39 +95,59 @@ class AdminReinvestmentSettingsController extends Controller
 
     public function getUserSettings(Request $request, $userId)
     {
-        $user = User::findOrFail($userId);
-        $userSettings = [];
+        try {
+            $user = User::findOrFail($userId);
+            $userSettings = [];
 
-        foreach ($this->walletTypes as $type) {
-            $userSettings[$type] = ReinvestmentSettings::getUserSettings($userId, $type);
+            foreach ($this->walletTypes as $type) {
+                $userSettings[$type] = ReinvestmentSettings::getUserSettings($userId, $type);
+            }
+
+            return response()->json([
+                'success' => true,
+                'user' => $user,
+                'settings' => $userSettings
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            \Log::error("User not found: {$userId}");
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Error loading user settings: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error loading user settings: ' . $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'user' => $user,
-            'settings' => $userSettings
-        ]);
     }
 
     public function updateUserSettings(Request $request, $userId)
     {
-        $request->validate([
-            'wallet_type' => 'required|in:profit,bonus',
-            'min_amount' => 'required|numeric|min:0',
-            'max_amount' => 'required|numeric|gt:min_amount',
-            'tax_percent' => 'required|numeric|min:0|max:100',
-            'is_enabled' => 'boolean'
-        ]);
+        try {
+            $request->validate([
+                'wallet_type' => 'required|in:profit,bonus',
+                'min_amount' => 'required|numeric|min:0',
+                'max_amount' => 'required|numeric|gt:min_amount',
+                'tax_percent' => 'required|numeric|min:0|max:100',
+                'is_enabled' => 'nullable'
+            ]);
 
-        $settings = [
-            'min_amount' => $request->min_amount,
-            'max_amount' => $request->max_amount,
-            'tax_percent' => $request->tax_percent,
-            'is_enabled' => $request->has('is_enabled')
-        ];
+            $settings = [
+                'min_amount' => $request->min_amount,
+                'max_amount' => $request->max_amount,
+                'tax_percent' => $request->tax_percent,
+                'is_enabled' => $request->has('is_enabled') ? (bool)$request->is_enabled : false
+            ];
 
-        ReinvestmentSettings::setUserSettings($userId, $request->wallet_type, $settings);
+            ReinvestmentSettings::setUserSettings($userId, $request->wallet_type, $settings);
 
-        return response()->json(['success' => true, 'message' => 'Settings updated successfully']);
+            return response()->json(['success' => true, 'message' => 'Settings updated successfully']);
+        } catch (\Exception $e) {
+            \Log::error('Error updating user settings: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Error updating settings: ' . $e->getMessage()], 500);
+        }
     }
 
     public function bulkUpdate(Request $request)
@@ -167,24 +187,29 @@ class AdminReinvestmentSettingsController extends Controller
 
     public function updateGlobalDefaults(Request $request)
     {
-        $request->validate([
-            'wallet_type' => 'required|in:profit,bonus',
-            'min_amount' => 'required|numeric|min:0',
-            'max_amount' => 'required|numeric|gt:min_amount',
-            'tax_percent' => 'required|numeric|min:0|max:100',
-            'is_enabled' => 'boolean'
-        ]);
+        try {
+            $request->validate([
+                'wallet_type' => 'required|in:profit,bonus',
+                'min_amount' => 'required|numeric|min:0',
+                'max_amount' => 'required|numeric|gt:min_amount',
+                'tax_percent' => 'required|numeric|min:0|max:100',
+                'is_enabled' => 'nullable'
+            ]);
 
-        $settings = [
-            'min_amount' => $request->min_amount,
-            'max_amount' => $request->max_amount,
-            'tax_percent' => $request->tax_percent,
-            'is_enabled' => $request->has('is_enabled')
-        ];
+            $settings = [
+                'min_amount' => $request->min_amount,
+                'max_amount' => $request->max_amount,
+                'tax_percent' => $request->tax_percent,
+                'is_enabled' => $request->has('is_enabled') ? (bool)$request->is_enabled : false
+            ];
 
-        ReinvestmentSettings::setGlobalDefaults($request->wallet_type, $settings);
+            ReinvestmentSettings::setGlobalDefaults($request->wallet_type, $settings);
 
-        return response()->json(['success' => true, 'message' => 'Global defaults updated successfully']);
+            return response()->json(['success' => true, 'message' => 'Global defaults updated successfully']);
+        } catch (\Exception $e) {
+            \Log::error('Error updating global defaults: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Error updating global defaults: ' . $e->getMessage()], 500);
+        }
     }
 
     public function getSettingsPreview(Request $request)
@@ -229,5 +254,27 @@ class AdminReinvestmentSettingsController extends Controller
                            ->delete();
 
         return response()->json(['success' => true, 'message' => 'User settings deleted, will use global defaults']);
+    }
+
+    public function setUserToFollowDefaults(Request $request, $userId)
+    {
+        try {
+            $user = User::findOrFail($userId);
+
+            // Delete all user-specific settings so they will fall back to global defaults
+            $deletedCount = ReinvestmentSettings::where('user_id', $userId)->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => "User will now follow global default settings for all wallet types. Removed {$deletedCount} custom settings."
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error setting user to follow defaults: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error setting user to follow defaults: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

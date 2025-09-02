@@ -133,6 +133,7 @@ Route::prefix('admin')->middleware('web')->group(function () {
             Route::get('/settings-preview', [AdminReinvestmentSettingsController::class, 'getSettingsPreview'])->name('settings-preview');
             Route::post('/global-defaults/update', [AdminReinvestmentSettingsController::class, 'updateGlobalDefaults'])->name('global-defaults.update');
             Route::delete('/user/{userId}/settings', [AdminReinvestmentSettingsController::class, 'deleteUserSettings'])->name('user.delete');
+            Route::post('/user/{userId}/follow-defaults', [AdminReinvestmentSettingsController::class, 'setUserToFollowDefaults'])->name('user.follow-defaults');
         });
     });
 });
