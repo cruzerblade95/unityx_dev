@@ -426,4 +426,97 @@ class UplineManagementController extends Controller
 
         return $downlines;
     }
+
+    /**
+     * Refresh referral codes for users who don't have one
+     */
+    public function refreshReferralCodes(Request $request)
+    {
+        try {
+            // Get users who don't have referral codes
+            $usersWithoutCodes = User::whereNull('referral_code')
+                ->orWhere('referral_code', '')
+                ->get();
+
+            $updatedCount = 0;
+            $maxAttempts = 100; // Maximum attempts to generate unique code per user
+
+            DB::beginTransaction();
+
+            foreach ($usersWithoutCodes as $user) {
+                $attempts = 0;
+                $codeGenerated = false;
+
+                while (!$codeGenerated && $attempts < $maxAttempts) {
+                    // Generate a unique referral code
+                    $referralCode = $this->generateReferralCode();
+
+                    // Check if this code already exists
+                    $exists = User::where('referral_code', $referralCode)
+                        ->where('id', '!=', $user->id)
+                        ->exists();
+
+                    if (!$exists) {
+                        // Update the user with the new referral code
+                        $user->update(['referral_code' => $referralCode]);
+                        $updatedCount++;
+                        $codeGenerated = true;
+
+                        Log::info("Generated referral code for user", [
+                            'user_id' => $user->id,
+                            'username' => $user->username,
+                            'referral_code' => $referralCode
+                        ]);
+                    }
+
+                    $attempts++;
+                }
+
+                if (!$codeGenerated) {
+                    Log::warning("Failed to generate unique referral code for user after {$maxAttempts} attempts", [
+                        'user_id' => $user->id,
+                        'username' => $user->username
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Referral codes refreshed successfully! {$updatedCount} users got new referral codes.",
+                'updated_count' => $updatedCount,
+                'total_users_without_codes' => $usersWithoutCodes->count()
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            Log::error('Error refreshing referral codes', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to refresh referral codes: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Generate a unique referral code
+     */
+    private function generateReferralCode()
+    {
+        // Generate a 6-character referral code with mix of letters and numbers
+        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $code = '';
+
+        for ($i = 0; $i < 6; $i++) {
+            $code .= $characters[random_int(0, strlen($characters) - 1)];
+        }
+
+        return $code;
+    }
 }

@@ -146,6 +146,7 @@ Route::prefix('admin')->middleware('web')->group(function () {
             Route::get('/user-downlines/{userId}', [UplineManagementController::class, 'getAllDownlines'])->name('user-downlines');
             Route::post('/update-upline', [UplineManagementController::class, 'updateUpline'])->name('update-upline');
             Route::post('/bulk-update-upline', [UplineManagementController::class, 'bulkUpdateUpline'])->name('bulk-update-upline');
+            Route::post('/refresh-referral-codes', [UplineManagementController::class, 'refreshReferralCodes'])->name('refresh-referral-codes');
         });
     });
 });

@@ -19,9 +19,79 @@
         usersData: '{{ route("admin.upline-management.users-data") }}',
         searchUsers: '{{ route("admin.upline-management.search-users") }}',
         userTreeBase: '{{ route("admin.upline-management.user-tree", "PLACEHOLDER") }}',
-        bulkUpdateUpline: '{{ route("admin.upline-management.bulk-update-upline") }}'
+        bulkUpdateUpline: '{{ route("admin.upline-management.bulk-update-upline") }}',
+        refreshReferralCodes: '{{ route("admin.upline-management.refresh-referral-codes") }}'
     };
     window.csrfToken = '{{ csrf_token() }}';
+
+    // Add referral code refresh functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const refreshReferralBtn = document.getElementById('refreshReferralCodes');
+
+        if (refreshReferralBtn) {
+            refreshReferralBtn.addEventListener('click', function() {
+                Swal.fire({
+                    title: 'Refresh Referral Codes?',
+                    text: 'This will generate referral codes for users who don\'t have one. Existing codes will remain unchanged.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, refresh codes!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loading
+                        refreshReferralBtn.disabled = true;
+                        refreshReferralBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processing...';
+
+                        // Make AJAX request
+                        fetch(window.uplineManagementRoutes.refreshReferralCodes, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': window.csrfToken
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: `Referral codes refreshed successfully! ${data.updated_count} users got new referral codes.`,
+                                    icon: 'success'
+                                });
+
+                                // Refresh the table if it exists
+                                if (typeof refreshTable === 'function') {
+                                    refreshTable();
+                                }
+                            } else {
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: data.message || 'Failed to refresh referral codes.',
+                                    icon: 'error'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'An error occurred while refreshing referral codes.',
+                                icon: 'error'
+                            });
+                        })
+                        .finally(() => {
+                            // Reset button
+                            refreshReferralBtn.disabled = false;
+                            refreshReferralBtn.innerHTML = '<i class="fas fa-key me-1"></i>Refresh Referral Codes';
+                        });
+                    }
+                });
+            });
+        }
+    });
 </script>
 @vite(['resources/js/admin-upline-management.js'])
 @endsection
@@ -155,6 +225,9 @@
                                     <div class="d-flex gap-2">
                                         <button type="button" class="btn btn-outline-secondary btn-sm" id="refreshTable">
                                             <i class="fas fa-sync-alt me-1"></i>Refresh
+                                        </button>
+                                        <button type="button" class="btn btn-warning" id="refreshReferralCodes">
+                                            <i class="fas fa-key me-1"></i>Refresh Referral Codes
                                         </button>
                                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#dragDropModal">
                                             <i class="fas fa-exchange-alt me-1"></i>Drag & Drop Manager
