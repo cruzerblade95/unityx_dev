@@ -12,6 +12,8 @@ use App\Http\Controllers\Admin\MarketplaceController;
 use App\Http\Controllers\Admin\FixCronValueController;
 use App\Http\Controllers\Admin\BannerAdvertisementController;
 use App\Http\Controllers\Admin\AnnouncementController;
+use App\Http\Controllers\Admin\AdminWithdrawalSettingsController;
+use App\Http\Controllers\Admin\AdminReinvestmentSettingsController;
 
 Route::prefix('admin')->middleware('web')->group(function () {
     // Guest routes
@@ -45,6 +47,7 @@ Route::prefix('admin')->middleware('web')->group(function () {
 
         // KYC Approval Routes
         Route::get('/kyc', [KycApprovalController::class, 'index'])->name('admin.kyc.index');
+        Route::get('/kyc/data', [KycApprovalController::class, 'getKycData'])->name('admin.kyc.data');
         Route::get('/kyc/{id}', [KycApprovalController::class, 'show'])->name('admin.kyc.show');
         Route::post('/kyc/{id}/approve', [KycApprovalController::class, 'approve'])->name('admin.kyc.approve');
         Route::post('/kyc/{id}/reject', [KycApprovalController::class, 'reject'])->name('admin.kyc.reject');
@@ -76,6 +79,7 @@ Route::prefix('admin')->middleware('web')->group(function () {
 
         // Recovery Accounts Management
         Route::get('/recovery-accounts', [App\Http\Controllers\Admin\RecoveryAccountController::class, 'index'])->name('admin.recovery_accounts.index');
+        Route::get('/recovery-accounts/data', [App\Http\Controllers\Admin\RecoveryAccountController::class, 'getRecoveryData'])->name('admin.recovery_accounts.data');
         Route::get('/recovery-accounts/{id}', [App\Http\Controllers\Admin\RecoveryAccountController::class, 'show'])->name('admin.recovery_accounts.show');
         Route::post('/recovery-accounts/{id}/approve', [App\Http\Controllers\Admin\RecoveryAccountController::class, 'approve'])->name('admin.recovery_accounts.approve');
         Route::post('/recovery-accounts/{id}/reject', [App\Http\Controllers\Admin\RecoveryAccountController::class, 'reject'])->name('admin.recovery_accounts.reject');
@@ -104,5 +108,32 @@ Route::prefix('admin')->middleware('web')->group(function () {
             'destroy' => 'admin.announcements.destroy',
         ]);
         Route::post('/announcements/{announcement}/toggle-status', [AnnouncementController::class, 'toggleStatus'])->name('admin.announcements.toggle-status');
+
+        // Withdrawal Settings Management Routes
+        Route::prefix('withdrawal-settings')->name('admin.withdrawal-settings.')->group(function () {
+            Route::get('/', [AdminWithdrawalSettingsController::class, 'index'])->name('index');
+            Route::get('/users-data', [AdminWithdrawalSettingsController::class, 'getUsersData'])->name('users-data');
+            Route::get('/user/{userId}/settings', [AdminWithdrawalSettingsController::class, 'getUserSettings'])->name('user.settings');
+            Route::post('/user/{userId}/update', [AdminWithdrawalSettingsController::class, 'updateUserSettings'])->name('user.update');
+            Route::post('/bulk-update', [AdminWithdrawalSettingsController::class, 'bulkUpdate'])->name('bulk-update');
+            Route::post('/reset-defaults', [AdminWithdrawalSettingsController::class, 'resetToDefaults'])->name('reset-defaults');
+            Route::post('/disable-withdrawals', [AdminWithdrawalSettingsController::class, 'disableWithdrawals'])->name('disable-withdrawals');
+            Route::post('/enable-withdrawals', [AdminWithdrawalSettingsController::class, 'enableWithdrawals'])->name('enable-withdrawals');
+            Route::get('/global-defaults', [AdminWithdrawalSettingsController::class, 'globalDefaults'])->name('global-defaults');
+            Route::post('/global-defaults/update', [AdminWithdrawalSettingsController::class, 'updateGlobalDefaults'])->name('global-defaults.update');
+        });
+
+        // Reinvestment Settings Management Routes
+        Route::prefix('reinvestment-settings')->name('admin.reinvestment-settings.')->group(function () {
+            Route::get('/', [AdminReinvestmentSettingsController::class, 'index'])->name('index');
+            Route::get('/users-data', [AdminReinvestmentSettingsController::class, 'getUsersData'])->name('users-data');
+            Route::get('/user/{userId}/settings', [AdminReinvestmentSettingsController::class, 'getUserSettings'])->name('user.settings');
+            Route::post('/user/{userId}/update', [AdminReinvestmentSettingsController::class, 'updateUserSettings'])->name('user.update');
+            Route::post('/bulk-update', [AdminReinvestmentSettingsController::class, 'bulkUpdate'])->name('bulk-update');
+            Route::get('/settings-preview', [AdminReinvestmentSettingsController::class, 'getSettingsPreview'])->name('settings-preview');
+            Route::post('/global-defaults/update', [AdminReinvestmentSettingsController::class, 'updateGlobalDefaults'])->name('global-defaults.update');
+            Route::delete('/user/{userId}/settings', [AdminReinvestmentSettingsController::class, 'deleteUserSettings'])->name('user.delete');
+            Route::post('/user/{userId}/follow-defaults', [AdminReinvestmentSettingsController::class, 'setUserToFollowDefaults'])->name('user.follow-defaults');
+        });
     });
 });

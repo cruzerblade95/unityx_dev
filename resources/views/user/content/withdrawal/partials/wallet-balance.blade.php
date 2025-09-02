@@ -6,7 +6,7 @@
                 <h5 class="card-title">Profit Balance Overview</h5>
                 <div class="row">
                     <div class="col-sm-6">
-                        <h3 class="text-primary">${{ number_format($walletBalance, 2) }}</h3>
+                        <h3 class="text-primary">${{ number_format($user->wallet ? $user->wallet->profit : 0, 2) }}</h3>
                         <small class="text-muted">Available for Withdrawal</small>
                     </div>
                     @if ($user->wallet && $user->wallet->floating > 0)

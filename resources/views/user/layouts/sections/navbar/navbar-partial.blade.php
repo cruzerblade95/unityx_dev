@@ -34,7 +34,7 @@
 <div class="navbar-nav-right d-flex align-items-center justify-content-end" id="navbar-collapse">
 
     <ul class="navbar-nav flex-row align-items-center ms-md-auto">
-        <!-- Language -->
+        {{-- <!-- Language -->
         <li class="nav-item dropdown-language dropdown">
             <a class="nav-link dropdown-toggle hide-arrow btn btn-icon btn-text-secondary rounded-pill"
                 href="javascript:void(0);" data-bs-toggle="dropdown">
@@ -67,7 +67,7 @@
                 </li>
             </ul>
         </li>
-        <!--/ Language -->
+        <!--/ Language --> --}}
 
         @if ($configData['hasCustomizer'] == true)
             <!-- Style Switcher -->
@@ -442,7 +442,7 @@
                                     @if (Auth::check())
                                         {{ Auth::user()->username }}
                                     @else
-                                        John Doe
+                                        Setup Your Name
                                     @endif
                                 </h6>
                                 <small class="text-body-secondary">User</small>

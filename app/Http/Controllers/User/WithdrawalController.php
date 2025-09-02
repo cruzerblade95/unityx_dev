@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\WithdrawalRequest;
 use App\Models\Withdrawal;
+use App\Models\WithdrawalSettings;
 use App\Models\KycVerification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -48,12 +49,39 @@ class WithdrawalController extends Controller
                 ->with('warning', 'Please complete your payment information to access withdrawal features.');
         }
 
+        // Check if withdrawal is enabled for this user
+        if (!WithdrawalSettings::isWithdrawalEnabled(Auth::id(), 'crypto')) {
+            return redirect()->route('user.withdrawal.index')
+                ->with('error', 'Cryptocurrency withdrawals are currently disabled for your account.');
+        }
+
         $withdrawals = Withdrawal::where('user_id', Auth::id())->latest()->get();
 
         // Check for pending withdrawal
         $pendingWithdrawal = Withdrawal::where('user_id', Auth::id())
             ->where('status', 'pending')
             ->first();
+
+        // Check for last withdrawal and calculate countdown using settings
+        $lastWithdrawal = Withdrawal::where('user_id', Auth::id())
+            ->whereIn('status', ['pending', 'approved', 'completed'])
+            ->latest('created_at')
+            ->first();
+
+        $canWithdraw = true;
+        $nextWithdrawalTime = null;
+        $hoursRemaining = 0;
+        $cooldownHours = WithdrawalSettings::getCooldownHours(Auth::id(), 'crypto');
+
+        if ($lastWithdrawal) {
+            $lastWithdrawalTime = $lastWithdrawal->created_at;
+            $nextWithdrawalTime = $lastWithdrawalTime->addHours($cooldownHours);
+            $hoursRemaining = max(0, now()->diffInHours($nextWithdrawalTime, false));
+            
+            if ($hoursRemaining > 0) {
+                $canWithdraw = false;
+            }
+        }
 
         // Check KYC status
         $kycStatus = $user->kycVerification ? $user->kycVerification->kyc_status : KycVerification::STATUS_NOT_SUBMITTED;
@@ -62,7 +90,22 @@ class WithdrawalController extends Controller
         // Get wallet profit balance (only profit balance is available for withdrawal)
         $walletBalance = $user->getWithdrawableBalance();
 
-        return view('user.content.withdrawal.crypto', compact('withdrawals', 'isKycApproved', 'walletBalance', 'user', 'pendingWithdrawal'));
+        // Get withdrawal settings for display
+        $withdrawalSettings = WithdrawalSettings::getUserSettings(Auth::id(), 'crypto');
+
+        return view('user.content.withdrawal.crypto', compact(
+            'withdrawals', 
+            'isKycApproved', 
+            'walletBalance', 
+            'user', 
+            'pendingWithdrawal',
+            'canWithdraw',
+            'nextWithdrawalTime',
+            'hoursRemaining',
+            'lastWithdrawal',
+            'withdrawalSettings',
+            'cooldownHours'
+        ));
     }
 
     public function etcBlack()
@@ -75,12 +118,39 @@ class WithdrawalController extends Controller
                 ->with('warning', 'Please complete your payment information to access withdrawal features.');
         }
 
+        // Check if withdrawal is enabled for this user
+        if (!WithdrawalSettings::isWithdrawalEnabled(Auth::id(), 'etc_black')) {
+            return redirect()->route('user.withdrawal.index')
+                ->with('error', 'ETC Black withdrawals are currently disabled for your account.');
+        }
+
         $withdrawals = Withdrawal::where('user_id', Auth::id())->latest()->get();
 
         // Check for pending withdrawal
         $pendingWithdrawal = Withdrawal::where('user_id', Auth::id())
             ->where('status', 'pending')
             ->first();
+
+        // Check for last withdrawal and calculate countdown using settings
+        $lastWithdrawal = Withdrawal::where('user_id', Auth::id())
+            ->whereIn('status', ['pending', 'approved', 'completed'])
+            ->latest('created_at')
+            ->first();
+
+        $canWithdraw = true;
+        $nextWithdrawalTime = null;
+        $hoursRemaining = 0;
+        $cooldownHours = WithdrawalSettings::getCooldownHours(Auth::id(), 'etc_black');
+
+        if ($lastWithdrawal) {
+            $lastWithdrawalTime = $lastWithdrawal->created_at;
+            $nextWithdrawalTime = $lastWithdrawalTime->addHours($cooldownHours);
+            $hoursRemaining = max(0, now()->diffInHours($nextWithdrawalTime, false));
+            
+            if ($hoursRemaining > 0) {
+                $canWithdraw = false;
+            }
+        }
 
         // Check KYC status
         $kycStatus = $user->kycVerification ? $user->kycVerification->kyc_status : KycVerification::STATUS_NOT_SUBMITTED;
@@ -89,7 +159,22 @@ class WithdrawalController extends Controller
         // Get wallet profit balance (only profit balance is available for withdrawal)
         $walletBalance = $user->getWithdrawableBalance();
 
-        return view('user.content.withdrawal.etc-black', compact('withdrawals', 'isKycApproved', 'walletBalance', 'user', 'pendingWithdrawal'));
+        // Get withdrawal settings for display
+        $withdrawalSettings = WithdrawalSettings::getUserSettings(Auth::id(), 'etc_black');
+
+        return view('user.content.withdrawal.etc-black', compact(
+            'withdrawals', 
+            'isKycApproved', 
+            'walletBalance', 
+            'user', 
+            'pendingWithdrawal',
+            'canWithdraw',
+            'nextWithdrawalTime',
+            'hoursRemaining',
+            'lastWithdrawal',
+            'withdrawalSettings',
+            'cooldownHours'
+        ));
     }
 
     public function gold()
@@ -102,12 +187,39 @@ class WithdrawalController extends Controller
                 ->with('warning', 'Please complete your payment information to access withdrawal features.');
         }
 
+        // Check if withdrawal is enabled for this user
+        if (!WithdrawalSettings::isWithdrawalEnabled(Auth::id(), 'gold')) {
+            return redirect()->route('user.withdrawal.index')
+                ->with('error', 'Gold withdrawals are currently disabled for your account.');
+        }
+
         $withdrawals = Withdrawal::where('user_id', Auth::id())->latest()->get();
 
         // Check for pending withdrawal
         $pendingWithdrawal = Withdrawal::where('user_id', Auth::id())
             ->where('status', 'pending')
             ->first();
+
+        // Check for last withdrawal and calculate countdown using settings
+        $lastWithdrawal = Withdrawal::where('user_id', Auth::id())
+            ->whereIn('status', ['pending', 'approved', 'completed'])
+            ->latest('created_at')
+            ->first();
+
+        $canWithdraw = true;
+        $nextWithdrawalTime = null;
+        $hoursRemaining = 0;
+        $cooldownHours = WithdrawalSettings::getCooldownHours(Auth::id(), 'gold');
+
+        if ($lastWithdrawal) {
+            $lastWithdrawalTime = $lastWithdrawal->created_at;
+            $nextWithdrawalTime = $lastWithdrawalTime->addHours($cooldownHours);
+            $hoursRemaining = max(0, now()->diffInHours($nextWithdrawalTime, false));
+            
+            if ($hoursRemaining > 0) {
+                $canWithdraw = false;
+            }
+        }
 
         // Check KYC status
         $kycStatus = $user->kycVerification ? $user->kycVerification->kyc_status : KycVerification::STATUS_NOT_SUBMITTED;
@@ -116,7 +228,22 @@ class WithdrawalController extends Controller
         // Get wallet profit balance (only profit balance is available for withdrawal)
         $walletBalance = $user->getWithdrawableBalance();
 
-        return view('user.content.withdrawal.gold', compact('withdrawals', 'isKycApproved', 'walletBalance', 'user', 'pendingWithdrawal'));
+        // Get withdrawal settings for display
+        $withdrawalSettings = WithdrawalSettings::getUserSettings(Auth::id(), 'gold');
+
+        return view('user.content.withdrawal.gold', compact(
+            'withdrawals', 
+            'isKycApproved', 
+            'walletBalance', 
+            'user', 
+            'pendingWithdrawal',
+            'canWithdraw',
+            'nextWithdrawalTime',
+            'hoursRemaining',
+            'lastWithdrawal',
+            'withdrawalSettings',
+            'cooldownHours'
+        ));
     }
 
     public function store(WithdrawalRequest $request)
@@ -127,6 +254,37 @@ class WithdrawalController extends Controller
         if (!$user->payment_info_completed) {
             return redirect()->route('user.payment-info.index')
                 ->with('warning', 'Please complete your payment information to access withdrawal features.');
+        }
+
+        // Validate withdrawal is enabled for this type
+        if (!WithdrawalSettings::isWithdrawalEnabled($user->id, $request->withdrawal_type)) {
+            return redirect()->back()->withErrors([
+                'withdrawal_disabled' => ucfirst(str_replace('_', ' ', $request->withdrawal_type)) . ' withdrawals are currently disabled for your account.'
+            ]);
+        }
+
+        // Validate withdrawal amount limits
+        $amountValidation = WithdrawalSettings::validateWithdrawalAmount($user->id, $request->withdrawal_type, $request->amount);
+        if (!$amountValidation['valid']) {
+            return redirect()->back()->withErrors(['amount' => $amountValidation['message']]);
+        }
+
+        // Check cooldown period
+        $cooldownHours = WithdrawalSettings::getCooldownHours($user->id, $request->withdrawal_type);
+        $lastWithdrawal = Withdrawal::where('user_id', $user->id)
+            ->whereIn('status', ['pending', 'approved', 'completed'])
+            ->latest('created_at')
+            ->first();
+
+        if ($lastWithdrawal) {
+            $nextWithdrawalTime = $lastWithdrawal->created_at->addHours($cooldownHours);
+            $hoursRemaining = max(0, now()->diffInHours($nextWithdrawalTime, false));
+            
+            if ($hoursRemaining > 0) {
+                return redirect()->back()->withErrors([
+                    'cooldown' => "You must wait {$hoursRemaining} more hours before making another withdrawal."
+                ]);
+            }
         }
 
         // Check if user has any pending withdrawal requests
@@ -148,16 +306,9 @@ class WithdrawalController extends Controller
             return redirect()->back()->withErrors(['amount' => 'Insufficient withdrawable balance. Available: $' . number_format($withdrawableBalance, 2)]);
         }
 
-        // Dynamic fee percentage based on withdrawal type
-        $systemTaxPercent = match($request->withdrawal_type) {
-            'crypto' => 4.75,
-            'etc_black' => 5.6,
-            'gold' => 7.0,
-            default => 4.75
-        };
-
-        $tax_amount = $request->amount * ($systemTaxPercent / 100);
-        $net_amount = $request->amount - $tax_amount;
+        // Calculate processing fee using settings
+        $processingFee = WithdrawalSettings::getProcessingFee($user->id, $request->withdrawal_type, $request->amount);
+        $net_amount = $request->amount - $processingFee;
 
         // Move the requested amount to floating (hold it)
         if ($wallet && !$wallet->holdAmount($request->amount)) {
@@ -168,8 +319,8 @@ class WithdrawalController extends Controller
         $withdrawalData = [
             'user_id' => Auth::id(),
             'amount' => $request->amount,
-            'tax_percent' => $systemTaxPercent,
-            'tax_amount' => $tax_amount,
+            'tax_percent' => 0, // Will be calculated from settings
+            'tax_amount' => $processingFee,
             'net_amount' => $net_amount,
             'status' => 'pending',
             'reference' => $request->reference,
@@ -177,6 +328,12 @@ class WithdrawalController extends Controller
             'withdrawal_type' => $request->withdrawal_type,
             'payment_details' => $this->getPaymentDetails($request, $user),
         ];
+
+        // Get withdrawal settings to calculate proper tax percent for display
+        $settings = WithdrawalSettings::getUserSettings($user->id, $request->withdrawal_type);
+        if ($settings) {
+            $withdrawalData['tax_percent'] = $settings->processing_fee_percent;
+        }
 
         // For crypto withdrawals, store currency and wallet address
         if ($request->withdrawal_type === 'crypto' && $request->currency && $request->wallet_address) {
@@ -191,7 +348,8 @@ class WithdrawalController extends Controller
 
         Withdrawal::create($withdrawalData);
 
-        return redirect()->back()->with('success', 'Withdrawal request submitted successfully! Net amount after ' . $systemTaxPercent . '% fee: $' . number_format($net_amount, 2));
+        $taxPercent = $settings ? $settings->processing_fee_percent : 4.75;
+        return redirect()->back()->with('success', 'Withdrawal request submitted successfully! Net amount after ' . $taxPercent . '% fee: $' . number_format($net_amount, 2));
     }
 
     private function getPaymentDetails($request, $user)

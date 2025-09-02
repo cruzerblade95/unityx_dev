@@ -2,8 +2,8 @@
 // Variables
 return [
   "creatorName" => "UnityX",
-  "creatorUrl" => "https://Unityx.dev",
-  "templateName" => "",
+  "creatorUrl" => "https://Unityx.pro",
+  "templateName" => "UnityX",
   "templateSuffix" => "Investment",
   "templateVersion" => "3.0.0",
   "templateFree" => false,

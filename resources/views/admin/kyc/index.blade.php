@@ -1,28 +1,29 @@
+@php
+$configData = Helper::appClasses();
+@endphp
+
 @extends('admin.layouts.layoutMaster')
 
 @section('title', 'KYC Approval Management')
 
 @section('vendor-style')
-@vite(['resources/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.scss'])
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+@vite(['resources/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.scss', 'resources/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.scss', 'resources/assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.scss'])
 @endsection
 
 @section('vendor-script')
 @vite(['resources/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js'])
 @endsection
 
-@section('page-script')
-@vite(['resources/assets/js/tables-datatables-basic.js'])
-@endsection
-
 @section('content')
-<div class="row">
+<div class="row g-6">
   <div class="col-12">
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">KYC Approval Management</h5>
-        <small class="text-muted float-end">Pending KYC verifications requiring review</small>
+        <h4 class="card-title mb-0">KYC Approval Management</h4>
+        <small class="text-muted">Pending KYC verifications requiring review</small>
       </div>
-      
+
       @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show mx-4 mt-3" role="alert">
           {{ session('success') }}
@@ -38,90 +39,27 @@
       @endif
 
       <div class="card-body">
-        @if($pendingKycs->count() > 0)
-          <div class="table-responsive">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>User</th>
-                  <th>Username</th>
-                  <th>Email</th>
-                  <th>Submitted At</th>
-                  <th>Documents</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                @foreach($pendingKycs as $kyc)
-                <tr>
-                  <td>{{ $kyc->id }}</td>
-                  <td>{{ $kyc->user->firstname }} {{ $kyc->user->lastname }}</td>
-                  <td>{{ $kyc->user->username }}</td>
-                  <td>{{ $kyc->user->email }}</td>
-                  <td>{{ $kyc->created_at->format('M d, Y H:i') }}</td>
-                  <td>
-                    <div class="d-flex gap-1">
-                      @if($kyc->kyc_doc1)
-                        <span class="badge bg-primary">ID Front</span>
-                      @endif
-                      @if($kyc->kyc_doc2)
-                        <span class="badge bg-primary">ID Back</span>
-                      @endif
-                      @if($kyc->kyc_doc3)
-                        <span class="badge bg-info">Passport</span>
-                      @endif
-                    </div>
-                  </td>
-                  <td>
-                    <span class="badge bg-warning">{{ $kyc->status_text }}</span>
-                  </td>
-                  <td>
-                    <div class="d-flex gap-2">
-                      <a href="{{ route('admin.kyc.show', $kyc->id) }}" class="btn btn-sm btn-outline-primary">
-                        <i class="icon-base ti tabler-eye me-1"></i>Review
-                      </a>
-                      
-                      <!-- Quick Approve Button -->
-                      <button type="button" class="btn btn-sm btn-success" onclick="quickApprove({{ $kyc->id }})">
-                        <i class="icon-base ti tabler-check me-1"></i>Approve
-                      </button>
-                      
-                      <!-- Quick Reject Button -->
-                      <button type="button" class="btn btn-sm btn-danger" onclick="showRejectModal({{ $kyc->id }}, '{{ $kyc->user->username }}')">
-                        <i class="icon-base ti tabler-x me-1"></i>Reject
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                @endforeach
-              </tbody>
-            </table>
-          </div>
-          
-          <!-- Pagination -->
-          <div class="d-flex justify-content-center">
-            {{ $pendingKycs->links() }}
-          </div>
-        @else
-          <div class="text-center py-5">
-            <i class="icon-base ti tabler-file-check display-4 text-muted"></i>
-            <h4 class="mt-3">No Pending KYC Verifications</h4>
-            <p class="text-muted">All KYC verifications have been processed.</p>
-          </div>
-        @endif
+        <div class="table-responsive">
+          <table id="kycTable" class="table table-striped table-hover">
+            <thead class="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Submitted At</th>
+                <th>Documents</th>
+                <th>Status</th>
+                <th width="200">Actions</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 </div>
-
-<!-- Quick Approve Forms (Hidden) -->
-@foreach($pendingKycs as $kyc)
-<form id="approve-form-{{ $kyc->id }}" method="POST" action="{{ route('admin.kyc.approve', $kyc->id) }}" style="display: none;">
-  @csrf
-</form>
-@endforeach
 
 <!-- Reject Modal -->
 <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
@@ -148,22 +86,130 @@
     </div>
   </div>
 </div>
+@endsection
 
+@section('page-script')
 <script>
+let kycTable;
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeDataTable();
+});
+
+function initializeDataTable() {
+    kycTable = $('#kycTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '{{ route("admin.kyc.data") }}',
+            type: 'GET'
+        },
+        columns: [
+            {
+                data: 'id',
+                name: 'id',
+                width: '50px'
+            },
+            {
+                data: 'user_info.firstname',
+                name: 'user_info',
+                render: function(data, type, row) {
+                    return row.user_info.firstname;
+                }
+            },
+            {
+                data: 'user_info.lastname',
+                name: 'user_info',
+                render: function(data, type, row) {
+                    return row.user_info.lastname;
+                }
+            },
+            {
+                data: 'user_info.username',
+                name: 'user_info',
+                render: function(data, type, row) {
+                    return row.user_info.username;
+                }
+            },
+            {
+                data: 'user_info.email',
+                name: 'user_info',
+                render: function(data, type, row) {
+                    return row.user_info.email;
+                }
+            },
+            {
+                data: 'submitted_at',
+                name: 'created_at',
+                orderable: true
+            },
+            {
+                data: 'documents',
+                name: 'documents',
+                orderable: false,
+                searchable: false
+            },
+            {
+                data: 'status',
+                name: 'status',
+                orderable: false,
+                searchable: false
+            },
+            {
+                data: 'actions',
+                name: 'actions',
+                orderable: false,
+                searchable: false,
+                width: '200px'
+            }
+        ],
+        pageLength: 25,
+        responsive: true,
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+             '<"row"<"col-sm-12"tr>>' +
+             '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+        language: {
+            search: "Search KYC records:",
+            lengthMenu: "Show _MENU_ records per page",
+            info: "Showing _START_ to _END_ of _TOTAL_ KYC records",
+            paginate: {
+                first: "First",
+                last: "Last",
+                next: "Next",
+                previous: "Previous"
+            },
+            emptyTable: "No pending KYC verifications found",
+            zeroRecords: "No matching KYC records found"
+        },
+        order: [[0, 'desc']] // Order by ID descending (newest first)
+    });
+}
+
 function quickApprove(kycId) {
-  if (confirm('Are you sure you want to approve this KYC verification?')) {
-    document.getElementById('approve-form-' + kycId).submit();
-  }
+    if (confirm('Are you sure you want to approve this KYC verification?')) {
+        // Create and submit a form for approval
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/admin/kyc/' + kycId + '/approve';
+
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        form.appendChild(csrfToken);
+        document.body.appendChild(form);
+        form.submit();
+    }
 }
 
 function showRejectModal(kycId, username) {
-  document.getElementById('reject-username').textContent = username;
-  document.getElementById('reject-form').action = '/admin/kyc/' + kycId + '/reject';
-  document.getElementById('reject-reason').value = '';
-  
-  const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
-  modal.show();
+    document.getElementById('reject-username').textContent = username;
+    document.getElementById('reject-form').action = '/admin/kyc/' + kycId + '/reject';
+    document.getElementById('reject-reason').value = '';
+
+    const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+    modal.show();
 }
 </script>
-
 @endsection

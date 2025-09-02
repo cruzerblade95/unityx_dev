@@ -120,8 +120,22 @@
             <div class="card-header border-bottom">
                 <h5 class="card-title mb-0">All Deposit Records</h5>
                 <div class="d-flex justify-content-between align-items-center row pt-4 gap-4 gap-md-0">
-                    <div class="col-md-4 deposit_status"></div>
-                    <div class="col-md-4 payment_method"></div>
+                    <div class="col-md-4 deposit_status">
+                        <label class="form-label small">Filter by Status:</label>
+                        <select class="form-select" id="DepositStatus">
+                            <option value="">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 payment_method">
+                        <label class="form-label small">Filter by Payment Method:</label>
+                        <select class="form-select" id="PaymentMethod">
+                            <option value="">All Payment Methods</option>
+                            <option value="manual">Manual</option>
+                            <option value="nowpayments">NOWPayments</option>
+                        </select>
+                    </div>
                     <div class="col-md-4">
                         <!-- Additional filters can be added here -->
                     </div>
@@ -134,7 +148,7 @@
                             <th>ID</th>
                             <th>User</th>
                             <th>Amount</th>
-                            <th>Payment ID</th>
+                            <th>Payment Method</th>
                             <th>Status</th>
                             <th>Created</th>
                             <th>Actions</th>

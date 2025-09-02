@@ -11,9 +11,9 @@
     @if (!isset($navbarFull))
         <div class="app-brand demo">
             <a href="{{ url('/user/dashboard') }}" class="app-brand-link">
-                <span class="app-brand-logo demo"><img src="{{ asset('assets/img/icons/logo-new-unityx.png') }}"
-                        alt="UnityX Logo" width="200"></span>
-                <span class="app-brand-text demo menu-text fw-bold ms-3">{{ config('variables.templateName') }}</span>
+                <span class="app-brand-logo demo mt-3"><img src="{{ asset('assets/img/icons/logo-new-unityx.png') }}"
+                        alt="UnityX Logo" width="150"></span>
+                {{-- <span class="app-brand-text demo menu-text fw-bold ms-3">{{ config('variables.templateName') }}</span> --}}
             </a>
 
             <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">

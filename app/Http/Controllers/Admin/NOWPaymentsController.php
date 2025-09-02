@@ -59,6 +59,30 @@ class NOWPaymentsController extends Controller
                 ->select('deposits.*')
                 ->orderBy('created_at', 'desc');
 
+            // Apply status filter if provided and not empty
+            if ($request->has('status_filter') && !empty($request->status_filter)) {
+                $deposits->where('status', $request->status_filter);
+            }
+
+            // Apply payment method filter if provided and not empty
+            if ($request->has('payment_method_filter') && !empty($request->payment_method_filter)) {
+                $paymentMethodFilter = $request->payment_method_filter;
+
+                if ($paymentMethodFilter === 'nowpayments') {
+                    // Show records that have a payment_id (NOWPayments transactions)
+                    $deposits->whereNotNull('payment_id')->where('payment_id', '!=', '');
+                } elseif ($paymentMethodFilter === 'manual') {
+                    // Show records without payment_id or with empty payment_id (Manual deposits)
+                    $deposits->where(function($query) {
+                        $query->whereNull('payment_id')
+                              ->orWhere('payment_id', '');
+                    });
+                } else {
+                    // Filter by specific payment method
+                    $deposits->where('payment_method', $paymentMethodFilter);
+                }
+            }
+
             return DataTables::of($deposits)
                 ->addIndexColumn()
                 ->addColumn('user', function ($deposit) {
@@ -72,9 +96,14 @@ class NOWPaymentsController extends Controller
                 })
                 ->addColumn('payment_id', function ($deposit) {
                     if ($deposit->payment_id) {
-                        return '<code class="bg-light p-1">' . $deposit->payment_id . '</code>';
+                        return '<code class="bg-light p-1">' . $deposit->payment_id . '</code><br><small class="text-muted">NOWPayments</small>';
                     }
-                    return '<span class="badge badge-warning">Pending NOWPayments</span>';
+
+                    if ($deposit->payment_method) {
+                        return '<span class="badge badge-info">' . ucfirst($deposit->payment_method) . '</span>';
+                    }
+
+                    return '<span class="badge badge-warning">Pending</span>';
                 })
                 ->addColumn('status', function ($deposit) {
                     $statusClass = $deposit->status === 'completed' ? 'success' :
@@ -108,7 +137,6 @@ class NOWPaymentsController extends Controller
                 ->make(true);
 
         } catch (\Exception $e) {
-            Log::error('NOWPayments DataTables Error: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to load deposits'], 500);
         }
     }

@@ -14,15 +14,17 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            UserSeeder::class,
-            AdminSeeder::class,
-            WalletSeeder::class,
-            UserProfileFieldsSeeder::class,
-            DepositSeeder::class,
-            WithdrawalSeeder::class,
-            InvestmentSeeder::class,
+            // UserSeeder::class,
+            // AdminSeeder::class,
+            // WalletSeeder::class,
+            // UserProfileFieldsSeeder::class,
+            // DepositSeeder::class,
+            // WithdrawalSeeder::class,
+            // InvestmentSeeder::class,
             // AiTradeSeeder::class,
             // AiTradeHistorySeeder::class,
+            WithdrawalSettingsSeeder::class,
+            ReinvestmentSettingsSeeder::class,
         ]);
     }
 }
