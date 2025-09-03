@@ -14,6 +14,7 @@ use App\Models\Wallet;
 use App\Models\KycVerification;
 use App\Models\Notification;
 use App\Models\AiTradeActivate;
+use App\Models\AiTrade;
 
 class User extends Authenticatable
 {
@@ -157,6 +158,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the upline (parent) user
+     */
+    public function upline()
+    {
+        return $this->belongsTo(User::class, 'upline_id');
+    }
+
+    /**
      * Check if user's KYC is approved.
      *
      * @return bool
@@ -192,5 +201,10 @@ class User extends Authenticatable
     public function aiTradeActivate()
     {
         return $this->hasOne(AiTradeActivate::class);
+    }
+
+    public function aiTrades()
+    {
+        return $this->hasMany(AiTrade::class);
     }
 }

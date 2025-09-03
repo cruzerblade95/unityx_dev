@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Withdrawal;
 use App\Models\User;
+use App\Services\TelegramNotificationService;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class WithdrawalManagementController extends Controller
 {
@@ -18,6 +20,15 @@ class WithdrawalManagementController extends Controller
         $totalWithdrawals = Withdrawal::count();
         $pendingWithdrawals = Withdrawal::where('status', 'pending')->count();
         $approvedWithdrawals = Withdrawal::where('status', 'approved')->count();
+        $rejectedWithdrawals = Withdrawal::where('status', 'rejected')->count();
+
+        // Calculate net amounts for each status
+        $totalNetAmount = Withdrawal::sum('net_amount');
+        $pendingNetAmount = Withdrawal::where('status', 'pending')->sum('net_amount');
+        $approvedNetAmount = Withdrawal::where('status', 'approved')->sum('net_amount');
+        $rejectedNetAmount = Withdrawal::where('status', 'rejected')->sum('net_amount');
+
+        // Keep original amount calculations for backward compatibility
         $totalAmount = Withdrawal::sum('amount');
         $pendingAmount = Withdrawal::where('status', 'pending')->sum('amount');
 
@@ -25,6 +36,11 @@ class WithdrawalManagementController extends Controller
             'totalWithdrawals',
             'pendingWithdrawals',
             'approvedWithdrawals',
+            'rejectedWithdrawals',
+            'totalNetAmount',
+            'pendingNetAmount',
+            'approvedNetAmount',
+            'rejectedNetAmount',
             'totalAmount',
             'pendingAmount'
         ));
@@ -175,6 +191,31 @@ class WithdrawalManagementController extends Controller
                 'status' => 'approved'
             ]);
 
+            // Check if user has telegram verification before sending notification
+            $telegramVerification = DB::table('telegram_verifications')
+                ->where('user_id', $withdrawal->user_id)
+                ->whereNotNull('telegram_username')
+                ->where('telegram_username', '!=', '')
+                ->first();
+
+            if ($telegramVerification) {
+                // Send Telegram notification only if user has telegram_username
+                $title = "✅ Withdrawal Approved";
+                $message = "Your withdrawal request has been approved!\n\n" .
+                          "💰 Amount: $" . number_format($withdrawal->amount, 2) . "\n" .
+                          "💰 Tax: $" . number_format($withdrawal->tax_amount, 2) . "\n" .
+                          "💵 Net Amount: $" . number_format($withdrawal->net_amount, 2) . "\n" .
+                          "🏦 Withdrawal Type: {$withdrawal->withdrawal_type}\n" .
+                          "📄 Reference: {$withdrawal->reference}\n\n" .
+                          "The funds will be processed for withdrawal.";
+
+                TelegramNotificationService::sendNotificationToTelegram(
+                    $withdrawal->user_id,
+                    $title,
+                    $message
+                );
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Withdrawal approved successfully! Amount has been processed for withdrawal.'
@@ -212,6 +253,32 @@ class WithdrawalManagementController extends Controller
             $withdrawal->update([
                 'status' => 'rejected'
             ]);
+
+            // Check if user has telegram verification before sending notification
+            $telegramVerification = DB::table('telegram_verifications')
+                ->where('user_id', $withdrawal->user_id)
+                ->whereNotNull('telegram_username')
+                ->where('telegram_username', '!=', '')
+                ->first();
+
+            if ($telegramVerification) {
+                // Send Telegram notification only if user has telegram_username
+                $title = "❌ Withdrawal Rejected";
+                $message = "Your withdrawal request has been rejected.\n\n" .
+                          "💰 Amount: $" . number_format($withdrawal->amount, 2) . "\n" .
+                          "💰 Tax: $" . number_format($withdrawal->tax_amount, 2) . "\n" .
+                          "💵 Net Amount: $" . number_format($withdrawal->net_amount, 2) . "\n" .
+                          "🏦 Withdrawal Type: {$withdrawal->withdrawal_type}\n" .
+                          "📄 Reference: {$withdrawal->reference}\n\n" .
+                          "💳 The amount has been returned to your profit balance.\n" .
+                          "📞 For more information, please contact support.";
+
+                TelegramNotificationService::sendNotificationToTelegram(
+                    $withdrawal->user_id,
+                    $title,
+                    $message
+                );
+            }
 
             return response()->json([
                 'success' => true,
