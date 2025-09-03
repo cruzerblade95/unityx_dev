@@ -6,6 +6,7 @@ use App\Services\NOWPaymentsService;
 use App\Services\NotificationService;
 use App\Models\Deposit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
 use App\Helpers\Helpers;
@@ -183,36 +184,60 @@ class NOWPaymentsController extends Controller
                 ]);
             }
 
+            // For NOWPayments deposits, try to get the outcome amount
+            $creditAmount = $deposit->net_amount; // Default fallback
+            $outcomeAmount = null;
+            
+            if ($deposit->payment_id) {
+                // Try to get updated payment data from NOWPayments
+                $nowpaymentsData = $this->nowPayments->getPaymentStatus($deposit->payment_id);
+                if ($nowpaymentsData && isset($nowpaymentsData['outcome_amount'])) {
+                    $outcomeAmount = round((float)$nowpaymentsData['outcome_amount'], 2);
+                    $creditAmount = $outcomeAmount;
+                    
+                    Log::info('Using outcome amount for manual approval', [
+                        'deposit_id' => $deposit->id,
+                        'outcome_amount' => $outcomeAmount,
+                        'original_net_amount' => $deposit->net_amount
+                    ]);
+                }
+            }
+
             // Update deposit status
             $deposit->status = 'completed';
             $deposit->save();
 
             // Update user wallet balance (add to deposit balance)
             if ($deposit->user && $deposit->user->wallet) {
-                $deposit->user->wallet->deposit += $deposit->net_amount;
+                $deposit->user->wallet->deposit += $creditAmount;
                 $deposit->user->wallet->save();
             }
 
-            // Add bonus to upline
-            Helpers::insertAiTradeV2($deposit->user_id, $deposit->net_amount);
-            Helpers::depositBonus($deposit->user_id, $deposit->net_amount);
+            // Add bonus to upline (use the credited amount)
+            Helpers::insertAiTradeV2($deposit->user_id, $creditAmount);
+            Helpers::depositBonus($deposit->user_id, $creditAmount);
 
             // Create success notification for the user
             NotificationService::createDepositSuccessNotification(
                 $deposit->user_id,
-                $deposit->net_amount,
+                $creditAmount,
                 $deposit->id
             );
 
             Log::info('Deposit approved manually', [
                 'deposit_id' => $deposit->id,
                 'user_id' => $deposit->user_id,
-                'amount' => $deposit->net_amount
+                'credited_amount' => $creditAmount,
+                'outcome_amount_used' => $outcomeAmount,
+                'original_net_amount' => $deposit->net_amount,
+                'was_nowpayments_deposit' => $deposit->payment_id ? true : false
             ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Payment approved successfully'
+                'message' => 'Payment approved successfully',
+                'credited_amount' => $creditAmount,
+                'outcome_amount_used' => $outcomeAmount !== null
             ]);
 
         } catch (\Exception $e) {
@@ -252,7 +277,7 @@ class NOWPaymentsController extends Controller
             $deposit->status = 'rejected';
             $deposit->rejection_reason = $request->reason;
             $deposit->rejected_at = now();
-            $deposit->rejected_by = auth()->user()->id ?? null;
+            $deposit->rejected_by = Auth::id();
             $deposit->save();
 
             // Create rejection notification for the user
@@ -268,7 +293,7 @@ class NOWPaymentsController extends Controller
                 'user_id' => $deposit->user_id,
                 'amount' => $deposit->amount,
                 'reason' => $request->reason,
-                'rejected_by' => auth()->user()->id ?? null
+                'rejected_by' => Auth::id()
             ]);
 
             return response()->json([
@@ -324,6 +349,35 @@ class NOWPaymentsController extends Controller
                         default => $nowpaymentsStatus
                     };
 
+                    // Handle wallet crediting if transitioning to completed from partially_paid
+                    if ($oldStatus === 'partially_paid' && $newStatus === 'completed' && $oldStatus !== $newStatus) {
+                        // Get outcome amount and credit user wallet
+                        $outcomeAmount = isset($payment['outcome_amount']) ? round((float)$payment['outcome_amount'], 2) : null;
+                        $creditAmount = $outcomeAmount ?? $deposit->net_amount;
+
+                        // Check if user has a wallet, create one if not
+                        $wallet = \App\Models\Wallet::firstOrCreate(
+                            ['user_id' => $deposit->user_id],
+                            ['deposit' => 0, 'withdrawal' => 0, 'investment' => 0, 'bonus' => 0]
+                        );
+
+                        // Credit the wallet
+                        $wallet->deposit += $creditAmount;
+                        $wallet->save();
+
+                        // Add bonus to upline
+                        Helpers::depositBonus($deposit->user_id, $creditAmount);
+
+                        Log::info('Partially paid deposit completed via refresh - user credited', [
+                            'deposit_id' => $deposit->id,
+                            'user_id' => $deposit->user_id,
+                            'credited_amount' => $creditAmount,
+                            'outcome_amount' => $outcomeAmount,
+                            'old_status' => $oldStatus,
+                            'new_status' => $newStatus
+                        ]);
+                    }
+
                     $deposit->status = $newStatus;
                     $deposit->save();
 
@@ -331,7 +385,8 @@ class NOWPaymentsController extends Controller
                         'payment_id' => $paymentId,
                         'old_status' => $oldStatus,
                         'nowpayments_status' => $nowpaymentsStatus,
-                        'new_status' => $newStatus
+                        'new_status' => $newStatus,
+                        'wallet_credited' => ($oldStatus === 'partially_paid' && $newStatus === 'completed')
                     ]);
                 } else {
                     Log::warning('Payment found in NOWPayments but not in local database', [
@@ -526,7 +581,7 @@ class NOWPaymentsController extends Controller
     {
         try {
             Log::info('Starting bulk refresh of payment statuses', [
-                'user_id' => auth()->user()->id ?? 'unknown',
+                'user_id' => Auth::id() ?? 'unknown',
                 'timestamp' => now(),
                 'environment' => app()->environment()
             ]);
@@ -583,6 +638,35 @@ class NOWPaymentsController extends Controller
 
                         // Only update if status has changed
                         if ($oldStatus !== $newStatus) {
+                            // Handle wallet crediting if transitioning to completed from partially_paid
+                            if ($oldStatus === 'partially_paid' && $newStatus === 'completed') {
+                                // Get outcome amount and credit user wallet
+                                $outcomeAmount = isset($payment['outcome_amount']) ? round((float)$payment['outcome_amount'], 2) : null;
+                                $creditAmount = $outcomeAmount ?? $deposit->net_amount;
+
+                                // Check if user has a wallet, create one if not
+                                $wallet = \App\Models\Wallet::firstOrCreate(
+                                    ['user_id' => $deposit->user_id],
+                                    ['deposit' => 0, 'withdrawal' => 0, 'investment' => 0, 'bonus' => 0]
+                                );
+
+                                // Credit the wallet
+                                $wallet->deposit += $creditAmount;
+                                $wallet->save();
+
+                                // Add bonus to upline
+                                Helpers::depositBonus($deposit->user_id, $creditAmount);
+
+                                Log::info('Partially paid deposit completed via bulk refresh - user credited', [
+                                    'deposit_id' => $deposit->id,
+                                    'user_id' => $deposit->user_id,
+                                    'credited_amount' => $creditAmount,
+                                    'outcome_amount' => $outcomeAmount,
+                                    'old_status' => $oldStatus,
+                                    'new_status' => $newStatus
+                                ]);
+                            }
+
                             $deposit->status = $newStatus;
                             $deposit->save();
                             $updatedCount++;
@@ -592,7 +676,8 @@ class NOWPaymentsController extends Controller
                                 'deposit_id' => $deposit->id,
                                 'old_status' => $oldStatus,
                                 'new_status' => $newStatus,
-                                'nowpayments_status' => $nowpaymentsStatus
+                                'nowpayments_status' => $nowpaymentsStatus,
+                                'wallet_credited' => ($oldStatus === 'partially_paid' && $newStatus === 'completed')
                             ];
 
                             Log::info('Updated deposit status during bulk refresh', [
@@ -662,7 +747,7 @@ class NOWPaymentsController extends Controller
             Log::error('Error during bulk refresh of payment statuses', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'user_id' => auth()->user()->id ?? 'unknown',
+                'user_id' => Auth::id() ?? 'unknown',
                 'environment' => app()->environment()
             ]);
 
