@@ -48,18 +48,21 @@ class NOWPaymentsWebhookController extends Controller
             }
 
             $paymentStatus = $data['payment_status'];
+            $previousStatus = $deposit->status;
 
             Log::info('NOWPayments webhook received', [
                 'payment_id' => $data['payment_id'],
                 'status' => $paymentStatus,
-                'deposit_id' => $deposit->id
+                'previous_status' => $previousStatus,
+                'deposit_id' => $deposit->id,
+                'outcome_amount' => $data['outcome_amount'] ?? 'not_provided'
             ]);
 
             // Update deposit status based on payment status
             switch ($paymentStatus) {
                 case 'finished':
                 case 'confirmed':
-                    $this->processSuccessfulPayment($deposit, $data);
+                    $this->processSuccessfulPayment($deposit, $data, $previousStatus);
                     break;
 
                 case 'failed':
@@ -95,37 +98,65 @@ class NOWPaymentsWebhookController extends Controller
         }
     }
 
-    private function processSuccessfulPayment(Deposit $deposit, array $data)
+    private function processSuccessfulPayment(Deposit $deposit, array $data, string $previousStatus)
     {
-        // Update deposit status
+        // Determine the amount to credit based on the outcome_amount or fallback to net_amount
+        $outcomeAmount = isset($data['outcome_amount']) ? round((float)$data['outcome_amount'], 2) : null;
+        $creditAmount = $outcomeAmount ?? $deposit->net_amount;
+        
+        // Update deposit status and related fields
         $deposit->update([
             'status' => 'completed',
             'crypto_amount' => $data['pay_amount'] ?? $deposit->crypto_amount,
             'payment_address' => $data['pay_address'] ?? $deposit->payment_address,
         ]);
 
-        // Update user wallet
-        $user = $deposit->user;
+        // Only credit wallet if the payment wasn't already completed
+        // This prevents double-crediting for status changes within completed states
+        if ($previousStatus !== 'completed') {
+            $user = $deposit->user;
 
-        // Check if user has a wallet, create one if not
-        $wallet = Wallet::firstOrCreate(
-            ['user_id' => $user->id],
-            ['deposit' => 0, 'withdrawal' => 0, 'investment' => 0, 'bonus' => 0]
-        );
+            // Check if user has a wallet, create one if not
+            $wallet = Wallet::firstOrCreate(
+                ['user_id' => $user->id],
+                ['deposit' => 0, 'withdrawal' => 0, 'investment' => 0, 'bonus' => 0]
+            );
 
-        // Add the net amount to user's deposit wallet
-        $wallet->deposit += $deposit->net_amount;
-        $wallet->save();
+            // Credit the wallet with the appropriate amount
+            $wallet->deposit += $creditAmount;
+            $wallet->save();
 
-        // Add bonus to upline
-        Helpers::depositBonus($user->id, $deposit->net_amount);
+            // Add bonus to upline (use the credited amount for bonus calculation)
+            Helpers::depositBonus($user->id, $creditAmount);
 
-        Log::info('Payment processed successfully', [
-            'deposit_id' => $deposit->id,
-            'user_id' => $user->id,
-            'amount' => $deposit->net_amount,
-            'new_wallet_balance' => $wallet->deposit
-        ]);
+            Log::info('Payment processed successfully', [
+                'deposit_id' => $deposit->id,
+                'user_id' => $user->id,
+                'previous_status' => $previousStatus,
+                'credited_amount' => $creditAmount,
+                'outcome_amount_from_nowpayments' => $outcomeAmount,
+                'net_amount_fallback' => $deposit->net_amount,
+                'new_wallet_balance' => $wallet->deposit,
+                'was_partial_payment' => $previousStatus === 'partially_paid'
+            ]);
+
+            // Log special case for partially paid to completed transitions
+            if ($previousStatus === 'partially_paid') {
+                Log::info('Partially paid deposit completed - user credited with outcome amount', [
+                    'deposit_id' => $deposit->id,
+                    'user_id' => $user->id,
+                    'outcome_amount' => $outcomeAmount,
+                    'original_requested_amount' => $deposit->amount,
+                    'net_amount' => $deposit->net_amount
+                ]);
+            }
+        } else {
+            Log::info('Payment already completed - no wallet credit applied', [
+                'deposit_id' => $deposit->id,
+                'previous_status' => $previousStatus,
+                'current_status' => 'completed'
+            ]);
+        }
 
         // Here you can also send notification to user about successful deposit
         // You can implement email notification or other notification methods
