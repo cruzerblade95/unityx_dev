@@ -83,6 +83,12 @@
       "name": "Upline Management",
       "icon": "menu-icon icon-base ti tabler-hierarchy",
       "slug": "admin.upline-management.index"
+    },
+    {
+      "url": "admin/ai-trade-settings",
+      "name": "AI Trade Settings",
+      "icon": "menu-icon icon-base ti tabler-robot",
+      "slug": "admin.ai-trade-settings.index"
     }
 
   ]

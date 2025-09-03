@@ -14,6 +14,7 @@ use App\Models\Wallet;
 use App\Models\KycVerification;
 use App\Models\Notification;
 use App\Models\AiTradeActivate;
+use App\Models\AiTrade;
 
 class User extends Authenticatable
 {
@@ -200,5 +201,10 @@ class User extends Authenticatable
     public function aiTradeActivate()
     {
         return $this->hasOne(AiTradeActivate::class);
+    }
+
+    public function aiTrades()
+    {
+        return $this->hasMany(AiTrade::class);
     }
 }

@@ -16,4 +16,9 @@ class AiTrade extends Model
     {
         return $this->hasMany(AiTradeHistory::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

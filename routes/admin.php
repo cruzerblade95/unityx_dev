@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\AdminWithdrawalSettingsController;
 use App\Http\Controllers\Admin\AdminReinvestmentSettingsController;
 use App\Http\Controllers\Admin\UplineManagementController;
+use App\Http\Controllers\Admin\AiTradeSettingsController;
 
 Route::prefix('admin')->middleware('web')->group(function () {
     // Guest routes
@@ -147,6 +148,17 @@ Route::prefix('admin')->middleware('web')->group(function () {
             Route::post('/update-upline', [UplineManagementController::class, 'updateUpline'])->name('update-upline');
             Route::post('/bulk-update-upline', [UplineManagementController::class, 'bulkUpdateUpline'])->name('bulk-update-upline');
             Route::post('/refresh-referral-codes', [UplineManagementController::class, 'refreshReferralCodes'])->name('refresh-referral-codes');
+        });
+
+        // AI Trade Settings Routes
+        Route::prefix('ai-trade-settings')->name('admin.ai-trade-settings.')->group(function () {
+            Route::get('/', [AiTradeSettingsController::class, 'index'])->name('index');
+            Route::post('/update-settings', [AiTradeSettingsController::class, 'updateSettings'])->name('update');
+            Route::get('/users-list', [AiTradeSettingsController::class, 'getUsersList'])->name('users.list');
+            Route::get('/user/{userId}/trades', [AiTradeSettingsController::class, 'getUserTrades'])->name('user.trades');
+            Route::put('/update-status/{id}', [AiTradeSettingsController::class, 'updateStatus'])->name('update-status');
+            Route::put('/update-trade/{id}', [AiTradeSettingsController::class, 'updateTrade'])->name('update-trade');
+            Route::delete('/delete-trade/{id}', [AiTradeSettingsController::class, 'deleteTrade'])->name('delete-trade');
         });
     });
 });
