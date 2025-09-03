@@ -33,16 +33,16 @@
 
         <!-- Statistics Cards -->
         <div class="row g-6 mb-6">
-            <div class="col-sm-6 col-xl-3">
+            <div class="col-sm-6 col-xl-2">
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex align-items-start justify-content-between">
                             <div class="content-left">
-                                <span class="text-heading">Total Deposits</span>
+                                <span class="text-heading">Total</span>
                                 <div class="d-flex align-items-center my-1">
                                     <h4 class="mb-0 me-2">{{ $totalDeposits }}</h4>
                                 </div>
-                                <small class="mb-0">All deposit requests</small>
+                                <small class="mb-0">All deposits</small>
                             </div>
                             <div class="avatar">
                                 <span class="avatar-initial rounded bg-label-primary">
@@ -53,7 +53,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-6 col-xl-3">
+            <div class="col-sm-6 col-xl-2">
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex align-items-start justify-content-between">
@@ -73,7 +73,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-6 col-xl-3">
+            <div class="col-sm-6 col-xl-2">
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex align-items-start justify-content-between">
@@ -93,7 +93,47 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-6 col-xl-3">
+            <div class="col-sm-6 col-xl-2">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div class="content-left">
+                                <span class="text-heading">Partial Paid</span>
+                                <div class="d-flex align-items-center my-1">
+                                    <h4 class="mb-0 me-2">{{ $partiallyPaidDeposits }}</h4>
+                                </div>
+                                <small class="mb-0">Partially paid</small>
+                            </div>
+                            <div class="avatar">
+                                <span class="avatar-initial rounded bg-label-info">
+                                    <i class="fas fa-exclamation-triangle fa-lg"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-2">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div class="content-left">
+                                <span class="text-heading">Expired</span>
+                                <div class="d-flex align-items-center my-1">
+                                    <h4 class="mb-0 me-2">{{ $expiredDeposits }}</h4>
+                                </div>
+                                <small class="mb-0">Payment expired</small>
+                            </div>
+                            <div class="avatar">
+                                <span class="avatar-initial rounded bg-label-danger">
+                                    <i class="fas fa-times-circle fa-lg"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-2">
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex align-items-start justify-content-between">
@@ -105,7 +145,7 @@
                                 <small class="mb-0">All deposits combined</small>
                             </div>
                             <div class="avatar">
-                                <span class="avatar-initial rounded bg-label-info">
+                                <span class="avatar-initial rounded bg-label-dark">
                                     <i class="fas fa-dollar-sign fa-lg"></i>
                                 </span>
                             </div>
@@ -120,17 +160,21 @@
             <div class="card-header border-bottom">
                 <h5 class="card-title mb-0">All Deposit Records</h5>
                 <div class="d-flex justify-content-between align-items-center row pt-4 gap-4 gap-md-0">
-                    <div class="col-md-4 deposit_status">
+                    <div class="col-md-4 custom-deposit-status-filter">
                         <label class="form-label small">Filter by Status:</label>
-                        <select class="form-select" id="DepositStatus">
+                        <select class="form-select" id="CustomDepositStatus">
                             <option value="">All Status</option>
                             <option value="pending">Pending</option>
                             <option value="completed">Completed</option>
+                            <option value="partially_paid">Partially Paid</option>
+                            <option value="expired">Expired</option>
+                            <option value="failed">Failed</option>
+                            <option value="processing">Processing</option>
                         </select>
                     </div>
-                    <div class="col-md-4 payment_method">
+                    <div class="col-md-4 custom-payment-method-filter">
                         <label class="form-label small">Filter by Payment Method:</label>
-                        <select class="form-select" id="PaymentMethod">
+                        <select class="form-select" id="CustomPaymentMethod">
                             <option value="">All Payment Methods</option>
                             <option value="manual">Manual</option>
                             <option value="nowpayments">NOWPayments</option>
@@ -354,12 +398,39 @@
             color: #721c24;
         }
 
+        .status-partially-paid {
+            background-color: #e2f3ff;
+            color: #0066cc;
+        }
+
+        .status-expired {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-processing {
+            background-color: #e7f3ff;
+            color: #004085;
+        }
+
         .nowpayments-status {
             border-left-color: var(--bs-success, #28a745);
         }
 
         .nowpayments-error {
             border-left-color: var(--bs-danger, #dc3545);
+        }
+
+        /* Hide any automatically generated DataTable filters that conflict with our custom ones */
+        .custom-deposit-status-filter select:not(#CustomDepositStatus),
+        .custom-payment-method-filter select:not(#CustomPaymentMethod) {
+            display: none !important;
+        }
+
+        /* Ensure our custom filters are properly styled */
+        #CustomDepositStatus,
+        #CustomPaymentMethod {
+            display: block !important;
         }
     </style>
 
@@ -506,11 +577,11 @@
                                     <span class="detail-value">${deposit.unique_address || 'N/A'}</span>
                                 </div>
                                 ${deposit.address_memo ? `
-                                                        <div class="detail-row">
-                                                            <span class="detail-label">Address Memo:</span>
-                                                            <span class="detail-value">${deposit.address_memo}</span>
-                                                        </div>
-                                                        ` : ''}
+                                                                    <div class="detail-row">
+                                                                        <span class="detail-label">Address Memo:</span>
+                                                                        <span class="detail-value">${deposit.address_memo}</span>
+                                                                    </div>
+                                                                    ` : ''}
                             </div>
                         `;
                         }

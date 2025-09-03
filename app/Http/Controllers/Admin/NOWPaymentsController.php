@@ -29,12 +29,18 @@ class NOWPaymentsController extends Controller
             $totalDeposits = Deposit::count();
             $pendingDeposits = Deposit::where('status', 'pending')->count();
             $completedDeposits = Deposit::where('status', 'completed')->count();
+            $partiallyPaidDeposits = Deposit::where('status', 'partially_paid')->count();
+            $expiredDeposits = Deposit::where('status', 'expired')->count();
+            $failedDeposits = Deposit::where('status', 'failed')->count();
             $totalAmount = Deposit::sum('amount');
 
             return view('admin.nowpayments.index', compact(
                 'totalDeposits',
                 'pendingDeposits',
                 'completedDeposits',
+                'partiallyPaidDeposits',
+                'expiredDeposits',
+                'failedDeposits',
                 'totalAmount'
             ));
 
@@ -44,6 +50,9 @@ class NOWPaymentsController extends Controller
                 'totalDeposits' => 0,
                 'pendingDeposits' => 0,
                 'completedDeposits' => 0,
+                'partiallyPaidDeposits' => 0,
+                'expiredDeposits' => 0,
+                'failedDeposits' => 0,
                 'totalAmount' => 0
             ]);
         }
@@ -106,9 +115,23 @@ class NOWPaymentsController extends Controller
                     return '<span class="badge badge-warning">Pending</span>';
                 })
                 ->addColumn('status', function ($deposit) {
-                    $statusClass = $deposit->status === 'completed' ? 'success' :
-                                  ($deposit->status === 'pending' ? 'warning' : 'secondary');
-                    return '<span class="badge bg-' . $statusClass . '">' . ucfirst($deposit->status) . '</span>';
+                    $statusClass = match($deposit->status) {
+                        'completed' => 'success',
+                        'pending' => 'warning',
+                        'partially_paid' => 'info',
+                        'expired' => 'danger',
+                        'failed' => 'danger',
+                        'processing' => 'primary',
+                        default => 'secondary'
+                    };
+
+                    $statusLabel = match($deposit->status) {
+                        'partially_paid' => 'Partially Paid',
+                        'expired' => 'Expired',
+                        default => ucfirst($deposit->status)
+                    };
+
+                    return '<span class="badge bg-' . $statusClass . '">' . $statusLabel . '</span>';
                 })
                 ->addColumn('created_at', function ($deposit) {
                     return $deposit->created_at->format('M d, Y H:i') . '<br><small class="text-muted">' . $deposit->created_at->diffForHumans() . '</small>';
