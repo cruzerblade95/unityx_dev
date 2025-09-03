@@ -489,4 +489,102 @@ class NOWPaymentsController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Refresh status for all NOWPayments deposits
+     */
+    public function refreshAllStatuses()
+    {
+        try {
+            // Get all deposits that have payment_id (NOWPayments deposits)
+            $deposits = Deposit::whereNotNull('payment_id')
+                ->where('payment_id', '!=', '')
+                ->get();
+
+            $totalCount = $deposits->count();
+            $updatedCount = 0;
+            $updates = [];
+
+            Log::info('Starting bulk refresh of payment statuses', [
+                'total_deposits' => $totalCount
+            ]);
+
+            foreach ($deposits as $deposit) {
+                try {
+                    $payment = $this->nowPayments->getPaymentStatus($deposit->payment_id);
+
+                    if ($payment && isset($payment['payment_status'])) {
+                        $oldStatus = $deposit->status;
+                        $nowpaymentsStatus = $payment['payment_status'];
+
+                        // Map NOWPayments status to our local status
+                        $newStatus = match($nowpaymentsStatus) {
+                            'finished', 'confirmed' => 'completed',
+                            'failed', 'refunded' => 'failed',
+                            'expired' => 'expired',
+                            'partially_paid' => 'partially_paid',
+                            'sending', 'confirming' => 'processing',
+                            'waiting' => 'pending',
+                            default => $nowpaymentsStatus
+                        };
+
+                        // Only update if status has changed
+                        if ($oldStatus !== $newStatus) {
+                            $deposit->status = $newStatus;
+                            $deposit->save();
+                            $updatedCount++;
+
+                            $updates[] = [
+                                'payment_id' => $deposit->payment_id,
+                                'deposit_id' => $deposit->id,
+                                'old_status' => $oldStatus,
+                                'new_status' => $newStatus,
+                                'nowpayments_status' => $nowpaymentsStatus
+                            ];
+
+                            Log::info('Updated deposit status during bulk refresh', [
+                                'deposit_id' => $deposit->id,
+                                'payment_id' => $deposit->payment_id,
+                                'old_status' => $oldStatus,
+                                'new_status' => $newStatus,
+                                'nowpayments_status' => $nowpaymentsStatus
+                            ]);
+                        }
+                    }
+                } catch (\Exception $e) {
+                    Log::warning('Failed to refresh individual payment status', [
+                        'deposit_id' => $deposit->id,
+                        'payment_id' => $deposit->payment_id,
+                        'error' => $e->getMessage()
+                    ]);
+                    // Continue with next deposit even if one fails
+                }
+            }
+
+            Log::info('Completed bulk refresh of payment statuses', [
+                'total_count' => $totalCount,
+                'updated_count' => $updatedCount,
+                'updates' => $updates
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'total_count' => $totalCount,
+                'updated_count' => $updatedCount,
+                'updates' => $updates,
+                'message' => "Refreshed {$updatedCount} out of {$totalCount} payment statuses"
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error during bulk refresh of payment statuses', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error refreshing payment statuses: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
