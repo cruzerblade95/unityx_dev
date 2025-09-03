@@ -30,6 +30,9 @@
                 <button class="btn btn-outline-warning" onclick="refreshAllPaymentStatuses()">
                     <i class="fas fa-sync-alt"></i> Refresh All Statuses
                 </button>
+                <button class="btn btn-outline-secondary" onclick="debugConnectivity()">
+                    <i class="fas fa-bug"></i> Debug
+                </button>
                 <button class="btn btn-primary" onclick="testApiConnection()">
                     <i class="fas fa-plug"></i> Test API Connection
                 </button>
@@ -442,43 +445,6 @@
     <script>
         let currentRejectDepositId = null;
 
-        function testApiConnection() {
-            console.log('Testing NOWPayments API connection...');
-
-            fetch('/admin/nowpayments/test-api', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => {
-                    console.log('API test response status:', response.status);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('API test response data:', data);
-
-                    let message = 'NOWPayments API Test Results:\n\n';
-
-                    if (data.success) {
-                        message += '✅ API Connection: SUCCESS\n';
-                        message += `📋 Test Result: ${JSON.stringify(data.test_result, null, 2)}\n`;
-                        message += `⚙️ API Configured: ${data.api_configured ? 'Yes' : 'No'}\n`;
-                        message += `🧪 Sandbox Mode: ${data.sandbox_mode ? 'Yes' : 'No'}\n`;
-                    } else {
-                        message += '❌ API Connection: FAILED\n';
-                        message += `Error: ${data.message}\n`;
-                    }
-
-                    alert(message);
-                })
-                .catch(error => {
-                    console.error('API test error:', error);
-                    alert(`Network error during API test:\n${error.message || error}`);
-                });
-        }
-
         function showDepositDetails(depositId, button) {
             console.log('Fetching deposit details for ID:', depositId);
 
@@ -582,11 +548,11 @@
                                     <span class="detail-value">${deposit.unique_address || 'N/A'}</span>
                                 </div>
                                 ${deposit.address_memo ? `
-                                                                            <div class="detail-row">
-                                                                                <span class="detail-label">Address Memo:</span>
-                                                                                <span class="detail-value">${deposit.address_memo}</span>
-                                                                            </div>
-                                                                            ` : ''}
+                                                                                        <div class="detail-row">
+                                                                                            <span class="detail-label">Address Memo:</span>
+                                                                                            <span class="detail-value">${deposit.address_memo}</span>
+                                                                                        </div>
+                                                                                        ` : ''}
                             </div>
                         `;
                         }
@@ -887,69 +853,6 @@
                 .finally(() => {
                     button.innerHTML = originalHtml;
                     button.disabled = false;
-                });
-        }
-
-        function refreshAllPaymentStatuses() {
-            if (!confirm('Are you sure you want to refresh all NOWPayments statuses? This may take a moment.')) {
-                return;
-            }
-
-            // Disable the button and show loading state
-            const refreshAllBtn = event.target;
-            const originalHtml = refreshAllBtn.innerHTML;
-            refreshAllBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing All...';
-            refreshAllBtn.disabled = true;
-
-            fetch('/admin/nowpayments/refresh-all-statuses', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        let message =
-                            `Successfully refreshed ${data.updated_count} out of ${data.total_count} payments.`;
-
-                        if (data.updated_count > 0) {
-                            message += `\n\nUpdated statuses:\n${data.updates.map(update =>
-                                `Payment ${update.payment_id}: ${update.old_status} → ${update.new_status}`
-                            ).join('\n')}`;
-                        }
-
-                        Swal.fire({
-                            title: 'Refresh Complete!',
-                            text: message,
-                            icon: data.updated_count > 0 ? 'success' : 'info',
-                            confirmButtonText: 'OK'
-                        }).then(() => {
-                            // Reload DataTable to show updated statuses
-                            $('.datatables-deposits').DataTable().ajax.reload();
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Error!',
-                            text: data.message || 'Failed to refresh payment statuses',
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error refreshing all statuses:', error);
-                    Swal.fire({
-                        title: 'Error!',
-                        text: 'Network error while refreshing payment statuses',
-                        icon: 'error',
-                        confirmButtonText: 'OK'
-                    });
-                })
-                .finally(() => {
-                    refreshAllBtn.innerHTML = originalHtml;
-                    refreshAllBtn.disabled = false;
                 });
         }
 

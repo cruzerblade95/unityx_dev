@@ -188,3 +188,170 @@ document.addEventListener('DOMContentLoaded', function () {
     console.error('CustomPaymentMethod filter element not found');
   }
 });
+
+// Global functions for button onclick events
+window.testApiConnection = function () {
+  console.log('Testing NOWPayments API connection...');
+
+  fetch('/admin/nowpayments/test-api', {
+    method: 'POST',
+    headers: {
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      'Content-Type': 'application/json'
+    }
+  })
+    .then(response => {
+      console.log('API test response status:', response.status);
+      return response.json();
+    })
+    .then(data => {
+      console.log('API test response data:', data);
+
+      let message = 'NOWPayments API Test Results:\n\n';
+
+      if (data.success) {
+        message += '✅ API Connection: SUCCESS\n';
+        message += `📋 Test Result: ${JSON.stringify(data.test_result, null, 2)}\n`;
+        message += `⚙️ API Configured: ${data.api_configured ? 'Yes' : 'No'}\n`;
+        message += `🧪 Sandbox Mode: ${data.sandbox_mode ? 'Yes' : 'No'}\n`;
+      } else {
+        message += '❌ API Connection: FAILED\n';
+        message += `Error: ${data.message}\n`;
+      }
+      alert(message);
+    })
+    .catch(error => {
+      console.error('API test error:', error);
+      alert(`Network error during API test:
+${error.message || error}`);
+    });
+};
+
+window.debugConnectivity = function () {
+  fetch('/admin/nowpayments/debug-connectivity', {
+    method: 'GET',
+    headers: {
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      'Content-Type': 'application/json'
+    }
+  })
+    .then(response => {
+      console.log('Debug response status:', response.status);
+      return response.json();
+    })
+    .then(data => {
+      console.log('Debug response data:', data);
+
+      let message = `Environment: ${data.environment}\n\n`;
+
+      if (data.success) {
+        message += '✅ Debug Test: SUCCESS\n';
+        message += `📋 API Status: ${JSON.stringify(data.api_status, null, 2)}\n`;
+        message += `⚙️ Config Check:\n`;
+        message += `  - API Key Set: ${data.config.api_key_set ? 'Yes' : 'No'}\n`;
+        message += `  - Sandbox Mode: ${data.config.sandbox_mode ? 'Yes' : 'No'}\n`;
+        message += `  - Base URL: ${data.config.base_url || 'Not Set'}\n`;
+      } else {
+        message += '❌ Debug Test: FAILED\n';
+        message += `Error: ${data.error}\n`;
+      }
+      alert(message);
+    })
+    .catch(error => {
+      console.error('Debug error:', error);
+      alert(`Debug network error:
+${error.message || error}`);
+    });
+};
+
+window.refreshAllPaymentStatuses = function () {
+  if (!confirm('Are you sure you want to refresh all NOWPayments statuses? This may take a moment.')) {
+    return;
+  }
+
+  // Disable the button and show loading state
+  const refreshAllBtn = event.target;
+  const originalHtml = refreshAllBtn.innerHTML;
+  refreshAllBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing All...';
+  refreshAllBtn.disabled = true;
+
+  fetch('/admin/nowpayments/refresh-all-statuses', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    }
+  })
+    .then(response => {
+      console.log('Refresh all response status:', response.status);
+      console.log('Refresh all response headers:', response.headers);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return response.json();
+    })
+    .then(data => {
+      console.log('Refresh all response data:', data);
+
+      if (data.success) {
+        let message = `Successfully refreshed ${data.updated_count} out of ${data.total_count} payments.`;
+
+        if (data.updated_count > 0) {
+          message += `\n\nUpdated statuses:\n${data.updates
+            .map(update => `Payment ${update.payment_id}: ${update.old_status} → ${update.new_status}`)
+            .join('\n')}`;
+        }
+
+        Swal.fire({
+          title: 'Refresh Complete!',
+          text: message,
+          icon: data.updated_count > 0 ? 'success' : 'info',
+          confirmButtonText: 'OK'
+        }).then(() => {
+          // Reload DataTable to show updated statuses
+          $('.datatables-deposits').DataTable().ajax.reload();
+        });
+      } else {
+        Swal.fire({
+          title: 'Error!',
+          text: data.message || 'Failed to refresh payment statuses',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error refreshing all statuses:', error);
+
+      let errorMessage = 'Network error while refreshing payment statuses';
+
+      if (error.message) {
+        errorMessage += `\n\nDetails: ${error.message}`;
+        console.error('Detailed error:', error.message);
+      }
+
+      // Check if it's a specific type of error
+      if (error.message.includes('HTTP 500')) {
+        errorMessage += '\n\nThis is a server error. Please check the server logs.';
+      } else if (error.message.includes('HTTP 404')) {
+        errorMessage += '\n\nThe refresh endpoint was not found. Please check the route configuration.';
+      } else if (error.message.includes('HTTP 403')) {
+        errorMessage += '\n\nAccess denied. Please check your permissions.';
+      } else if (error.message.includes('HTTP 419')) {
+        errorMessage += '\n\nCSRF token mismatch. Please refresh the page and try again.';
+      }
+
+      Swal.fire({
+        title: 'Error!',
+        text: errorMessage,
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+    })
+    .finally(() => {
+      refreshAllBtn.innerHTML = originalHtml;
+      refreshAllBtn.disabled = false;
+    });
+};
