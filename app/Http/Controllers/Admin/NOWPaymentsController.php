@@ -120,6 +120,7 @@ class NOWPaymentsController extends Controller
                         'completed' => 'success',
                         'pending' => 'warning',
                         'partially_paid' => 'info',
+                        'cancelled' => 'secondary',
                         'expired' => 'danger',
                         'failed' => 'danger',
                         'processing' => 'primary',
