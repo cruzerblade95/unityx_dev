@@ -7,40 +7,47 @@
       "slug": "admin.dashboard"
     },
     {
-      "url": "admin/users",
-      "name": "Users",
+      "name": "User Management",
       "icon": "menu-icon icon-base ti tabler-users",
-      "slug": "admin.users.index"
-    },
-    {
-      "url": "admin/wallets",
-      "name": "Wallets",
-      "icon": "menu-icon icon-base ti tabler-wallet",
-      "slug": "admin.wallets.index"
-    },
-    {
-      "url": "admin/kyc",
-      "name": "KYC Verification",
-      "icon": "menu-icon icon-base ti tabler-id",
-      "slug": "admin.kyc.index"
-    },
-    {
-      "url": "admin/withdrawals",
-      "name": "Withdrawals",
-      "icon": "menu-icon icon-base ti tabler-coin",
-      "slug": "admin.withdrawals.index"
-    },
-    {
-      "url": "admin/nowpayments",
-      "name": "Deposit Records",
-      "icon": "menu-icon icon-base ti tabler-cash",
-      "slug": "admin.nowpayments.index"
-    },
-    {
-      "url": "admin/marketplace",
-      "name": "Marketplace",
-      "icon": "menu-icon icon-base ti tabler-shopping-cart",
-      "slug": "admin.marketplace.index"
+      "slug": "admin.user_management",
+      "submenu": [
+        {
+          "url": "admin/users",
+          "name": "Users",
+          "icon": "menu-icon icon-base ti tabler-users",
+          "slug": "admin.users.index"
+        },
+        {
+          "url": "admin/wallets",
+          "name": "Wallets",
+          "icon": "menu-icon icon-base ti tabler-wallet",
+          "slug": "admin.wallets.index"
+        },
+        {
+          "url": "admin/kyc",
+          "name": "KYC Verification",
+          "icon": "menu-icon icon-base ti tabler-id",
+          "slug": "admin.kyc.index"
+        },
+        {
+          "url": "admin/withdrawals",
+          "name": "Withdrawals",
+          "icon": "menu-icon icon-base ti tabler-coin",
+          "slug": "admin.withdrawals.index"
+        },
+        {
+          "url": "admin/nowpayments",
+          "name": "Deposit Records",
+          "icon": "menu-icon icon-base ti tabler-cash",
+          "slug": "admin.nowpayments.index"
+        },
+        {
+          "url": "admin/marketplace",
+          "name": "Marketplace",
+          "icon": "menu-icon icon-base ti tabler-shopping-cart",
+          "slug": "admin.marketplace.index"
+        }
+      ]
     },
     {
       "url": "admin/fix-cron-value",
@@ -67,29 +74,35 @@
       "slug": "admin.announcements.index"
     },
     {
-      "url": "admin/withdrawal-settings",
-      "name": "Withdrawal Settings",
+      "name": "Settings",
       "icon": "menu-icon icon-base ti tabler-settings",
-      "slug": "admin.withdrawal_settings.index"
-    },
-    {
-      "url": "admin/reinvestment-settings",
-      "name": "Reinvestment Settings",
-      "icon": "menu-icon icon-base ti tabler-repeat",
-      "slug": "admin.reinvestment_settings.index"
-    },
-    {
-      "url": "admin/upline-management",
-      "name": "Upline Management",
-      "icon": "menu-icon icon-base ti tabler-hierarchy",
-      "slug": "admin.upline-management.index"
-    },
-    {
-      "url": "admin/ai-trade-settings",
-      "name": "AI Trade Settings",
-      "icon": "menu-icon icon-base ti tabler-robot",
-      "slug": "admin.ai-trade-settings.index"
+      "slug": "admin.settings",
+      "submenu": [
+        {
+          "url": "admin/withdrawal-settings",
+          "name": "Withdrawal Settings",
+          "icon": "menu-icon icon-base ti tabler-settings",
+          "slug": "admin.withdrawal_settings.index"
+        },
+        {
+          "url": "admin/reinvestment-settings",
+          "name": "Reinvestment Settings",
+          "icon": "menu-icon icon-base ti tabler-repeat",
+          "slug": "admin.reinvestment_settings.index"
+        },
+        {
+          "url": "admin/upline-management",
+          "name": "Upline Management",
+          "icon": "menu-icon icon-base ti tabler-hierarchy",
+          "slug": "admin.upline-management.index"
+        },
+        {
+          "url": "admin/ai-trade-settings",
+          "name": "AI Trade Settings",
+          "icon": "menu-icon icon-base ti tabler-robot",
+          "slug": "admin.ai-trade-settings.index"
+        }
+      ]
     }
-
   ]
 }

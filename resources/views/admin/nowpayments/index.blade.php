@@ -585,7 +585,7 @@
                             'nowpayments-error';
                         modalContent += `
                         <div class="detail-section ${nowpaymentsClass}">
-                            <h6><i class="fas fa-link"></i> NOWPayments Status</h6>
+                            <h6><i class="fas fa-link"></i> NOWPayments Payment Details</h6>
                             <div class="detail-row">
                                 <span class="detail-label">Has Payment ID:</span>
                                 <span class="detail-value">${data.has_payment_id ? 'Yes' : 'No'}</span>
@@ -599,18 +599,148 @@
                         if (data.nowpayments_data) {
                             modalContent += `
                             <div class="detail-row">
+                                <span class="detail-label">Payment ID:</span>
+                                <span class="detail-value"><strong>${data.nowpayments_data.payment_id || 'N/A'}</strong></span>
+                            </div>
+                            <div class="detail-row">
                                 <span class="detail-label">NOWPayments Status:</span>
-                                <span class="detail-value">${data.nowpayments_data.payment_status || 'Unknown'}</span>
+                                <span class="detail-value"><span class="badge ${data.nowpayments_data.payment_status === 'finished' ? 'bg-success' : (data.nowpayments_data.payment_status === 'waiting' ? 'bg-warning' : 'bg-secondary')}">${data.nowpayments_data.payment_status || 'Unknown'}</span></span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Order ID:</span>
+                                <span class="detail-value">${data.nowpayments_data.order_id || 'N/A'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Order Description:</span>
+                                <span class="detail-value">${data.nowpayments_data.order_description || 'N/A'}</span>
                             </div>
                         `;
-                            if (data.nowpayments_data.order_id) {
-                                modalContent += `
+                            
+                            // Financial Information Section
+                            modalContent += `
+                            </div>
+                            <div class="detail-section">
+                                <h6><i class="fas fa-dollar-sign"></i> Financial Information</h6>
                                 <div class="detail-row">
-                                    <span class="detail-label">Order ID:</span>
-                                    <span class="detail-value">${data.nowpayments_data.order_id}</span>
+                                    <span class="detail-label">Original Price:</span>
+                                    <span class="detail-value"><strong>${data.nowpayments_data.price_amount || 'N/A'} ${(data.nowpayments_data.price_currency || 'USD').toUpperCase()}</strong></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Pay Price:</span>
+                                    <span class="detail-value">${data.nowpayments_data.pay_amount || 'N/A'} ${(data.nowpayments_data.pay_currency || '').toUpperCase()}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Actually Paid:</span>
+                                    <span class="detail-value"><strong class="text-success">${data.nowpayments_data.actually_paid || 'N/A'} ${(data.nowpayments_data.pay_currency || '').toUpperCase()}</strong></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Actually Paid (Fiat):</span>
+                                    <span class="detail-value">${data.nowpayments_data.actually_paid_at_fiat || 'N/A'} ${(data.nowpayments_data.price_currency || 'USD').toUpperCase()}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Outcome Price:</span>
+                                    <span class="detail-value">${data.nowpayments_data.outcome_amount || 'N/A'} ${(data.nowpayments_data.outcome_currency || data.nowpayments_data.pay_currency || '').toUpperCase()}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Network Fee:</span>
+                                    <span class="detail-value">${data.nowpayments_data.network_fee || 'N/A'} ${(data.nowpayments_data.pay_currency || '').toUpperCase()}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Service Fee:</span>
+                                    <span class="detail-value">${data.nowpayments_data.service_fee || 'N/A'} ${(data.nowpayments_data.pay_currency || '').toUpperCase()}</span>
                                 </div>
                             `;
+
+                            // Transaction Information Section
+                            modalContent += `
+                            </div>
+                            <div class="detail-section">
+                                <h6><i class="fas fa-exchange-alt"></i> Transaction Information</h6>
+                                <div class="detail-row">
+                                    <span class="detail-label">Type:</span>
+                                    <span class="detail-value">${data.nowpayments_data.type || 'N/A'}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Fixed Rate:</span>
+                                    <span class="detail-value">${data.nowpayments_data.fixed_rate ? 'True' : 'False'}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Fee Paid by User:</span>
+                                    <span class="detail-value">${data.nowpayments_data.fee_paid_by_user ? 'True' : 'False'}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Created At:</span>
+                                    <span class="detail-value">${data.nowpayments_data.created_at ? new Date(data.nowpayments_data.created_at).toLocaleString() : 'N/A'}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Updated At:</span>
+                                    <span class="detail-value">${data.nowpayments_data.updated_at ? new Date(data.nowpayments_data.updated_at).toLocaleString() : 'N/A'}</span>
+                                </div>
+                            `;
+
+                            // Address Information Section  
+                            if (data.nowpayments_data.payin_address || data.nowpayments_data.payout_address) {
+                                modalContent += `
+                                </div>
+                                <div class="detail-section">
+                                    <h6><i class="fas fa-wallet"></i> Address Information</h6>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Payin Address:</span>
+                                        <span class="detail-value"><code class="small">${data.nowpayments_data.payin_address || 'N/A'}</code></span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Payout Address:</span>
+                                        <span class="detail-value"><code class="small">${data.nowpayments_data.payout_address || 'N/A'}</code></span>
+                                    </div>
+                                `;
                             }
+
+                            // Hash Information Section
+                            if (data.nowpayments_data.payin_hash || data.nowpayments_data.payout_hash) {
+                                modalContent += `
+                                </div>
+                                <div class="detail-section">
+                                    <h6><i class="fas fa-link"></i> Transaction Hashes</h6>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Payin Hash:</span>
+                                        <span class="detail-value">
+                                            ${data.nowpayments_data.payin_hash ? 
+                                                `<code class="small">${data.nowpayments_data.payin_hash}</code>` : 
+                                                'N/A'
+                                            }
+                                        </span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Payout Hash:</span>
+                                        <span class="detail-value">
+                                            ${data.nowpayments_data.payout_hash ? 
+                                                `<code class="small">${data.nowpayments_data.payout_hash}</code>` : 
+                                                'N/A'
+                                            }
+                                        </span>
+                                    </div>
+                                `;
+                            }
+
+                            // Technical Information Section
+                            if (data.nowpayments_data.ipn_callback_url) {
+                                modalContent += `
+                                </div>
+                                <div class="detail-section">
+                                    <h6><i class="fas fa-cog"></i> Technical Information</h6>
+                                    <div class="detail-row">
+                                        <span class="detail-label">IPN Callback URL:</span>
+                                        <span class="detail-value"><small class="text-muted">${data.nowpayments_data.ipn_callback_url}</small></span>
+                                    </div>
+                                `;
+                            }
+                        } else {
+                            modalContent += `
+                            <div class="alert alert-warning mt-3">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                No detailed payment information available from NOWPayments API.
+                            </div>
+                            `;
                         }
 
                         modalContent += `</div>`;

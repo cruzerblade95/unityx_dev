@@ -458,7 +458,36 @@ class NOWPaymentsController extends Controller
             // If payment_id exists, try to get NOWPayments data
             $nowpaymentsData = null;
             if ($deposit->payment_id) {
-                $nowpaymentsData = $this->nowPayments->getPaymentStatus($deposit->payment_id);
+                // Try to get detailed payment information
+                $nowpaymentsData = $this->nowPayments->getDetailedPaymentInfo($deposit->payment_id);
+                
+                // If detailed info fails, fall back to basic status
+                if (!$nowpaymentsData) {
+                    $nowpaymentsData = $this->nowPayments->getPaymentStatus($deposit->payment_id);
+                }
+                
+                // Log what data we received for debugging
+                if ($nowpaymentsData) {
+                    Log::info('NOWPayments data retrieved successfully', [
+                        'payment_id' => $deposit->payment_id,
+                        'available_fields' => array_keys($nowpaymentsData),
+                        'status' => $nowpaymentsData['payment_status'] ?? 'unknown',
+                        'sample_data' => [
+                            'payment_id' => $nowpaymentsData['payment_id'] ?? null,
+                            'order_id' => $nowpaymentsData['order_id'] ?? null,
+                            'price_amount' => $nowpaymentsData['price_amount'] ?? null,
+                            'pay_amount' => $nowpaymentsData['pay_amount'] ?? null,
+                            'actually_paid' => $nowpaymentsData['actually_paid'] ?? null,
+                            'payin_hash' => $nowpaymentsData['payin_hash'] ?? null,
+                            'payout_hash' => $nowpaymentsData['payout_hash'] ?? null,
+                        ]
+                    ]);
+                } else {
+                    Log::warning('Failed to retrieve NOWPayments data', [
+                        'payment_id' => $deposit->payment_id,
+                        'deposit_id' => $deposit->id
+                    ]);
+                }
             }
 
             Log::info('Deposit details requested', [
