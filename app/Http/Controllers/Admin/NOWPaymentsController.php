@@ -141,6 +141,13 @@ class NOWPaymentsController extends Controller
                                     <i class="fas fa-info-circle"></i> Details
                                 </button>';
 
+                    // Add refresh status button for NOWPayments deposits
+                    if ($deposit->payment_id) {
+                        $actions .= ' <button class="btn btn-sm btn-outline-warning ml-1" onclick="refreshPaymentStatus(\'' . $deposit->payment_id . '\', ' . $deposit->id . ', this)">
+                                        <i class="fas fa-sync"></i> Refresh
+                                    </button>';
+                    }
+
                     if ($deposit->status === 'pending') {
                         $actions .= ' <button class="btn btn-sm btn-success ml-1" onclick="approvePayment(' . $deposit->id . ', this)">
                                         <i class="fas fa-check"></i> Approve
@@ -304,7 +311,18 @@ class NOWPaymentsController extends Controller
                 // Update local deposit record if it exists
                 if ($deposit) {
                     $oldStatus = $deposit->status;
-                    $newStatus = $payment['payment_status'] ?? $deposit->status;
+                    $nowpaymentsStatus = $payment['payment_status'] ?? $deposit->status;
+
+                    // Map NOWPayments status to our local status
+                    $newStatus = match($nowpaymentsStatus) {
+                        'finished', 'confirmed' => 'completed',
+                        'failed', 'refunded' => 'failed',
+                        'expired' => 'expired',
+                        'partially_paid' => 'partially_paid',
+                        'sending', 'confirming' => 'processing',
+                        'waiting' => 'pending',
+                        default => $nowpaymentsStatus
+                    };
 
                     $deposit->status = $newStatus;
                     $deposit->save();
@@ -312,6 +330,7 @@ class NOWPaymentsController extends Controller
                     Log::info('Updated local deposit status', [
                         'payment_id' => $paymentId,
                         'old_status' => $oldStatus,
+                        'nowpayments_status' => $nowpaymentsStatus,
                         'new_status' => $newStatus
                     ]);
                 } else {
