@@ -289,17 +289,7 @@ Route::get('/telegram/verify', [TelegramController::class, 'verify'])->name('tel
 
 // Main Page Route
 Route::get('/', function () {
-    $host = request()->getHost();
-    // \Log::info('Main route accessed - Host: ' . $host);
-
-    // Check if accessing from unityx.dev domain
-    if (str_contains(strtolower($host), 'unityx.dev')) {
-        // \Log::info('unityx.dev domain detected - showing migration notice');
-        return view('migration_notice');
-    }
-
-    // \Log::info('Other domain - showing landing page');
-    // Otherwise show landing page
+    // Show landing page (middleware will handle unityx.dev domain check)
     return app(Landing::class)->index();
 })->name('front-pages-landing');
 
@@ -524,12 +514,8 @@ Route::middleware([
     })->name('dashboard');
 });
 
-// Catch-all route for unityx.dev domains (must be last)
+// Catch-all route (must be last)
 Route::fallback(function () {
-    if (str_contains(strtolower(request()->getHost()), 'unityx.dev')) {
-        return view('migration_notice');
-    }
-
-    // For other domains, show 404
+    // Show 404 (middleware will handle unityx.dev domain check)
     abort(404);
 });
