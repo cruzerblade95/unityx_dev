@@ -28,11 +28,14 @@ class CheckMigrationDomain
             $skipRoutes = [
                 'api/',
                 'migration-notice',
+                'test-domain',
+                'test-migration',
                 '_debugbar',
                 'livewire/',
                 'storage/',
                 'assets/',
-                'vendor/'
+                'vendor/',
+                'build/'
             ];
 
             $currentPath = $request->path();
