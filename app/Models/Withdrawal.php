@@ -20,6 +20,7 @@ class Withdrawal extends Model
         'bank_name', 
         'account_number',
         'withdrawal_type',
+        'wallet_type',
         'branch_name',
         'branch_selected',
         'payment_details'

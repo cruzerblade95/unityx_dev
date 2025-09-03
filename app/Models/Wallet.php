@@ -176,4 +176,54 @@ class Wallet extends Model
         $this->floating -= $amount;
         return $this->save();
     }
+
+    /**
+     * Hold amount from specific wallet type.
+     *
+     * @param float $amount
+     * @param string $walletType ('profit' or 'bonus')
+     * @return bool
+     */
+    public function holdAmountFromWallet(float $amount, string $walletType)
+    {
+        switch ($walletType) {
+            case 'profit':
+                if ($this->profit < $amount) {
+                    return false;
+                }
+                $this->profit -= $amount;
+                break;
+
+            case 'bonus':
+                if ($this->bonus < $amount) {
+                    return false;
+                }
+                $this->bonus -= $amount;
+                break;
+
+            default:
+                return false;
+        }
+
+        $this->floating += $amount;
+        return $this->save();
+    }
+
+    /**
+     * Get available balance for specific wallet type.
+     *
+     * @param string $walletType ('profit' or 'bonus')
+     * @return float
+     */
+    public function getAvailableBalance(string $walletType)
+    {
+        switch ($walletType) {
+            case 'profit':
+                return max(0, $this->profit);
+            case 'bonus':
+                return max(0, $this->bonus);
+            default:
+                return 0;
+        }
+    }
 }

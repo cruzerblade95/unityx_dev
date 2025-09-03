@@ -216,6 +216,25 @@
                                         <small class="text-muted">All transactions use BEP20 (BSC) network</small>
                                     </div>
 
+                                    <!-- Wallet Type Selection -->
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Withdraw From <span class="text-danger">*</span></label>
+                                        <select class="form-select @error('wallet_type') is-invalid @enderror" 
+                                                name="wallet_type" id="wallet_type" required>
+                                            <option value="">Select Wallet</option>
+                                            <option value="profit" {{ old('wallet_type') == 'profit' ? 'selected' : '' }}>
+                                                Profit Wallet (${{ number_format($user->wallet->profit ?? 0, 2) }})
+                                            </option>
+                                            <option value="bonus" {{ old('wallet_type') == 'bonus' ? 'selected' : '' }}>
+                                                Bonus Wallet (${{ number_format($user->wallet->bonus ?? 0, 2) }})
+                                            </option>
+                                        </select>
+                                        @error('wallet_type')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                        <small class="text-muted">Choose which wallet to withdraw from</small>
+                                    </div>
+
                                     <!-- Withdrawal Amount -->
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Withdrawal Amount (USD) <span
@@ -232,9 +251,11 @@
                                         @error('amount')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
-                                        <small class="text-muted">Minimum: ${{ number_format($withdrawalSettings->min_amount ?? 50, 2) }} | Maximum:
+                                        <small class="text-muted" id="amount-help">
+                                            Minimum: ${{ number_format($withdrawalSettings->min_amount ?? 50, 2) }} | Maximum:
                                             ${{ number_format(min($withdrawalSettings->max_amount ?? 300, $walletBalance), 2) }} | Available:
-                                            ${{ number_format($walletBalance, 2) }}</small>
+                                            ${{ number_format($walletBalance, 2) }}
+                                        </small>
                                     </div>
                                 </div>
 
@@ -442,6 +463,40 @@
             const walletAddressInput = document.getElementById('wallet_address');
             const savedAddressButtons = document.querySelectorAll('.saved-address');
             const currencySelect = document.getElementById('currency');
+            const walletTypeSelect = document.getElementById('wallet_type');
+            const amountHelp = document.getElementById('amount-help');
+
+            // Wallet balances from server
+            const walletBalances = {
+                'profit': {{ $user->wallet->profit ?? 0 }},
+                'bonus': {{ $user->wallet->bonus ?? 0 }}
+            };
+
+            // Update available balance and max amount when wallet type changes
+            if (walletTypeSelect && amountInput && amountHelp) {
+                walletTypeSelect.addEventListener('change', function() {
+                    const walletType = this.value;
+                    if (walletType && walletBalances[walletType] !== undefined) {
+                        const availableBalance = walletBalances[walletType];
+                        const minAmount = {{ $withdrawalSettings->min_amount ?? 50 }};
+                        const maxAmount = Math.min({{ $withdrawalSettings->max_amount ?? 300 }}, availableBalance);
+                        
+                        // Update input max attribute
+                        amountInput.setAttribute('max', maxAmount);
+                        
+                        // Update help text
+                        amountHelp.innerHTML = `Minimum: $${minAmount.toFixed(2)} | Maximum: $${maxAmount.toFixed(2)} | Available: $${availableBalance.toFixed(2)}`;
+                        
+                        // Clear amount if it exceeds new max
+                        if (parseFloat(amountInput.value) > maxAmount) {
+                            amountInput.value = '';
+                            displayAmount.textContent = '$0.00';
+                            displayFee.textContent = '$0.00';
+                            displayNet.textContent = '$0.00';
+                        }
+                    }
+                });
+            }
 
             // Calculate fees on amount change
             if (amountInput) {
@@ -500,19 +555,32 @@
             if (form) {
                 form.addEventListener('submit', function(e) {
                     const amount = parseFloat(amountInput.value);
-                    const walletBalance = {{ $walletBalance }};
+                    const walletType = walletTypeSelect.value;
+                    const availableBalance = walletBalances[walletType] || 0;
                     const minAmount = {{ $withdrawalSettings->min_amount ?? 50 }};
-                    const maxAmount = Math.min({{ $withdrawalSettings->max_amount ?? 300 }}, walletBalance);
+                    const maxAmount = Math.min({{ $withdrawalSettings->max_amount ?? 300 }}, availableBalance);
+
+                    if (!walletType) {
+                        e.preventDefault();
+                        alert('Please select a wallet to withdraw from.');
+                        return false;
+                    }
 
                     if (amount > maxAmount) {
                         e.preventDefault();
-                        alert(`Maximum withdrawal amount is $${maxAmount.toFixed(2)}.`);
+                        alert(`Maximum withdrawal amount is $${maxAmount.toFixed(2)} for the selected wallet.`);
                         return false;
                     }
 
                     if (amount < minAmount) {
                         e.preventDefault();
                         alert(`Minimum withdrawal amount is $${minAmount.toFixed(2)}.`);
+                        return false;
+                    }
+
+                    if (amount > availableBalance) {
+                        e.preventDefault();
+                        alert(`Insufficient balance in selected wallet. Available: $${availableBalance.toFixed(2)}.`);
                         return false;
                     }
                 });

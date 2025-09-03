@@ -54,6 +54,7 @@ class WithdrawalRequest extends FormRequest
                 "max:{$maxAmount}"
             ],
             'withdrawal_type' => 'required|string|in:crypto,etc_black,gold',
+            'wallet_type' => 'required|string|in:profit,bonus',
             'reference' => 'nullable|string|max:255',
             'note' => 'nullable|string|max:1000',
         ];
@@ -102,6 +103,8 @@ class WithdrawalRequest extends FormRequest
             'amount.max' => "The withdrawal amount cannot exceed $" . number_format($maxAmount, 2),
             'amount.min' => "The minimum withdrawal amount is $" . number_format($minAmount, 2),
             'withdrawal_type.required' => 'Please select a withdrawal type',
+            'wallet_type.required' => 'Please select a wallet to withdraw from',
+            'wallet_type.in' => 'Invalid wallet type selected',
             'currency.required' => 'Please select a currency',
             'currency.in' => 'Invalid currency selected',
             'wallet_address.required' => 'Wallet address is required',

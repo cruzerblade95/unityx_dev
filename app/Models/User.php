@@ -192,6 +192,21 @@ class User extends Authenticatable
     }
 
     /**
+     * Get withdrawable balance for specific wallet type.
+     *
+     * @param string $walletType ('profit' or 'bonus')
+     * @return float
+     */
+    public function getWithdrawableBalanceByType(string $walletType)
+    {
+        if (!$this->wallet) {
+            return 0;
+        }
+
+        return $this->wallet->getAvailableBalance($walletType);
+    }
+
+    /**
      * Get the user's telegram verification record.
      */
     public function telegramVerification()
