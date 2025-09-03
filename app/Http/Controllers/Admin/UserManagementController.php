@@ -161,7 +161,7 @@ class UserManagementController extends Controller
 
     public function profile($id)
     {
-        $user = User::with('wallet')->findOrFail($id);
+        $user = User::with(['wallet', 'kycVerification'])->findOrFail($id);
 
         // Get direct downlines
         $downlines = User::with('wallet')
