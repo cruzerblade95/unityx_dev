@@ -199,6 +199,117 @@ use Illuminate\Support\Facades\Storage;
     </div>
 </div>
 
+<!-- KYC Information Section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header border-bottom">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-id-card me-2"></i>KYC Verification
+                    </h5>
+                    @if($user->kycVerification)
+                        <a href="{{ route('admin.kyc.show', $user->kycVerification->id) }}" class="btn btn-primary">
+                            <i class="fas fa-eye me-1"></i>View KYC Documents
+                        </a>
+                    @endif
+                </div>
+            </div>
+            <div class="card-body">
+                @if($user->kycVerification)
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <div class="card bg-label-{{ $user->kycVerification->status_color }}">
+                                <div class="card-body text-center">
+                                    <div class="avatar mb-2">
+                                        <span class="avatar-initial rounded-circle bg-{{ $user->kycVerification->status_color }}">
+                                            <i class="fas fa-{{ $user->kycVerification->kyc_status == 2 ? 'check-circle' : ($user->kycVerification->kyc_status == 1 ? 'clock' : 'times-circle') }}"></i>
+                                        </span>
+                                    </div>
+                                    <h5 class="mb-1">{{ $user->kycVerification->status_text }}</h5>
+                                    <small>Verification Status</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-label-info">
+                                <div class="card-body text-center">
+                                    <div class="avatar mb-2">
+                                        <span class="avatar-initial rounded-circle bg-info">
+                                            <i class="fas fa-file-alt"></i>
+                                        </span>
+                                    </div>
+                                    <h5 class="mb-1">
+                                        {{ ($user->kycVerification->kyc_doc1 ? 1 : 0) + ($user->kycVerification->kyc_doc2 ? 1 : 0) + ($user->kycVerification->kyc_doc3 ? 1 : 0) }}
+                                    </h5>
+                                    <small>Documents Submitted</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center h-100">
+                                <div class="w-100">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <small class="text-muted">Submitted:</small>
+                                        <span class="text-body fw-medium">{{ $user->kycVerification->created_at->format('M d, Y g:i A') }}</span>
+                                    </div>
+                                    @if($user->kycVerification->updated_at != $user->kycVerification->created_at)
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <small class="text-muted">Last Updated:</small>
+                                            <span class="text-body fw-medium">{{ $user->kycVerification->updated_at->format('M d, Y g:i A') }}</span>
+                                        </div>
+                                    @endif
+                                    @if($user->kycVerification->kyc_reason)
+                                        <div class="mt-2">
+                                            <small class="text-muted d-block">Admin Note:</small>
+                                            <span class="text-body">{{ $user->kycVerification->kyc_reason }}</span>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Document Status -->
+                    <div class="mt-4 pt-3 border-top">
+                        <h6 class="mb-3">Document Status</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-id-card me-2 text-{{ $user->kycVerification->kyc_doc1 ? 'success' : 'muted' }}"></i>
+                                    <span>ID Front {{ $user->kycVerification->kyc_doc1 ? '✓' : '✗' }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-id-card me-2 text-{{ $user->kycVerification->kyc_doc2 ? 'success' : 'muted' }}"></i>
+                                    <span>ID Back {{ $user->kycVerification->kyc_doc2 ? '✓' : '✗' }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-passport me-2 text-{{ $user->kycVerification->kyc_doc3 ? 'success' : 'muted' }}"></i>
+                                    <span>Passport/Additional {{ $user->kycVerification->kyc_doc3 ? '✓' : '✗' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    <div class="text-center py-5">
+                        <div class="avatar avatar-xl mb-3">
+                            <span class="avatar-initial rounded-circle bg-label-secondary">
+                                <i class="fas fa-id-card fa-2x"></i>
+                            </span>
+                        </div>
+                        <h6 class="text-muted">No KYC verification submitted</h6>
+                        <p class="text-muted small">User has not submitted any KYC documents yet.</p>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- User Management Section -->
 <div class="row mt-4">
     <div class="col-12">

@@ -41,7 +41,7 @@ class AccountRecoveryController extends Controller
             return redirect()->route('account-recovery.details');
         } else {
             // Email not found, redirect to registration with alert
-            return redirect()->route('register')->with('email_not_found', true);
+            return redirect()->route('user.register')->with('email_not_found', true);
         }
     }
 
