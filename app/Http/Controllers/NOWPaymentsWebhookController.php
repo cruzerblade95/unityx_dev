@@ -63,9 +63,12 @@ class NOWPaymentsWebhookController extends Controller
                     break;
 
                 case 'failed':
-                case 'expired':
                 case 'refunded':
                     $deposit->update(['status' => 'failed']);
+                    break;
+
+                case 'expired':
+                    $deposit->update(['status' => 'expired']);
                     break;
 
                 case 'partially_paid':
