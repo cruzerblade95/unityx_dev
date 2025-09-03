@@ -141,6 +141,69 @@ $(document).ready(function() {
         });
     });
 
+    // Process Wallets to AI Trades button
+    $('#processWalletsBtn').on('click', function() {
+        var btn = $(this);
+        var originalText = btn.html();
+
+        // Show confirmation dialog
+        Swal.fire({
+            title: 'Process Wallets to AI Trades?',
+            text: 'This will update or create AI trades based on user wallet deposits. Are you sure?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#dc3545',
+            confirmButtonText: 'Yes, Process Now',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Disable button and show loading
+                btn.prop('disabled', true);
+                btn.html('<i class="fas fa-spinner fa-spin me-2"></i>Processing...');
+
+                $.ajax({
+                    url: "{{ url('/process-wallets-to-ai-trades') }}",
+                    method: 'GET',
+                    success: function(response) {
+                        // Re-enable button
+                        btn.prop('disabled', false);
+                        btn.html(originalText);
+
+                        if (response.upserts && response.message) {
+                            var processedCount = response.upserts.length;
+                            Swal.fire({
+                                title: 'Success!',
+                                html: response.message + '<br><br><strong>Processed ' + processedCount + ' users</strong>',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                // Reload the users table to show updated data
+                                usersTable.ajax.reload();
+                            });
+                        } else {
+                            Swal.fire('Success!', 'Wallets processed successfully.', 'success').then(() => {
+                                usersTable.ajax.reload();
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        // Re-enable button
+                        btn.prop('disabled', false);
+                        btn.html(originalText);
+
+                        var errorMessage = 'Failed to process wallets.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        Swal.fire('Error!', errorMessage, 'error');
+                    }
+                });
+            }
+        });
+        });
+    });
+
     // View Details Modal
     $(document).on('click', '.view-details-btn', function() {
         var userId = $(this).data('id');
@@ -458,11 +521,18 @@ $(document).ready(function() {
             <div class="row">
                 <div class="col-12">
                     <div class="card">
-                        <div class="card-header">
-                            <h4 class="card-title mb-0">
-                                <i class="fas fa-cog me-2"></i>Trading Configuration
-                            </h4>
-                            <p class="card-title-desc mb-0">Configure AI trading algorithm parameters</p>
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="card-title mb-0">
+                                    <i class="fas fa-cog me-2"></i>Trading Configuration
+                                </h4>
+                                <p class="card-title-desc mb-0">Configure AI trading algorithm parameters</p>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-success" id="processWalletsBtn">
+                                    <i class="fas fa-sync-alt me-2"></i>Process Wallets to AI Trades
+                                </button>
+                            </div>
                         </div>
                         <div class="card-body">
                             <form id="settingsForm">
