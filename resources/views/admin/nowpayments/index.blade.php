@@ -577,11 +577,11 @@
                                     <span class="detail-value">${deposit.unique_address || 'N/A'}</span>
                                 </div>
                                 ${deposit.address_memo ? `
-                                                                    <div class="detail-row">
-                                                                        <span class="detail-label">Address Memo:</span>
-                                                                        <span class="detail-value">${deposit.address_memo}</span>
-                                                                    </div>
-                                                                    ` : ''}
+                                                                        <div class="detail-row">
+                                                                            <span class="detail-label">Address Memo:</span>
+                                                                            <span class="detail-value">${deposit.address_memo}</span>
+                                                                        </div>
+                                                                        ` : ''}
                             </div>
                         `;
                         }
@@ -830,6 +830,58 @@
                 .finally(() => {
                     confirmBtn.innerHTML = originalHtml;
                     confirmBtn.disabled = false;
+                });
+        }
+
+        function refreshPaymentStatus(paymentId, depositId, button) {
+            if (!confirm('Are you sure you want to refresh the payment status from NOWPayments?')) {
+                return;
+            }
+
+            const originalHtml = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+            button.disabled = true;
+
+            fetch(`/admin/nowpayments/refresh-status/${paymentId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: 'Payment status refreshed successfully!',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            // Reload DataTable to show updated status
+                            $('.datatables-deposits').DataTable().ajax.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Info',
+                            text: data.message || 'No status update needed',
+                            icon: 'info',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error refreshing status:', error);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Error refreshing payment status',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                })
+                .finally(() => {
+                    button.innerHTML = originalHtml;
+                    button.disabled = false;
                 });
         }
 
