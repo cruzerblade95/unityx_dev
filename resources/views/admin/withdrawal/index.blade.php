@@ -231,20 +231,36 @@ function initializeWithdrawalPage() {
         var withdrawalId = $(this).data('id');
 
         Swal.fire({
-            title: 'Reject Withdrawal?',
-            text: "Are you sure you want to reject this withdrawal request?",
+            title: 'Reject Withdrawal',
+            html: `
+                <div class="mb-3">
+                    <label for="rejection-reason" class="form-label">Rejection Reason *</label>
+                    <textarea id="rejection-reason" class="form-control" rows="4"
+                              placeholder="Please provide a reason for rejection..." required></textarea>
+                </div>
+            `,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc3545',
             cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, reject it!'
+            confirmButtonText: 'Reject Withdrawal',
+            cancelButtonText: 'Cancel',
+            preConfirm: () => {
+                const reason = document.getElementById('rejection-reason').value;
+                if (!reason.trim()) {
+                    Swal.showValidationMessage('Please provide a rejection reason');
+                    return false;
+                }
+                return reason;
+            }
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
                     url: "/admin/withdrawals/" + withdrawalId + "/reject",
                     type: 'POST',
                     data: {
-                        _token: "{{ csrf_token() }}"
+                        _token: "{{ csrf_token() }}",
+                        rejection_reason: result.value
                     },
                     success: function(response) {
                         if (response.success) {

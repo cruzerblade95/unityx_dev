@@ -232,6 +232,11 @@ class WithdrawalManagementController extends Controller
     public function reject(Request $request, $id)
     {
         try {
+            // Validate rejection reason
+            $request->validate([
+                'rejection_reason' => 'required|string|min:5|max:500'
+            ]);
+
             $withdrawal = Withdrawal::with('user.wallet')->findOrFail($id);
 
             if ($withdrawal->status !== 'pending') {
@@ -251,7 +256,8 @@ class WithdrawalManagementController extends Controller
             }
 
             $withdrawal->update([
-                'status' => 'rejected'
+                'status' => 'rejected',
+                'rejection_reason' => $request->rejection_reason
             ]);
 
             // Check if user has telegram verification before sending notification
@@ -270,6 +276,7 @@ class WithdrawalManagementController extends Controller
                           "💵 Net Amount: $" . number_format($withdrawal->net_amount, 2) . "\n" .
                           "🏦 Withdrawal Type: {$withdrawal->withdrawal_type}\n" .
                           "📄 Reference: {$withdrawal->reference}\n\n" .
+                          "❌ Rejection Reason: {$request->rejection_reason}\n\n" .
                           "💳 The amount has been returned to your profit balance.\n" .
                           "📞 For more information, please contact support.";
 
