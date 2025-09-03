@@ -11,8 +11,8 @@ document.addEventListener('DOMContentLoaded', function () {
       type: 'GET',
       data: function (d) {
         // Only add filter parameters if they have actual values
-        const statusFilter = $('#DepositStatus').val();
-        const paymentMethodFilter = $('#PaymentMethod').val();
+        const statusFilter = $('#CustomDepositStatus').val();
+        const paymentMethodFilter = $('#CustomPaymentMethod').val();
 
         if (statusFilter && statusFilter !== '') {
           d.status_filter = statusFilter;
@@ -162,8 +162,8 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // Add event listeners for filters (with existence check)
-  const statusFilter = $('#DepositStatus');
-  const paymentMethodFilter = $('#PaymentMethod');
+  const statusFilter = $('#CustomDepositStatus');
+  const paymentMethodFilter = $('#CustomPaymentMethod');
 
   console.log('Filter elements found:', {
     statusFilter: statusFilter.length,
@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function () {
       depositsTable.ajax.reload();
     });
   } else {
-    console.error('DepositStatus filter element not found');
+    console.error('CustomDepositStatus filter element not found');
   }
 
   if (paymentMethodFilter.length > 0) {
@@ -185,6 +185,6 @@ document.addEventListener('DOMContentLoaded', function () {
       depositsTable.ajax.reload();
     });
   } else {
-    console.error('PaymentMethod filter element not found');
+    console.error('CustomPaymentMethod filter element not found');
   }
 });

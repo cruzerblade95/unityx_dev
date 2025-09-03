@@ -160,9 +160,9 @@
             <div class="card-header border-bottom">
                 <h5 class="card-title mb-0">All Deposit Records</h5>
                 <div class="d-flex justify-content-between align-items-center row pt-4 gap-4 gap-md-0">
-                    <div class="col-md-4 deposit_status">
+                    <div class="col-md-4 custom-deposit-status-filter">
                         <label class="form-label small">Filter by Status:</label>
-                        <select class="form-select" id="DepositStatus">
+                        <select class="form-select" id="CustomDepositStatus">
                             <option value="">All Status</option>
                             <option value="pending">Pending</option>
                             <option value="completed">Completed</option>
@@ -172,9 +172,9 @@
                             <option value="processing">Processing</option>
                         </select>
                     </div>
-                    <div class="col-md-4 payment_method">
+                    <div class="col-md-4 custom-payment-method-filter">
                         <label class="form-label small">Filter by Payment Method:</label>
-                        <select class="form-select" id="PaymentMethod">
+                        <select class="form-select" id="CustomPaymentMethod">
                             <option value="">All Payment Methods</option>
                             <option value="manual">Manual</option>
                             <option value="nowpayments">NOWPayments</option>
@@ -420,6 +420,18 @@
         .nowpayments-error {
             border-left-color: var(--bs-danger, #dc3545);
         }
+
+        /* Hide any automatically generated DataTable filters that conflict with our custom ones */
+        .custom-deposit-status-filter select:not(#CustomDepositStatus),
+        .custom-payment-method-filter select:not(#CustomPaymentMethod) {
+            display: none !important;
+        }
+
+        /* Ensure our custom filters are properly styled */
+        #CustomDepositStatus,
+        #CustomPaymentMethod {
+            display: block !important;
+        }
     </style>
 
     <script>
@@ -565,11 +577,11 @@
                                     <span class="detail-value">${deposit.unique_address || 'N/A'}</span>
                                 </div>
                                 ${deposit.address_memo ? `
-                                                                <div class="detail-row">
-                                                                    <span class="detail-label">Address Memo:</span>
-                                                                    <span class="detail-value">${deposit.address_memo}</span>
-                                                                </div>
-                                                                ` : ''}
+                                                                    <div class="detail-row">
+                                                                        <span class="detail-label">Address Memo:</span>
+                                                                        <span class="detail-value">${deposit.address_memo}</span>
+                                                                    </div>
+                                                                    ` : ''}
                             </div>
                         `;
                         }
