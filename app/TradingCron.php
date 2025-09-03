@@ -18,16 +18,18 @@ class TradingCron
     {
         logger()->info("Trading Cron Running Function");
         try {
-            // Configurable min/max percent (as decimals, e.g., 0.0003 for 0.03%)
-            $minPercent = 0.003; // 0.3%
-            $maxPercent = 0.004; // 0.4%
+            // Get configurable settings from config file
+            $minPercent = config('trading.min_percent', 0.003); // Default 0.3%
+            $maxPercent = config('trading.max_percent', 0.004); // Default 0.4%
+            $percentAmountToDeduct = config('trading.percent_amount_to_deduct', 0.4); // Default 40%
 
             // Only run for users with ai_trade_activates.status = 1
             $activeUserIds = DB::table('ai_trade_activates')->where('status', 1)->pluck('user_id');
             $trades = AiTrade::where('trade_status', 1)->whereIn('user_id', $activeUserIds)->get();
             foreach ($trades as $trade) {
                 $percent = mt_rand($minPercent * 1000000, $maxPercent * 1000000) / 1000000;
-                $profit = $trade->amount_invest * $percent;
+                $amount_to_deduct = $trade->amount_invest * $percentAmountToDeduct;
+                $profit = ($trade->amount_invest - $amount_to_deduct) * $percent;
 
                 // Insert into ai_trade_histories
                 $history = new AiTradeHistory([

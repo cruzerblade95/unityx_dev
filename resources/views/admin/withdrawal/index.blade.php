@@ -28,7 +28,7 @@ function waitForLibraries() {
         dollar: typeof $ !== 'undefined',
         dataTable: (typeof jQuery !== 'undefined' && typeof jQuery.fn !== 'undefined') ? typeof jQuery.fn.DataTable !== 'undefined' : false
     });
-    
+
     if (typeof jQuery !== 'undefined' && typeof jQuery.fn !== 'undefined' && typeof jQuery.fn.DataTable !== 'undefined') {
         console.log('Both jQuery and DataTables are now available');
         // Set $ as alias for jQuery if not already set
@@ -44,7 +44,7 @@ function waitForLibraries() {
 function initializeWithdrawalPage() {
     $(document).ready(function() {
     console.log('Initializing withdrawal page...');
-    
+
     // Initialize DataTable
     var table = $('#withdrawalsTable').DataTable({
         processing: true,
@@ -64,9 +64,9 @@ function initializeWithdrawalPage() {
         },
         columns: [
             { data: 'id', name: 'id', title: 'ID' },
-            { 
-                data: 'user_info', 
-                name: 'user_info', 
+            {
+                data: 'user_info',
+                name: 'user_info',
                 title: 'User Info',
                 render: function(data, type, row) {
                     if (!data) {
@@ -80,25 +80,25 @@ function initializeWithdrawalPage() {
                 },
                 orderable: false
             },
-            { 
-                data: 'amount', 
-                name: 'amount', 
+            {
+                data: 'amount',
+                name: 'amount',
                 title: 'Amount',
                 render: function(data, type, row) {
                     return '$' + parseFloat(data).toFixed(2);
                 }
             },
-            { 
-                data: 'net_amount', 
-                name: 'net_amount', 
+            {
+                data: 'net_amount',
+                name: 'net_amount',
                 title: 'Net Amount',
                 render: function(data, type, row) {
                     return '$' + parseFloat(data).toFixed(2);
                 }
             },
-            { 
-                data: 'bank_info', 
-                name: 'bank_info', 
+            {
+                data: 'bank_info',
+                name: 'bank_info',
                 title: 'Crypto Info',
                 render: function(data, type, row) {
                     if (!data) {
@@ -111,9 +111,9 @@ function initializeWithdrawalPage() {
                 },
                 orderable: false
             },
-            { 
-                data: 'status', 
-                name: 'status', 
+            {
+                data: 'status',
+                name: 'status',
                 title: 'Status',
                 render: function(data, type, row) {
                     var badgeClass = '';
@@ -133,21 +133,21 @@ function initializeWithdrawalPage() {
                     return '<span class="badge ' + badgeClass + '">' + data.charAt(0).toUpperCase() + data.slice(1) + '</span>';
                 }
             },
-            { 
-                data: 'created_at', 
-                name: 'created_at', 
+            {
+                data: 'created_at',
+                name: 'created_at',
                 title: 'Date',
                 render: function(data, type, row) {
-                    return new Date(data).toLocaleDateString() + '<br>' + 
+                    return new Date(data).toLocaleDateString() + '<br>' +
                            '<small class="text-muted">' + new Date(data).toLocaleTimeString() + '</small>';
                 }
             },
-            { 
-                data: 'action', 
-                name: 'action', 
-                title: 'Actions', 
-                orderable: false, 
-                searchable: false 
+            {
+                data: 'action',
+                name: 'action',
+                title: 'Actions',
+                orderable: false,
+                searchable: false
             }
         ],
         order: [[0, 'desc']],
@@ -192,7 +192,7 @@ function initializeWithdrawalPage() {
     // Approve withdrawal
     $(document).on('click', '.approve-btn', function() {
         var withdrawalId = $(this).data('id');
-        
+
         Swal.fire({
             title: 'Approve Withdrawal?',
             text: "Are you sure you want to approve this withdrawal request?",
@@ -229,7 +229,7 @@ function initializeWithdrawalPage() {
     // Reject withdrawal
     $(document).on('click', '.reject-btn', function() {
         var withdrawalId = $(this).data('id');
-        
+
         Swal.fire({
             title: 'Reject Withdrawal?',
             text: "Are you sure you want to reject this withdrawal request?",
@@ -266,7 +266,7 @@ function initializeWithdrawalPage() {
     // View withdrawal details
     $(document).on('click', '.view-btn', function() {
         var withdrawalId = $(this).data('id');
-        
+
         $.ajax({
             url: "/admin/withdrawals/" + withdrawalId,
             type: 'GET',
@@ -298,7 +298,7 @@ function initializeWithdrawalPage() {
                             </div>
                         </div>
                     `;
-                    
+
                     $('#viewModalBody').html(modalContent);
                     $('#viewModal').modal('show');
                 }
@@ -352,7 +352,7 @@ waitForLibraries();
             </div>
         </div>
     </div>
-    
+
     <div class="col-sm-6 col-xl-3">
         <div class="card">
             <div class="card-body">
@@ -373,7 +373,7 @@ waitForLibraries();
             </div>
         </div>
     </div>
-    
+
     <div class="col-sm-6 col-xl-3">
         <div class="card">
             <div class="card-body">
@@ -394,21 +394,87 @@ waitForLibraries();
             </div>
         </div>
     </div>
-    
+
     <div class="col-sm-6 col-xl-3">
         <div class="card">
             <div class="card-body">
                 <div class="d-flex align-items-start justify-content-between">
                     <div class="content-left">
-                        <span class="text-heading">Total Amount</span>
+                        <span class="text-heading">Total Net Amount</span>
                         <div class="d-flex align-items-center my-1">
-                            <h4 class="mb-0 me-2">${{ number_format($totalAmount, 2) }}</h4>
+                            <h4 class="mb-0 me-2">${{ number_format($totalNetAmount, 2) }}</h4>
                         </div>
-                        <small class="text-muted">All withdrawals</small>
+                        <small class="text-muted">All net withdrawals</small>
                     </div>
                     <div class="avatar">
                         <span class="avatar-initial rounded bg-label-info">
                             <i class="fas fa-dollar-sign text-info"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Second Row - Net Amount by Status -->
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="content-left">
+                        <span class="text-heading">Total Pending Net</span>
+                        <div class="d-flex align-items-center my-1">
+                            <h4 class="mb-0 me-2">${{ number_format($pendingNetAmount, 2) }}</h4>
+                        </div>
+                        <small class="text-muted">Pending net amount</small>
+                    </div>
+                    <div class="avatar">
+                        <span class="avatar-initial rounded bg-label-warning">
+                            <i class="fas fa-clock text-warning"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="content-left">
+                        <span class="text-heading">Total Approved Net</span>
+                        <div class="d-flex align-items-center my-1">
+                            <h4 class="mb-0 me-2">${{ number_format($approvedNetAmount, 2) }}</h4>
+                        </div>
+                        <small class="text-muted">Approved net amount</small>
+                    </div>
+                    <div class="avatar">
+                        <span class="avatar-initial rounded bg-label-success">
+                            <i class="fas fa-check-circle text-success"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="content-left">
+                        <span class="text-heading">Total Rejected Net</span>
+                        <div class="d-flex align-items-center my-1">
+                            <h4 class="mb-0 me-2">${{ number_format($rejectedNetAmount, 2) }}</h4>
+                        </div>
+                        <small class="text-muted">Rejected net amount</small>
+                    </div>
+                    <div class="avatar">
+                        <span class="avatar-initial rounded bg-label-danger">
+                            <i class="fas fa-times-circle text-danger"></i>
                         </span>
                     </div>
                 </div>

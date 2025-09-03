@@ -227,6 +227,7 @@ export default defineConfig({
         'resources/assets/vendor/scss/pages/wizard-ex-checkout.scss',
         'resources/js/laravel-user-management.js',
         'resources/js/admin-nowpayments-list.js',
+        'resources/js/admin-upline-management.js',
         'resources/assets/vendor/libs/datatables-rowgroup-bs5/rowgroup.bootstrap5.scss',
         'public/assets/css/coming-soon-overlay.css'
       ],
