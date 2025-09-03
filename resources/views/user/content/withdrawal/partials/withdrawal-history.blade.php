@@ -118,6 +118,17 @@
                                         <span class="badge bg-danger">
                                             <i class="fas fa-times me-1"></i>Rejected
                                         </span>
+                                        @if($withdrawal->rejection_reason)
+                                            <br>
+                                            <small class="text-muted mt-1" style="display: block;">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                <button type="button" class="btn btn-sm btn-outline-danger mt-1"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#rejectionModal{{ $withdrawal->id }}">
+                                                    View Reason
+                                                </button>
+                                            </small>
+                                        @endif
                                     @elseif($withdrawal->status === 'completed')
                                         <span class="badge bg-success">
                                             <i class="fas fa-check-double me-1"></i>Completed
@@ -193,6 +204,73 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Rejection Reason Modals -->
+            @foreach ($withdrawals as $withdrawal)
+                @if($withdrawal->status === 'rejected' && $withdrawal->rejection_reason)
+                    <div class="modal fade" id="rejectionModal{{ $withdrawal->id }}" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">
+                                        <i class="fas fa-times text-danger me-2"></i>
+                                        Withdrawal Rejection Details
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <h6 class="fw-bold">Withdrawal Information:</h6>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <small class="text-muted">Withdrawal ID:</small>
+                                                <div class="fw-semibold">#{{ $withdrawal->id }}</div>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted">Amount:</small>
+                                                <div class="fw-semibold">${{ number_format($withdrawal->amount, 2) }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-2">
+                                            <div class="col-6">
+                                                <small class="text-muted">Date:</small>
+                                                <div class="fw-semibold">{{ $withdrawal->created_at->format('M j, Y g:i A') }}</div>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted">Type:</small>
+                                                <div class="fw-semibold text-capitalize">{{ $withdrawal->withdrawal_type }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <hr>
+
+                                    <div class="mb-3">
+                                        <h6 class="fw-bold text-danger">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            Rejection Reason:
+                                        </h6>
+                                        <div class="alert alert-danger">
+                                            <div style="white-space: pre-wrap;">{{ $withdrawal->rejection_reason }}</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="alert alert-info">
+                                        <small>
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            The withdrawal amount has been returned to your profit balance.
+                                            You can submit a new withdrawal request after addressing the issues mentioned above.
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            @endforeach
         @else
             <div class="text-center py-4">
                 <i class="fas fa-history text-muted fa-3x mb-3"></i>
