@@ -496,6 +496,12 @@ class NOWPaymentsController extends Controller
     public function refreshAllStatuses()
     {
         try {
+            Log::info('Starting bulk refresh of payment statuses', [
+                'user_id' => auth()->user()->id ?? 'unknown',
+                'timestamp' => now(),
+                'environment' => app()->environment()
+            ]);
+
             // Get all deposits that have payment_id (NOWPayments deposits)
             $deposits = Deposit::whereNotNull('payment_id')
                 ->where('payment_id', '!=', '')
@@ -504,13 +510,31 @@ class NOWPaymentsController extends Controller
             $totalCount = $deposits->count();
             $updatedCount = 0;
             $updates = [];
+            $errors = [];
 
-            Log::info('Starting bulk refresh of payment statuses', [
-                'total_deposits' => $totalCount
+            Log::info('Found deposits for bulk refresh', [
+                'total_deposits' => $totalCount,
+                'deposit_ids' => $deposits->pluck('id')->toArray()
             ]);
+
+            if ($totalCount === 0) {
+                return response()->json([
+                    'success' => true,
+                    'total_count' => 0,
+                    'updated_count' => 0,
+                    'updates' => [],
+                    'message' => 'No NOWPayments deposits found to refresh'
+                ]);
+            }
 
             foreach ($deposits as $deposit) {
                 try {
+                    Log::info('Processing deposit for status refresh', [
+                        'deposit_id' => $deposit->id,
+                        'payment_id' => $deposit->payment_id,
+                        'current_status' => $deposit->status
+                    ]);
+
                     $payment = $this->nowPayments->getPaymentStatus($deposit->payment_id);
 
                     if ($payment && isset($payment['payment_status'])) {
@@ -549,14 +573,39 @@ class NOWPaymentsController extends Controller
                                 'new_status' => $newStatus,
                                 'nowpayments_status' => $nowpaymentsStatus
                             ]);
+                        } else {
+                            Log::info('No status change needed for deposit', [
+                                'deposit_id' => $deposit->id,
+                                'payment_id' => $deposit->payment_id,
+                                'status' => $oldStatus
+                            ]);
                         }
+                    } else {
+                        Log::warning('NOWPayments API returned null/empty data for payment', [
+                            'deposit_id' => $deposit->id,
+                            'payment_id' => $deposit->payment_id,
+                            'api_response' => $payment
+                        ]);
+
+                        $errors[] = [
+                            'deposit_id' => $deposit->id,
+                            'payment_id' => $deposit->payment_id,
+                            'error' => 'No payment data from NOWPayments API'
+                        ];
                     }
                 } catch (\Exception $e) {
-                    Log::warning('Failed to refresh individual payment status', [
+                    Log::error('Failed to refresh individual payment status', [
+                        'deposit_id' => $deposit->id,
+                        'payment_id' => $deposit->payment_id,
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+
+                    $errors[] = [
                         'deposit_id' => $deposit->id,
                         'payment_id' => $deposit->payment_id,
                         'error' => $e->getMessage()
-                    ]);
+                    ];
                     // Continue with next deposit even if one fails
                 }
             }
@@ -564,26 +613,86 @@ class NOWPaymentsController extends Controller
             Log::info('Completed bulk refresh of payment statuses', [
                 'total_count' => $totalCount,
                 'updated_count' => $updatedCount,
-                'updates' => $updates
+                'error_count' => count($errors),
+                'updates' => $updates,
+                'errors' => $errors
             ]);
 
             return response()->json([
                 'success' => true,
                 'total_count' => $totalCount,
                 'updated_count' => $updatedCount,
+                'error_count' => count($errors),
                 'updates' => $updates,
-                'message' => "Refreshed {$updatedCount} out of {$totalCount} payment statuses"
+                'errors' => $errors,
+                'message' => "Refreshed {$updatedCount} out of {$totalCount} payment statuses" .
+                           (count($errors) > 0 ? " with " . count($errors) . " errors" : "")
             ]);
 
         } catch (\Exception $e) {
             Log::error('Error during bulk refresh of payment statuses', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->user()->id ?? 'unknown',
+                'environment' => app()->environment()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error refreshing payment statuses: ' . $e->getMessage(),
+                'error_details' => [
+                    'message' => $e->getMessage(),
+                    'line' => $e->getLine(),
+                    'file' => basename($e->getFile())
+                ]
+            ], 500);
+        }
+    }
+
+    /**
+     * Debug method to test NOWPayments connectivity
+     */
+    public function debugConnectivity()
+    {
+        try {
+            Log::info('Debug: Testing NOWPayments connectivity', [
+                'environment' => app()->environment(),
+                'config_check' => [
+                    'api_key_set' => config('services.nowpayments.api_key') ? 'yes' : 'no',
+                    'api_key_length' => config('services.nowpayments.api_key') ? strlen(config('services.nowpayments.api_key')) : 0,
+                    'sandbox_mode' => config('services.nowpayments.sandbox', true) ? 'yes' : 'no',
+                    'base_url' => config('services.nowpayments.base_url', 'not_set')
+                ]
+            ]);
+
+            // Test basic API status
+            $apiStatus = $this->nowPayments->getApiStatus();
+
+            Log::info('Debug: NOWPayments API status result', [
+                'api_status' => $apiStatus
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'environment' => app()->environment(),
+                'api_status' => $apiStatus,
+                'config' => [
+                    'api_key_set' => config('services.nowpayments.api_key') ? true : false,
+                    'sandbox_mode' => config('services.nowpayments.sandbox', true),
+                    'base_url' => config('services.nowpayments.base_url')
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Debug: Error testing NOWPayments connectivity', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error refreshing payment statuses: ' . $e->getMessage()
+                'error' => $e->getMessage(),
+                'environment' => app()->environment()
             ], 500);
         }
     }
