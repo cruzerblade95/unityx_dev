@@ -11,6 +11,7 @@
                         <tr>
                             <th>ID</th>
                             <th>Type</th>
+                            <th>Wallet</th>
                             <th>Amount</th>
                             <th>Fee</th>
                             <th>Net Amount</th>
@@ -36,6 +37,21 @@
                                     @elseif($withdrawal->withdrawal_type === 'gold')
                                         <span class="badge bg-warning type-badge">
                                             <i class="fas fa-coins me-1"></i>Gold
+                                        </span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if ($withdrawal->wallet_type === 'profit')
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-chart-line me-1"></i>Profit
+                                        </span>
+                                    @elseif($withdrawal->wallet_type === 'bonus')
+                                        <span class="badge bg-info">
+                                            <i class="fas fa-gift me-1"></i>Bonus
+                                        </span>
+                                    @else
+                                        <span class="badge bg-light text-dark">
+                                            <i class="fas fa-question me-1"></i>Legacy
                                         </span>
                                     @endif
                                 </td>

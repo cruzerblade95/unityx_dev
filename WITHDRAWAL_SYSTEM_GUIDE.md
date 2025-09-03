@@ -2,7 +2,7 @@
 
 ## Overview
 
-This system implements a secure withdrawal request process with proper fund management using floating amounts to prevent double spending and ensure accurate balance tracking.
+This system implements a secure withdrawal request process with proper fund management using floating amounts to prevent double spending and ensure accurate balance tracking. Users can withdraw from both their profit and bonus wallet balances.
 
 ## Key Features
 
@@ -12,7 +12,14 @@ This system implements a secure withdrawal request process with proper fund mana
 - **Real-time calculation**: Shows net amount as user types
 - **Transparent display**: Fee information clearly shown to users
 
-### 2. Floating Amount System
+### 2. Multi-Wallet Withdrawal System
+
+The system allows withdrawals from both profit and bonus balances:
+- **Profit Balance**: Primary earnings from trading activities
+- **Bonus Balance**: Rewards and bonuses earned
+- **Deduction Order**: Profit first, then bonus if needed
+
+### 3. Floating Amount System
 
 The system uses a "floating" balance to hold requested withdrawal amounts:
 
@@ -20,18 +27,20 @@ The system uses a "floating" balance to hold requested withdrawal amounts:
 
 ```
 User Wallet:
-- Profit: $1000
+- Profit: $800
+- Bonus: $200
 - Floating: $0
-- Withdrawable: $1000
+- Total Withdrawable: $1000
 ```
 
 #### After Withdrawal Request ($500)
 
 ```
 User Wallet:
-- Profit: $500 (reduced)
+- Profit: $300 (reduced by $500, taking all $800 profit and $200 from bonus)
+- Bonus: $0 (reduced by $200 to complete the $500 withdrawal)
 - Floating: $500 (held)
-- Withdrawable: $0 (profit - floating)
+- Total Withdrawable: $0 (profit + bonus - floating)
 
 Withdrawal Record:
 - Amount: $500

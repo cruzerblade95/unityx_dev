@@ -63,13 +63,13 @@ class Wallet extends Model
     }
 
     /**
-     * Get the available balance (profit minus floating).
+     * Get the available balance (profit + bonus minus floating).
      *
      * @return float
      */
     public function getAvailableBalanceAttribute()
     {
-        return $this->profit - $this->floating;
+        return $this->profit + $this->bonus - $this->floating;
     }
 
     /**
@@ -111,24 +111,41 @@ class Wallet extends Model
     }
 
     /**
-     * Move amount from profit to floating (for pending withdrawals).
+     * Move amount from profit and bonus to floating (for pending withdrawals).
+     * Deducts from profit first, then from bonus if needed.
      *
      * @param float $amount
      * @return bool
      */
     public function holdAmount(float $amount)
     {
-        if ($this->profit < $amount) {
+        $totalAvailable = $this->profit + $this->bonus;
+        
+        if ($totalAvailable < $amount) {
             return false;
         }
 
-        $this->profit -= $amount;
+        $remainingAmount = $amount;
+
+        // First, deduct from profit
+        if ($this->profit > 0) {
+            $fromProfit = min($this->profit, $remainingAmount);
+            $this->profit -= $fromProfit;
+            $remainingAmount -= $fromProfit;
+        }
+
+        // Then, deduct from bonus if still needed
+        if ($remainingAmount > 0 && $this->bonus >= $remainingAmount) {
+            $this->bonus -= $remainingAmount;
+        }
+
         $this->floating += $amount;
         return $this->save();
     }
 
     /**
-     * Move amount from floating back to profit (for rejected withdrawals).
+     * Move amount from floating back to profit and bonus (for rejected withdrawals).
+     * Returns to profit first, then to bonus if needed.
      *
      * @param float $amount
      * @return bool
@@ -140,7 +157,7 @@ class Wallet extends Model
         }
 
         $this->floating -= $amount;
-        $this->profit += $amount;
+        $this->profit += $amount; // For simplicity, return all to profit
         return $this->save();
     }
 
@@ -158,5 +175,55 @@ class Wallet extends Model
 
         $this->floating -= $amount;
         return $this->save();
+    }
+
+    /**
+     * Hold amount from specific wallet type.
+     *
+     * @param float $amount
+     * @param string $walletType ('profit' or 'bonus')
+     * @return bool
+     */
+    public function holdAmountFromWallet(float $amount, string $walletType)
+    {
+        switch ($walletType) {
+            case 'profit':
+                if ($this->profit < $amount) {
+                    return false;
+                }
+                $this->profit -= $amount;
+                break;
+
+            case 'bonus':
+                if ($this->bonus < $amount) {
+                    return false;
+                }
+                $this->bonus -= $amount;
+                break;
+
+            default:
+                return false;
+        }
+
+        $this->floating += $amount;
+        return $this->save();
+    }
+
+    /**
+     * Get available balance for specific wallet type.
+     *
+     * @param string $walletType ('profit' or 'bonus')
+     * @return float
+     */
+    public function getAvailableBalance(string $walletType)
+    {
+        switch ($walletType) {
+            case 'profit':
+                return max(0, $this->profit);
+            case 'bonus':
+                return max(0, $this->bonus);
+            default:
+                return 0;
+        }
     }
 }
