@@ -130,7 +130,7 @@
                             <div class="col-md-6">
                                 <h6 class="text-primary">Withdrawal Rules</h6>
                                 <ul class="list-unstyled small">
-                                    <li><i class="fas fa-check text-success me-2"></i>Only profit balance can be withdrawn
+                                    <li><i class="fas fa-check text-success me-2"></i>Profit & bonus balances can be withdrawn
                                     </li>
                                     <li><i class="fas fa-check text-success me-2"></i>One pending request at a time</li>
                                     <li><i class="fas fa-check text-success me-2"></i>KYC verification required</li>

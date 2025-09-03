@@ -33,7 +33,7 @@ class WithdrawalController extends Controller
         $kycStatus = $user->kycVerification ? $user->kycVerification->kyc_status : KycVerification::STATUS_NOT_SUBMITTED;
         $isKycApproved = $kycStatus === KycVerification::STATUS_APPROVED;
 
-        // Get wallet profit balance (only profit balance is available for withdrawal)
+        // Get wallet withdrawable balance (profit + bonus balance is available for withdrawal)
         $walletBalance = $user->getWithdrawableBalance();
 
         return view('user.content.withdrawal.index', compact('withdrawals', 'isKycApproved', 'walletBalance', 'user', 'pendingWithdrawal'));
@@ -87,7 +87,7 @@ class WithdrawalController extends Controller
         $kycStatus = $user->kycVerification ? $user->kycVerification->kyc_status : KycVerification::STATUS_NOT_SUBMITTED;
         $isKycApproved = $kycStatus === KycVerification::STATUS_APPROVED;
 
-        // Get wallet profit balance (only profit balance is available for withdrawal)
+        // Get wallet withdrawable balance (profit + bonus balance is available for withdrawal)
         $walletBalance = $user->getWithdrawableBalance();
 
         // Get withdrawal settings for display
@@ -156,7 +156,7 @@ class WithdrawalController extends Controller
         $kycStatus = $user->kycVerification ? $user->kycVerification->kyc_status : KycVerification::STATUS_NOT_SUBMITTED;
         $isKycApproved = $kycStatus === KycVerification::STATUS_APPROVED;
 
-        // Get wallet profit balance (only profit balance is available for withdrawal)
+        // Get wallet withdrawable balance (profit + bonus balance is available for withdrawal)
         $walletBalance = $user->getWithdrawableBalance();
 
         // Get withdrawal settings for display
@@ -225,7 +225,7 @@ class WithdrawalController extends Controller
         $kycStatus = $user->kycVerification ? $user->kycVerification->kyc_status : KycVerification::STATUS_NOT_SUBMITTED;
         $isKycApproved = $kycStatus === KycVerification::STATUS_APPROVED;
 
-        // Get wallet profit balance (only profit balance is available for withdrawal)
+        // Get wallet withdrawable balance (profit + bonus balance is available for withdrawal)
         $walletBalance = $user->getWithdrawableBalance();
 
         // Get withdrawal settings for display
