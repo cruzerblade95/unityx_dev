@@ -40,6 +40,7 @@ Route::prefix('admin')->middleware('web')->group(function () {
         Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('admin.users.destroy');
         Route::post('/users/{user}/ban', [UserManagementController::class, 'ban'])->name('admin.users.ban');
         Route::post('/users/{user}/unban', [UserManagementController::class, 'unban'])->name('admin.users.unban');
+        Route::post('/users/{user}/test-telegram', [UserManagementController::class, 'testTelegramConnection'])->name('admin.users.test-telegram');
 
         // Wallet Management Routes
         Route::get('/wallets', [WalletManagementController::class, 'index'])->name('admin.wallets.index');

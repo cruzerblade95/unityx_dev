@@ -290,4 +290,29 @@ class UserManagementController extends Controller
             'message' => 'User has been unbanned successfully'
         ]);
     }
+
+    public function testTelegramConnection(User $user)
+    {
+        try {
+            $result = \App\Services\TelegramNotificationService::testTelegramConnection($user->id);
+
+            if ($result) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Test notification sent successfully to user\'s Telegram account!'
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to send test notification. User may not have verified their Telegram account or there may be a configuration issue.'
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Telegram test failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while testing Telegram connection: ' . $e->getMessage()
+            ]);
+        }
+    }
 }

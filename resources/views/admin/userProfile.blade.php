@@ -269,7 +269,7 @@ use Illuminate\Support\Facades\Storage;
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Document Status -->
                     <div class="mt-4 pt-3 border-top">
                         <h6 class="mb-3">Document Status</h6>
@@ -303,6 +303,126 @@ use Illuminate\Support\Facades\Storage;
                         </div>
                         <h6 class="text-muted">No KYC verification submitted</h6>
                         <p class="text-muted small">User has not submitted any KYC documents yet.</p>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Telegram Notification Testing Section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header border-bottom">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fab fa-telegram me-2"></i>Telegram Notifications
+                    </h5>
+                    <button type="button" class="btn btn-primary" id="testTelegramBtn">
+                        <i class="fas fa-paper-plane me-1"></i>Test Connection
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                @php
+                    $telegramVerification = \App\Models\TelegramVerification::where('user_id', $user->id)->first();
+                @endphp
+
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="card bg-label-{{ $telegramVerification && $telegramVerification->telegram_username ? 'success' : 'warning' }}">
+                            <div class="card-body text-center">
+                                <div class="avatar mb-2">
+                                    <span class="avatar-initial rounded-circle bg-{{ $telegramVerification && $telegramVerification->telegram_username ? 'success' : 'warning' }}">
+                                        <i class="fab fa-telegram"></i>
+                                    </span>
+                                </div>
+                                <h5 class="mb-1">{{ $telegramVerification && $telegramVerification->telegram_username ? 'Verified' : 'Not Verified' }}</h5>
+                                <small>Telegram Status</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-label-info">
+                            <div class="card-body text-center">
+                                <div class="avatar mb-2">
+                                    <span class="avatar-initial rounded-circle bg-info">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                </div>
+                                <h5 class="mb-1">{{ $telegramVerification && $telegramVerification->telegram_username ? '@' . $telegramVerification->telegram_username : 'N/A' }}</h5>
+                                <small>Username</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-label-{{ $telegramVerification && $telegramVerification->chat_id ? 'success' : 'secondary' }}">
+                            <div class="card-body text-center">
+                                <div class="avatar mb-2">
+                                    <span class="avatar-initial rounded-circle bg-{{ $telegramVerification && $telegramVerification->chat_id ? 'success' : 'secondary' }}">
+                                        <i class="fas fa-comments"></i>
+                                    </span>
+                                </div>
+                                <h5 class="mb-1">{{ $telegramVerification && $telegramVerification->chat_id ? 'Connected' : 'Not Connected' }}</h5>
+                                <small>Chat Status</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-label-primary">
+                            <div class="card-body text-center">
+                                <div class="avatar mb-2">
+                                    <span class="avatar-initial rounded-circle bg-primary">
+                                        <i class="fas fa-calendar"></i>
+                                    </span>
+                                </div>
+                                <h5 class="mb-1">{{ $telegramVerification && $telegramVerification->created_at ? $telegramVerification->created_at->format('M d') : 'N/A' }}</h5>
+                                <small>Verified Date</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if($telegramVerification && $telegramVerification->telegram_username)
+                    <div class="mt-4 pt-3 border-top">
+                        <h6 class="mb-3">Connection Details</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fab fa-telegram me-2 text-primary"></i>
+                                    <span><strong>Telegram Username:</strong> {{ $telegramVerification->telegram_username }}</span>
+                                </div>
+                                @if($telegramVerification->chat_id)
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-hashtag me-2 text-success"></i>
+                                        <span><strong>Chat ID:</strong> {{ $telegramVerification->chat_id }}</span>
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-calendar me-2 text-info"></i>
+                                    <span><strong>Verified:</strong> {{ $telegramVerification->created_at ? $telegramVerification->created_at->format('M d, Y g:i A') : 'N/A' }}</span>
+                                </div>
+                                @if($telegramVerification->updated_at && $telegramVerification->created_at && $telegramVerification->updated_at != $telegramVerification->created_at)
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-clock me-2 text-warning"></i>
+                                        <span><strong>Last Updated:</strong> {{ $telegramVerification->updated_at->format('M d, Y g:i A') }}</span>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    <div class="text-center py-4 mt-3 border-top">
+                        <div class="avatar avatar-xl mb-3">
+                            <span class="avatar-initial rounded-circle bg-label-warning">
+                                <i class="fab fa-telegram fa-2x"></i>
+                            </span>
+                        </div>
+                        <h6 class="text-muted">Telegram Not Verified</h6>
+                        <p class="text-muted small">User has not verified their Telegram account yet. They need to connect their Telegram account from their profile settings to receive notifications.</p>
                     </div>
                 @endif
             </div>
@@ -735,6 +855,62 @@ $(document).ready(function() {
             submitBtn.html(originalBtnText);
             submitBtn.prop('disabled', false);
         }
+    });
+
+    // Handle Telegram connection test
+    $('#testTelegramBtn').on('click', function(e) {
+        e.preventDefault();
+
+        const button = $(this);
+        const originalBtnText = button.html();
+        const userId = {{ $user->id }};
+
+        // Disable button and show loading state
+        button.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Testing...');
+        button.prop('disabled', true);
+
+        // Send AJAX request to test Telegram connection
+        $.ajax({
+            url: `/admin/users/${userId}/test-telegram`,
+            type: 'POST',
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Test Successful!',
+                        text: response.message,
+                        confirmButtonText: 'OK',
+                        timer: 5000
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Test Failed',
+                        text: response.message,
+                        confirmButtonText: 'OK'
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                let errorMessage = 'An error occurred while testing Telegram connection.';
+
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: errorMessage,
+                    confirmButtonText: 'OK'
+                });
+            },
+            complete: function() {
+                // Reset button state
+                button.html(originalBtnText);
+                button.prop('disabled', false);
+            }
+        });
     });
 
     // Reset form when modal is hidden
