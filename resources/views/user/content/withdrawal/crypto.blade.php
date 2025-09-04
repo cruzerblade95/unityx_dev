@@ -650,7 +650,7 @@
                 // Get form data
                 const formData = new FormData(form);
 
-                fetch('{{ route("user.withdrawal.send_otp") }}', {
+                fetch('/user/withdrawal/send-otp', {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -677,7 +677,7 @@
                                 cancelButtonText: 'Cancel'
                             }).then((result) => {
                                 if (result.isConfirmed) {
-                                    window.location.href = '{{ route("user.profile.index") }}';
+                                    window.location.href = '/user/profile';
                                 }
                             });
                         } else {
@@ -710,7 +710,7 @@
                 verifyBtn.disabled = true;
                 verifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Verifying...';
 
-                fetch('{{ route("user.withdrawal.verify_otp") }}', {
+                fetch('/user/withdrawal/verify-otp', {
                     method: 'POST',
                     body: JSON.stringify({ otp: otpCode }),
                     headers: {
