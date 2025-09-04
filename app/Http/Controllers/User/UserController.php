@@ -52,13 +52,15 @@ class UserController extends Controller
         $validated = $request->validate([
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
-            'username' => 'nullable|string|max:255|unique:users,username,' . $user->id,
+            'username' => 'nullable|string|max:255|unique:users,username,' . $user->id . '|regex:/^\S*$/u',
             'email' => 'required|email|max:255|unique:users,email,' . $user->id,
             'address' => 'nullable|string|max:255',
             'state' => 'nullable|string|max:255',
             'zipCode' => 'nullable|string|max:10',
             'country' => 'nullable|string|max:255',
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ], [
+            'username.regex' => 'Username must not contain spaces.',
         ]);
 
         // Handle profile photo upload

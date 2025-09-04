@@ -68,6 +68,42 @@
                     captchaContainer.style.padding = '';
                 }
             };
+
+            // Username validation - prevent spaces
+            const usernameInput = document.getElementById('username');
+            if (usernameInput) {
+                usernameInput.addEventListener('input', function(e) {
+                    // Remove spaces from the input
+                    const value = e.target.value.replace(/\s/g, '');
+                    if (value !== e.target.value) {
+                        e.target.value = value;
+
+                        // Show warning message
+                        let errorDiv = e.target.parentElement.querySelector('.invalid-feedback');
+                        if (!errorDiv) {
+                            errorDiv = document.createElement('div');
+                            errorDiv.className = 'invalid-feedback';
+                            e.target.parentElement.appendChild(errorDiv);
+                        }
+                        errorDiv.textContent = 'Username cannot contain spaces.';
+                        errorDiv.style.display = 'block';
+                        e.target.classList.add('is-invalid');
+
+                        // Hide the error after 2 seconds
+                        setTimeout(() => {
+                            errorDiv.style.display = 'none';
+                            e.target.classList.remove('is-invalid');
+                        }, 2000);
+                    }
+                });
+
+                // Prevent space key from being entered
+                usernameInput.addEventListener('keydown', function(e) {
+                    if (e.code === 'Space') {
+                        e.preventDefault();
+                    }
+                });
+            }
         });
     </script>
 @endsection
@@ -150,7 +186,8 @@
                             <div class="col-6 mb-6 form-control-validation">
                                 <label for="username" class="form-label">Username</label>
                                 <input type="text" class="form-control @error('username') is-invalid @enderror"
-                                    id="username" name="username" value="{{ old('username') }}" required />
+                                    id="username" name="username" value="{{ old('username') }}"
+                                    placeholder="Enter username (no spaces allowed)" required />
                                 @error('username')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

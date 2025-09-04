@@ -107,11 +107,13 @@ class UserManagementController extends Controller
             $validatedData = $request->validate([
                 'firstname' => 'required|string|max:255',
                 'lastname' => 'required|string|max:255',
-                'username' => 'required|string|max:255|unique:users,username',
+                'username' => 'required|string|max:255|unique:users,username|regex:/^\S*$/u',
                 'email' => 'required|string|email|max:255|unique:users,email',
                 'password' => 'required|string|min:8',
                 'password_confirmation' => 'required|string|same:password',
                 'upline_id' => 'nullable|exists:users,id'
+            ], [
+                'username.regex' => 'Username must not contain spaces.',
             ]);
 
             // Generate unique 6-character referral code
@@ -213,10 +215,12 @@ class UserManagementController extends Controller
         $user = User::findOrFail($id);
 
         $request->validate([
-            'username' => 'required|string|max:255|unique:users,username,' . $id,
+            'username' => 'required|string|max:255|unique:users,username,' . $id . '|regex:/^\S*$/u',
             'email' => 'required|string|email|max:255|unique:users,email,' . $id,
             'password' => 'nullable|string|min:8',
             'role' => 'required|string|in:user,admin'
+        ], [
+            'username.regex' => 'Username must not contain spaces.',
         ]);
 
         $userData = [

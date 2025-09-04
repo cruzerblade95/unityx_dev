@@ -129,7 +129,7 @@
                             <div class="col-md-6 form-control-validation">
                                 <label for="username" class="form-label">Username</label>
                                 <input class="form-control @error('username') is-invalid @enderror" type="text"
-                                    name="username" id="username" value="{{ old('username', $user->username ?? '') }}" />
+                                    name="username" id="username" value="{{ old('username', $user->username ?? '') }}" disabled/>
                                 @error('username')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

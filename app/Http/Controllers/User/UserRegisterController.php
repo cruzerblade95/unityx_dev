@@ -30,7 +30,7 @@ class UserRegisterController extends Controller
         $request->validate([
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users',
+            'username' => 'required|string|max:255|unique:users|regex:/^\S*$/u',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
             'referral_code' => 'required|string|size:6',
@@ -40,6 +40,7 @@ class UserRegisterController extends Controller
             'referral_code.required' => 'Referral code is required to register.',
             'referral_code.size' => 'Referral code must be exactly 6 characters.',
             'username.unique' => 'This username is already taken. Please choose another one.',
+            'username.regex' => 'Username must not contain spaces.',
             'email.unique' => 'This email is already registered. Please use a different email or try logging in.',
             'password.confirmed' => 'Password confirmation does not match.',
             'password.min' => 'Password must be at least 6 characters long.',
