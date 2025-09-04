@@ -17,19 +17,25 @@ class TelegramController extends Controller
     // Telegram webhook handler
     public function webhook(Request $request)
     {
-        try {
-            // Return early success to prevent timeout
-            $this->processWebhookAsync($request);
-            return response('ok', 200);
+        // Return success immediately to prevent timeout
+        $response = response('ok', 200);
 
+        // Use fastcgi_finish_request if available to send response immediately
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        }
+
+        try {
+            $this->processWebhookAsync($request);
         } catch (\Exception $e) {
             Log::error('Telegram webhook error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'data' => $request->all()
             ]);
-            return response('ok', 200); // Still return 200 to prevent retries
         }
+
+        return $response;
     }
 
     private function processWebhookAsync(Request $request)
@@ -69,20 +75,8 @@ class TelegramController extends Controller
                 'from' => $data['message']['from'] ?? 'unknown'
             ]);
 
-            // Dispatch to queue for async processing to prevent timeout
-            try {
-                \App\Jobs\ProcessTelegramMessage::dispatch($chatId, $text, $telegramUsername, $data['message']);
-                Log::info('Telegram message dispatched to queue', ['chat_id' => $chatId]);
-            } catch (\Exception $e) {
-                Log::error('Failed to dispatch telegram message to queue', [
-                    'error' => $e->getMessage(),
-                    'chat_id' => $chatId,
-                    'text' => $text
-                ]);
-
-                // Fallback to synchronous processing if queue fails
-                $this->processTelegramMessageSync($chatId, $text, $telegramUsername);
-            }
+            // Process synchronously for now to avoid queue issues
+            $this->processTelegramMessageSync($chatId, $text, $telegramUsername);
         } else {
             Log::warning('Invalid webhook data received', ['data' => $data]);
         }
@@ -171,61 +165,35 @@ class TelegramController extends Controller
         ];
 
         try {
-            Log::info('Attempting to send Telegram message', [
-                'chat_id' => $chatId,
-                'text' => $text,
-                'url' => $url
-            ]);
-
             $client = new \GuzzleHttp\Client();
             $response = $client->post($url, [
                 'form_params' => $params,
-                'timeout' => 10, // Reduced timeout
-                'connect_timeout' => 5, // Added connect timeout
-                'verify' => false, // Add this if you have SSL issues
-                'http_errors' => false // Don't throw exceptions on HTTP errors
+                'timeout' => 5, // Very short timeout
+                'connect_timeout' => 3, // Very short connect timeout
+                'verify' => false,
+                'http_errors' => false
             ]);
 
-            $responseBody = $response->getBody()->getContents();
-            $result = json_decode($responseBody, true);
+            $statusCode = $response->getStatusCode();
 
-            Log::info('Telegram API response', [
-                'status_code' => $response->getStatusCode(),
-                'response_body' => $responseBody,
-                'parsed_result' => $result
-            ]);
-
-            if ($response->getStatusCode() == 200 && isset($result['ok']) && $result['ok']) {
-                Log::info('Telegram message sent successfully', ['chat_id' => $chatId]);
-                return true;
-            } else {
-                Log::error('Telegram API returned error', [
-                    'status_code' => $response->getStatusCode(),
-                    'error_code' => $result['error_code'] ?? 'unknown',
-                    'description' => $result['description'] ?? 'unknown'
-                ]);
-                return false;
+            if ($statusCode == 200) {
+                $result = json_decode($response->getBody()->getContents(), true);
+                if (isset($result['ok']) && $result['ok']) {
+                    Log::info('Telegram message sent successfully', ['chat_id' => $chatId]);
+                    return true;
+                }
             }
 
-        } catch (\GuzzleHttp\Exception\ConnectException $e) {
-            Log::error('Telegram connection error', [
-                'error' => $e->getMessage(),
-                'chat_id' => $chatId,
-                'text' => $text
+            Log::error('Telegram API error', [
+                'status_code' => $statusCode,
+                'chat_id' => $chatId
             ]);
             return false;
-        } catch (\GuzzleHttp\Exception\RequestException $e) {
-            Log::error('Telegram request error', [
-                'error' => $e->getMessage(),
-                'chat_id' => $chatId,
-                'text' => $text
-            ]);
-            return false;
+
         } catch (\Exception $e) {
             Log::error('Telegram send error', [
                 'error' => $e->getMessage(),
-                'chat_id' => $chatId,
-                'text' => $text
+                'chat_id' => $chatId
             ]);
             return false;
         }
