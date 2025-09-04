@@ -48,6 +48,8 @@ document.addEventListener('DOMContentLoaded', function () {
           });
 
           const username = row.username ? `@${row.username}` : row.email;
+          const bannedBadge = row.is_banned ? '<span class="badge bg-danger ms-2">BANNED</span>' : '';
+
           return `
             <div class="d-flex justify-content-start align-items-center user-name">
               <div class="avatar-wrapper">
@@ -56,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
               </div>
               <div class="d-flex flex-column">
-                <span class="fw-medium">${fullName}</span>
+                <span class="fw-medium">${fullName} ${bannedBadge}</span>
                 <small class="text-muted">${username}</small>
               </div>
             </div>
@@ -91,7 +93,17 @@ document.addEventListener('DOMContentLoaded', function () {
       // Status column
       {
         data: 'status',
-        render: function (data) {
+        render: function (data, type, row) {
+          // Check if user is banned first
+          if (row.is_banned) {
+            return `
+              <span class="badge bg-label-danger">
+                <i class="fas fa-ban me-1"></i>
+                Banned
+              </span>
+            `;
+          }
+
           const statusClasses = {
             'online': 'bg-label-success',
             'offline': 'bg-label-secondary'
@@ -121,6 +133,14 @@ document.addEventListener('DOMContentLoaded', function () {
         orderable: false,
         searchable: false,
         render: function (data, type, row) {
+          const banButton = row.is_banned
+            ? `<button class="btn btn-sm btn-icon btn-success unban-record" data-id="${row.id}" title="Unban User">
+                 <i class="fas fa-user-check"></i>
+               </button>`
+            : `<button class="btn btn-sm btn-icon btn-warning ban-record" data-id="${row.id}" title="Ban User">
+                 <i class="fas fa-ban"></i>
+               </button>`;
+
           return `
             <div class="d-inline-flex gap-2">
               <a href="/admin/users/${row.id}/profile" class="btn btn-sm btn-icon btn-info" title="View Profile">
@@ -129,6 +149,7 @@ document.addEventListener('DOMContentLoaded', function () {
               <button class="btn btn-sm btn-icon btn-primary edit-record" data-id="${row.id}" data-bs-toggle="offcanvas" data-bs-target="#offcanvasEditUser" title="Edit User">
                 <i class="fas fa-edit"></i>
               </button>
+              ${banButton}
               <button class="btn btn-sm btn-icon btn-danger delete-record" data-id="${row.id}" title="Delete User">
                 <i class="fas fa-trash-alt"></i>
               </button>
@@ -402,6 +423,139 @@ document.addEventListener('DOMContentLoaded', function () {
             confirmButton: 'btn btn-primary'
           },
           buttonsStyling: false
+        });
+      }
+    });
+  });
+
+  // Ban User
+  $(document).on('click', '.ban-record', function() {
+    const id = $(this).data('id');
+
+    Swal.fire({
+      title: 'Ban User',
+      html: `
+        <div class="mb-3">
+          <label for="ban-reason" class="form-label">Reason for banning:</label>
+          <textarea id="ban-reason" class="form-control" rows="3"
+                    placeholder="Enter the reason for banning this user..." required></textarea>
+        </div>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ban User',
+      cancelButtonText: 'Cancel',
+      customClass: {
+        confirmButton: 'btn btn-warning me-3',
+        cancelButton: 'btn btn-label-secondary'
+      },
+      buttonsStyling: false,
+      preConfirm: () => {
+        const reason = document.getElementById('ban-reason').value;
+        if (!reason.trim()) {
+          Swal.showValidationMessage('Please provide a reason for banning');
+          return false;
+        }
+        return { reason: reason };
+      }
+    }).then(function (result) {
+      if (result.value) {
+        $.ajax({
+          url: `/admin/users/${id}/ban`,
+          type: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+          },
+          data: {
+            ban_reason: result.value.reason
+          },
+          success: function (data) {
+            if (data.success) {
+              userTable.ajax.reload();
+              Swal.fire({
+                icon: 'success',
+                title: 'Banned!',
+                text: 'User has been banned successfully.',
+                customClass: {
+                  confirmButton: 'btn btn-success'
+                },
+                buttonsStyling: false
+              });
+            }
+          },
+          error: function (error) {
+            let errorMessage = 'Could not ban the user.';
+            if (error.responseJSON && error.responseJSON.message) {
+              errorMessage = error.responseJSON.message;
+            }
+            Swal.fire({
+              icon: 'error',
+              title: 'Error!',
+              text: errorMessage,
+              customClass: {
+                confirmButton: 'btn btn-primary'
+              },
+              buttonsStyling: false
+            });
+          }
+        });
+      }
+    });
+  });
+
+  // Unban User
+  $(document).on('click', '.unban-record', function() {
+    const id = $(this).data('id');
+
+    Swal.fire({
+      title: 'Unban User',
+      text: 'Are you sure you want to unban this user?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Unban User',
+      cancelButtonText: 'Cancel',
+      customClass: {
+        confirmButton: 'btn btn-success me-3',
+        cancelButton: 'btn btn-label-secondary'
+      },
+      buttonsStyling: false
+    }).then(function (result) {
+      if (result.value) {
+        $.ajax({
+          url: `/admin/users/${id}/unban`,
+          type: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+          },
+          success: function (data) {
+            if (data.success) {
+              userTable.ajax.reload();
+              Swal.fire({
+                icon: 'success',
+                title: 'Unbanned!',
+                text: 'User has been unbanned successfully.',
+                customClass: {
+                  confirmButton: 'btn btn-success'
+                },
+                buttonsStyling: false
+              });
+            }
+          },
+          error: function (error) {
+            let errorMessage = 'Could not unban the user.';
+            if (error.responseJSON && error.responseJSON.message) {
+              errorMessage = error.responseJSON.message;
+            }
+            Swal.fire({
+              icon: 'error',
+              title: 'Error!',
+              text: errorMessage,
+              customClass: {
+                confirmButton: 'btn btn-primary'
+              },
+              buttonsStyling: false
+            });
+          }
         });
       }
     });

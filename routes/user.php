@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\User\UserLoginController;
 use App\Http\Controllers\User\UserRegisterController;
 use App\Http\Controllers\User\UserForgotPasswordController;
+use App\Http\Controllers\User\UserBannedController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\DepositController;
 use App\Http\Controllers\User\WithdrawalController;
@@ -45,6 +46,9 @@ Route::prefix('user')->middleware('web')->group(function () {
     Route::post('/password/update', [UserForgotPasswordController::class, 'resetPassword'])
         ->name('user.password.update');
 
+    // Banned page route (accessible without auth)
+    Route::get('/banned', [UserBannedController::class, 'index'])->name('user.banned');
+
     // Guest routes
     Route::middleware('guest')->group(function () {
         Route::get('/login', [UserLoginController::class, 'showLoginForm'])->name('user.login');
@@ -58,7 +62,7 @@ Route::prefix('user')->middleware('web')->group(function () {
     });
 
     // Protected routes
-    Route::middleware(['auth:web'])->group(function () {
+    Route::middleware(['auth:web', 'check.banned'])->group(function () {
         Route::get('/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
         Route::get('/profile', [UserController::class, 'profile'])->name('user.profile');
         Route::match(['put', 'post'], '/profile', [UserController::class, 'updateProfile'])->name('user.profile.update');
@@ -120,6 +124,7 @@ Route::prefix('user')->middleware('web')->group(function () {
     Route::post('marketplace/topup', [MarketplaceController::class, 'topUpCash'])->name('user.marketplace.topup');
 
     // Marketplace Verification
+    Route::post('marketplace/upload-screenshot/{listingId}', [MarketplaceController::class, 'uploadScreenshot'])->name('user.marketplace.upload_screenshot');
     Route::post('marketplace/approve/{listingId}', [MarketplaceController::class, 'approveVerification'])->name('user.marketplace.approve');
     Route::post('marketplace/reject/{listingId}', [MarketplaceController::class, 'rejectVerification'])->name('user.marketplace.reject');
     Route::post('marketplace/cancel-verification/{listingId}', [MarketplaceController::class, 'cancelVerification'])->name('user.marketplace.cancel_verification');

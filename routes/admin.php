@@ -38,6 +38,8 @@ Route::prefix('admin')->middleware('web')->group(function () {
         Route::post('/users', [UserManagementController::class, 'store'])->name('admin.users.store');
         Route::put('/users/{id}', [UserManagementController::class, 'update'])->name('admin.users.update');
         Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('admin.users.destroy');
+        Route::post('/users/{user}/ban', [UserManagementController::class, 'ban'])->name('admin.users.ban');
+        Route::post('/users/{user}/unban', [UserManagementController::class, 'unban'])->name('admin.users.unban');
 
         // Wallet Management Routes
         Route::get('/wallets', [WalletManagementController::class, 'index'])->name('admin.wallets.index');

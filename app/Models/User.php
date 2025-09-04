@@ -76,6 +76,10 @@ class User extends Authenticatable
         'cardholder_name',
         'account_number',
         'payment_info_completed',
+        'is_banned',
+        'ban_reason',
+        'banned_at',
+        'banned_by',
     ];
 
     /**
@@ -149,6 +153,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_banned' => 'boolean',
+            'banned_at' => 'datetime',
         ];
     }
 
@@ -163,6 +169,22 @@ class User extends Authenticatable
     public function upline()
     {
         return $this->belongsTo(User::class, 'upline_id');
+    }
+
+    /**
+     * Get the admin who banned this user
+     */
+    public function bannedBy()
+    {
+        return $this->belongsTo(Admin::class, 'banned_by');
+    }
+
+    /**
+     * Check if user is banned
+     */
+    public function isBanned()
+    {
+        return $this->is_banned;
     }
 
     /**
