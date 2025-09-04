@@ -124,6 +124,7 @@ Route::prefix('user')->middleware('web')->group(function () {
     Route::post('marketplace/topup', [MarketplaceController::class, 'topUpCash'])->name('user.marketplace.topup');
 
     // Marketplace Verification
+    Route::post('marketplace/upload-screenshot/{listingId}', [MarketplaceController::class, 'uploadScreenshot'])->name('user.marketplace.upload_screenshot');
     Route::post('marketplace/approve/{listingId}', [MarketplaceController::class, 'approveVerification'])->name('user.marketplace.approve');
     Route::post('marketplace/reject/{listingId}', [MarketplaceController::class, 'rejectVerification'])->name('user.marketplace.reject');
     Route::post('marketplace/cancel-verification/{listingId}', [MarketplaceController::class, 'cancelVerification'])->name('user.marketplace.cancel_verification');

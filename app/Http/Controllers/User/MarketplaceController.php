@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class MarketplaceController extends Controller
 {
@@ -217,6 +218,51 @@ class MarketplaceController extends Controller
     }
 
     /**
+     * Upload verification screenshot (seller uploads before approving)
+     */
+    public function uploadScreenshot(Request $request, $listingId)
+    {
+        $request->validate([
+            'screenshot' => 'required|image|mimes:jpeg,png,jpg|max:2048'
+        ]);
+
+        $listing = MarketplaceListing::where('unique_id', $listingId)
+            ->where('seller_id', Auth::id())
+            ->where('status', 'pending_verification')
+            ->firstOrFail();
+
+        if ($listing->isVerificationExpired()) {
+            $listing->cancelVerification('Verification expired');
+            return response()->json(['error' => 'Verification has expired.'], 400);
+        }
+
+        try {
+            // Delete existing screenshot if it exists
+            if ($listing->verification_screenshot && Storage::disk('public')->exists($listing->verification_screenshot)) {
+                Storage::disk('public')->delete($listing->verification_screenshot);
+            }
+
+            // Store the screenshot
+            $path = $request->file('screenshot')->store('marketplace/screenshots', 'public');
+
+            $listing->update([
+                'verification_screenshot' => $path,
+                'screenshot_uploaded_at' => now()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Screenshot uploaded successfully! You can now approve the transaction.',
+                'screenshot_url' => asset('storage/' . $path)
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error uploading verification screenshot: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to upload screenshot. Please try again.'], 500);
+        }
+    }
+
+    /**
      * Seller approves a verification (completes the transaction)
      */
     public function approveVerification(Request $request, $listingId)
@@ -239,6 +285,11 @@ class MarketplaceController extends Controller
         if ($listing->isVerificationExpired()) {
             $listing->cancelVerification('Verification expired');
             return redirect()->back()->withErrors(['error' => 'Verification has expired.']);
+        }
+
+        // Check if screenshot has been uploaded
+        if (!$listing->hasScreenshot()) {
+            return redirect()->back()->withErrors(['error' => 'You must upload a verification screenshot before approving the transaction.']);
         }
 
         try {
