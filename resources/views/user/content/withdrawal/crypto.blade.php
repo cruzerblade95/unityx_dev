@@ -86,7 +86,8 @@
                         <span class="countdown-label">Hours</span>
                     </div>
                     <div class="countdown-item">
-                        <span class="countdown-number" id="minutes">{{ floor(($hoursRemaining - floor($hoursRemaining)) * 60) }}</span>
+                        <span class="countdown-number"
+                            id="minutes">{{ floor(($hoursRemaining - floor($hoursRemaining)) * 60) }}</span>
                         <span class="countdown-label">Minutes</span>
                     </div>
                     <div class="countdown-item">
@@ -95,9 +96,11 @@
                     </div>
                 </div>
                 <div class="progress mt-3">
-                    <div class="progress-bar bg-warning" role="progressbar" style="width: {{ (30 - $hoursRemaining) / 30 * 100 }}%"></div>
+                    <div class="progress-bar bg-warning" role="progressbar"
+                        style="width: {{ ((30 - $hoursRemaining) / 30) * 100 }}%"></div>
                 </div>
-                <p class="mb-0 mt-2"><small class="text-muted">This countdown will automatically refresh when the cooldown period ends.</small></p>
+                <p class="mb-0 mt-2"><small class="text-muted">This countdown will automatically refresh when the cooldown
+                        period ends.</small></p>
             </div>
 
             <style>
@@ -219,8 +222,8 @@
                                     <!-- Wallet Type Selection -->
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Withdraw From <span class="text-danger">*</span></label>
-                                        <select class="form-select @error('wallet_type') is-invalid @enderror" 
-                                                name="wallet_type" id="wallet_type" required>
+                                        <select class="form-select @error('wallet_type') is-invalid @enderror"
+                                            name="wallet_type" id="wallet_type" required>
                                             <option value="">Select Wallet</option>
                                             <option value="profit" {{ old('wallet_type') == 'profit' ? 'selected' : '' }}>
                                                 Profit Wallet (${{ number_format($user->wallet->profit ?? 0, 2) }})
@@ -241,19 +244,21 @@
                                                 class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control @error('amount') is-invalid @enderror"
-                                                name="amount" id="amount" step="0.01"
+                                            <input type="number"
+                                                class="form-control @error('amount') is-invalid @enderror" name="amount"
+                                                id="amount" step="0.01"
                                                 min="{{ $withdrawalSettings->min_amount ?? 50 }}"
                                                 max="{{ min($withdrawalSettings->max_amount ?? 300, $walletBalance) }}"
-                                                value="{{ old('amount') }}"
-                                                placeholder="Enter amount" required>
+                                                value="{{ old('amount') }}" placeholder="Enter amount" required>
                                         </div>
                                         @error('amount')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                         <small class="text-muted" id="amount-help">
-                                            Minimum: ${{ number_format($withdrawalSettings->min_amount ?? 50, 2) }} | Maximum:
-                                            ${{ number_format(min($withdrawalSettings->max_amount ?? 300, $walletBalance), 2) }} | Available:
+                                            Minimum: ${{ number_format($withdrawalSettings->min_amount ?? 50, 2) }} |
+                                            Maximum:
+                                            ${{ number_format(min($withdrawalSettings->max_amount ?? 300, $walletBalance), 2) }}
+                                            | Available:
                                             ${{ number_format($walletBalance, 2) }}
                                         </small>
                                     </div>
@@ -265,7 +270,8 @@
                                     <div class="input-group">
                                         <input type="text"
                                             class="form-control @error('wallet_address') is-invalid @enderror"
-                                            name="wallet_address" id="wallet_address" value="{{ old('wallet_address') }}"
+                                            name="wallet_address" id="wallet_address"
+                                            value="{{ old('wallet_address') }}"
                                             placeholder="Enter your BEP20 wallet address" required>
                                         <button type="button" class="btn btn-outline-secondary" id="pasteAddress">
                                             <i class="fas fa-paste"></i>
@@ -381,7 +387,8 @@
                                 @elseif(!$canWithdraw)
                                     <i class="fas fa-hourglass-half text-warning fa-3x mb-3"></i>
                                     <h5>Withdrawal Cooldown Active</h5>
-                                    <p class="text-muted">Please wait for the cooldown period to end before making another withdrawal request.</p>
+                                    <p class="text-muted">Please wait for the cooldown period to end before making another
+                                        withdrawal request.</p>
                                 @else
                                     <i class="fas fa-wallet text-muted fa-3x mb-3"></i>
                                     <h5>Insufficient Balance</h5>
@@ -423,7 +430,8 @@
                             </li>
                             <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>Incorrect addresses =
                                 permanent loss</li>
-                            <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>Minimum withdrawal: ${{ number_format($withdrawalSettings->min_amount ?? 50, 2) }}</li>
+                            <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>Minimum withdrawal:
+                                ${{ number_format($withdrawalSettings->min_amount ?? 50, 2) }}</li>
                         </ul>
                     </div>
                 </div>
@@ -479,14 +487,16 @@
                     if (walletType && walletBalances[walletType] !== undefined) {
                         const availableBalance = walletBalances[walletType];
                         const minAmount = {{ $withdrawalSettings->min_amount ?? 50 }};
-                        const maxAmount = Math.min({{ $withdrawalSettings->max_amount ?? 300 }}, availableBalance);
-                        
+                        const maxAmount = Math.min({{ $withdrawalSettings->max_amount ?? 300 }},
+                            availableBalance);
+
                         // Update input max attribute
                         amountInput.setAttribute('max', maxAmount);
-                        
+
                         // Update help text
-                        amountHelp.innerHTML = `Minimum: $${minAmount.toFixed(2)} | Maximum: $${maxAmount.toFixed(2)} | Available: $${availableBalance.toFixed(2)}`;
-                        
+                        amountHelp.innerHTML =
+                            `Minimum: $${minAmount.toFixed(2)} | Maximum: $${maxAmount.toFixed(2)} | Available: $${availableBalance.toFixed(2)}`;
+
                         // Clear amount if it exceeds new max
                         if (parseFloat(amountInput.value) > maxAmount) {
                             amountInput.value = '';
@@ -558,7 +568,8 @@
                     const walletType = walletTypeSelect.value;
                     const availableBalance = walletBalances[walletType] || 0;
                     const minAmount = {{ $withdrawalSettings->min_amount ?? 50 }};
-                    const maxAmount = Math.min({{ $withdrawalSettings->max_amount ?? 300 }}, availableBalance);
+                    const maxAmount = Math.min({{ $withdrawalSettings->max_amount ?? 300 }},
+                        availableBalance);
 
                     if (!walletType) {
                         e.preventDefault();
@@ -568,7 +579,8 @@
 
                     if (amount > maxAmount) {
                         e.preventDefault();
-                        alert(`Maximum withdrawal amount is $${maxAmount.toFixed(2)} for the selected wallet.`);
+                        alert(
+                            `Maximum withdrawal amount is $${maxAmount.toFixed(2)} for the selected wallet.`);
                         return false;
                     }
 
@@ -580,7 +592,8 @@
 
                     if (amount > availableBalance) {
                         e.preventDefault();
-                        alert(`Insufficient balance in selected wallet. Available: $${availableBalance.toFixed(2)}.`);
+                        alert(
+                            `Insufficient balance in selected wallet. Available: $${availableBalance.toFixed(2)}.`);
                         return false;
                     }
                 });

@@ -1,4 +1,4 @@
-@include('components.coming-soon-overlay')
+{{-- @include('components.coming-soon-overlay') --}}
 
 @extends('user.layouts.layoutMaster')
 
@@ -78,20 +78,20 @@
                 </div>
             </div>
 
-            <!-- ETC Black Card Withdrawal -->
+            <!-- Crypto Bank Card Withdrawal -->
             <div class="col-lg-4 col-md-6">
                 <div class="card withdrawal-type-card etc-card h-100">
                     <div class="card-body text-center">
                         <div class="card-icon">
                             <i class="fas fa-credit-card"></i>
                         </div>
-                        <h5 class="card-title">ETC Black Card</h5>
-                        <p class="card-text">Withdraw directly to your ETC Black debit card account</p>
+                        <h5 class="card-title">Crypto Bank Card</h5>
+                        <p class="card-text">Withdraw directly to your Crypto Bank Card account</p>
                         <div class="fee-badge">5.6% Fee</div>
                         <div class="mt-3">
-                            <a href="{{ route('user.withdrawal.etc-black') }}" class="btn"
+                            <a href="{{ route('user.withdrawal.crypto-bank-card') }}" class="btn"
                                 style="background-color: rgba(111, 66, 193, 1); color: white;">
-                                <i class="fas fa-credit-card me-1"></i>Withdraw to ETC
+                                <i class="fas fa-credit-card me-1"></i>Withdraw to Card
                             </a>
                         </div>
                     </div>
@@ -130,7 +130,8 @@
                             <div class="col-md-6">
                                 <h6 class="text-primary">Withdrawal Rules</h6>
                                 <ul class="list-unstyled small">
-                                    <li><i class="fas fa-check text-success me-2"></i>Profit & bonus balances can be withdrawn
+                                    <li><i class="fas fa-check text-success me-2"></i>Profit & bonus balances can be
+                                        withdrawn
                                     </li>
                                     <li><i class="fas fa-check text-success me-2"></i>One pending request at a time</li>
                                     <li><i class="fas fa-check text-success me-2"></i>KYC verification required</li>
@@ -142,8 +143,8 @@
                                 <h6 class="text-primary">Fee Structure</h6>
                                 <ul class="list-unstyled small">
                                     <li><i class="fab fa-bitcoin text-success me-2"></i>Crypto: 4.75% processing fee</li>
-                                    <li><i class="fas fa-credit-card me-2" style="color: rgba(111, 66, 193, 1);"></i>ETC
-                                        Black: 5.6% processing fee</li>
+                                    <li><i class="fas fa-credit-card me-2" style="color: rgba(111, 66, 193, 1);"></i>Crypto
+                                        Bank Card: 5.6% processing fee</li>
                                     <li><i class="fas fa-coins text-warning me-2"></i>Gold: 7.0% processing fee</li>
                                 </ul>
                             </div>

@@ -1,5 +1,5 @@
 @php
-$configData = Helper::appClasses();
+    $configData = Helper::appClasses();
 @endphp
 
 @extends('admin.layouts.layoutMaster')
@@ -7,12 +7,12 @@ $configData = Helper::appClasses();
 @section('title', 'Global Withdrawal Defaults')
 
 @section('vendor-style')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 @endsection
 
 @section('content')
-<div class="row g-6">
-    <div class="col-12">
+    <div class="row g-6">
+        <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="card-title mb-0">Global Withdrawal Default Settings</h4>
@@ -24,7 +24,8 @@ $configData = Helper::appClasses();
                 <div class="card-body">
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle"></i>
-                        These are the default settings that will be applied to all users who don't have custom withdrawal settings.
+                        These are the default settings that will be applied to all users who don't have custom withdrawal
+                        settings.
                     </div>
 
                     <div class="row">
@@ -43,7 +44,7 @@ $configData = Helper::appClasses();
                                         <div class="mb-3">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" id="crypto-enabled"
-                                                       {{ $globalDefaults['crypto']->is_enabled ?? true ? 'checked' : '' }}>
+                                                    {{ $globalDefaults['crypto']->is_enabled ?? true ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="crypto-enabled">
                                                     Enable Cryptocurrency Withdrawals
                                                 </label>
@@ -53,39 +54,40 @@ $configData = Helper::appClasses();
                                         <div class="mb-3">
                                             <label class="form-label">Minimum Amount</label>
                                             <input type="number" class="form-control" id="crypto-min"
-                                                   value="{{ $globalDefaults['crypto']->min_amount ?? 10.00 }}"
-                                                   step="0.01" min="0" required>
+                                                value="{{ $globalDefaults['crypto']->min_amount ?? 10.0 }}" step="0.01"
+                                                min="0" required>
                                         </div>
 
                                         <div class="mb-3">
                                             <label class="form-label">Maximum Amount</label>
                                             <input type="number" class="form-control" id="crypto-max"
-                                                   value="{{ $globalDefaults['crypto']->max_amount ?? 10000.00 }}"
-                                                   step="0.01" min="0" required>
+                                                value="{{ $globalDefaults['crypto']->max_amount ?? 10000.0 }}"
+                                                step="0.01" min="0" required>
                                         </div>
 
                                         <div class="mb-3">
                                             <label class="form-label">Processing Fee (%)</label>
                                             <input type="number" class="form-control" id="crypto-fee-percent"
-                                                   value="{{ $globalDefaults['crypto']->processing_fee_percent ?? 4.75 }}"
-                                                   step="0.01" min="0" max="100" required>
+                                                value="{{ $globalDefaults['crypto']->processing_fee_percent ?? 4.75 }}"
+                                                step="0.01" min="0" max="100" required>
                                         </div>
 
                                         <div class="mb-3">
                                             <label class="form-label">Fixed Processing Fee</label>
                                             <input type="number" class="form-control" id="crypto-fee-fixed"
-                                                   value="{{ $globalDefaults['crypto']->processing_fee_fixed ?? 0.00 }}"
-                                                   step="0.01" min="0" required>
+                                                value="{{ $globalDefaults['crypto']->processing_fee_fixed ?? 0.0 }}"
+                                                step="0.01" min="0" required>
                                         </div>
 
                                         <div class="mb-3">
                                             <label class="form-label">Cooldown Period (Hours)</label>
                                             <input type="number" class="form-control" id="crypto-cooldown"
-                                                   value="{{ $globalDefaults['crypto']->cooldown_hours ?? 30 }}"
-                                                   min="0" required>
+                                                value="{{ $globalDefaults['crypto']->cooldown_hours ?? 30 }}" min="0"
+                                                required>
                                         </div>
 
-                                        <button type="button" class="btn btn-primary w-100" onclick="saveGlobalDefaults('crypto')">
+                                        <button type="button" class="btn btn-primary w-100"
+                                            onclick="saveGlobalDefaults('crypto')">
                                             <i class="fas fa-save"></i> Save Crypto Settings
                                         </button>
                                     </form>
@@ -93,12 +95,12 @@ $configData = Helper::appClasses();
                             </div>
                         </div>
 
-                        <!-- ETC Black Settings -->
+                        <!-- Crypto Bank Card Settings -->
                         <div class="col-md-4">
                             <div class="card border-dark">
                                 <div class="card-header bg-dark text-white">
                                     <h5 class="card-title mb-0">
-                                        <i class="fas fa-circle"></i> ETC Black
+                                        <i class="fas fa-circle"></i> Crypto Bank Card
                                     </h5>
                                 </div>
                                 <div class="card-body">
@@ -108,9 +110,9 @@ $configData = Helper::appClasses();
                                         <div class="mb-3">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" id="etc-black-enabled"
-                                                       {{ $globalDefaults['etc_black']->is_enabled ?? true ? 'checked' : '' }}>
+                                                    {{ $globalDefaults['etc_black']->is_enabled ?? true ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="etc-black-enabled">
-                                                    Enable ETC Black Withdrawals
+                                                    Enable Crypto Bank Card Withdrawals
                                                 </label>
                                             </div>
                                         </div>
@@ -118,40 +120,41 @@ $configData = Helper::appClasses();
                                         <div class="mb-3">
                                             <label class="form-label">Minimum Amount</label>
                                             <input type="number" class="form-control" id="etc-black-min"
-                                                   value="{{ $globalDefaults['etc_black']->min_amount ?? 10.00 }}"
-                                                   step="0.01" min="0" required>
+                                                value="{{ $globalDefaults['etc_black']->min_amount ?? 10.0 }}"
+                                                step="0.01" min="0" required>
                                         </div>
 
                                         <div class="mb-3">
                                             <label class="form-label">Maximum Amount</label>
                                             <input type="number" class="form-control" id="etc-black-max"
-                                                   value="{{ $globalDefaults['etc_black']->max_amount ?? 10000.00 }}"
-                                                   step="0.01" min="0" required>
+                                                value="{{ $globalDefaults['etc_black']->max_amount ?? 10000.0 }}"
+                                                step="0.01" min="0" required>
                                         </div>
 
                                         <div class="mb-3">
                                             <label class="form-label">Processing Fee (%)</label>
                                             <input type="number" class="form-control" id="etc-black-fee-percent"
-                                                   value="{{ $globalDefaults['etc_black']->processing_fee_percent ?? 4.75 }}"
-                                                   step="0.01" min="0" max="100" required>
+                                                value="{{ $globalDefaults['etc_black']->processing_fee_percent ?? 4.75 }}"
+                                                step="0.01" min="0" max="100" required>
                                         </div>
 
                                         <div class="mb-3">
                                             <label class="form-label">Fixed Processing Fee</label>
                                             <input type="number" class="form-control" id="etc-black-fee-fixed"
-                                                   value="{{ $globalDefaults['etc_black']->processing_fee_fixed ?? 0.00 }}"
-                                                   step="0.01" min="0" required>
+                                                value="{{ $globalDefaults['etc_black']->processing_fee_fixed ?? 0.0 }}"
+                                                step="0.01" min="0" required>
                                         </div>
 
                                         <div class="mb-3">
                                             <label class="form-label">Cooldown Period (Hours)</label>
                                             <input type="number" class="form-control" id="etc-black-cooldown"
-                                                   value="{{ $globalDefaults['etc_black']->cooldown_hours ?? 30 }}"
-                                                   min="0" required>
+                                                value="{{ $globalDefaults['etc_black']->cooldown_hours ?? 30 }}"
+                                                min="0" required>
                                         </div>
 
-                                        <button type="button" class="btn btn-dark w-100" onclick="saveGlobalDefaults('etc_black')">
-                                            <i class="fas fa-save"></i> Save ETC Black Settings
+                                        <button type="button" class="btn btn-dark w-100"
+                                            onclick="saveGlobalDefaults('etc_black')">
+                                            <i class="fas fa-save"></i> Save Crypto Bank Card Settings
                                         </button>
                                     </form>
                                 </div>
@@ -173,7 +176,7 @@ $configData = Helper::appClasses();
                                         <div class="mb-3">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" id="gold-enabled"
-                                                       {{ $globalDefaults['gold']->is_enabled ?? true ? 'checked' : '' }}>
+                                                    {{ $globalDefaults['gold']->is_enabled ?? true ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="gold-enabled">
                                                     Enable Gold Withdrawals
                                                 </label>
@@ -183,39 +186,40 @@ $configData = Helper::appClasses();
                                         <div class="mb-3">
                                             <label class="form-label">Minimum Amount</label>
                                             <input type="number" class="form-control" id="gold-min"
-                                                   value="{{ $globalDefaults['gold']->min_amount ?? 10.00 }}"
-                                                   step="0.01" min="0" required>
+                                                value="{{ $globalDefaults['gold']->min_amount ?? 10.0 }}" step="0.01"
+                                                min="0" required>
                                         </div>
 
                                         <div class="mb-3">
                                             <label class="form-label">Maximum Amount</label>
                                             <input type="number" class="form-control" id="gold-max"
-                                                   value="{{ $globalDefaults['gold']->max_amount ?? 10000.00 }}"
-                                                   step="0.01" min="0" required>
+                                                value="{{ $globalDefaults['gold']->max_amount ?? 10000.0 }}"
+                                                step="0.01" min="0" required>
                                         </div>
 
                                         <div class="mb-3">
                                             <label class="form-label">Processing Fee (%)</label>
                                             <input type="number" class="form-control" id="gold-fee-percent"
-                                                   value="{{ $globalDefaults['gold']->processing_fee_percent ?? 4.75 }}"
-                                                   step="0.01" min="0" max="100" required>
+                                                value="{{ $globalDefaults['gold']->processing_fee_percent ?? 4.75 }}"
+                                                step="0.01" min="0" max="100" required>
                                         </div>
 
                                         <div class="mb-3">
                                             <label class="form-label">Fixed Processing Fee</label>
                                             <input type="number" class="form-control" id="gold-fee-fixed"
-                                                   value="{{ $globalDefaults['gold']->processing_fee_fixed ?? 0.00 }}"
-                                                   step="0.01" min="0" required>
+                                                value="{{ $globalDefaults['gold']->processing_fee_fixed ?? 0.0 }}"
+                                                step="0.01" min="0" required>
                                         </div>
 
                                         <div class="mb-3">
                                             <label class="form-label">Cooldown Period (Hours)</label>
                                             <input type="number" class="form-control" id="gold-cooldown"
-                                                   value="{{ $globalDefaults['gold']->cooldown_hours ?? 30 }}"
-                                                   min="0" required>
+                                                value="{{ $globalDefaults['gold']->cooldown_hours ?? 30 }}"
+                                                min="0" required>
                                         </div>
 
-                                        <button type="button" class="btn btn-warning w-100" onclick="saveGlobalDefaults('gold')">
+                                        <button type="button" class="btn btn-warning w-100"
+                                            onclick="saveGlobalDefaults('gold')">
                                             <i class="fas fa-save"></i> Save Gold Settings
                                         </button>
                                     </form>
@@ -251,117 +255,159 @@ $configData = Helper::appClasses();
             </div>
         </div>
     </div>
-</div>
+    </div>
 
 @section('page-script')
-<script>
-function saveGlobalDefaults(type) {
-    const formData = {
-        withdrawal_type: type,
-        min_amount: document.getElementById(`${type.replace('_', '-')}-min`).value,
-        max_amount: document.getElementById(`${type.replace('_', '-')}-max`).value,
-        processing_fee_percent: document.getElementById(`${type.replace('_', '-')}-fee-percent`).value,
-        processing_fee_fixed: document.getElementById(`${type.replace('_', '-')}-fee-fixed`).value,
-        cooldown_hours: document.getElementById(`${type.replace('_', '-')}-cooldown`).value,
-        is_enabled: document.getElementById(`${type.replace('_', '-')}-enabled`).checked
-    };
+    <script>
+        function saveGlobalDefaults(type) {
+            const formData = {
+                withdrawal_type: type,
+                min_amount: document.getElementById(`${type.replace('_', '-')}-min`).value,
+                max_amount: document.getElementById(`${type.replace('_', '-')}-max`).value,
+                processing_fee_percent: document.getElementById(`${type.replace('_', '-')}-fee-percent`).value,
+                processing_fee_fixed: document.getElementById(`${type.replace('_', '-')}-fee-fixed`).value,
+                cooldown_hours: document.getElementById(`${type.replace('_', '-')}-cooldown`).value,
+                is_enabled: document.getElementById(`${type.replace('_', '-')}-enabled`).checked
+            };
 
-    fetch('/admin/withdrawal-settings/global-defaults/update', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        body: JSON.stringify(formData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(`${type.toUpperCase()} default settings updated successfully!`);
-        } else {
-            alert('Error updating settings');
+            fetch('/admin/withdrawal-settings/global-defaults/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`${type.toUpperCase()} default settings updated successfully!`);
+                    } else {
+                        alert('Error updating settings');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saving settings:', error);
+                    alert('Error saving settings');
+                });
         }
-    })
-    .catch(error => {
-        console.error('Error saving settings:', error);
-        alert('Error saving settings');
-    });
-}
 
-function setStandardDefaults() {
-    if (!confirm('This will set standard default values for all withdrawal types. Continue?')) {
-        return;
-    }
+        function setStandardDefaults() {
+            if (!confirm('This will set standard default values for all withdrawal types. Continue?')) {
+                return;
+            }
 
-    const standardSettings = {
-        crypto: { min: 10, max: 10000, feePercent: 4.75, feeFixed: 0, cooldown: 30, enabled: true },
-        etc_black: { min: 10, max: 10000, feePercent: 4.75, feeFixed: 0, cooldown: 30, enabled: true },
-        gold: { min: 10, max: 10000, feePercent: 4.75, feeFixed: 0, cooldown: 30, enabled: true }
-    };
+            const standardSettings = {
+                crypto: {
+                    min: 10,
+                    max: 10000,
+                    feePercent: 4.75,
+                    feeFixed: 0,
+                    cooldown: 30,
+                    enabled: true
+                },
+                etc_black: {
+                    min: 10,
+                    max: 10000,
+                    feePercent: 4.75,
+                    feeFixed: 0,
+                    cooldown: 30,
+                    enabled: true
+                },
+                gold: {
+                    min: 10,
+                    max: 10000,
+                    feePercent: 4.75,
+                    feeFixed: 0,
+                    cooldown: 30,
+                    enabled: true
+                }
+            };
 
-    Object.keys(standardSettings).forEach(type => {
-        const settings = standardSettings[type];
-        const prefix = type.replace('_', '-');
+            Object.keys(standardSettings).forEach(type => {
+                const settings = standardSettings[type];
+                const prefix = type.replace('_', '-');
 
-        document.getElementById(`${prefix}-min`).value = settings.min;
-        document.getElementById(`${prefix}-max`).value = settings.max;
-        document.getElementById(`${prefix}-fee-percent`).value = settings.feePercent;
-        document.getElementById(`${prefix}-fee-fixed`).value = settings.feeFixed;
-        document.getElementById(`${prefix}-cooldown`).value = settings.cooldown;
-        document.getElementById(`${prefix}-enabled`).checked = settings.enabled;
+                document.getElementById(`${prefix}-min`).value = settings.min;
+                document.getElementById(`${prefix}-max`).value = settings.max;
+                document.getElementById(`${prefix}-fee-percent`).value = settings.feePercent;
+                document.getElementById(`${prefix}-fee-fixed`).value = settings.feeFixed;
+                document.getElementById(`${prefix}-cooldown`).value = settings.cooldown;
+                document.getElementById(`${prefix}-enabled`).checked = settings.enabled;
 
-        saveGlobalDefaults(type);
-    });
-}
+                saveGlobalDefaults(type);
+            });
+        }
 
-function enableAllWithdrawals() {
-    if (!confirm('This will enable all withdrawal types. Continue?')) {
-        return;
-    }
+        function enableAllWithdrawals() {
+            if (!confirm('This will enable all withdrawal types. Continue?')) {
+                return;
+            }
 
-    ['crypto', 'etc-black', 'gold'].forEach(type => {
-        document.getElementById(`${type}-enabled`).checked = true;
-        saveGlobalDefaults(type.replace('-', '_'));
-    });
-}
+            ['crypto', 'etc-black', 'gold'].forEach(type => {
+                document.getElementById(`${type}-enabled`).checked = true;
+                saveGlobalDefaults(type.replace('-', '_'));
+            });
+        }
 
-function disableAllWithdrawals() {
-    if (!confirm('This will disable all withdrawal types. Continue?')) {
-        return;
-    }
+        function disableAllWithdrawals() {
+            if (!confirm('This will disable all withdrawal types. Continue?')) {
+                return;
+            }
 
-    ['crypto', 'etc-black', 'gold'].forEach(type => {
-        document.getElementById(`${type}-enabled`).checked = false;
-        saveGlobalDefaults(type.replace('-', '_'));
-    });
-}
+            ['crypto', 'etc-black', 'gold'].forEach(type => {
+                document.getElementById(`${type}-enabled`).checked = false;
+                saveGlobalDefaults(type.replace('-', '_'));
+            });
+        }
 
-function setHighSecurityDefaults() {
-    if (!confirm('This will set high security defaults (higher fees, longer cooldowns). Continue?')) {
-        return;
-    }
+        function setHighSecurityDefaults() {
+            if (!confirm('This will set high security defaults (higher fees, longer cooldowns). Continue?')) {
+                return;
+            }
 
-    const securitySettings = {
-        crypto: { min: 50, max: 5000, feePercent: 7.5, feeFixed: 5, cooldown: 72, enabled: true },
-        etc_black: { min: 50, max: 5000, feePercent: 7.5, feeFixed: 5, cooldown: 72, enabled: true },
-        gold: { min: 50, max: 5000, feePercent: 7.5, feeFixed: 5, cooldown: 72, enabled: true }
-    };
+            const securitySettings = {
+                crypto: {
+                    min: 50,
+                    max: 5000,
+                    feePercent: 7.5,
+                    feeFixed: 5,
+                    cooldown: 72,
+                    enabled: true
+                },
+                etc_black: {
+                    min: 50,
+                    max: 5000,
+                    feePercent: 7.5,
+                    feeFixed: 5,
+                    cooldown: 72,
+                    enabled: true
+                },
+                gold: {
+                    min: 50,
+                    max: 5000,
+                    feePercent: 7.5,
+                    feeFixed: 5,
+                    cooldown: 72,
+                    enabled: true
+                }
+            };
 
-    Object.keys(securitySettings).forEach(type => {
-        const settings = securitySettings[type];
-        const prefix = type.replace('_', '-');
+            Object.keys(securitySettings).forEach(type => {
+                const settings = securitySettings[type];
+                const prefix = type.replace('_', '-');
 
-        document.getElementById(`${prefix}-min`).value = settings.min;
-        document.getElementById(`${prefix}-max`).value = settings.max;
-        document.getElementById(`${prefix}-fee-percent`).value = settings.feePercent;
-        document.getElementById(`${prefix}-fee-fixed`).value = settings.feeFixed;
-        document.getElementById(`${prefix}-cooldown`).value = settings.cooldown;
-        document.getElementById(`${prefix}-enabled`).checked = settings.enabled;
+                document.getElementById(`${prefix}-min`).value = settings.min;
+                document.getElementById(`${prefix}-max`).value = settings.max;
+                document.getElementById(`${prefix}-fee-percent`).value = settings.feePercent;
+                document.getElementById(`${prefix}-fee-fixed`).value = settings.feeFixed;
+                document.getElementById(`${prefix}-cooldown`).value = settings.cooldown;
+                document.getElementById(`${prefix}-enabled`).checked = settings.enabled;
 
-        saveGlobalDefaults(type);
-    });
-}
-</script>
+                saveGlobalDefaults(type);
+            });
+        }
+    </script>
 @endsection
 
 @endsection

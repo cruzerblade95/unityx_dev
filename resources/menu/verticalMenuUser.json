@@ -41,9 +41,9 @@
           "slug": "user.withdrawal.crypto"
         },
         {
-          "url": "user/withdrawal/etc-black",
-          "name": "ETC Black",
-          "slug": "user.withdrawal.etc-black"
+          "url": "user/withdrawal/crypto-bank-card",
+          "name": "Crypto Bank Card",
+          "slug": "user.withdrawal.crypto-bank-card"
         },
         {
           "url": "user/withdrawal/gold",

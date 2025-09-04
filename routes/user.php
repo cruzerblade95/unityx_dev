@@ -99,7 +99,7 @@ Route::prefix('user')->middleware('web')->group(function () {
     Route::get('deposit/cancel', [DepositController::class, 'cancel'])->name('user.deposit.cancel');
     Route::get('withdrawal', [WithdrawalController::class, 'index'])->name('user.withdrawal.index')->middleware('require.payment.info');
     Route::get('withdrawal/crypto', [WithdrawalController::class, 'crypto'])->name('user.withdrawal.crypto')->middleware('require.payment.info');
-    Route::get('withdrawal/etc-black', [WithdrawalController::class, 'etcBlack'])->name('user.withdrawal.etc-black')->middleware('require.payment.info');
+    Route::get('withdrawal/crypto-bank-card', [WithdrawalController::class, 'cryptoBankCard'])->name('user.withdrawal.crypto-bank-card')->middleware('require.payment.info');
     Route::get('withdrawal/gold', [WithdrawalController::class, 'gold'])->name('user.withdrawal.gold')->middleware('require.payment.info');
     Route::post('withdrawal', [WithdrawalController::class, 'store'])->name('user.withdrawal.store')->middleware('require.payment.info');
     Route::post('withdrawal/{withdrawalId}/select-branch', [WithdrawalController::class, 'selectBranch'])->name('user.withdrawal.select-branch')->middleware('require.payment.info');

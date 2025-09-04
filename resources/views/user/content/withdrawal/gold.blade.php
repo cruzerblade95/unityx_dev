@@ -1,4 +1,4 @@
-@include('components.coming-soon-overlay')
+{{-- @include('components.coming-soon-overlay') --}}
 
 @extends('user.layouts.layoutMaster')
 
@@ -85,8 +85,8 @@
                                 <!-- Wallet Type Selection -->
                                 <div class="mb-3">
                                     <label class="form-label">Withdraw From <span class="text-danger">*</span></label>
-                                    <select class="form-select @error('wallet_type') is-invalid @enderror" 
-                                            name="wallet_type" id="wallet_type" required>
+                                    <select class="form-select @error('wallet_type') is-invalid @enderror"
+                                        name="wallet_type" id="wallet_type" required>
                                         <option value="">Select Wallet</option>
                                         <option value="profit" {{ old('wallet_type') == 'profit' ? 'selected' : '' }}>
                                             Profit Wallet (${{ number_format($user->wallet->profit ?? 0, 2) }})
@@ -385,13 +385,14 @@
                         const availableBalance = walletBalances[walletType];
                         const minAmount = 300;
                         const maxAmount = Math.min(3000, availableBalance);
-                        
+
                         // Update input max attribute
                         amountInput.setAttribute('max', maxAmount);
-                        
+
                         // Update help text
-                        amountHelp.innerHTML = `Minimum: $${minAmount.toFixed(2)} | Maximum: $${maxAmount.toFixed(2)} | Available: $${availableBalance.toFixed(2)}`;
-                        
+                        amountHelp.innerHTML =
+                            `Minimum: $${minAmount.toFixed(2)} | Maximum: $${maxAmount.toFixed(2)} | Available: $${availableBalance.toFixed(2)}`;
+
                         // Clear amount if it exceeds new max
                         if (parseFloat(amountInput.value) > maxAmount) {
                             amountInput.value = '';
@@ -434,7 +435,8 @@
 
                     if (amount > maxAmount) {
                         e.preventDefault();
-                        alert(`Maximum redemption amount is $${maxAmount.toFixed(2)} for the selected wallet.`);
+                        alert(
+                            `Maximum redemption amount is $${maxAmount.toFixed(2)} for the selected wallet.`);
                         return false;
                     }
 
@@ -446,7 +448,8 @@
 
                     if (amount > availableBalance) {
                         e.preventDefault();
-                        alert(`Insufficient balance in selected wallet. Available: $${availableBalance.toFixed(2)}.`);
+                        alert(
+                            `Insufficient balance in selected wallet. Available: $${availableBalance.toFixed(2)}.`);
                         return false;
                     }
                 });
