@@ -106,6 +106,8 @@ Route::prefix('user')->middleware('web')->group(function () {
     Route::get('withdrawal/crypto-bank-card', [WithdrawalController::class, 'cryptoBankCard'])->name('user.withdrawal.crypto-bank-card')->middleware('require.payment.info');
     Route::get('withdrawal/gold', [WithdrawalController::class, 'gold'])->name('user.withdrawal.gold')->middleware('require.payment.info');
     Route::post('withdrawal', [WithdrawalController::class, 'store'])->name('user.withdrawal.store')->middleware('require.payment.info');
+    Route::post('withdrawal/send-otp', [WithdrawalController::class, 'sendOtp'])->name('user.withdrawal.send_otp')->middleware('require.payment.info');
+    Route::post('withdrawal/verify-otp', [WithdrawalController::class, 'verifyOtp'])->name('user.withdrawal.verify_otp')->middleware('require.payment.info');
     Route::post('withdrawal/{withdrawalId}/select-branch', [WithdrawalController::class, 'selectBranch'])->name('user.withdrawal.select-branch')->middleware('require.payment.info');
 
     // Investment

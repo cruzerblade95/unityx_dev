@@ -123,6 +123,20 @@ class TelegramNotificationService
     }
 
     /**
+     * Send OTP code to user's Telegram account
+     */
+    public static function sendOtpToTelegram($userId, $otpCode, $withdrawalType = 'crypto')
+    {
+        $title = "🔐 Withdrawal OTP Verification";
+        $message = "Your 6-digit OTP code for {$withdrawalType} withdrawal is:\n\n";
+        $message .= "<code>{$otpCode}</code>\n\n";
+        $message .= "⏰ This code will expire in 5 minutes.\n";
+        $message .= "🔒 Do not share this code with anyone.";
+
+        return self::sendNotificationToTelegram($userId, $title, $message);
+    }
+
+    /**
      * Test if user can receive Telegram notifications
      */
     public static function testTelegramConnection($userId)

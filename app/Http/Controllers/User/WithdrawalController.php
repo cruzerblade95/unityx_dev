@@ -8,6 +8,9 @@ use App\Models\Withdrawal;
 use App\Models\WithdrawalSettings;
 use App\Models\SystemSettings;
 use App\Models\KycVerification;
+use App\Models\TelegramVerification;
+use App\Models\WithdrawalOtp;
+use App\Services\TelegramNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -287,6 +290,20 @@ class WithdrawalController extends Controller
                 ->with('warning', 'Please complete your payment information to access withdrawal features.');
         }
 
+        // For crypto withdrawals, check Telegram verification first
+        if ($request->withdrawal_type === 'crypto') {
+            // Check if user has verified Telegram
+            $telegramVerification = \App\Models\TelegramVerification::where('user_id', $user->id)->first();
+
+            if (!$telegramVerification || !$telegramVerification->telegram_username) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'telegram_not_verified',
+                    'message' => 'Please verify your Telegram account in your profile first.'
+                ], 422);
+            }
+        }
+
         // Validate withdrawal is enabled for this type
         if (!WithdrawalSettings::isWithdrawalEnabled($user->id, $request->withdrawal_type)) {
             return redirect()->back()->withErrors([
@@ -464,5 +481,179 @@ class WithdrawalController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Branch selected successfully! Your gold withdrawal is ready for pickup at Musleem Gold - ' . $request->branch_name);
+    }
+
+    public function sendOtp(Request $request)
+    {
+        $user = Auth::user();
+
+        // Check if withdrawal type is crypto
+        if ($request->withdrawal_type !== 'crypto') {
+            return response()->json([
+                'success' => false,
+                'message' => 'OTP is only required for crypto withdrawals.'
+            ], 422);
+        }
+
+        // Check if user has verified Telegram
+        $telegramVerification = \App\Models\TelegramVerification::where('user_id', $user->id)->first();
+
+        if (!$telegramVerification || !$telegramVerification->telegram_username) {
+            return response()->json([
+                'success' => false,
+                'error' => 'telegram_not_verified',
+                'message' => 'Please verify your Telegram account in your profile first.'
+            ], 422);
+        }
+
+        // Check for existing pending OTP
+        $existingOtp = \App\Models\WithdrawalOtp::where('user_id', $user->id)
+            ->where('created_at', '>', now()->subMinutes(5))
+            ->first();
+
+        if ($existingOtp) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An OTP has already been sent. Please check your Telegram or wait for it to expire.'
+            ], 422);
+        }
+
+        // Generate and send OTP
+        $otpModel = new \App\Models\WithdrawalOtp();
+        $otp = $otpModel->generateOtp($user->id, $request->all());
+
+        try {
+            $telegramService = new \App\Services\TelegramNotificationService();
+            $telegramService->sendOtpToTelegram($user, $otp);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'OTP sent to your Telegram. Please enter the 6-digit code to complete withdrawal.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send OTP. Please try again.'
+            ], 500);
+        }
+    }
+
+    public function verifyOtp(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'otp' => 'required|string|size:6',
+        ]);
+
+        // Verify OTP
+        $otpModel = new \App\Models\WithdrawalOtp();
+        $verification = $otpModel->verifyOtp($user->id, $request->otp);
+
+        if (!$verification['valid']) {
+            return response()->json([
+                'success' => false,
+                'message' => $verification['message']
+            ], 422);
+        }
+
+        // Get the withdrawal data from OTP record
+        $withdrawalData = $verification['withdrawal_data'];
+
+        // Recreate the request object with stored data
+        $withdrawalRequest = new WithdrawalRequest();
+        $withdrawalRequest->merge($withdrawalData);
+
+        // Validate withdrawal is enabled for this type
+        if (!WithdrawalSettings::isWithdrawalEnabled($user->id, $withdrawalRequest->withdrawal_type)) {
+            return response()->json([
+                'success' => false,
+                'message' => ucfirst(str_replace('_', ' ', $withdrawalRequest->withdrawal_type)) . ' withdrawals are currently disabled for your account.'
+            ], 422);
+        }
+
+        // Check if user has any pending withdrawal requests
+        $pendingWithdrawal = Withdrawal::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
+
+        if ($pendingWithdrawal) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You already have a pending withdrawal request (#' . $pendingWithdrawal->id . '). Please wait for it to be processed before submitting a new request.'
+            ], 422);
+        }
+
+        $wallet = $user->wallet;
+
+        // Validate wallet type
+        $walletType = $withdrawalRequest->wallet_type;
+        if (!in_array($walletType, ['profit', 'bonus'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please select a valid wallet type.'
+            ], 422);
+        }
+
+        // Check if user has sufficient withdrawable balance for the selected wallet type
+        $withdrawableBalance = $wallet->getAvailableBalance($walletType);
+        if ($withdrawableBalance < $withdrawalRequest->amount) {
+            $walletName = ucfirst($walletType . ' wallet');
+            return response()->json([
+                'success' => false,
+                'message' => "Insufficient balance in {$walletName}. Available: $" . number_format($withdrawableBalance, 2)
+            ], 422);
+        }
+
+        // Calculate processing fee using settings
+        $processingFee = WithdrawalSettings::getProcessingFee($user->id, $withdrawalRequest->withdrawal_type, $withdrawalRequest->amount);
+        $net_amount = $withdrawalRequest->amount - $processingFee;
+
+        // Move the requested amount to floating (hold it) from the selected wallet type
+        if ($wallet && !$wallet->holdAmountFromWalletForWithdrawal($withdrawalRequest->amount, $walletType, $withdrawalRequest->withdrawal_type)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to hold withdrawal amount. Please try again.'
+            ], 422);
+        }
+
+        // Prepare data for withdrawal creation
+        $withdrawalCreateData = [
+            'user_id' => Auth::id(),
+            'amount' => $withdrawalRequest->amount,
+            'tax_percent' => 0, // Will be calculated from settings
+            'tax_amount' => $processingFee,
+            'net_amount' => $net_amount,
+            'status' => 'pending',
+            'reference' => $withdrawalRequest->reference,
+            'note' => $withdrawalRequest->note,
+            'withdrawal_type' => $withdrawalRequest->withdrawal_type,
+            'wallet_type' => $walletType,
+            'payment_details' => $this->getPaymentDetails($withdrawalRequest, $user),
+        ];
+
+        // Get withdrawal settings to calculate proper tax percent for display
+        $settings = WithdrawalSettings::getUserSettings($user->id, $withdrawalRequest->withdrawal_type);
+        if ($settings) {
+            $withdrawalCreateData['tax_percent'] = $settings->processing_fee_percent;
+        }
+
+        // For crypto withdrawals, store currency and wallet address
+        if ($withdrawalRequest->withdrawal_type === 'crypto' && $withdrawalRequest->currency && $withdrawalRequest->wallet_address) {
+            $withdrawalCreateData['bank_name'] = $withdrawalRequest->currency; // Store currency in bank_name
+            $withdrawalCreateData['account_number'] = $withdrawalRequest->wallet_address; // Store wallet address
+        }
+
+        Withdrawal::create($withdrawalCreateData);
+
+        // Delete the used OTP
+        \App\Models\WithdrawalOtp::where('user_id', $user->id)->delete();
+
+        $taxPercent = $settings ? $settings->processing_fee_percent : 4.75;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Withdrawal request submitted successfully! Net amount after ' . $taxPercent . '% fee: $' . number_format($net_amount, 2)
+        ]);
     }
 }
