@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\AdminWithdrawalSettingsController;
 use App\Http\Controllers\Admin\AdminReinvestmentSettingsController;
 use App\Http\Controllers\Admin\UplineManagementController;
 use App\Http\Controllers\Admin\AiTradeSettingsController;
+use App\Http\Controllers\Admin\AdminSettingsController;
 
 Route::prefix('admin')->middleware('web')->group(function () {
     // Guest routes
@@ -166,6 +167,13 @@ Route::prefix('admin')->middleware('web')->group(function () {
             Route::put('/update-status/{id}', [AiTradeSettingsController::class, 'updateStatus'])->name('update-status');
             Route::put('/update-trade/{id}', [AiTradeSettingsController::class, 'updateTrade'])->name('update-trade');
             Route::delete('/delete-trade/{id}', [AiTradeSettingsController::class, 'deleteTrade'])->name('delete-trade');
+        });
+
+        // Admin Settings Routes
+        Route::prefix('settings')->name('admin.settings.')->group(function () {
+            Route::get('/', [AdminSettingsController::class, 'index'])->name('index');
+            Route::post('/profile', [AdminSettingsController::class, 'updateProfile'])->name('profile.update');
+            Route::post('/password', [AdminSettingsController::class, 'updatePassword'])->name('password.update');
         });
     });
 });
