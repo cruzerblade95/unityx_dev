@@ -18,11 +18,12 @@ class CheckBannedUser
     {
         // Check if user is authenticated and banned
         if (Auth::check() && Auth::user()->is_banned) {
+            $user = Auth::user();
             Auth::logout();
 
             return redirect()->route('user.banned')
-                ->with('banReason', Auth::user()->ban_reason)
-                ->with('bannedAt', Auth::user()->banned_at);
+                ->with('banReason', $user->ban_reason)
+                ->with('bannedAt', $user->banned_at);
         }
 
         return $next($request);
