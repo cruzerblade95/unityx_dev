@@ -384,9 +384,9 @@
                             <h4 class="text-primary mb-1">{{ number_format($wallet->profit ?? 0, 2) }} USDT</h4>
                             <div class="d-flex gap-2">
                                 <a href="{{ route('user.ai_trades.index') }}" class="btn btn-primary">View AI Trade</a>
-                                <a href="{{ route('user.withdrawal.index') }}" class="btn btn-success">
+                                {{-- <a href="{{ route('user.withdrawal.index') }}" class="btn btn-success">
                                     <i class="fas fa-money-bill-wave me-1"></i>Withdraw
-                                </a>
+                                </a> --}}
                             </div>
                         </div>
                     </div>
