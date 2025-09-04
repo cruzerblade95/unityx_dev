@@ -56,7 +56,10 @@ class UserManagementController extends Controller
             'role',
             'created_at',
             'last_active_at',
-            'profile_photo_path'
+            'profile_photo_path',
+            'is_banned',
+            'ban_reason',
+            'banned_at'
         ]);
 
         return DataTables::of($users)
@@ -107,11 +110,13 @@ class UserManagementController extends Controller
             $validatedData = $request->validate([
                 'firstname' => 'required|string|max:255',
                 'lastname' => 'required|string|max:255',
-                'username' => 'required|string|max:255|unique:users,username',
+                'username' => 'required|string|max:255|unique:users,username|regex:/^\S*$/u',
                 'email' => 'required|string|email|max:255|unique:users,email',
                 'password' => 'required|string|min:8',
                 'password_confirmation' => 'required|string|same:password',
                 'upline_id' => 'nullable|exists:users,id'
+            ], [
+                'username.regex' => 'Username must not contain spaces.',
             ]);
 
             // Generate unique 6-character referral code
@@ -213,10 +218,12 @@ class UserManagementController extends Controller
         $user = User::findOrFail($id);
 
         $request->validate([
-            'username' => 'required|string|max:255|unique:users,username,' . $id,
+            'username' => 'required|string|max:255|unique:users,username,' . $id . '|regex:/^\S*$/u',
             'email' => 'required|string|email|max:255|unique:users,email,' . $id,
             'password' => 'nullable|string|min:8',
             'role' => 'required|string|in:user,admin'
+        ], [
+            'username.regex' => 'Username must not contain spaces.',
         ]);
 
         $userData = [
@@ -244,6 +251,43 @@ class UserManagementController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'User deleted successfully'
+        ]);
+    }
+
+    public function ban(Request $request, User $user)
+    {
+        $request->validate([
+            'ban_reason' => 'required|string|max:1000',
+        ], [
+            'ban_reason.required' => 'Please provide a reason for banning this user.',
+            'ban_reason.max' => 'Ban reason cannot exceed 1000 characters.',
+        ]);
+
+        $user->update([
+            'is_banned' => true,
+            'ban_reason' => $request->ban_reason,
+            'banned_at' => now(),
+            'banned_by' => auth('admin')->id(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User has been banned successfully'
+        ]);
+    }
+
+    public function unban(User $user)
+    {
+        $user->update([
+            'is_banned' => false,
+            'ban_reason' => null,
+            'banned_at' => null,
+            'banned_by' => null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User has been unbanned successfully'
         ]);
     }
 }

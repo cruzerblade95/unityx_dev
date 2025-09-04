@@ -38,6 +38,8 @@ Route::prefix('admin')->middleware('web')->group(function () {
         Route::post('/users', [UserManagementController::class, 'store'])->name('admin.users.store');
         Route::put('/users/{id}', [UserManagementController::class, 'update'])->name('admin.users.update');
         Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('admin.users.destroy');
+        Route::post('/users/{user}/ban', [UserManagementController::class, 'ban'])->name('admin.users.ban');
+        Route::post('/users/{user}/unban', [UserManagementController::class, 'unban'])->name('admin.users.unban');
 
         // Wallet Management Routes
         Route::get('/wallets', [WalletManagementController::class, 'index'])->name('admin.wallets.index');
@@ -125,6 +127,8 @@ Route::prefix('admin')->middleware('web')->group(function () {
             Route::post('/enable-withdrawals', [AdminWithdrawalSettingsController::class, 'enableWithdrawals'])->name('enable-withdrawals');
             Route::get('/global-defaults', [AdminWithdrawalSettingsController::class, 'globalDefaults'])->name('global-defaults');
             Route::post('/global-defaults/update', [AdminWithdrawalSettingsController::class, 'updateGlobalDefaults'])->name('global-defaults.update');
+            Route::post('/toggle-maintenance', [AdminWithdrawalSettingsController::class, 'toggleMaintenance'])->name('toggle-maintenance');
+            Route::get('/maintenance-status', [AdminWithdrawalSettingsController::class, 'getMaintenanceStatus'])->name('maintenance-status');
         });
 
         // Reinvestment Settings Management Routes

@@ -28,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Alias for middleware
         $middleware->alias([
             'require.payment.info' => \App\Http\Middleware\RequirePaymentInfo::class,
+            'check.banned' => \App\Http\Middleware\CheckBannedUser::class,
             'require.kyc.verification' => \App\Http\Middleware\RequireKycVerification::class,
         ]);
     })

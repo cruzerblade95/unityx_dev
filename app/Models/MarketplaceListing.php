@@ -25,6 +25,8 @@ class MarketplaceListing extends Model
         'seller_approval_reason',
         'seller_approved',
         'seller_approved_at',
+        'verification_screenshot',
+        'screenshot_uploaded_at',
         'admin_rejection_reason',
         'admin_rejected_at',
         'admin_rejected_by'
@@ -39,6 +41,7 @@ class MarketplaceListing extends Model
         'verification_started_at' => 'datetime',
         'verification_expires_at' => 'datetime',
         'seller_approved_at' => 'datetime',
+        'screenshot_uploaded_at' => 'datetime',
         'seller_approved' => 'boolean',
         'admin_rejected_at' => 'datetime',
     ];
@@ -211,5 +214,25 @@ class MarketplaceListing extends Model
         }
 
         return max(0, now()->diffInMinutes($this->verification_expires_at, false));
+    }
+
+    /**
+     * Check if screenshot has been uploaded
+     */
+    public function hasScreenshot()
+    {
+        return !empty($this->verification_screenshot);
+    }
+
+    /**
+     * Get screenshot URL
+     */
+    public function getScreenshotUrlAttribute()
+    {
+        if (!$this->verification_screenshot) {
+            return null;
+        }
+
+        return asset('storage/' . $this->verification_screenshot);
     }
 }

@@ -21,19 +21,29 @@ class UserLoginController extends Controller
         // dd($request->all());
         // Log the incoming request data
         Log::info('Login attempt with data:', $request->all());
-        
+
         $login = $request->input('email-username');
         $password = $request->input('password');
 
         $fieldType = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
         $credentials = [$fieldType => $login, 'password' => $password];
-        
+
         // Log the credentials being used
         Log::info('Attempting login with credentials:', ['fieldType' => $fieldType]);
 
         if (Auth::guard('web')->attempt($credentials)) {
             Log::info('Login successful');
-            
+
+            $user = Auth::guard('web')->user();
+
+            // Check if user is banned
+            if ($user->is_banned) {
+                Auth::guard('web')->logout();
+                return redirect()->route('user.banned')
+                    ->with('banReason', $user->ban_reason)
+                    ->with('bannedAt', $user->banned_at);
+            }
+
             // Update last login timestamp using DB facade
             $userId = Auth::guard('web')->id();
             DB::table('users')
@@ -42,7 +52,7 @@ class UserLoginController extends Controller
 
             return redirect()->route('user.dashboard');
         }
-        
+
         Log::info('Login failed');
         $errorMessage = 'Invalid credentials. Please check your ' . ($fieldType === 'email' ? 'email' : 'username') . ' and password.';
         return back()->withErrors(['email' => $errorMessage])->withInput();

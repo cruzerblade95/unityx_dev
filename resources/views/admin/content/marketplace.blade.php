@@ -211,6 +211,7 @@
                                         <th>Buyer</th>
                                         <th>Seller</th>
                                         <th>Status</th>
+                                        <th>Screenshot</th>
                                         <th>USDT Amount</th>
                                         <th>Total Price</th>
                                         <th>Tax Amount</th>
@@ -288,6 +289,18 @@
                                                         <span
                                                             class="badge bg-light text-dark">{{ ucfirst($transaction->status) }}</span>
                                                 @endswitch
+                                            </td>
+                                            <td>
+                                                @if ($transaction->verification_screenshot)
+                                                    <a href="{{ asset('storage/' . $transaction->verification_screenshot) }}"
+                                                       target="_blank"
+                                                       class="btn btn-sm btn-outline-primary">
+                                                        <i class="ti tabler-eye"></i>
+                                                    </a>
+                                                    <br><small class="text-muted">{{ $transaction->screenshot_uploaded_at ? $transaction->screenshot_uploaded_at->format('M d, H:i') : '' }}</small>
+                                                @else
+                                                    <span class="text-muted">No screenshot</span>
+                                                @endif
                                             </td>
                                             <td>
                                                 <span class="fw-medium">{{ number_format($transaction->amount, 2) }}
@@ -562,5 +575,32 @@
                 a.click();
                 window.URL.revokeObjectURL(url);
             }
+
+            function previewScreenshot(imageUrl) {
+                document.getElementById('screenshotImage').src = imageUrl;
+                const modal = new bootstrap.Modal(document.getElementById('screenshotModal'));
+                modal.show();
+            }
         </script>
+
+        <!-- Screenshot Preview Modal -->
+        <div class="modal fade" id="screenshotModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="ti tabler-photo me-2"></i>
+                            Verification Screenshot
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <img id="screenshotImage" src="" alt="Verification Screenshot" class="img-fluid rounded">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     @endsection

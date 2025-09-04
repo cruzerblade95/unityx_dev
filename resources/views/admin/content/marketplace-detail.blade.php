@@ -3,8 +3,12 @@
 @section('title', 'Transaction Details')
 
 @section('content')
-    <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Header -->
+    <div class="container-xxl flex-grow-1 container-p-y">                                        @if ($transaction->verification_screenshot)
+                                            <a href="#" onclick="previewScreenshot('{{ asset('storage/' . $transaction->verification_screenshot) }}')"
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="ti tabler-eye me-1"></i>View Screenshot
+                                            </a>
+                                        @endif  <!-- Header -->
         <div class="row">
             <div class="col-12">
                 <div class="card mb-6">
@@ -143,6 +147,27 @@
                                                 class="text-muted">{{ \Carbon\Carbon::parse($transaction->verification_started_at)->format('M d, Y H:i') }}</small>
                                         </div>
                                         <p class="mb-2">Buyer initiated verification process</p>
+                                    </div>
+                                </li>
+                            @endif
+
+                            @if ($transaction->screenshot_uploaded_at)
+                                <li class="timeline-item timeline-item-transparent">
+                                    <span class="timeline-point timeline-point-warning"></span>
+                                    <div class="timeline-event">
+                                        <div class="timeline-header mb-3">
+                                            <h6 class="mb-0">Screenshot Uploaded</h6>
+                                            <small
+                                                class="text-muted">{{ \Carbon\Carbon::parse($transaction->screenshot_uploaded_at)->format('M d, Y H:i') }}</small>
+                                        </div>
+                                        <p class="mb-2">Seller uploaded verification screenshot</p>
+                                        @if ($transaction->verification_screenshot)
+                                            <a href="{{ asset('storage/' . $transaction->verification_screenshot) }}"
+                                               target="_blank"
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="ti tabler-eye me-1"></i>View Screenshot
+                                            </a>
+                                        @endif
                                     </div>
                                 </li>
                             @endif
@@ -291,4 +316,33 @@
             </div>
         </div>
     </div>
+
+    <!-- Screenshot Preview Modal -->
+    <div class="modal fade" id="screenshotModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="ti tabler-photo me-2"></i>
+                        Verification Screenshot
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="screenshotImage" src="" alt="Verification Screenshot" class="img-fluid rounded">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function previewScreenshot(imageUrl) {
+            document.getElementById('screenshotImage').src = imageUrl;
+            const modal = new bootstrap.Modal(document.getElementById('screenshotModal'));
+            modal.show();
+        }
+    </script>
 @endsection

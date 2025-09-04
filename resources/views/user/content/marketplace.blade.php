@@ -319,10 +319,91 @@
                                             </small>
                                         </div>
 
+                                        <!-- Screenshot Upload Section -->
+                                        @if (!$request->hasScreenshot())
+                                            <div class="alert alert-warning mb-3">
+                                                <h6 class="alert-heading mb-2">
+                                                    <i class="fas fa-camera me-2"></i>
+                                                    Screenshot Required
+                                                </h6>
+                                                <p class="mb-2">Please upload a screenshot of the transaction as proof before approving.</p>
+                                                <form id="screenshot-form-{{ $request->unique_id }}" enctype="multipart/form-data">
+                                                    @csrf
+                                                    <div class="mb-2">
+                                                        <input type="file"
+                                                               class="form-control form-control-sm"
+                                                               id="screenshot-{{ $request->unique_id }}"
+                                                               name="screenshot"
+                                                               accept="image/*"
+                                                               required>
+                                                    </div>
+                                                    <button type="button"
+                                                            class="btn btn-primary btn-sm w-100"
+                                                            onclick="uploadScreenshot('{{ $request->unique_id }}')">
+                                                        <i class="fas fa-upload me-2"></i>
+                                                        Upload Screenshot
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        @else
+                                            <div class="alert alert-success mb-3">
+                                                <h6 class="alert-heading mb-2">
+                                                    <i class="fas fa-check-circle me-2"></i>
+                                                    Screenshot Uploaded
+                                                </h6>
+                                                <p class="mb-2">Screenshot uploaded successfully at {{ $request->screenshot_uploaded_at->format('M d, Y H:i') }}</p>
+                                                <div class="d-flex gap-2 mb-2">
+                                                    <a href="#" onclick="previewScreenshot('{{ $request->screenshot_url }}')" class="btn btn-outline-primary btn-sm">
+                                                        <i class="fas fa-eye me-2"></i>
+                                                        View Screenshot
+                                                    </a>
+                                                    <button type="button" class="btn btn-outline-warning btn-sm" onclick="showReplaceForm('{{ $request->unique_id }}')">
+                                                        <i class="fas fa-sync-alt me-2"></i>
+                                                        Replace
+                                                    </button>
+                                                </div>
+
+                                                <!-- Hidden replace form -->
+                                                <div id="replace-form-{{ $request->unique_id }}" class="mt-3" style="display: none;">
+                                                    <hr>
+                                                    <h6 class="text-warning mb-2">
+                                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                                        Replace Screenshot
+                                                    </h6>
+                                                    <form id="replace-screenshot-form-{{ $request->unique_id }}" enctype="multipart/form-data">
+                                                        @csrf
+                                                        <div class="mb-2">
+                                                            <input type="file"
+                                                                   class="form-control form-control-sm"
+                                                                   id="replace-screenshot-{{ $request->unique_id }}"
+                                                                   name="screenshot"
+                                                                   accept="image/*"
+                                                                   required>
+                                                        </div>
+                                                        <div class="d-flex gap-2">
+                                                            <button type="button"
+                                                                    class="btn btn-warning btn-sm flex-fill"
+                                                                    onclick="replaceScreenshot('{{ $request->unique_id }}')">
+                                                                <i class="fas fa-upload me-2"></i>
+                                                                Upload New Screenshot
+                                                            </button>
+                                                            <button type="button"
+                                                                    class="btn btn-secondary btn-sm"
+                                                                    onclick="hideReplaceForm('{{ $request->unique_id }}')">
+                                                                <i class="fas fa-times me-2"></i>
+                                                                Cancel
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        @endif
+
                                         <div class="row">
                                             <div class="col-6">
-                                                <button class="btn btn-success btn-sm w-100"
-                                                    onclick="approveVerification('{{ $request->unique_id }}')">
+                                                <button class="btn btn-success btn-sm w-100 {{ !$request->hasScreenshot() ? 'disabled' : '' }}"
+                                                    onclick="approveVerification('{{ $request->unique_id }}')"
+                                                    {{ !$request->hasScreenshot() ? 'disabled title="Upload screenshot first"' : '' }}>
                                                     <i class="fas fa-check me-2"></i>
                                                     Approve
                                                 </button>
@@ -937,6 +1018,27 @@
         </div>
     </div>
 
+    <!-- Screenshot Preview Modal -->
+    <div class="modal fade" id="screenshotModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-image me-2"></i>
+                        Verification Screenshot
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="screenshotImage" src="" alt="Verification Screenshot" class="img-fluid rounded">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         function calculateFinalPrice() {
             const amount = parseFloat(document.getElementById('amount').value) || 0;
@@ -1011,6 +1113,142 @@
                     form.appendChild(csrfToken);
                     document.body.appendChild(form);
                     form.submit();
+                }
+            });
+        }
+
+        function previewScreenshot(imageUrl) {
+            document.getElementById('screenshotImage').src = imageUrl;
+            const modal = new bootstrap.Modal(document.getElementById('screenshotModal'));
+            modal.show();
+        }
+
+        function uploadScreenshot(listingId) {
+            const form = document.getElementById(`screenshot-form-${listingId}`);
+            const fileInput = document.getElementById(`screenshot-${listingId}`);
+
+            if (!fileInput.files[0]) {
+                Swal.fire('Error', 'Please select a screenshot to upload.', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('screenshot', fileInput.files[0]);
+            formData.append('_token', '{{ csrf_token() }}');
+
+            // Show loading state
+            Swal.fire({
+                title: 'Uploading Screenshot...',
+                text: 'Please wait while we upload your verification screenshot.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            fetch(`/user/marketplace/upload-screenshot/${listingId}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: data.message,
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        // Reload page to show updated status
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire('Error', data.error || 'Failed to upload screenshot.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error uploading screenshot:', error);
+                Swal.fire('Error', 'Failed to upload screenshot. Please try again.', 'error');
+            });
+        }
+
+        function showReplaceForm(listingId) {
+            const replaceForm = document.getElementById(`replace-form-${listingId}`);
+            replaceForm.style.display = 'block';
+        }
+
+        function hideReplaceForm(listingId) {
+            const replaceForm = document.getElementById(`replace-form-${listingId}`);
+            replaceForm.style.display = 'none';
+
+            // Clear the file input
+            const fileInput = document.getElementById(`replace-screenshot-${listingId}`);
+            if (fileInput) {
+                fileInput.value = '';
+            }
+        }
+
+        function replaceScreenshot(listingId) {
+            const fileInput = document.getElementById(`replace-screenshot-${listingId}`);
+
+            if (!fileInput.files[0]) {
+                Swal.fire('Error', 'Please select a new screenshot to upload.', 'error');
+                return;
+            }
+
+            // Confirm replacement
+            Swal.fire({
+                title: 'Replace Screenshot?',
+                text: 'This will replace your current screenshot with the new one.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ffc107',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Replace It'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const formData = new FormData();
+                    formData.append('screenshot', fileInput.files[0]);
+                    formData.append('_token', '{{ csrf_token() }}');
+
+                    // Show loading state
+                    Swal.fire({
+                        title: 'Replacing Screenshot...',
+                        text: 'Please wait while we replace your verification screenshot.',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    fetch(`/user/marketplace/upload-screenshot/${listingId}`, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Success!',
+                                text: 'Screenshot replaced successfully!',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                // Reload page to show updated status
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error', data.error || 'Failed to replace screenshot.', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error replacing screenshot:', error);
+                        Swal.fire('Error', 'Failed to replace screenshot. Please try again.', 'error');
+                    });
                 }
             });
         }
