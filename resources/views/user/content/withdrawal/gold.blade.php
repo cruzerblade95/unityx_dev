@@ -1,4 +1,4 @@
-{{-- @include('components.coming-soon-overlay') --}}
+@include('components.coming-soon-overlay')
 
 @extends('user.layouts.layoutMaster')
 
@@ -436,7 +436,8 @@
                     if (amount > maxAmount) {
                         e.preventDefault();
                         alert(
-                            `Maximum redemption amount is $${maxAmount.toFixed(2)} for the selected wallet.`);
+                            `Maximum redemption amount is $${maxAmount.toFixed(2)} for the selected wallet.`
+                            );
                         return false;
                     }
 
@@ -449,7 +450,8 @@
                     if (amount > availableBalance) {
                         e.preventDefault();
                         alert(
-                            `Insufficient balance in selected wallet. Available: $${availableBalance.toFixed(2)}.`);
+                            `Insufficient balance in selected wallet. Available: $${availableBalance.toFixed(2)}.`
+                            );
                         return false;
                     }
                 });

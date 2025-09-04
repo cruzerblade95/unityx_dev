@@ -1,4 +1,4 @@
-{{-- @include('components.coming-soon-overlay') --}}
+@include('components.coming-soon-overlay')
 
 @extends('user.layouts.layoutMaster')
 
