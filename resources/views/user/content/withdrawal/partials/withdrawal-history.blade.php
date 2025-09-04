@@ -32,7 +32,7 @@
                                         </span>
                                     @elseif($withdrawal->withdrawal_type === 'etc_black')
                                         <span class="badge type-badge" style="background-color: rgba(111, 66, 193, 1);">
-                                            <i class="fas fa-credit-card me-1"></i>ETC Black
+                                            <i class="fas fa-credit-card me-1"></i>Crypto Bank Card
                                         </span>
                                     @elseif($withdrawal->withdrawal_type === 'gold')
                                         <span class="badge bg-warning type-badge">
@@ -77,7 +77,7 @@
                                                 : $withdrawal->payment_details;
                                         @endphp
                                         <div class="small">
-                                            <strong>ETC Black Card</strong><br>
+                                            <strong>Crypto Bank Card</strong><br>
                                             Card:
                                             ****{{ substr($paymentDetails['etc_black_card_number'] ?? 'N/A', -4) }}<br>
                                             {{ $paymentDetails['cardholder_name'] ?? 'N/A' }}
@@ -118,13 +118,13 @@
                                         <span class="badge bg-danger">
                                             <i class="fas fa-times me-1"></i>Rejected
                                         </span>
-                                        @if($withdrawal->rejection_reason)
+                                        @if ($withdrawal->rejection_reason)
                                             <br>
                                             <small class="text-muted mt-1" style="display: block;">
                                                 <i class="fas fa-info-circle me-1"></i>
                                                 <button type="button" class="btn btn-sm btn-outline-danger mt-1"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#rejectionModal{{ $withdrawal->id }}">
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#rejectionModal{{ $withdrawal->id }}">
                                                     View Reason
                                                 </button>
                                             </small>
@@ -207,7 +207,7 @@
 
             <!-- Rejection Reason Modals -->
             @foreach ($withdrawals as $withdrawal)
-                @if($withdrawal->status === 'rejected' && $withdrawal->rejection_reason)
+                @if ($withdrawal->status === 'rejected' && $withdrawal->rejection_reason)
                     <div class="modal fade" id="rejectionModal{{ $withdrawal->id }}" tabindex="-1">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
@@ -228,17 +228,20 @@
                                             </div>
                                             <div class="col-6">
                                                 <small class="text-muted">Amount:</small>
-                                                <div class="fw-semibold">${{ number_format($withdrawal->amount, 2) }}</div>
+                                                <div class="fw-semibold">${{ number_format($withdrawal->amount, 2) }}
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="row mt-2">
                                             <div class="col-6">
                                                 <small class="text-muted">Date:</small>
-                                                <div class="fw-semibold">{{ $withdrawal->created_at->format('M j, Y g:i A') }}</div>
+                                                <div class="fw-semibold">
+                                                    {{ $withdrawal->created_at->format('M j, Y g:i A') }}</div>
                                             </div>
                                             <div class="col-6">
                                                 <small class="text-muted">Type:</small>
-                                                <div class="fw-semibold text-capitalize">{{ $withdrawal->withdrawal_type }}</div>
+                                                <div class="fw-semibold text-capitalize">
+                                                    {{ $withdrawal->withdrawal_type }}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -251,7 +254,8 @@
                                             Rejection Reason:
                                         </h6>
                                         <div class="alert alert-danger">
-                                            <div style="white-space: pre-wrap;">{{ $withdrawal->rejection_reason }}</div>
+                                            <div style="white-space: pre-wrap;">{{ $withdrawal->rejection_reason }}
+                                            </div>
                                         </div>
                                     </div>
 
@@ -259,12 +263,14 @@
                                         <small>
                                             <i class="fas fa-info-circle me-1"></i>
                                             The withdrawal amount has been returned to your profit balance.
-                                            You can submit a new withdrawal request after addressing the issues mentioned above.
+                                            You can submit a new withdrawal request after addressing the issues
+                                            mentioned above.
                                         </small>
                                     </div>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Close</button>
                                 </div>
                             </div>
                         </div>

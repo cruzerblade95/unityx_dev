@@ -77,7 +77,7 @@ class WithdrawalController extends Controller
             $lastWithdrawalTime = $lastWithdrawal->created_at;
             $nextWithdrawalTime = $lastWithdrawalTime->addHours($cooldownHours);
             $hoursRemaining = max(0, now()->diffInHours($nextWithdrawalTime, false));
-            
+
             if ($hoursRemaining > 0) {
                 $canWithdraw = false;
             }
@@ -94,10 +94,10 @@ class WithdrawalController extends Controller
         $withdrawalSettings = WithdrawalSettings::getUserSettings(Auth::id(), 'crypto');
 
         return view('user.content.withdrawal.crypto', compact(
-            'withdrawals', 
-            'isKycApproved', 
-            'walletBalance', 
-            'user', 
+            'withdrawals',
+            'isKycApproved',
+            'walletBalance',
+            'user',
             'pendingWithdrawal',
             'canWithdraw',
             'nextWithdrawalTime',
@@ -108,7 +108,7 @@ class WithdrawalController extends Controller
         ));
     }
 
-    public function etcBlack()
+    public function cryptoBankCard()
     {
         $user = Auth::user();
 
@@ -121,7 +121,7 @@ class WithdrawalController extends Controller
         // Check if withdrawal is enabled for this user
         if (!WithdrawalSettings::isWithdrawalEnabled(Auth::id(), 'etc_black')) {
             return redirect()->route('user.withdrawal.index')
-                ->with('error', 'ETC Black withdrawals are currently disabled for your account.');
+                ->with('error', 'Crypto Bank Card withdrawals are currently disabled for your account.');
         }
 
         $withdrawals = Withdrawal::where('user_id', Auth::id())->latest()->get();
@@ -146,7 +146,7 @@ class WithdrawalController extends Controller
             $lastWithdrawalTime = $lastWithdrawal->created_at;
             $nextWithdrawalTime = $lastWithdrawalTime->addHours($cooldownHours);
             $hoursRemaining = max(0, now()->diffInHours($nextWithdrawalTime, false));
-            
+
             if ($hoursRemaining > 0) {
                 $canWithdraw = false;
             }
@@ -162,11 +162,11 @@ class WithdrawalController extends Controller
         // Get withdrawal settings for display
         $withdrawalSettings = WithdrawalSettings::getUserSettings(Auth::id(), 'etc_black');
 
-        return view('user.content.withdrawal.etc-black', compact(
-            'withdrawals', 
-            'isKycApproved', 
-            'walletBalance', 
-            'user', 
+        return view('user.content.withdrawal.crypto-bank-card', compact(
+            'withdrawals',
+            'isKycApproved',
+            'walletBalance',
+            'user',
             'pendingWithdrawal',
             'canWithdraw',
             'nextWithdrawalTime',
@@ -215,7 +215,7 @@ class WithdrawalController extends Controller
             $lastWithdrawalTime = $lastWithdrawal->created_at;
             $nextWithdrawalTime = $lastWithdrawalTime->addHours($cooldownHours);
             $hoursRemaining = max(0, now()->diffInHours($nextWithdrawalTime, false));
-            
+
             if ($hoursRemaining > 0) {
                 $canWithdraw = false;
             }
@@ -232,10 +232,10 @@ class WithdrawalController extends Controller
         $withdrawalSettings = WithdrawalSettings::getUserSettings(Auth::id(), 'gold');
 
         return view('user.content.withdrawal.gold', compact(
-            'withdrawals', 
-            'isKycApproved', 
-            'walletBalance', 
-            'user', 
+            'withdrawals',
+            'isKycApproved',
+            'walletBalance',
+            'user',
             'pendingWithdrawal',
             'canWithdraw',
             'nextWithdrawalTime',
@@ -279,7 +279,7 @@ class WithdrawalController extends Controller
         if ($lastWithdrawal) {
             $nextWithdrawalTime = $lastWithdrawal->created_at->addHours($cooldownHours);
             $hoursRemaining = max(0, now()->diffInHours($nextWithdrawalTime, false));
-            
+
             if ($hoursRemaining > 0) {
                 return redirect()->back()->withErrors([
                     'cooldown' => "You must wait {$hoursRemaining} more hours before making another withdrawal."

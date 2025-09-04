@@ -2,7 +2,7 @@
 
 @extends('user.layouts.layoutMaster')
 
-@section('title', 'ETC Black Card Withdrawal')
+@section('title', 'Crypto Bank Card Withdrawal')
 
 @section('vendor-style')
     @vite(['resources/assets/vendor/libs/flatpickr/flatpickr.scss'])
@@ -26,8 +26,8 @@
                 <i class="fas fa-arrow-left"></i>
             </a>
             <div>
-                <h4 class="py-3 mb-0">ETC Black Card Withdrawal</h4>
-                <p class="text-muted mb-0">Withdraw directly to your ETC Black debit card</p>
+                <h4 class="py-3 mb-0">Crypto Bank Card Withdrawal</h4>
+                <p class="text-muted mb-0">Withdraw directly to your Crypto Bank Card</p>
             </div>
         </div>
 
@@ -36,8 +36,8 @@
             <div class="banner-icon">
                 <i class="fas fa-credit-card"></i>
             </div>
-            <h3 style="color: rgba(111, 66, 193, 1);" class="mb-2">ETC Black Card Withdrawal</h3>
-            <p class="mb-0">Fast and convenient withdrawal to your ETC Black debit card with 5.6% processing fee</p>
+            <h3 style="color: rgba(111, 66, 193, 1);" class="mb-2">Crypto Bank Card Withdrawal</h3>
+            <p class="mb-0">Fast and convenient withdrawal to your Crypto Bank Card with 5.6% processing fee</p>
         </div>
 
         <!-- Wallet Balance -->
@@ -74,8 +74,8 @@
             <div class="col-lg-8">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="fas fa-credit-card me-2" style="color: rgba(111, 66, 193, 1);"></i>ETC
-                            Black Card Withdrawal Form</h5>
+                        <h5 class="mb-0"><i class="fas fa-credit-card me-2"
+                                style="color: rgba(111, 66, 193, 1);"></i>Crypto Bank Card Withdrawal Form</h5>
                     </div>
                     <div class="card-body">
                         @if ($isKycApproved && !$pendingWithdrawal && $walletBalance > 0)
@@ -86,8 +86,8 @@
                                 <!-- Wallet Type Selection -->
                                 <div class="mb-3">
                                     <label class="form-label">Withdraw From <span class="text-danger">*</span></label>
-                                    <select class="form-select @error('wallet_type') is-invalid @enderror" 
-                                            name="wallet_type" id="wallet_type" required>
+                                    <select class="form-select @error('wallet_type') is-invalid @enderror"
+                                        name="wallet_type" id="wallet_type" required>
                                         <option value="">Select Wallet</option>
                                         <option value="profit" {{ old('wallet_type') == 'profit' ? 'selected' : '' }}>
                                             Profit Wallet (${{ number_format($user->wallet->profit ?? 0, 2) }})
@@ -121,12 +121,12 @@
                                         ${{ number_format($walletBalance, 2) }}</small>
                                 </div>
 
-                                <!-- ETC Black Card Information -->
+                                <!-- Crypto Bank Card Information -->
                                 <div class="card bg-light mb-4">
                                     <div class="card-body">
                                         <h6 class="card-title">
                                             <i class="fas fa-credit-card me-2" style="color: rgba(111, 66, 193, 1);"></i>
-                                            Your ETC Black Card Details
+                                            Your Crypto Bank Card Details
                                         </h6>
                                         <div class="row">
                                             <div class="col-md-6">
@@ -163,7 +163,7 @@
                                             <div class="alert alert-warning mt-3 mb-0">
                                                 <small>
                                                     <i class="fas fa-exclamation-triangle me-1"></i>
-                                                    Your ETC Black card information is incomplete. Please update your
+                                                    Your Crypto Bank Card information is incomplete. Please update your
                                                     payment information.
                                                     <a href="{{ route('user.payment-info.index') }}"
                                                         class="alert-link">Update Now</a>
@@ -219,7 +219,7 @@
                                     <button type="submit" class="btn btn-lg"
                                         style="background-color: rgba(111, 66, 193, 1); color: white;"
                                         @if (!$user->etc_black_card_number || !$user->cardholder_name || !$user->account_number) disabled @endif>
-                                        <i class="fas fa-credit-card me-2"></i>Submit ETC Black Withdrawal
+                                        <i class="fas fa-credit-card me-2"></i>Submit Crypto Bank Card Withdrawal
                                     </button>
                                 </div>
                             </form>
@@ -249,7 +249,7 @@
             <div class="col-lg-4">
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>ETC Black Card Info</h5>
+                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Crypto Bank Card Info</h5>
                     </div>
                     <div class="card-body">
                         <h6 style="color: rgba(111, 66, 193, 1);">Benefits</h6>
@@ -269,7 +269,7 @@
 
                         <h6 class="text-warning">Requirements</h6>
                         <ul class="list-unstyled small">
-                            <li><i class="fas fa-check-circle text-success me-2"></i>Valid ETC Black card</li>
+                            <li><i class="fas fa-check-circle text-success me-2"></i>Valid Crypto Bank Card</li>
                             <li><i class="fas fa-check-circle text-success me-2"></i>Complete payment information</li>
                             <li><i class="fas fa-check-circle text-success me-2"></i>KYC verification</li>
                             <li><i class="fas fa-check-circle text-success me-2"></i>Minimum withdrawal: $10</li>
@@ -282,7 +282,7 @@
                         <h5 class="mb-0"><i class="fas fa-headset me-2"></i>Need Help?</h5>
                     </div>
                     <div class="card-body">
-                        <p class="small text-muted mb-3">Contact support for ETC Black withdrawal assistance</p>
+                        <p class="small text-muted mb-3">Contact support for Crypto Bank Card withdrawal assistance</p>
                         <div class="d-grid gap-2">
                             <a href="mailto:support@unityx.com" class="btn btn-outline-primary btn-sm">
                                 <i class="fas fa-envelope me-1"></i>Email Support
@@ -325,13 +325,14 @@
                         const availableBalance = walletBalances[walletType];
                         const minAmount = 100;
                         const maxAmount = Math.min(300, availableBalance);
-                        
+
                         // Update input max attribute
                         amountInput.setAttribute('max', maxAmount);
-                        
+
                         // Update help text
-                        amountHelp.innerHTML = `Minimum: $${minAmount.toFixed(2)} | Maximum: $${maxAmount.toFixed(2)} | Available: $${availableBalance.toFixed(2)}`;
-                        
+                        amountHelp.innerHTML =
+                            `Minimum: $${minAmount.toFixed(2)} | Maximum: $${maxAmount.toFixed(2)} | Available: $${availableBalance.toFixed(2)}`;
+
                         // Clear amount if it exceeds new max
                         if (parseFloat(amountInput.value) > maxAmount) {
                             amountInput.value = '';
@@ -374,7 +375,9 @@
 
                     if (amount > maxAmount) {
                         e.preventDefault();
-                        alert(`Maximum withdrawal amount is $${maxAmount.toFixed(2)} for the selected wallet.`);
+                        alert(
+                            `Maximum withdrawal amount is $${maxAmount.toFixed(2)} for the selected wallet.`
+                        );
                         return false;
                     }
 
@@ -386,7 +389,9 @@
 
                     if (amount > availableBalance) {
                         e.preventDefault();
-                        alert(`Insufficient balance in selected wallet. Available: $${availableBalance.toFixed(2)}.`);
+                        alert(
+                            `Insufficient balance in selected wallet. Available: $${availableBalance.toFixed(2)}.`
+                        );
                         return false;
                     }
                 });

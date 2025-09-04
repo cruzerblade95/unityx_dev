@@ -192,7 +192,7 @@
     <div class="container py-4">
         <div class="row">
             <div class="col-md-8 mx-auto">
-                @if(auth()->user()->payment_info_completed)
+                @if (auth()->user()->payment_info_completed)
                     <!-- Current Payment Information Display -->
                     <div class="card payment-info-card current-info-card mb-4">
                         <div class="card-header bg-success text-white">
@@ -219,34 +219,38 @@
                             <div class="current-info-display">
                                 <strong>Crypto Wallet Addresses:</strong><br>
                                 <div class="mt-2">
-                                    @if(auth()->user()->usdt_bep20_address)
+                                    @if (auth()->user()->usdt_bep20_address)
                                         <small class="text-muted d-block"><strong>USDT BEP20:</strong></small>
-                                        <span class="text-muted font-monospace d-block">{{ auth()->user()->usdt_bep20_address }}</span>
+                                        <span
+                                            class="text-muted font-monospace d-block">{{ auth()->user()->usdt_bep20_address }}</span>
                                     @endif
                                 </div>
                                 <div class="mt-2">
-                                    @if(auth()->user()->usdc_bep20_address)
+                                    @if (auth()->user()->usdc_bep20_address)
                                         <small class="text-muted d-block"><strong>USDC BEP20:</strong></small>
-                                        <span class="text-muted font-monospace d-block">{{ auth()->user()->usdc_bep20_address }}</span>
+                                        <span
+                                            class="text-muted font-monospace d-block">{{ auth()->user()->usdc_bep20_address }}</span>
                                     @endif
                                 </div>
                                 <div class="mt-2">
-                                    @if(auth()->user()->fdusd_bep20_address)
+                                    @if (auth()->user()->fdusd_bep20_address)
                                         <small class="text-muted d-block"><strong>FDUSD BEP20:</strong></small>
-                                        <span class="text-muted font-monospace d-block">{{ auth()->user()->fdusd_bep20_address }}</span>
+                                        <span
+                                            class="text-muted font-monospace d-block">{{ auth()->user()->fdusd_bep20_address }}</span>
                                     @endif
                                 </div>
-                                @if(!auth()->user()->usdt_bep20_address && !auth()->user()->usdc_bep20_address && !auth()->user()->fdusd_bep20_address)
+                                @if (!auth()->user()->usdt_bep20_address && !auth()->user()->usdc_bep20_address && !auth()->user()->fdusd_bep20_address)
                                     <span class="text-muted">No crypto wallet addresses set</span>
                                 @endif
                             </div>
-                            @if(auth()->user()->etc_black_card_number)
+                            @if (auth()->user()->etc_black_card_number)
                                 <div class="current-info-display">
-                                    <strong>ETC Black Card:</strong><br>
-                                    <span class="text-muted">**** **** **** {{ substr(auth()->user()->etc_black_card_number, -4) }}</span>
+                                    <strong>Crypto Bank Card:</strong><br>
+                                    <span class="text-muted">**** **** ****
+                                        {{ substr(auth()->user()->etc_black_card_number, -4) }}</span>
                                 </div>
                             @endif
-                            @if(auth()->user()->account_number)
+                            @if (auth()->user()->account_number)
                                 <div class="current-info-display">
                                     <strong>Account Number:</strong><br>
                                     <span class="text-muted">****{{ substr(auth()->user()->account_number, -4) }}</span>
@@ -292,10 +296,10 @@
                                         <label for="national_id" class="form-label">
                                             National ID / Passport ID <span class="text-danger">*</span>
                                         </label>
-                                        <input type="text" class="form-control @error('national_id') is-invalid @enderror"
-                                               id="national_id" name="national_id"
-                                               value="{{ old('national_id', auth()->user()->national_id) }}"
-                                               required>
+                                        <input type="text"
+                                            class="form-control @error('national_id') is-invalid @enderror" id="national_id"
+                                            name="national_id"
+                                            value="{{ old('national_id', auth()->user()->national_id) }}" required>
                                         @error('national_id')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -308,10 +312,10 @@
                                         <label for="cardholder_name" class="form-label">
                                             Account Holder Name <span class="text-danger">*</span>
                                         </label>
-                                        <input type="text" class="form-control @error('cardholder_name') is-invalid @enderror"
-                                               id="cardholder_name" name="cardholder_name"
-                                               value="{{ old('cardholder_name', auth()->user()->cardholder_name) }}"
-                                               required>
+                                        <input type="text"
+                                            class="form-control @error('cardholder_name') is-invalid @enderror"
+                                            id="cardholder_name" name="cardholder_name"
+                                            value="{{ old('cardholder_name', auth()->user()->cardholder_name) }}" required>
                                         @error('cardholder_name')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -327,7 +331,8 @@
                                 </h6>
                                 <p class="text-muted mb-3">
                                     <i class="fas fa-info-circle me-1"></i>
-                                    Please provide at least one crypto wallet address. You can add more wallet addresses for different cryptocurrencies.
+                                    Please provide at least one crypto wallet address. You can add more wallet addresses for
+                                    different cryptocurrencies.
                                 </p>
 
                                 <div class="row">
@@ -337,9 +342,10 @@
                                                 <i class="fas fa-wallet me-1"></i>
                                                 USDT BEP20 Address
                                             </label>
-                                            <input type="text" class="form-control @error('usdt_bep20_address') is-invalid @enderror"
-                                                   id="usdt_bep20_address" name="usdt_bep20_address"
-                                                   value="{{ old('usdt_bep20_address', auth()->user()->usdt_bep20_address) }}">
+                                            <input type="text"
+                                                class="form-control @error('usdt_bep20_address') is-invalid @enderror"
+                                                id="usdt_bep20_address" name="usdt_bep20_address"
+                                                value="{{ old('usdt_bep20_address', auth()->user()->usdt_bep20_address) }}">
                                             @error('usdt_bep20_address')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -353,9 +359,10 @@
                                                 <i class="fas fa-wallet me-1"></i>
                                                 USDC BEP20 Address
                                             </label>
-                                            <input type="text" class="form-control @error('usdc_bep20_address') is-invalid @enderror"
-                                                   id="usdc_bep20_address" name="usdc_bep20_address"
-                                                   value="{{ old('usdc_bep20_address', auth()->user()->usdc_bep20_address) }}">
+                                            <input type="text"
+                                                class="form-control @error('usdc_bep20_address') is-invalid @enderror"
+                                                id="usdc_bep20_address" name="usdc_bep20_address"
+                                                value="{{ old('usdc_bep20_address', auth()->user()->usdc_bep20_address) }}">
                                             @error('usdc_bep20_address')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -369,9 +376,10 @@
                                                 <i class="fas fa-wallet me-1"></i>
                                                 FDUSD BEP20 Address
                                             </label>
-                                            <input type="text" class="form-control @error('fdusd_bep20_address') is-invalid @enderror"
-                                                   id="fdusd_bep20_address" name="fdusd_bep20_address"
-                                                   value="{{ old('fdusd_bep20_address', auth()->user()->fdusd_bep20_address) }}">
+                                            <input type="text"
+                                                class="form-control @error('fdusd_bep20_address') is-invalid @enderror"
+                                                id="fdusd_bep20_address" name="fdusd_bep20_address"
+                                                value="{{ old('fdusd_bep20_address', auth()->user()->fdusd_bep20_address) }}">
                                             @error('fdusd_bep20_address')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -391,27 +399,29 @@
                             <div class="card-section">
                                 <h6 class="mb-3">
                                     <i class="fas fa-credit-card me-2"></i>
-                                    ETC Black Card Information <span class="badge bg-secondary ms-2">Optional</span>
+                                    Crypto Bank Card Information <span class="badge bg-secondary ms-2">Optional</span>
                                 </h6>
                                 <p class="text-muted mb-3">
                                     <i class="fas fa-info-circle me-1"></i>
-                                    This information is optional. You can add it now or later if you have an ETC Black Card.
+                                    This information is optional. You can add it now or later if you have a Crypto Bank
+                                    Card.
                                 </p>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label for="etc_black_card_number" class="form-label">
                                                 <i class="fas fa-credit-card me-1"></i>
-                                                ETC Black Card Number
+                                                Crypto Bank Card Number
                                             </label>
-                                            <input type="text" class="form-control @error('etc_black_card_number') is-invalid @enderror"
-                                                   id="etc_black_card_number" name="etc_black_card_number"
-                                                   value="{{ old('etc_black_card_number', auth()->user()->etc_black_card_number) }}"
-                                                   maxlength="19" placeholder="1234 5678 9012 3456">
+                                            <input type="text"
+                                                class="form-control @error('etc_black_card_number') is-invalid @enderror"
+                                                id="etc_black_card_number" name="etc_black_card_number"
+                                                value="{{ old('etc_black_card_number', auth()->user()->etc_black_card_number) }}"
+                                                maxlength="19" placeholder="1234 5678 9012 3456">
                                             @error('etc_black_card_number')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
-                                            <div class="form-text">Your ETC Black Card number (optional)</div>
+                                            <div class="form-text">Your Crypto Bank Card number (optional)</div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -420,10 +430,11 @@
                                                 <i class="fas fa-university me-1"></i>
                                                 Account Number
                                             </label>
-                                            <input type="text" class="form-control @error('account_number') is-invalid @enderror"
-                                                   id="account_number" name="account_number"
-                                                   value="{{ old('account_number', auth()->user()->account_number) }}"
-                                                   maxlength="20" placeholder="1234567890123456">
+                                            <input type="text"
+                                                class="form-control @error('account_number') is-invalid @enderror"
+                                                id="account_number" name="account_number"
+                                                value="{{ old('account_number', auth()->user()->account_number) }}"
+                                                maxlength="20" placeholder="1234567890123456">
                                             @error('account_number')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -438,7 +449,7 @@
                                 <ul class="mb-0">
                                     <li>National ID/Passport and Account Holder Name are required</li>
                                     <li>At least one crypto wallet address (USDT, USDC, or FDUSD) is required</li>
-                                    <li>ETC Black Card and Account Number information is optional</li>
+                                    <li>Crypto Bank Card and Account Number information is optional</li>
                                     <li>All information must be accurate to process withdrawals</li>
                                     <li>Payment information can be updated later if needed</li>
                                     <li>Your data is encrypted and stored securely</li>
@@ -506,7 +517,9 @@
                         // Highlight the crypto section
                         const cryptoSection = document.querySelector('.crypto-section');
                         if (cryptoSection) {
-                            cryptoSection.scrollIntoView({ behavior: 'smooth' });
+                            cryptoSection.scrollIntoView({
+                                behavior: 'smooth'
+                            });
                             cryptoSection.style.borderColor = '#dc3545';
                             setTimeout(() => {
                                 cryptoSection.style.borderColor = 'var(--bs-warning)';
