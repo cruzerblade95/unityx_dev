@@ -7,9 +7,14 @@ Route::post('/telegram/webhook', [TelegramController::class, 'webhook']);
 Route::get('/telegram/webhook', function() { return 'ok'; });
 Route::get('/telegram/setup-webhook', [TelegramController::class, 'setupWebhook']);
 
-// Simple test webhook that just returns OK
-Route::post('/telegram/test-webhook', function() {
-    return response('ok', 200);
+// Very simple test webhook that logs everything
+Route::post('/telegram/simple-test', function(Request $request) {
+    file_put_contents(
+        storage_path('logs/simple_test.log'),
+        "[" . date('Y-m-d H:i:s') . "] Simple test called - " . $request->getContent() . PHP_EOL,
+        FILE_APPEND
+    );
+    return response('OK', 200);
 });
 
 // Test route for debugging
