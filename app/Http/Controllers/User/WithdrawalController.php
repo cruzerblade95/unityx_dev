@@ -514,7 +514,8 @@ class WithdrawalController extends Controller
         if ($existingOtp) {
             return response()->json([
                 'success' => false,
-                'message' => 'An OTP has already been sent. Please check your Telegram or wait for it to expire.'
+                'message' => 'An OTP has already been sent. Please check your Telegram or wait for it to expire.',
+                'expires_at' => $existingOtp->expires_at->toISOString()
             ], 422);
         }
 
@@ -528,7 +529,8 @@ class WithdrawalController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'OTP sent to your Telegram. Please enter the 6-digit code to complete withdrawal.'
+                'message' => 'OTP sent to your Telegram. Please enter the 6-digit code to complete withdrawal.',
+                'expires_at' => $otp->expires_at->toISOString()
             ]);
         } catch (\Exception $e) {
             return response()->json([
