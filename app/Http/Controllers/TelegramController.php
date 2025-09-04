@@ -21,7 +21,7 @@ class TelegramController extends Controller
             // Return early success to prevent timeout
             $this->processWebhookAsync($request);
             return response('ok', 200);
-            
+
         } catch (\Exception $e) {
             Log::error('Telegram webhook error', [
                 'error' => $e->getMessage(),
@@ -79,7 +79,7 @@ class TelegramController extends Controller
                     'chat_id' => $chatId,
                     'text' => $text
                 ]);
-                
+
                 // Fallback to synchronous processing if queue fails
                 $this->processTelegramMessageSync($chatId, $text, $telegramUsername);
             }
