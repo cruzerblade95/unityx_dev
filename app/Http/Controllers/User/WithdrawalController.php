@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\WithdrawalRequest;
 use App\Models\Withdrawal;
 use App\Models\WithdrawalSettings;
+use App\Models\SystemSettings;
 use App\Models\KycVerification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +16,12 @@ class WithdrawalController extends Controller
     public function index()
     {
         $user = Auth::user();
+
+        // Check if withdrawal system is in maintenance mode
+        if (SystemSettings::isWithdrawalMaintenanceMode()) {
+            $maintenanceMessage = SystemSettings::getWithdrawalMaintenanceMessage();
+            return view('user.content.withdrawal.maintenance', compact('maintenanceMessage'));
+        }
 
         // Check if payment information is completed
         if (!$user->payment_info_completed) {
@@ -42,6 +49,12 @@ class WithdrawalController extends Controller
     public function crypto()
     {
         $user = Auth::user();
+
+        // Check if withdrawal system is in maintenance mode
+        if (SystemSettings::isWithdrawalMaintenanceMode()) {
+            $maintenanceMessage = SystemSettings::getWithdrawalMaintenanceMessage();
+            return view('user.content.withdrawal.maintenance', compact('maintenanceMessage'));
+        }
 
         // Check if payment information is completed
         if (!$user->payment_info_completed) {
@@ -112,6 +125,12 @@ class WithdrawalController extends Controller
     {
         $user = Auth::user();
 
+        // Check if withdrawal system is in maintenance mode
+        if (SystemSettings::isWithdrawalMaintenanceMode()) {
+            $maintenanceMessage = SystemSettings::getWithdrawalMaintenanceMessage();
+            return view('user.content.withdrawal.maintenance', compact('maintenanceMessage'));
+        }
+
         // Check if payment information is completed
         if (!$user->payment_info_completed) {
             return redirect()->route('user.payment-info.index')
@@ -181,6 +200,12 @@ class WithdrawalController extends Controller
     {
         $user = Auth::user();
 
+        // Check if withdrawal system is in maintenance mode
+        if (SystemSettings::isWithdrawalMaintenanceMode()) {
+            $maintenanceMessage = SystemSettings::getWithdrawalMaintenanceMessage();
+            return view('user.content.withdrawal.maintenance', compact('maintenanceMessage'));
+        }
+
         // Check if payment information is completed
         if (!$user->payment_info_completed) {
             return redirect()->route('user.payment-info.index')
@@ -249,6 +274,12 @@ class WithdrawalController extends Controller
     public function store(WithdrawalRequest $request)
     {
         $user = Auth::user();
+
+        // Check if withdrawal system is in maintenance mode
+        if (SystemSettings::isWithdrawalMaintenanceMode()) {
+            return redirect()->route('user.withdrawal.index')
+                ->with('error', SystemSettings::getWithdrawalMaintenanceMessage());
+        }
 
         // Check if payment information is completed
         if (!$user->payment_info_completed) {
