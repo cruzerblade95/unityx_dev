@@ -33,7 +33,7 @@ class WithdrawalController extends Controller
         $kycStatus = $user->kycVerification ? $user->kycVerification->kyc_status : KycVerification::STATUS_NOT_SUBMITTED;
         $isKycApproved = $kycStatus === KycVerification::STATUS_APPROVED;
 
-        // Get wallet profit balance (only profit balance is available for withdrawal)
+        // Get wallet withdrawable balance (profit + bonus balance is available for withdrawal)
         $walletBalance = $user->getWithdrawableBalance();
 
         return view('user.content.withdrawal.index', compact('withdrawals', 'isKycApproved', 'walletBalance', 'user', 'pendingWithdrawal'));
@@ -87,7 +87,7 @@ class WithdrawalController extends Controller
         $kycStatus = $user->kycVerification ? $user->kycVerification->kyc_status : KycVerification::STATUS_NOT_SUBMITTED;
         $isKycApproved = $kycStatus === KycVerification::STATUS_APPROVED;
 
-        // Get wallet profit balance (only profit balance is available for withdrawal)
+        // Get wallet withdrawable balance (profit + bonus balance is available for withdrawal)
         $walletBalance = $user->getWithdrawableBalance();
 
         // Get withdrawal settings for display
@@ -156,7 +156,7 @@ class WithdrawalController extends Controller
         $kycStatus = $user->kycVerification ? $user->kycVerification->kyc_status : KycVerification::STATUS_NOT_SUBMITTED;
         $isKycApproved = $kycStatus === KycVerification::STATUS_APPROVED;
 
-        // Get wallet profit balance (only profit balance is available for withdrawal)
+        // Get wallet withdrawable balance (profit + bonus balance is available for withdrawal)
         $walletBalance = $user->getWithdrawableBalance();
 
         // Get withdrawal settings for display
@@ -225,7 +225,7 @@ class WithdrawalController extends Controller
         $kycStatus = $user->kycVerification ? $user->kycVerification->kyc_status : KycVerification::STATUS_NOT_SUBMITTED;
         $isKycApproved = $kycStatus === KycVerification::STATUS_APPROVED;
 
-        // Get wallet profit balance (only profit balance is available for withdrawal)
+        // Get wallet withdrawable balance (profit + bonus balance is available for withdrawal)
         $walletBalance = $user->getWithdrawableBalance();
 
         // Get withdrawal settings for display
@@ -300,18 +300,25 @@ class WithdrawalController extends Controller
 
         $wallet = $user->wallet;
 
-        // Check if user has sufficient withdrawable balance (profit - floating)
-        $withdrawableBalance = $user->getWithdrawableBalance();
+        // Validate wallet type
+        $walletType = $request->wallet_type;
+        if (!in_array($walletType, ['profit', 'bonus'])) {
+            return redirect()->back()->withErrors(['wallet_type' => 'Please select a valid wallet type.']);
+        }
+
+        // Check if user has sufficient withdrawable balance for the selected wallet type
+        $withdrawableBalance = $wallet->getAvailableBalance($walletType);
         if ($withdrawableBalance < $request->amount) {
-            return redirect()->back()->withErrors(['amount' => 'Insufficient withdrawable balance. Available: $' . number_format($withdrawableBalance, 2)]);
+            $walletName = ucfirst($walletType . ' wallet');
+            return redirect()->back()->withErrors(['amount' => "Insufficient balance in {$walletName}. Available: $" . number_format($withdrawableBalance, 2)]);
         }
 
         // Calculate processing fee using settings
         $processingFee = WithdrawalSettings::getProcessingFee($user->id, $request->withdrawal_type, $request->amount);
         $net_amount = $request->amount - $processingFee;
 
-        // Move the requested amount to floating (hold it)
-        if ($wallet && !$wallet->holdAmount($request->amount)) {
+        // Move the requested amount to floating (hold it) from the selected wallet type
+        if ($wallet && !$wallet->holdAmountFromWallet($request->amount, $walletType)) {
             return redirect()->back()->withErrors(['amount' => 'Failed to hold withdrawal amount. Please try again.']);
         }
 
@@ -326,6 +333,7 @@ class WithdrawalController extends Controller
             'reference' => $request->reference,
             'note' => $request->note,
             'withdrawal_type' => $request->withdrawal_type,
+            'wallet_type' => $walletType,
             'payment_details' => $this->getPaymentDetails($request, $user),
         ];
 

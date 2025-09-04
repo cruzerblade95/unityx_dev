@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckMigrationDomain
@@ -18,40 +19,43 @@ class CheckMigrationDomain
         $host = $request->getHost();
 
         // Debug: Log the host for testing
-        \Log::info('CheckMigrationDomain - Host: ' . $host);
+        Log::info('CheckMigrationDomain - Host: ' . $host);
 
         // Check if the host contains unityx.dev
         if (str_contains(strtolower($host), 'unityx.dev')) {
-            \Log::info('CheckMigrationDomain - unityx.dev domain detected');
+            Log::info('CheckMigrationDomain - unityx.dev domain detected');
 
             // Skip migration notice for certain routes (like API endpoints)
             $skipRoutes = [
                 'api/',
                 'migration-notice',
+                'test-domain',
+                'test-migration',
                 '_debugbar',
                 'livewire/',
                 'storage/',
                 'assets/',
-                'vendor/'
+                'vendor/',
+                'build/'
             ];
 
             $currentPath = $request->path();
-            \Log::info('CheckMigrationDomain - Current path: ' . $currentPath);
+            Log::info('CheckMigrationDomain - Current path: ' . $currentPath);
 
             // Don't redirect if already on migration notice page or excluded routes
             foreach ($skipRoutes as $skipRoute) {
                 if (str_starts_with($currentPath, $skipRoute)) {
-                    \Log::info('CheckMigrationDomain - Skipping route: ' . $skipRoute);
+                    Log::info('CheckMigrationDomain - Skipping route: ' . $skipRoute);
                     return $next($request);
                 }
             }
 
-            \Log::info('CheckMigrationDomain - Showing migration notice');
+            Log::info('CheckMigrationDomain - Showing migration notice');
             // Redirect to migration notice
             return response()->view('migration_notice');
         }
 
-        \Log::info('CheckMigrationDomain - Not unityx.dev domain, continuing');
+        Log::info('CheckMigrationDomain - Not unityx.dev domain, continuing');
         return $next($request);
     }
 }

@@ -270,13 +270,17 @@ class NOWPaymentsService
                     $response = $this->client->get($endpoint);
                     $result = json_decode($response->getBody()->getContents(), true);
 
+                    // Log the response structure for debugging
                     Log::info('NOWPayments Payment Status Success', [
                         'endpoint' => $endpoint,
                         'payment_id' => $paymentId,
-                        'status_code' => $response->getStatusCode()
+                        'status_code' => $response->getStatusCode(),
+                        'response_keys' => array_keys($result ?? [])
                     ]);
 
-                    return $result;
+                    if ($result && isset($result['payment_id'])) {
+                        return $result;
+                    }
                 } catch (RequestException $e) {
                     Log::warning("NOWPayments payment status endpoint {$endpoint} failed", [
                         'payment_id' => $paymentId,
@@ -299,10 +303,13 @@ class NOWPaymentsService
                         Log::info('NOWPayments Authenticated Payment Status Success', [
                             'endpoint' => $endpoint,
                             'payment_id' => $paymentId,
-                            'status_code' => $response->getStatusCode()
+                            'status_code' => $response->getStatusCode(),
+                            'response_keys' => array_keys($result ?? [])
                         ]);
 
-                        return $result;
+                        if ($result && isset($result['payment_id'])) {
+                            return $result;
+                        }
                     } catch (RequestException $e) {
                         Log::warning("NOWPayments authenticated payment status endpoint {$endpoint} failed", [
                             'payment_id' => $paymentId,
@@ -325,6 +332,69 @@ class NOWPaymentsService
                 Log::error('Payment Status Response Status: ' . $e->getResponse()->getStatusCode());
                 Log::error('Payment Status Response Body: ' . $e->getResponse()->getBody());
             }
+            return false;
+        }
+    }
+
+    /**
+     * Get detailed payment information with transaction history
+     */
+    public function getDetailedPaymentInfo($paymentId)
+    {
+        try {
+            // Try to get payment status first
+            $paymentData = $this->getPaymentStatus($paymentId);
+            
+            if (!$paymentData) {
+                Log::warning('Could not retrieve basic payment data for detailed info', ['payment_id' => $paymentId]);
+                return false;
+            }
+
+            // Try additional endpoints for more detailed transaction information
+            $detailEndpoints = [
+                "/v1/payment/{$paymentId}/logs",
+                "/v1/payment/{$paymentId}/history",
+                "/v1/transaction/{$paymentId}",
+                "/v2/payment/{$paymentId}/details"
+            ];
+
+            $additionalData = [];
+            
+            // Try to fetch additional transaction details
+            foreach ($detailEndpoints as $endpoint) {
+                try {
+                    Log::info("Trying detailed payment endpoint: {$endpoint}");
+                    $response = $this->client->get($endpoint);
+                    $result = json_decode($response->getBody()->getContents(), true);
+                    
+                    if ($result && is_array($result)) {
+                        $additionalData[basename($endpoint)] = $result;
+                        Log::info("Successfully fetched data from {$endpoint}", [
+                            'payment_id' => $paymentId,
+                            'data_keys' => array_keys($result)
+                        ]);
+                    }
+                } catch (RequestException $e) {
+                    Log::debug("Detail endpoint {$endpoint} failed (expected for some endpoints)", [
+                        'payment_id' => $paymentId,
+                        'status' => $e->hasResponse() ? $e->getResponse()->getStatusCode() : 'no_response'
+                    ]);
+                    continue;
+                }
+            }
+
+            // Merge additional data with main payment data
+            if (!empty($additionalData)) {
+                $paymentData['additional_details'] = $additionalData;
+            }
+
+            return $paymentData;
+
+        } catch (\Exception $e) {
+            Log::error('Error fetching detailed payment info: ' . $e->getMessage(), [
+                'payment_id' => $paymentId,
+                'trace' => $e->getTraceAsString()
+            ]);
             return false;
         }
     }
