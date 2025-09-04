@@ -17,6 +17,13 @@ class TelegramController extends Controller
     // Telegram webhook handler
     public function webhook(Request $request)
     {
+        // Immediate logging to see if we're reaching here
+        file_put_contents(
+            storage_path('logs/webhook_debug.log'),
+            "[" . date('Y-m-d H:i:s') . "] WEBHOOK CALLED - Method: " . $request->method() . " - IP: " . $request->ip() . PHP_EOL,
+            FILE_APPEND | LOCK_EX
+        );
+
         // Return success immediately to prevent timeout
         $response = response('ok', 200);
 
@@ -28,21 +35,33 @@ class TelegramController extends Controller
         try {
             $this->processWebhookAsync($request);
         } catch (\Exception $e) {
-            Log::error('Telegram webhook error', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'data' => $request->all()
-            ]);
+            file_put_contents(
+                storage_path('logs/webhook_debug.log'),
+                "[" . date('Y-m-d H:i:s') . "] ERROR: " . $e->getMessage() . PHP_EOL,
+                FILE_APPEND | LOCK_EX
+            );
         }
 
         return $response;
-    }
-
-    private function processWebhookAsync(Request $request)
+    }    private function processWebhookAsync(Request $request)
     {
+        // Simple debug logging
+        file_put_contents(
+            storage_path('logs/webhook_debug.log'),
+            "[" . date('Y-m-d H:i:s') . "] PROCESSING WEBHOOK" . PHP_EOL,
+            FILE_APPEND | LOCK_EX
+        );
+
         // Enhanced logging for debugging
         $rawContent = $request->getContent();
         $data = $request->all();
+
+        // Debug log the data
+        file_put_contents(
+            storage_path('logs/webhook_debug.log'),
+            "[" . date('Y-m-d H:i:s') . "] DATA: " . json_encode($data) . PHP_EOL,
+            FILE_APPEND | LOCK_EX
+        );
 
         // Log everything for debugging
         Log::info('TELEGRAM WEBHOOK RECEIVED', [
@@ -79,6 +98,11 @@ class TelegramController extends Controller
             $this->processTelegramMessageSync($chatId, $text, $telegramUsername);
         } else {
             Log::warning('Invalid webhook data received', ['data' => $data]);
+            file_put_contents(
+                storage_path('logs/webhook_debug.log'),
+                "[" . date('Y-m-d H:i:s') . "] INVALID DATA: " . json_encode($data) . PHP_EOL,
+                FILE_APPEND | LOCK_EX
+            );
         }
     }
 
