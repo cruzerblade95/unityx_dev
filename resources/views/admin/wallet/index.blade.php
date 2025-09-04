@@ -152,6 +152,7 @@
                         <th>Profit</th>
                         <th>Bonus</th>
                         <th>Cash</th>
+                        <th>Floating Amounts</th>
                         <th>Total Balance</th>
                         <th>Last Updated</th>
                         <th>Actions</th>
@@ -374,6 +375,37 @@
                                             <div class="border rounded p-3">
                                                 <h6 class="text-info mb-1">Cash</h6>
                                                 <h5 class="mb-0">$<span id="user_cash">0.00</span></h5>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Floating Amounts Section -->
+                                    <div class="row text-center mt-3">
+                                        <div class="col-12 mb-2">
+                                            <h6 class="text-muted">Floating Amounts (Pending Withdrawals)</h6>
+                                        </div>
+                                        <div class="col-6 mb-2">
+                                            <div class="border rounded p-2 bg-light">
+                                                <small class="text-muted">Marketplace</small>
+                                                <div class="fw-medium">$<span id="user_floating">0.00</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 mb-2">
+                                            <div class="border rounded p-2 bg-light">
+                                                <small class="text-muted">Crypto</small>
+                                                <div class="fw-medium">$<span id="user_crypto_floating">0.00</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 mb-2">
+                                            <div class="border rounded p-2 bg-light">
+                                                <small class="text-muted">Bank/Card</small>
+                                                <div class="fw-medium">$<span id="user_bank_floating">0.00</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 mb-2">
+                                            <div class="border rounded p-2 bg-light">
+                                                <small class="text-muted">Gold</small>
+                                                <div class="fw-medium">$<span id="user_gold_floating">0.00</span></div>
                                             </div>
                                         </div>
                                     </div>

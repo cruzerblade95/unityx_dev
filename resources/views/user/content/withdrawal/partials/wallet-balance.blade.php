@@ -18,22 +18,6 @@
                         <small class="text-muted">Total Available</small>
                     </div>
                 </div>
-                @if ($user->wallet && $user->wallet->floating > 0)
-                    <div class="mt-3">
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <h5 class="text-info">${{ number_format($user->wallet->floating, 2) }}</h5>
-                                <small class="text-muted">Pending Withdrawals</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-2">
-                        <small class="text-info">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Floating balance represents amounts held for pending withdrawal requests
-                        </small>
-                    </div>
-                @endif
             </div>
             <div class="col-md-4 text-end">
                 <div class="small text-muted">
@@ -41,9 +25,6 @@
                     <div>Profit: ${{ number_format($user->wallet ? $user->wallet->profit : 0, 2) }}</div>
                     <div>Bonus: ${{ number_format($user->wallet ? $user->wallet->bonus : 0, 2) }}</div>
                     <div>Deposit: ${{ number_format($user->wallet ? $user->wallet->deposit : 0, 2) }}</div>
-                    @if ($user->wallet && $user->wallet->floating > 0)
-                        <div>Floating: ${{ number_format($user->wallet->floating, 2) }}</div>
-                    @endif
                     <hr class="my-1">
                     <div><strong>Withdrawable: ${{ number_format($walletBalance, 2) }}</strong></div>
                 </div>

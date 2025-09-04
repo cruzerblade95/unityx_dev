@@ -106,6 +106,8 @@ Route::prefix('user')->middleware('web')->group(function () {
     Route::get('withdrawal/crypto-bank-card', [WithdrawalController::class, 'cryptoBankCard'])->name('user.withdrawal.crypto-bank-card')->middleware('require.payment.info');
     Route::get('withdrawal/gold', [WithdrawalController::class, 'gold'])->name('user.withdrawal.gold')->middleware('require.payment.info');
     Route::post('withdrawal', [WithdrawalController::class, 'store'])->name('user.withdrawal.store')->middleware('require.payment.info');
+    Route::post('withdrawal/send-otp', [WithdrawalController::class, 'sendOtp'])->name('user.withdrawal.send_otp')->middleware('require.payment.info');
+    Route::post('withdrawal/verify-otp', [WithdrawalController::class, 'verifyOtp'])->name('user.withdrawal.verify_otp')->middleware('require.payment.info');
     Route::post('withdrawal/{withdrawalId}/select-branch', [WithdrawalController::class, 'selectBranch'])->name('user.withdrawal.select-branch')->middleware('require.payment.info');
 
     // Investment
@@ -117,17 +119,17 @@ Route::prefix('user')->middleware('web')->group(function () {
     Route::post('ai-trades/{id}/cancel', [AiTradeController::class, 'cancel'])->name('user.ai_trades.cancel');
 
     // Marketplace
-    Route::get('marketplace', [MarketplaceController::class, 'index'])->name('user.marketplace.index');
-    Route::post('marketplace/create', [MarketplaceController::class, 'createListing'])->name('user.marketplace.create');
-    Route::post('marketplace/purchase/{listingId}', [MarketplaceController::class, 'purchaseListing'])->name('user.marketplace.purchase');
-    Route::post('marketplace/cancel/{listingId}', [MarketplaceController::class, 'cancelListing'])->name('user.marketplace.cancel');
-    Route::post('marketplace/topup', [MarketplaceController::class, 'topUpCash'])->name('user.marketplace.topup');
+    Route::get('marketplace', [MarketplaceController::class, 'index'])->name('user.marketplace.index')->middleware(['require.payment.info', 'require.kyc.verification']);
+    Route::post('marketplace/create', [MarketplaceController::class, 'createListing'])->name('user.marketplace.create')->middleware(['require.payment.info', 'require.kyc.verification']);
+    Route::post('marketplace/purchase/{listingId}', [MarketplaceController::class, 'purchaseListing'])->name('user.marketplace.purchase')->middleware(['require.payment.info', 'require.kyc.verification']);
+    Route::post('marketplace/cancel/{listingId}', [MarketplaceController::class, 'cancelListing'])->name('user.marketplace.cancel')->middleware(['require.payment.info', 'require.kyc.verification']);
+    Route::post('marketplace/topup', [MarketplaceController::class, 'topUpCash'])->name('user.marketplace.topup')->middleware(['require.payment.info', 'require.kyc.verification']);
 
     // Marketplace Verification
     Route::post('marketplace/upload-screenshot/{listingId}', [MarketplaceController::class, 'uploadScreenshot'])->name('user.marketplace.upload_screenshot');
-    Route::post('marketplace/approve/{listingId}', [MarketplaceController::class, 'approveVerification'])->name('user.marketplace.approve');
-    Route::post('marketplace/reject/{listingId}', [MarketplaceController::class, 'rejectVerification'])->name('user.marketplace.reject');
-    Route::post('marketplace/cancel-verification/{listingId}', [MarketplaceController::class, 'cancelVerification'])->name('user.marketplace.cancel_verification');
+    Route::post('marketplace/approve/{listingId}', [MarketplaceController::class, 'approveVerification'])->name('user.marketplace.approve')->middleware(['require.payment.info', 'require.kyc.verification']);
+    Route::post('marketplace/reject/{listingId}', [MarketplaceController::class, 'rejectVerification'])->name('user.marketplace.reject')->middleware(['require.payment.info', 'require.kyc.verification']);
+    Route::post('marketplace/cancel-verification/{listingId}', [MarketplaceController::class, 'cancelVerification'])->name('user.marketplace.cancel_verification')->middleware(['require.payment.info', 'require.kyc.verification']);
 
     // Notifications
     Route::get('notifications', [NotificationController::class, 'index'])->name('user.notifications.index');

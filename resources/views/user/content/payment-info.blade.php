@@ -442,6 +442,26 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="mb-3">
+                                            <label for="card_wallet_address" class="form-label">
+                                                <i class="fas fa-wallet me-1"></i>
+                                                Card Wallet Address (USDT BEP20)
+                                            </label>
+                                            <input type="text"
+                                                class="form-control @error('card_wallet_address') is-invalid @enderror"
+                                                id="card_wallet_address" name="card_wallet_address"
+                                                value="{{ old('card_wallet_address', auth()->user()->card_wallet_address) }}"
+                                                placeholder="Enter your USDT BEP20 wallet address for card withdrawals">
+                                            @error('card_wallet_address')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <div class="form-text">Your USDT BEP20 wallet address for crypto bank card
+                                                withdrawals (optional)</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="info-alert alert">
