@@ -125,6 +125,8 @@ Route::prefix('admin')->middleware('web')->group(function () {
             Route::post('/enable-withdrawals', [AdminWithdrawalSettingsController::class, 'enableWithdrawals'])->name('enable-withdrawals');
             Route::get('/global-defaults', [AdminWithdrawalSettingsController::class, 'globalDefaults'])->name('global-defaults');
             Route::post('/global-defaults/update', [AdminWithdrawalSettingsController::class, 'updateGlobalDefaults'])->name('global-defaults.update');
+            Route::post('/toggle-maintenance', [AdminWithdrawalSettingsController::class, 'toggleMaintenance'])->name('toggle-maintenance');
+            Route::get('/maintenance-status', [AdminWithdrawalSettingsController::class, 'getMaintenanceStatus'])->name('maintenance-status');
         });
 
         // Reinvestment Settings Management Routes

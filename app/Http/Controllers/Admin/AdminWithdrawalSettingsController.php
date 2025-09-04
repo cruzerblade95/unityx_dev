@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\WithdrawalSettings;
+use App\Models\SystemSettings;
 use Illuminate\Support\Facades\DB;
 
 class AdminWithdrawalSettingsController extends Controller
@@ -20,7 +21,11 @@ class AdminWithdrawalSettingsController extends Controller
             $globalDefaults[$type] = WithdrawalSettings::getGlobalDefaults($type);
         }
 
-        return view('admin.withdrawal-settings.index', compact('globalDefaults'));
+        // Get maintenance mode status
+        $isMaintenanceMode = SystemSettings::isWithdrawalMaintenanceMode();
+        $maintenanceMessage = SystemSettings::getWithdrawalMaintenanceMessage();
+
+        return view('admin.withdrawal-settings.index', compact('globalDefaults', 'isMaintenanceMode', 'maintenanceMessage'));
     }
 
     public function getUsersData(Request $request)
@@ -275,6 +280,50 @@ class AdminWithdrawalSettingsController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Withdrawals enabled for selected users'
+        ]);
+    }
+
+    /**
+     * Toggle withdrawal maintenance mode
+     */
+    public function toggleMaintenance(Request $request)
+    {
+        try {
+            $enabled = $request->input('enabled', null);
+            $message = $request->input('message', null);
+
+            // Toggle maintenance mode
+            SystemSettings::toggleWithdrawalMaintenance($enabled);
+
+            // Update message if provided
+            if ($message !== null) {
+                SystemSettings::set('withdrawal_maintenance_message', $message, 'string', 'Message to display when withdrawal system is in maintenance mode');
+            }
+
+            $isEnabled = SystemSettings::isWithdrawalMaintenanceMode();
+
+            return response()->json([
+                'success' => true,
+                'message' => $isEnabled ? 'Withdrawal maintenance mode enabled' : 'Withdrawal maintenance mode disabled',
+                'maintenance_enabled' => $isEnabled
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error toggling maintenance mode: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get current maintenance status
+     */
+    public function getMaintenanceStatus()
+    {
+        return response()->json([
+            'maintenance_enabled' => SystemSettings::isWithdrawalMaintenanceMode(),
+            'maintenance_message' => SystemSettings::getWithdrawalMaintenanceMessage()
         ]);
     }
 }

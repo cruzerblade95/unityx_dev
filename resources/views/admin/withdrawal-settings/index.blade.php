@@ -13,6 +13,7 @@
 
 @section('vendor-script')
     @vite(['resources/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js'])
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection
 
 @section('page-script')
@@ -451,6 +452,72 @@
                     alert('Error updating withdrawal status');
                 });
         }
+
+        // Maintenance Mode Toggle Function
+        function toggleMaintenanceMode() {
+            const isMaintenanceMode = {{ $isMaintenanceMode ? 'true' : 'false' }};
+            const maintenanceMessage = {!! json_encode($maintenanceMessage) !!};
+
+            Swal.fire({
+                title: 'Toggle Withdrawal Maintenance Mode',
+                html: `
+                    <div class="mb-3">
+                        <label class="form-label">Current Status: <span class="badge bg-${isMaintenanceMode ? 'danger' : 'success'}">${isMaintenanceMode ? 'Maintenance ON' : 'Maintenance OFF'}</span></label>
+                    </div>
+                    <div class="mb-3">
+                        <label for="maintenance-message" class="form-label">Maintenance Message:</label>
+                        <textarea id="maintenance-message" class="form-control" rows="3"
+                                  placeholder="Enter maintenance message for users...">${maintenanceMessage}</textarea>
+                    </div>
+                    <div class="alert alert-warning">
+                        <small><i class="fas fa-exclamation-triangle me-1"></i>
+                        This will ${isMaintenanceMode ? 'disable' : 'enable'} maintenance mode for ALL withdrawal functionality globally.</small>
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: isMaintenanceMode ? '#28a745' : '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: isMaintenanceMode ? 'Disable Maintenance' : 'Enable Maintenance',
+                cancelButtonText: 'Cancel',
+                preConfirm: () => {
+                    const message = document.getElementById('maintenance-message').value;
+                    return { message: message };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const formData = {
+                        enabled: !isMaintenanceMode,
+                        message: result.value.message
+                    };                    fetch('/admin/withdrawal-settings/toggle-maintenance', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify(formData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Success!',
+                                text: data.message,
+                                icon: 'success'
+                            }).then(() => {
+                                location.reload(); // Reload to update button state
+                            });
+                        } else {
+                            Swal.fire('Error!', data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error toggling maintenance mode:', error);
+                        Swal.fire('Error!', 'Failed to toggle maintenance mode', 'error');
+                    });
+                }
+            });
+        }
     </script>
 @endsection
 
@@ -461,6 +528,11 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="card-title mb-0">Withdrawal Settings Management</h4>
                     <div class="d-flex gap-2">
+                        <!-- Maintenance Mode Toggle -->
+                        <button class="btn {{ $isMaintenanceMode ? 'btn-danger' : 'btn-success' }}" onclick="toggleMaintenanceMode()">
+                            <i class="fas {{ $isMaintenanceMode ? 'fa-tools' : 'fa-shield-check' }}"></i>
+                            {{ $isMaintenanceMode ? 'Maintenance ON' : 'Maintenance OFF' }}
+                        </button>
                         <a href="{{ route('admin.withdrawal-settings.global-defaults') }}" class="btn btn-primary">
                             <i class="fas fa-cog"></i> Global Defaults
                         </a>
