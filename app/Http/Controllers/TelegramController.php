@@ -18,94 +18,115 @@ class TelegramController extends Controller
     public function webhook(Request $request)
     {
         try {
-            // Enhanced logging for debugging
-            $rawContent = $request->getContent();
-            $data = $request->all();
-
-            // Log everything for debugging
-            Log::info('TELEGRAM WEBHOOK RECEIVED', [
-                'headers' => $request->headers->all(),
-                'raw_content' => $rawContent,
-                'parsed_data' => $data,
-                'method' => $request->method(),
-                'ip' => $request->ip(),
-                'url' => $request->fullUrl()
-            ]);
-
-            // Also log to file for easier debugging
-            file_put_contents(
-                storage_path('logs/telegram_webhook_' . date('Y-m-d') . '.log'),
-                "[" . date('Y-m-d H:i:s') . "] " . json_encode([
-                    'data' => $data,
-                    'raw' => $rawContent
-                ], JSON_PRETTY_PRINT) . PHP_EOL,
-                FILE_APPEND
-            );
-
-            if (isset($data['message']) && isset($data['message']['chat']['id'])) {
-                $chatId = $data['message']['chat']['id'];
-                $text = $data['message']['text'] ?? '';
-
-                Log::info('Processing Telegram message', [
-                    'chat_id' => $chatId,
-                    'text' => $text,
-                    'from' => $data['message']['from'] ?? 'unknown'
-                ]);
-
-                // Extract telegram username from the webhook data
-                $telegramUsername = $data['message']['from']['username'] ?? null;
-
-                if ($text === '/start') {
-                    $reply = "Welcome! Please type /verify to link your account.";
-                    Log::info('Sending start message', ['chat_id' => $chatId]);
-                    $this->sendTelegramMessage($chatId, $reply);
-                } elseif ($text === '/verify') {
-                    $reply = "Please enter your email to link your account.";
-                    Log::info('Sending verify message', ['chat_id' => $chatId]);
-                    $this->sendTelegramMessage($chatId, $reply);
-                } elseif (filter_var($text, FILTER_VALIDATE_EMAIL)) {
-                    Log::info('Processing email verification', ['email' => $text, 'chat_id' => $chatId]);
-                    $user = User::where('email', $text)->first();
-                    if ($user) {
-                        $token = Str::random(40);
-                        DB::table('telegram_verifications')->updateOrInsert(
-                            ['user_id' => $user->id],
-                            [
-                                'token' => $token,
-                                'expires_at' => Carbon::now()->addMinutes(30),
-                                'telegram_username' => $telegramUsername,
-                                'chat_id' => $chatId,
-                                'updated_at' => now(),
-                                'created_at' => now(),
-                            ]
-                        );
-                        // Include token for verification
-                        $link = URL::to('/telegram/verify?token=' . $token);
-                        $this->sendTelegramMessage($chatId, "Click to verify your profile: $link");
-                        Log::info('Verification link sent', ['user_id' => $user->id, 'chat_id' => $chatId]);
-                    } else {
-                        $this->sendTelegramMessage($chatId, "No user found for this email.");
-                        Log::warning('User not found for email', ['email' => $text, 'chat_id' => $chatId]);
-                    }
-                } else {
-                    // For any other message that's not /start, /verify, or email
-                    $reply = "Please type /start to begin.";
-                    Log::info('Sending default message', ['chat_id' => $chatId, 'text' => $text]);
-                    $this->sendTelegramMessage($chatId, $reply);
-                }
-            } else {
-                Log::warning('Invalid webhook data received', ['data' => $data]);
-            }
-
+            // Return early success to prevent timeout
+            $this->processWebhookAsync($request);
             return response('ok', 200);
-
+            
         } catch (\Exception $e) {
             Log::error('Telegram webhook error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'data' => $request->all()
             ]);
-            return response('error', 500);
+            return response('ok', 200); // Still return 200 to prevent retries
+        }
+    }
+
+    private function processWebhookAsync(Request $request)
+    {
+        // Enhanced logging for debugging
+        $rawContent = $request->getContent();
+        $data = $request->all();
+
+        // Log everything for debugging
+        Log::info('TELEGRAM WEBHOOK RECEIVED', [
+            'headers' => $request->headers->all(),
+            'raw_content' => $rawContent,
+            'parsed_data' => $data,
+            'method' => $request->method(),
+            'ip' => $request->ip(),
+            'url' => $request->fullUrl()
+        ]);
+
+        // Also log to file for easier debugging
+        file_put_contents(
+            storage_path('logs/telegram_webhook_' . date('Y-m-d') . '.log'),
+            "[" . date('Y-m-d H:i:s') . "] " . json_encode([
+                'data' => $data,
+                'raw' => $rawContent
+            ], JSON_PRETTY_PRINT) . PHP_EOL,
+            FILE_APPEND
+        );
+
+        if (isset($data['message']) && isset($data['message']['chat']['id'])) {
+            $chatId = $data['message']['chat']['id'];
+            $text = $data['message']['text'] ?? '';
+            $telegramUsername = $data['message']['from']['username'] ?? null;
+
+            Log::info('Processing Telegram message', [
+                'chat_id' => $chatId,
+                'text' => $text,
+                'from' => $data['message']['from'] ?? 'unknown'
+            ]);
+
+            // Dispatch to queue for async processing to prevent timeout
+            try {
+                \App\Jobs\ProcessTelegramMessage::dispatch($chatId, $text, $telegramUsername, $data['message']);
+                Log::info('Telegram message dispatched to queue', ['chat_id' => $chatId]);
+            } catch (\Exception $e) {
+                Log::error('Failed to dispatch telegram message to queue', [
+                    'error' => $e->getMessage(),
+                    'chat_id' => $chatId,
+                    'text' => $text
+                ]);
+                
+                // Fallback to synchronous processing if queue fails
+                $this->processTelegramMessageSync($chatId, $text, $telegramUsername);
+            }
+        } else {
+            Log::warning('Invalid webhook data received', ['data' => $data]);
+        }
+    }
+
+    private function processTelegramMessageSync($chatId, $text, $telegramUsername)
+    {
+        if ($text === '/start') {
+            $reply = "Welcome! Please type /verify to link your account.";
+            Log::info('Sending start message (sync)', ['chat_id' => $chatId]);
+            $this->sendTelegramMessage($chatId, $reply);
+        } elseif ($text === '/verify') {
+            $reply = "Please enter your email to link your account.";
+            Log::info('Sending verify message (sync)', ['chat_id' => $chatId]);
+            $this->sendTelegramMessage($chatId, $reply);
+        } elseif (filter_var($text, FILTER_VALIDATE_EMAIL)) {
+            Log::info('Processing email verification (sync)', ['email' => $text, 'chat_id' => $chatId]);
+            $user = User::where('email', $text)->first();
+            if ($user) {
+                $token = Str::random(40);
+                DB::table('telegram_verifications')->updateOrInsert(
+                    ['user_id' => $user->id],
+                    [
+                        'token' => $token,
+                        'expires_at' => Carbon::now()->addMinutes(30),
+                        'telegram_username' => $telegramUsername,
+                        'chat_id' => $chatId,
+                        'updated_at' => now(),
+                        'created_at' => now(),
+                    ]
+                );
+                // Include token for verification
+                $link = URL::to('/telegram/verify?token=' . $token);
+                $this->sendTelegramMessage($chatId, "Click to verify your profile: $link");
+                Log::info('Verification link sent (sync)', ['user_id' => $user->id, 'chat_id' => $chatId]);
+            } else {
+                $this->sendTelegramMessage($chatId, "No user found for this email.");
+                Log::warning('User not found for email (sync)', ['email' => $text, 'chat_id' => $chatId]);
+            }
+        } else {
+            // For any other message that's not /start, /verify, or email
+            $reply = "Please type /start to begin.";
+            Log::info('Sending default message (sync)', ['chat_id' => $chatId, 'text' => $text]);
+            $this->sendTelegramMessage($chatId, $reply);
         }
     }
 
@@ -159,8 +180,10 @@ class TelegramController extends Controller
             $client = new \GuzzleHttp\Client();
             $response = $client->post($url, [
                 'form_params' => $params,
-                'timeout' => 30,
-                'verify' => false // Add this if you have SSL issues
+                'timeout' => 10, // Reduced timeout
+                'connect_timeout' => 5, // Added connect timeout
+                'verify' => false, // Add this if you have SSL issues
+                'http_errors' => false // Don't throw exceptions on HTTP errors
             ]);
 
             $responseBody = $response->getBody()->getContents();
@@ -172,17 +195,32 @@ class TelegramController extends Controller
                 'parsed_result' => $result
             ]);
 
-            if ($result['ok']) {
+            if ($response->getStatusCode() == 200 && isset($result['ok']) && $result['ok']) {
                 Log::info('Telegram message sent successfully', ['chat_id' => $chatId]);
                 return true;
             } else {
                 Log::error('Telegram API returned error', [
+                    'status_code' => $response->getStatusCode(),
                     'error_code' => $result['error_code'] ?? 'unknown',
                     'description' => $result['description'] ?? 'unknown'
                 ]);
                 return false;
             }
 
+        } catch (\GuzzleHttp\Exception\ConnectException $e) {
+            Log::error('Telegram connection error', [
+                'error' => $e->getMessage(),
+                'chat_id' => $chatId,
+                'text' => $text
+            ]);
+            return false;
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            Log::error('Telegram request error', [
+                'error' => $e->getMessage(),
+                'chat_id' => $chatId,
+                'text' => $text
+            ]);
+            return false;
         } catch (\Exception $e) {
             Log::error('Telegram send error', [
                 'error' => $e->getMessage(),

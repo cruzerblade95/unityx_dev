@@ -7,6 +7,11 @@ Route::post('/telegram/webhook', [TelegramController::class, 'webhook']);
 Route::get('/telegram/webhook', function() { return 'ok'; });
 Route::get('/telegram/setup-webhook', [TelegramController::class, 'setupWebhook']);
 
+// Test route for debugging
+Route::get('/test', function() {
+    return response()->json(['status' => 'ok', 'timestamp' => now()]);
+});
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
