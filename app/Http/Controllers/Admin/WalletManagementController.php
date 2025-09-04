@@ -107,6 +107,25 @@ class WalletManagementController extends Controller
                     $total = $deposit + $profit + $bonus + $cash;
                     return '$' . number_format($total, 2);
                 })
+                ->addColumn('floating_amounts', function ($wallet) {
+                    $marketplace = (float)($wallet->floating ?? 0);
+                    $crypto = (float)($wallet->crypto_floating ?? 0);
+                    $bank = (float)($wallet->bank_floating ?? 0);
+                    $gold = (float)($wallet->gold_floating ?? 0);
+                    $total = $marketplace + $crypto + $bank + $gold;
+
+                    $details = '';
+                    if ($total > 0) {
+                        $details = '<small class="text-muted d-block">';
+                        if ($marketplace > 0) $details .= 'Marketplace: $' . number_format($marketplace, 2) . '<br>';
+                        if ($crypto > 0) $details .= 'Crypto: $' . number_format($crypto, 2) . '<br>';
+                        if ($bank > 0) $details .= 'Bank: $' . number_format($bank, 2) . '<br>';
+                        if ($gold > 0) $details .= 'Gold: $' . number_format($gold, 2);
+                        $details .= '</small>';
+                    }
+
+                    return '$' . number_format($total, 2) . $details;
+                })
                 ->addColumn('updated_at', function ($wallet) {
                     return $wallet->updated_at ? $wallet->updated_at->format('M d, Y H:i') : 'N/A';
                 })
@@ -280,6 +299,10 @@ class WalletManagementController extends Controller
                     'profit' => number_format($wallet->profit, 2),
                     'bonus' => number_format($wallet->bonus, 2),
                     'cash' => number_format($wallet->cash, 2),
+                    'floating' => number_format($wallet->floating, 2),
+                    'crypto_floating' => number_format($wallet->crypto_floating, 2),
+                    'bank_floating' => number_format($wallet->bank_floating, 2),
+                    'gold_floating' => number_format($wallet->gold_floating, 2),
                     'total_balance' => number_format($wallet->total_balance, 2)
                 ],
                 'user' => [

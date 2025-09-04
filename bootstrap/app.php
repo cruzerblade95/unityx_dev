@@ -25,9 +25,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(\App\Http\Middleware\AdminRouteProtection::class);
         $middleware->web(\App\Http\Middleware\GeneralRouteProtection::class);
 
-        // Alias for payment info middleware
+        // Alias for middleware
         $middleware->alias([
             'require.payment.info' => \App\Http\Middleware\RequirePaymentInfo::class,
+            'require.kyc.verification' => \App\Http\Middleware\RequireKycVerification::class,
         ]);
     })
     ->withSchedule(function (Schedule $schedule) {

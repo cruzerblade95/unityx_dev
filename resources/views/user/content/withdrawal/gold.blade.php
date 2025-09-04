@@ -1,4 +1,4 @@
-@include('components.coming-soon-overlay')
+{{-- @include('components.coming-soon-overlay') --}}
 
 @extends('user.layouts.layoutMaster')
 
@@ -69,6 +69,112 @@
             </div>
         @endif
 
+        <!-- Withdrawal Cooldown Alert -->
+        @if (!$canWithdraw && $hoursRemaining > 0)
+            <div class="alert alert-warning" role="alert" id="withdrawalCooldownAlert">
+                <h5 class="alert-heading"><i class="fas fa-clock me-2"></i>Withdrawal Cooldown Period</h5>
+                <p class="mb-2">You must wait {{ $cooldownHours }} hours between withdrawal requests for security
+                    purposes.</p>
+                @if ($lastWithdrawal)
+                    <p class="mb-2">
+                        <strong>Last withdrawal:</strong> {{ $lastWithdrawal->created_at->format('M d, Y H:i:s') }}
+                        <br>
+                        <strong>Next withdrawal available:</strong> {{ $nextWithdrawalTime->format('M d, Y H:i:s') }}
+                    </p>
+                @endif
+                <div class="countdown-display">
+                    <div class="countdown-item">
+                        <span class="countdown-number" id="hours">{{ floor($hoursRemaining) }}</span>
+                        <span class="countdown-label">Hours</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="countdown-number"
+                            id="minutes">{{ floor(($hoursRemaining - floor($hoursRemaining)) * 60) }}</span>
+                        <span class="countdown-label">Minutes</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="countdown-number" id="seconds">00</span>
+                        <span class="countdown-label">Seconds</span>
+                    </div>
+                </div>
+                <div class="progress mt-3">
+                    <div class="progress-bar bg-warning" role="progressbar"
+                        style="width: {{ (($cooldownHours - $hoursRemaining) / $cooldownHours) * 100 }}%"></div>
+                </div>
+                <p class="mb-0 mt-2"><small class="text-muted">This countdown will automatically refresh when the cooldown
+                        period ends.</small></p>
+            </div>
+
+            <style>
+                .countdown-display {
+                    display: flex;
+                    gap: 20px;
+                    margin: 15px 0;
+                    justify-content: center;
+                }
+
+                .countdown-item {
+                    text-align: center;
+                    background: rgba(255, 255, 255, 0.1);
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    min-width: 80px;
+                }
+
+                .countdown-number {
+                    display: block;
+                    font-size: 2rem;
+                    font-weight: bold;
+                    color: #fff;
+                }
+
+                .countdown-label {
+                    display: block;
+                    font-size: 0.8rem;
+                    text-transform: uppercase;
+                    color: #fff;
+                    margin-top: 5px;
+                }
+            </style>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    @if ($nextWithdrawalTime)
+                        const nextWithdrawalTime = new Date('{{ $nextWithdrawalTime->toISOString() }}');
+
+                        function updateCountdown() {
+                            const now = new Date();
+                            const difference = nextWithdrawalTime - now;
+
+                            if (difference <= 0) {
+                                // Countdown finished, reload the page
+                                location.reload();
+                                return;
+                            }
+
+                            const hours = Math.floor(difference / (1000 * 60 * 60));
+                            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+                            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+                            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+                            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+
+                            // Update progress bar
+                            const totalHours = {{ $cooldownHours }};
+                            const remainingHours = difference / (1000 * 60 * 60);
+                            const progressPercentage = ((totalHours - remainingHours) / totalHours) * 100;
+                            document.querySelector('.progress-bar').style.width = progressPercentage + '%';
+                        }
+
+                        // Update countdown every second
+                        updateCountdown();
+                        const countdownInterval = setInterval(updateCountdown, 1000);
+                    @endif
+                });
+            </script>
+        @endif
+
         <div class="row">
             <!-- Withdrawal Form -->
             <div class="col-lg-8">
@@ -77,7 +183,7 @@
                         <h5 class="mb-0"><i class="fas fa-coins me-2 text-warning"></i>Gold Redemption Form</h5>
                     </div>
                     <div class="card-body">
-                        @if ($isKycApproved && !$pendingWithdrawal && $walletBalance > 0)
+                        @if ($isKycApproved && !$pendingWithdrawal && $walletBalance > 0 && $canWithdraw)
                             <form method="POST" action="{{ route('user.withdrawal.store') }}" id="goldWithdrawalForm">
                                 @csrf
                                 <input type="hidden" name="withdrawal_type" value="gold">
@@ -270,6 +376,11 @@
                                     <h5>Pending Withdrawal</h5>
                                     <p class="text-muted">You have a pending withdrawal request. Please wait for it to be
                                         processed.</p>
+                                @elseif(!$canWithdraw)
+                                    <i class="fas fa-clock text-warning fa-3x mb-3"></i>
+                                    <h5>Withdrawal Cooldown Active</h5>
+                                    <p class="text-muted">Please wait for the cooldown period to end before making another
+                                        withdrawal request.</p>
                                 @else
                                     <i class="fas fa-wallet text-muted fa-3x mb-3"></i>
                                     <h5>Insufficient Balance</h5>
@@ -437,7 +548,7 @@
                         e.preventDefault();
                         alert(
                             `Maximum redemption amount is $${maxAmount.toFixed(2)} for the selected wallet.`
-                            );
+                        );
                         return false;
                     }
 
@@ -451,7 +562,7 @@
                         e.preventDefault();
                         alert(
                             `Insufficient balance in selected wallet. Available: $${availableBalance.toFixed(2)}.`
-                            );
+                        );
                         return false;
                     }
                 });

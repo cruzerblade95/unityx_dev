@@ -20,7 +20,7 @@ $(function () {
       ajax: {
         url: ajaxUrl,
         type: 'GET',
-        error: function(xhr, error, thrown) {
+        error: function (xhr, error, thrown) {
           console.log('AJAX Error:', error);
           console.log('Response:', xhr.responseText);
           console.log('Attempted URL:', ajaxUrl);
@@ -36,6 +36,7 @@ $(function () {
         { data: 'profit', name: 'profit' },
         { data: 'bonus', name: 'bonus' },
         { data: 'cash', name: 'cash' },
+        { data: 'floating_amounts', name: 'floating_amounts' },
         { data: 'total_balance', name: 'total_balance' },
         { data: 'updated_at', name: 'updated_at' },
         { data: 'actions', name: 'actions', orderable: false, searchable: false }
@@ -74,20 +75,16 @@ $(function () {
               text: '<i class="tabler-printer me-2"></i>Print',
               className: 'dropdown-item',
               exportOptions: {
-                columns: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                 format: {
-                  body: function ( data, row, column, node ) {
+                  body: function (data, row, column, node) {
                     return data;
                   }
                 }
               },
               customize: function (win) {
-                $(win.document.body)
-                  .css('font-size', '10pt')
-                  .prepend('<h3>User Wallet Management Report</h3>');
-                $(win.document.body).find('table')
-                  .addClass('compact')
-                  .css('font-size', 'inherit');
+                $(win.document.body).css('font-size', '10pt').prepend('<h3>User Wallet Management Report</h3>');
+                $(win.document.body).find('table').addClass('compact').css('font-size', 'inherit');
               }
             },
             {
@@ -95,7 +92,7 @@ $(function () {
               text: '<i class="tabler-file-text me-2"></i>CSV',
               className: 'dropdown-item',
               exportOptions: {
-                columns: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+                columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
               }
             },
             {
@@ -103,7 +100,7 @@ $(function () {
               text: '<i class="tabler-file-spreadsheet me-2"></i>Excel',
               className: 'dropdown-item',
               exportOptions: {
-                columns: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+                columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
               }
             },
             {
@@ -111,10 +108,10 @@ $(function () {
               text: '<i class="tabler-file-description me-2"></i>PDF',
               className: 'dropdown-item',
               exportOptions: {
-                columns: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+                columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
               },
               customize: function (doc) {
-                doc.content[1].table.widths = ['20%', '12%', '12%', '12%', '12%', '15%', '17%'];
+                doc.content[1].table.widths = ['15%', '10%', '10%', '10%', '10%', '10%', '10%', '12%', '13%'];
                 doc.content.splice(0, 1, {
                   text: 'User Wallet Management Report',
                   style: 'header',
@@ -168,7 +165,7 @@ $(function () {
   }
 
   // Handle adjust wallet button click
-  $(document).on('click', '.btn-adjust-wallet', function() {
+  $(document).on('click', '.btn-adjust-wallet', function () {
     var walletId = $(this).data('wallet-id');
     var userName = $(this).data('user-name');
 
@@ -191,7 +188,7 @@ $(function () {
   });
 
   // Handle balance type and action change to show/hide deposit bonus checkbox
-  $('#balance_type, #adjustment_action').on('change', function() {
+  $('#balance_type, #adjustment_action').on('change', function () {
     var balanceType = $('#balance_type').val();
     var action = $('#adjustment_action').val();
 
@@ -212,7 +209,7 @@ $(function () {
       headers: {
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
       },
-      success: function(response) {
+      success: function (response) {
         if (response.success) {
           var wallet = response.wallet;
           $('#current_deposit').text(wallet.deposit);
@@ -222,7 +219,7 @@ $(function () {
           $('#modal_user_name').text(wallet.user_name);
         }
       },
-      error: function(xhr) {
+      error: function (xhr) {
         console.error('Error loading wallet data:', xhr);
         Swal.fire({
           icon: 'error',
@@ -234,7 +231,7 @@ $(function () {
   }
 
   // Handle form submission
-  $('#adjustWalletForm').on('submit', function(e) {
+  $('#adjustWalletForm').on('submit', function (e) {
     e.preventDefault();
 
     var form = $(this);
@@ -267,28 +264,37 @@ $(function () {
     }
 
     // Show confirmation
-    var actionText = formData.action === 'add' ? 'add $' + formData.amount + ' to' : 'deduct $' + formData.amount + ' from';
+    var actionText =
+      formData.action === 'add' ? 'add $' + formData.amount + ' to' : 'deduct $' + formData.amount + ' from';
     var bonusText = '';
 
     if (formData.type === 'deposit' && formData.action === 'add' && formData.trigger_deposit_bonus) {
-      bonusText = '<br><br><span class="text-info"><i class="ti ti-info-circle me-1"></i><strong>Note:</strong> Deposit bonus script will be triggered for referral downline.</span>';
+      bonusText =
+        '<br><br><span class="text-info"><i class="ti ti-info-circle me-1"></i><strong>Note:</strong> Deposit bonus script will be triggered for referral downline.</span>';
     }
 
     // Close modal first to ensure SweetAlert appears in front
     $('#adjustWalletModal').modal('hide');
 
     // Show confirmation after modal is hidden
-    setTimeout(function() {
+    setTimeout(function () {
       Swal.fire({
         title: 'Confirm Wallet Adjustment',
-        html: 'Are you sure you want to <strong>' + actionText + '</strong> the <strong>' + formData.type + '</strong> balance?<br><br><strong>Reason:</strong> ' + formData.reason + bonusText,
+        html:
+          'Are you sure you want to <strong>' +
+          actionText +
+          '</strong> the <strong>' +
+          formData.type +
+          '</strong> balance?<br><br><strong>Reason:</strong> ' +
+          formData.reason +
+          bonusText,
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#696cff',
         cancelButtonColor: '#8592a3',
         confirmButtonText: 'Yes, proceed',
         cancelButtonText: 'Cancel'
-      }).then((result) => {
+      }).then(result => {
         if (result.isConfirmed) {
           submitWalletAdjustment(formData);
         } else {
@@ -308,10 +314,12 @@ $(function () {
       headers: {
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
       },
-      beforeSend: function() {
-        $('button[type="submit"]', '#adjustWalletForm').prop('disabled', true).html('<i class="ti ti-loader me-1"></i>Processing...');
+      beforeSend: function () {
+        $('button[type="submit"]', '#adjustWalletForm')
+          .prop('disabled', true)
+          .html('<i class="ti ti-loader me-1"></i>Processing...');
       },
-      success: function(response) {
+      success: function (response) {
         if (response.success) {
           Swal.fire({
             icon: 'success',
@@ -331,7 +339,7 @@ $(function () {
           });
         }
       },
-      error: function(xhr) {
+      error: function (xhr) {
         var errorMessage = 'An error occurred while adjusting wallet balance';
         if (xhr.responseJSON && xhr.responseJSON.message) {
           errorMessage = xhr.responseJSON.message;
@@ -343,20 +351,22 @@ $(function () {
           text: errorMessage
         });
       },
-      complete: function() {
-        $('button[type="submit"]', '#adjustWalletForm').prop('disabled', false).html('<i class="ti ti-device-floppy me-1"></i>Adjust Balance');
+      complete: function () {
+        $('button[type="submit"]', '#adjustWalletForm')
+          .prop('disabled', false)
+          .html('<i class="ti ti-device-floppy me-1"></i>Adjust Balance');
       }
     });
   }
 
   // Handle wallet history button click
-  $(document).on('click', '.btn-wallet-history', function() {
+  $(document).on('click', '.btn-wallet-history', function () {
     var walletId = $(this).data('wallet-id');
     loadTransactionHistory(walletId);
   });
 
   // Handle view user button click
-  $(document).on('click', '.btn-view-user', function() {
+  $(document).on('click', '.btn-view-user', function () {
     var walletId = $(this).data('wallet-id');
     loadUserDetails(walletId);
   });
@@ -370,7 +380,7 @@ $(function () {
       headers: {
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
       },
-      success: function(walletResponse) {
+      success: function (walletResponse) {
         if (walletResponse.success) {
           var userId = walletResponse.user.id;
 
@@ -381,11 +391,13 @@ $(function () {
             headers: {
               'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
-            beforeSend: function() {
+            beforeSend: function () {
               $('#userDetailsModal').modal('show');
-              $('#userDetailsModal .modal-body').html('<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading user details...</p></div>');
+              $('#userDetailsModal .modal-body').html(
+                '<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading user details...</p></div>'
+              );
             },
-            success: function(user) {
+            success: function (user) {
               // Format the full name
               const fullName = `${user.firstname || ''} ${user.lastname || ''}`.trim() || 'N/A';
 
@@ -400,7 +412,12 @@ $(function () {
 
               // Format wallet data
               const wallet = walletResponse.wallet;
-              const totalBalance = (parseFloat(wallet.deposit) + parseFloat(wallet.profit) + parseFloat(wallet.bonus) + parseFloat(wallet.cash)).toFixed(2);
+              const totalBalance = (
+                parseFloat(wallet.deposit) +
+                parseFloat(wallet.profit) +
+                parseFloat(wallet.bonus) +
+                parseFloat(wallet.cash)
+              ).toFixed(2);
 
               // Populate user details modal with real data
               $('#userDetailsModal .modal-body').html(`
@@ -455,12 +472,30 @@ $(function () {
                           </div>
                         </div>
                         <hr>
+                        <h6 class="card-title">Floating Amounts (Pending Withdrawals)</h6>
+                        <div class="row">
+                          <div class="col-3">
+                            <p><strong>Marketplace:</strong> <span class="text-muted">$${parseFloat(wallet.floating).toFixed(2)}</span></p>
+                          </div>
+                          <div class="col-3">
+                            <p><strong>Crypto:</strong> <span class="text-muted">$${parseFloat(wallet.crypto_floating).toFixed(2)}</span></p>
+                          </div>
+                          <div class="col-3">
+                            <p><strong>Bank/Card:</strong> <span class="text-muted">$${parseFloat(wallet.bank_floating).toFixed(2)}</span></p>
+                          </div>
+                          <div class="col-3">
+                            <p><strong>Gold:</strong> <span class="text-muted">$${parseFloat(wallet.gold_floating).toFixed(2)}</span></p>
+                          </div>
+                        </div>
+                        <hr>
                         <p><strong>Total Balance:</strong> <span class="h5 text-success">$${totalBalance}</span></p>
                       </div>
                     </div>
                   </div>
                 </div>
-                ${user.telegram_id ? `
+                ${
+                  user.telegram_id
+                    ? `
                 <div class="row mt-3">
                   <div class="col-12">
                     <div class="card">
@@ -474,20 +509,26 @@ $(function () {
                     </div>
                   </div>
                 </div>
-                ` : ''}
+                `
+                    : ''
+                }
               `);
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
               console.error('Error loading user details:', error);
-              $('#userDetailsModal .modal-body').html('<div class="alert alert-danger">Error loading user details: ' + error + '</div>');
+              $('#userDetailsModal .modal-body').html(
+                '<div class="alert alert-danger">Error loading user details: ' + error + '</div>'
+              );
             }
           });
         }
       },
-      error: function(xhr, status, error) {
+      error: function (xhr, status, error) {
         console.error('Error loading wallet data:', error);
         $('#userDetailsModal').modal('show');
-        $('#userDetailsModal .modal-body').html('<div class="alert alert-danger">Error loading wallet data: ' + error + '</div>');
+        $('#userDetailsModal .modal-body').html(
+          '<div class="alert alert-danger">Error loading wallet data: ' + error + '</div>'
+        );
       }
     });
   }
@@ -500,7 +541,7 @@ $(function () {
       headers: {
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
       },
-      beforeSend: function() {
+      beforeSend: function () {
         $('#transactionHistoryModal').modal('show');
         $('#history_user_name').text('Loading...');
         // Show loading state
@@ -515,13 +556,13 @@ $(function () {
           </tr>
         `);
       },
-      success: function(response) {
+      success: function (response) {
         if (response.success) {
           $('#history_user_name').text(response.user_name);
 
           if (response.transactions && response.transactions.length > 0) {
             var tbody = '';
-            response.transactions.forEach(function(transaction) {
+            response.transactions.forEach(function (transaction) {
               var typeClass = transaction.type.toLowerCase() === 'add' ? 'text-success' : 'text-danger';
               var typeIcon = transaction.type.toLowerCase() === 'add' ? 'ti-plus' : 'ti-minus';
 
@@ -560,7 +601,7 @@ $(function () {
           }
         }
       },
-      error: function(xhr) {
+      error: function (xhr) {
         console.error('Error loading transaction history:', xhr);
         $('#transactionHistoryModal').modal('hide');
         Swal.fire({
@@ -570,21 +611,22 @@ $(function () {
         });
       }
     });
-  }  // Clear form when modal is hidden
-  $('#adjustWalletModal').on('hidden.bs.modal', function() {
+  } // Clear form when modal is hidden
+  $('#adjustWalletModal').on('hidden.bs.modal', function () {
     $('#adjustWalletForm')[0].reset();
     $('#current_deposit, #current_profit, #current_bonus, #current_cash').text('0.00');
     $('#modal_user_name').text('Loading...');
   });
 
   // Clear user details modal when hidden
-  $('#userDetailsModal').on('hidden.bs.modal', function() {
+  $('#userDetailsModal').on('hidden.bs.modal', function () {
     $('#user_full_name, #user_email, #user_username, #user_created_at, #user_status').text('Loading...');
     $('#user_deposit, #user_profit, #user_bonus, #user_cash, #user_total_balance').text('0.00');
+    $('#user_floating, #user_crypto_floating, #user_bank_floating, #user_gold_floating').text('0.00');
   });
 
   // Clear transaction history modal when hidden
-  $('#transactionHistoryModal').on('hidden.bs.modal', function() {
+  $('#transactionHistoryModal').on('hidden.bs.modal', function () {
     $('#history_user_name').text('User');
     $('#transaction_history_body').html(`
       <tr>

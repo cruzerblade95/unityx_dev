@@ -87,8 +87,8 @@ class WithdrawalController extends Controller
         $kycStatus = $user->kycVerification ? $user->kycVerification->kyc_status : KycVerification::STATUS_NOT_SUBMITTED;
         $isKycApproved = $kycStatus === KycVerification::STATUS_APPROVED;
 
-        // Get wallet withdrawable balance (profit + bonus balance is available for withdrawal)
-        $walletBalance = $user->getWithdrawableBalance();
+        // Get wallet withdrawable balance for crypto withdrawals
+        $walletBalance = $user->getWithdrawableBalanceForWithdrawal('crypto');
 
         // Get withdrawal settings for display
         $withdrawalSettings = WithdrawalSettings::getUserSettings(Auth::id(), 'crypto');
@@ -156,8 +156,8 @@ class WithdrawalController extends Controller
         $kycStatus = $user->kycVerification ? $user->kycVerification->kyc_status : KycVerification::STATUS_NOT_SUBMITTED;
         $isKycApproved = $kycStatus === KycVerification::STATUS_APPROVED;
 
-        // Get wallet withdrawable balance (profit + bonus balance is available for withdrawal)
-        $walletBalance = $user->getWithdrawableBalance();
+        // Get wallet withdrawable balance for bank card withdrawals
+        $walletBalance = $user->getWithdrawableBalanceForWithdrawal('etc_black');
 
         // Get withdrawal settings for display
         $withdrawalSettings = WithdrawalSettings::getUserSettings(Auth::id(), 'etc_black');
@@ -225,8 +225,8 @@ class WithdrawalController extends Controller
         $kycStatus = $user->kycVerification ? $user->kycVerification->kyc_status : KycVerification::STATUS_NOT_SUBMITTED;
         $isKycApproved = $kycStatus === KycVerification::STATUS_APPROVED;
 
-        // Get wallet withdrawable balance (profit + bonus balance is available for withdrawal)
-        $walletBalance = $user->getWithdrawableBalance();
+        // Get wallet withdrawable balance for gold withdrawals
+        $walletBalance = $user->getWithdrawableBalanceForWithdrawal('gold');
 
         // Get withdrawal settings for display
         $withdrawalSettings = WithdrawalSettings::getUserSettings(Auth::id(), 'gold');
@@ -318,7 +318,7 @@ class WithdrawalController extends Controller
         $net_amount = $request->amount - $processingFee;
 
         // Move the requested amount to floating (hold it) from the selected wallet type
-        if ($wallet && !$wallet->holdAmountFromWallet($request->amount, $walletType)) {
+        if ($wallet && !$wallet->holdAmountFromWalletForWithdrawal($request->amount, $walletType, $request->withdrawal_type)) {
             return redirect()->back()->withErrors(['amount' => 'Failed to hold withdrawal amount. Please try again.']);
         }
 

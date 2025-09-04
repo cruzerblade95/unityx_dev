@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -68,10 +69,10 @@ class User extends Authenticatable
         'telegram_username',
         'profile_photo_path',
         'national_id',
-        'crypto_wallet_address',
         'usdt_bep20_address',
         'usdc_bep20_address',
         'fdusd_bep20_address',
+        'card_wallet_address',
         'etc_black_card_number',
         'cardholder_name',
         'account_number',
@@ -176,7 +177,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the user's withdrawable balance (profit + bonus balance minus floating).
+     * Get total withdrawable balance (profit + bonus - all floating amounts).
      *
      * @return float
      */
@@ -186,9 +187,26 @@ class User extends Authenticatable
             return 0;
         }
 
-        // Calculate total withdrawable from profit and bonus minus floating amount
-        $totalWithdrawable = $this->wallet->profit + $this->wallet->bonus - $this->wallet->floating;
+        // Calculate total withdrawable from profit and bonus minus all floating amounts
+        $totalFloating = $this->wallet->floating + $this->wallet->crypto_floating +
+                        $this->wallet->bank_floating + $this->wallet->gold_floating;
+        $totalWithdrawable = $this->wallet->profit + $this->wallet->bonus - $totalFloating;
         return max(0, $totalWithdrawable);
+    }
+
+    /**
+     * Get withdrawable balance for specific withdrawal type.
+     *
+     * @param string $withdrawalType ('crypto', 'etc_black', 'gold')
+     * @return float
+     */
+    public function getWithdrawableBalanceForWithdrawal(string $withdrawalType)
+    {
+        if (!$this->wallet) {
+            return 0;
+        }
+
+        return $this->wallet->getAvailableBalanceForWithdrawal($withdrawalType);
     }
 
     /**

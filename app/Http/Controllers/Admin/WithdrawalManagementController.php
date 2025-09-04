@@ -60,6 +60,8 @@ class WithdrawalManagementController extends Controller
                 'withdrawals.status',
                 'withdrawals.bank_name',
                 'withdrawals.account_number',
+                'withdrawals.withdrawal_type',
+                'withdrawals.wallet_type',
                 'withdrawals.reference',
                 'withdrawals.note',
                 'withdrawals.created_at'
@@ -102,12 +104,69 @@ class WithdrawalManagementController extends Controller
                     ];
                 })
                 ->addColumn('bank_info', function ($withdrawal) {
-                    return [
-                        'bank_name' => $withdrawal->bank_name ?? 'N/A',
-                        'account_number' => $withdrawal->account_number ?
-                            substr($withdrawal->account_number, 0, 4) . '****' . substr($withdrawal->account_number, -4) :
-                            'N/A'
-                    ];
+                    $user = $withdrawal->user;
+
+                    switch ($withdrawal->withdrawal_type) {
+                        case 'crypto':
+                            // For crypto withdrawals, show wallet address based on currency
+                            $walletAddress = null;
+                            $currency = $withdrawal->bank_name ?? 'Unknown';
+
+                            if ($user) {
+                                switch (strtolower($currency)) {
+                                    case 'usdt':
+                                    case 'usdt bep20':
+                                        $walletAddress = $user->usdt_bep20_address;
+                                        break;
+                                    case 'usdc':
+                                    case 'usdc bep20':
+                                        $walletAddress = $user->usdc_bep20_address;
+                                        break;
+                                    case 'fdusd':
+                                    case 'fdusd bep20':
+                                        $walletAddress = $user->fdusd_bep20_address;
+                                        break;
+                                    default:
+                                        $walletAddress = $withdrawal->account_number;
+                                }
+                            }
+
+                            return [
+                                'type' => 'Crypto',
+                                'currency' => $currency,
+                                'wallet_address' => $walletAddress ?
+                                    substr($walletAddress, 0, 6) . '...' . substr($walletAddress, -6) :
+                                    'Not provided'
+                            ];
+
+                        case 'etc_black':
+                            // For crypto bank card withdrawals
+                            return [
+                                'type' => 'Crypto Bank Card',
+                                'card_number' => $user && $user->etc_black_card_number ?
+                                    '****-****-****-' . substr($user->etc_black_card_number, -4) :
+                                    'Not provided',
+                                'wallet_address' => $user && $user->card_wallet_address ?
+                                    substr($user->card_wallet_address, 0, 6) . '...' . substr($user->card_wallet_address, -6) :
+                                    'Not provided'
+                            ];
+
+                        case 'gold':
+                            // For gold withdrawals, show bank information
+                            return [
+                                'type' => 'Gold Bank',
+                                'bank_name' => $withdrawal->bank_name ?? 'Not provided',
+                                'account_number' => $withdrawal->account_number ?
+                                    '****' . substr($withdrawal->account_number, -4) :
+                                    'Not provided'
+                            ];
+
+                        default:
+                            return [
+                                'type' => 'Unknown',
+                                'info' => 'N/A'
+                            ];
+                    }
                 })
                 ->addColumn('action', function ($withdrawal) {
                     $actions = '<div class="btn-group" role="group">';
@@ -170,20 +229,22 @@ class WithdrawalManagementController extends Controller
                 ], 400);
             }
 
-            // Check if user has sufficient floating balance (should match withdrawal amount)
+            // Check if user has sufficient floating balance for this withdrawal type
             $wallet = $withdrawal->user->wallet;
-            if (!$wallet || $wallet->floating < $withdrawal->amount) {
+            $floatingAmount = $wallet ? $wallet->getFloatingAmountForWithdrawal($withdrawal->withdrawal_type) : 0;
+
+            if (!$wallet || $floatingAmount < $withdrawal->amount) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Error: Floating balance mismatch. Please contact system administrator.'
+                    'message' => 'Error: Floating balance mismatch for ' . $withdrawal->withdrawal_type . ' withdrawals. Please contact system administrator.'
                 ], 400);
             }
 
-            // Remove the amount from floating (complete the withdrawal process)
-            if (!$wallet->deductFloating($withdrawal->amount)) {
+            // Remove the amount from the appropriate floating field
+            if (!$wallet->deductFloatingForWithdrawal($withdrawal->amount, $withdrawal->withdrawal_type)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Error: Failed to process floating amount. Please contact system administrator.'
+                    'message' => 'Error: Failed to process floating amount for ' . $withdrawal->withdrawal_type . ' withdrawal. Please contact system administrator.'
                 ], 400);
             }
 
@@ -246,12 +307,12 @@ class WithdrawalManagementController extends Controller
                 ], 400);
             }
 
-            // Return the floating amount back to profit balance
+            // Return the floating amount back to profit balance for the specific withdrawal type
             $wallet = $withdrawal->user->wallet;
-            if ($wallet && !$wallet->releaseAmount($withdrawal->amount)) {
+            if ($wallet && !$wallet->releaseAmountForWithdrawal($withdrawal->amount, $withdrawal->withdrawal_type)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Error: Failed to release floating amount back to profit. Please contact system administrator.'
+                    'message' => 'Error: Failed to release floating amount back to profit for ' . $withdrawal->withdrawal_type . ' withdrawal. Please contact system administrator.'
                 ], 400);
             }
 
@@ -304,6 +365,72 @@ class WithdrawalManagementController extends Controller
     {
         try {
             $withdrawal = Withdrawal::with('user')->findOrFail($id);
+            $user = $withdrawal->user;
+
+            // Prepare withdrawal type specific data
+            $withdrawalDetails = [];
+
+            switch ($withdrawal->withdrawal_type) {
+                case 'crypto':
+                    $currency = $withdrawal->bank_name ?? 'Unknown';
+                    $walletAddress = null;
+
+                    if ($user) {
+                        switch (strtolower($currency)) {
+                            case 'usdt':
+                            case 'usdt bep20':
+                                $walletAddress = $user->usdt_bep20_address;
+                                break;
+                            case 'usdc':
+                            case 'usdc bep20':
+                                $walletAddress = $user->usdc_bep20_address;
+                                break;
+                            case 'fdusd':
+                            case 'fdusd bep20':
+                                $walletAddress = $user->fdusd_bep20_address;
+                                break;
+                            default:
+                                $walletAddress = $withdrawal->account_number;
+                        }
+                    }
+
+                    $withdrawalDetails = [
+                        'type' => 'Crypto Withdrawal',
+                        'currency' => $currency,
+                        'wallet_address' => $walletAddress ?? 'Not provided',
+                        'network' => 'BEP20'
+                    ];
+                    break;
+
+                case 'etc_black':
+                    $withdrawalDetails = [
+                        'type' => 'Crypto Bank Card Withdrawal',
+                        'card_number' => $user && $user->etc_black_card_number ?
+                            '****-****-****-' . substr($user->etc_black_card_number, -4) :
+                            'Not provided',
+                        'cardholder_name' => $user->cardholder_name ?? 'Not provided',
+                        'account_number' => $user && $user->account_number ?
+                            '****' . substr($user->account_number, -4) :
+                            'Not provided',
+                        'card_wallet_address' => $user->card_wallet_address ?? 'Not provided'
+                    ];
+                    break;
+
+                case 'gold':
+                    $withdrawalDetails = [
+                        'type' => 'Gold Bank Withdrawal',
+                        'bank_name' => $withdrawal->bank_name ?? 'Not provided',
+                        'account_number' => $withdrawal->account_number ?? 'Not provided',
+                        'account_holder' => $user ? $user->firstname . ' ' . $user->lastname : 'Not provided'
+                    ];
+                    break;
+
+                default:
+                    $withdrawalDetails = [
+                        'type' => 'Unknown Withdrawal Type',
+                        'info' => 'N/A'
+                    ];
+            }
 
             return response()->json([
                 'success' => true,
@@ -313,11 +440,15 @@ class WithdrawalManagementController extends Controller
                     'tax_amount' => $withdrawal->tax_amount,
                     'net_amount' => $withdrawal->net_amount,
                     'status' => $withdrawal->status,
+                    'withdrawal_type' => $withdrawal->withdrawal_type,
+                    'wallet_type' => $withdrawal->wallet_type ?? 'profit',
                     'bank_name' => $withdrawal->bank_name,
                     'account_number' => $withdrawal->account_number,
                     'reference' => $withdrawal->reference,
                     'note' => $withdrawal->note,
                     'created_at' => $withdrawal->created_at->format('M d, Y H:i'),
+                    'rejection_reason' => $withdrawal->rejection_reason,
+                    'withdrawal_details' => $withdrawalDetails,
                     'user' => [
                         'id' => $withdrawal->user->id,
                         'username' => $withdrawal->user->username,
