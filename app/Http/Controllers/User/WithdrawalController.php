@@ -290,8 +290,8 @@ class WithdrawalController extends Controller
                 ->with('warning', 'Please complete your payment information to access withdrawal features.');
         }
 
-        // For crypto withdrawals, check Telegram verification first
-        if ($request->withdrawal_type === 'crypto') {
+        // For crypto and crypto bank card withdrawals, check Telegram verification first
+        if (in_array($request->withdrawal_type, ['crypto', 'etc_black'])) {
             // Check if user has verified Telegram
             $telegramVerification = \App\Models\TelegramVerification::where('user_id', $user->id)->first();
 
@@ -487,11 +487,11 @@ class WithdrawalController extends Controller
     {
         $user = Auth::user();
 
-        // Check if withdrawal type is crypto
-        if ($request->withdrawal_type !== 'crypto') {
+        // Check if withdrawal type requires OTP (crypto or crypto bank card)
+        if (!in_array($request->withdrawal_type, ['crypto', 'etc_black'])) {
             return response()->json([
                 'success' => false,
-                'message' => 'OTP is only required for crypto withdrawals.'
+                'message' => 'OTP is only required for crypto and crypto bank card withdrawals.'
             ], 422);
         }
 
