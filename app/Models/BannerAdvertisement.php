@@ -19,6 +19,8 @@ class BannerAdvertisement extends Model
         'background_color',
         'gradient_color',
         'text_color',
+        'show_title',
+        'show_description',
         'sort_order',
         'is_active',
         'start_date',
@@ -27,6 +29,8 @@ class BannerAdvertisement extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'show_title' => 'boolean',
+        'show_description' => 'boolean',
         'start_date' => 'datetime',
         'end_date' => 'datetime',
     ];
@@ -52,7 +56,7 @@ class BannerAdvertisement extends Model
         }
 
         $now = now();
-        
+
         if ($this->start_date && $now->lt($this->start_date)) {
             return false;
         }

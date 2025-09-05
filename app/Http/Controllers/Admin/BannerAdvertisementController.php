@@ -41,6 +41,8 @@ class BannerAdvertisementController extends Controller
             'background_color' => 'required|string|max:7',
             'gradient_color' => 'required|string|max:7',
             'text_color' => 'required|string|max:7',
+            'show_title' => 'boolean',
+            'show_description' => 'boolean',
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
             'start_date' => 'nullable|date',
@@ -48,6 +50,11 @@ class BannerAdvertisementController extends Controller
         ]);
 
         $data = $request->except('image');
+
+        // Handle boolean checkboxes (they don't send value when unchecked)
+        $data['show_title'] = $request->has('show_title') ? true : false;
+        $data['show_description'] = $request->has('show_description') ? true : false;
+        $data['is_active'] = $request->has('is_active') ? true : false;
 
         // Handle image upload
         if ($request->hasFile('image')) {
@@ -99,6 +106,8 @@ class BannerAdvertisementController extends Controller
             'background_color' => 'required|string|max:7',
             'gradient_color' => 'required|string|max:7',
             'text_color' => 'required|string|max:7',
+            'show_title' => 'boolean',
+            'show_description' => 'boolean',
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
             'start_date' => 'nullable|date',
@@ -106,6 +115,11 @@ class BannerAdvertisementController extends Controller
         ]);
 
         $data = $request->except('image');
+
+        // Handle boolean checkboxes (they don't send value when unchecked)
+        $data['show_title'] = $request->has('show_title') ? true : false;
+        $data['show_description'] = $request->has('show_description') ? true : false;
+        $data['is_active'] = $request->has('is_active') ? true : false;
 
         // Handle image upload
         if ($request->hasFile('image')) {
@@ -149,7 +163,7 @@ class BannerAdvertisementController extends Controller
     {
         $oldStatus = $bannerAdvertisement->is_active;
         $newStatus = !$bannerAdvertisement->is_active;
-        
+
         $bannerAdvertisement->update([
             'is_active' => $newStatus
         ]);
