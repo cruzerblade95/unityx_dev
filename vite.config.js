@@ -41,6 +41,7 @@ export default defineConfig({
         'resources/assets/js/cards-actions.js',
         'resources/assets/js/cards-advance.js',
         'resources/assets/js/cards-analytics.js',
+        'resources/assets/js/user-deposit-promo-bonuses.js',
         'resources/assets/js/cards-statistics.js',
         'resources/assets/js/charts-apex.js',
         'resources/assets/js/charts-chartjs.js',
