@@ -57,10 +57,36 @@ class WithdrawalOtp extends Model
 
         if ($otp) {
             $otp->update(['is_verified' => true]);
-            return $otp->withdrawal_data;
+            return [
+                'valid' => true,
+                'data' => $otp->withdrawal_data,
+                'message' => 'OTP verified successfully'
+            ];
         }
 
-        return null;
+        // Check if OTP exists but is expired or already used
+        $existingOtp = static::where('user_id', $userId)
+            ->where('otp_code', $otpCode)
+            ->first();
+
+        if ($existingOtp) {
+            if ($existingOtp->is_verified) {
+                return [
+                    'valid' => false,
+                    'message' => 'OTP has already been used'
+                ];
+            } elseif ($existingOtp->expires_at <= now()) {
+                return [
+                    'valid' => false,
+                    'message' => 'OTP has expired'
+                ];
+            }
+        }
+
+        return [
+            'valid' => false,
+            'message' => 'Invalid OTP code'
+        ];
     }
 
     /**

@@ -524,8 +524,14 @@ class WithdrawalController extends Controller
         $otp = $otpModel->generateOtp($user->id, $request->all());
 
         try {
-            $telegramService = new \App\Services\TelegramNotificationService();
-            $telegramService->sendOtpToTelegram($user, $otp);
+            $result = \App\Services\TelegramNotificationService::sendOtpToTelegram($user, $otp);
+
+            if (!$result) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to send OTP. Please check your Telegram verification status.'
+                ], 500);
+            }
 
             return response()->json([
                 'success' => true,
@@ -560,7 +566,7 @@ class WithdrawalController extends Controller
         }
 
         // Get the withdrawal data from OTP record
-        $withdrawalData = $verification['withdrawal_data'];
+        $withdrawalData = $verification['data'];
 
         // Recreate the request object with stored data
         $withdrawalRequest = new WithdrawalRequest();
