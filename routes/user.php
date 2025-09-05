@@ -145,5 +145,13 @@ Route::prefix('user')->middleware('web')->group(function () {
     Route::get('group-sales', [App\Http\Controllers\User\GroupSalesController::class, 'index'])->name('user.group-sales.index');
     Route::post('group-sales/claim-reward', [App\Http\Controllers\User\GroupSalesController::class, 'claimReward'])->name('user.group-sales.claim-reward');
     Route::get('group-sales/history', [App\Http\Controllers\User\GroupSalesController::class, 'history'])->name('user.group-sales.history');
+
+    // Deposit Promo Bonuses
+    Route::prefix('bonuses')->name('user.bonuses.')->group(function () {
+        Route::get('/', [App\Http\Controllers\User\BonusController::class, 'index'])->name('index');
+        Route::post('/claim/{bonusId}', [App\Http\Controllers\User\BonusController::class, 'claim'])->name('claim');
+        Route::get('/show/{bonusId}', [App\Http\Controllers\User\BonusController::class, 'show'])->name('show');
+        Route::post('/mark-expired', [App\Http\Controllers\User\BonusController::class, 'markExpiredBonuses'])->name('mark-expired');
+    });
     });
 });

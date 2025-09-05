@@ -243,6 +243,8 @@ class WalletManagementController extends Controller
                     Helpers::insertAiTradeV2($wallet->user_id, $amount);
                     if($triggerDepositBonus){
                       Helpers::depositBonus($wallet->user_id, $amount);
+                      // Process deposit promo bonus if campaign is active
+                      Helpers::processDepositPromoBonus($wallet->user_id, $amount);
                     }
                 }
 

@@ -82,6 +82,12 @@
       ]
     },
     {
+      "url": "user/bonuses",
+      "name": "Deposit Promo Bonus",
+      "icon": "menu-icon icon-base ti tabler-gift",
+      "slug": "user.bonuses.index"
+    },
+    {
       "url": "user/downline",
       "name": "Referral",
       "icon": "menu-icon icon-base ti tabler-git-branch",

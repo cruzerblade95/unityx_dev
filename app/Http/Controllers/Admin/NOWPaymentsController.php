@@ -105,15 +105,25 @@ class NOWPaymentsController extends Controller
                     return '<span class="font-weight-bold text-success">$' . number_format($deposit->amount, 2) . '</span>';
                 })
                 ->addColumn('payment_id', function ($deposit) {
-                    if ($deposit->payment_id) {
-                        return '<code class="bg-light p-1">' . $deposit->payment_id . '</code><br><small class="text-muted">NOWPayments</small>';
+                    // First check the actual payment_method column
+                    if ($deposit->payment_method === 'manual') {
+                        return '<span class="badge bg-secondary">Manual</span>';
                     }
 
+                    if ($deposit->payment_method === 'nowpayments' || $deposit->payment_id) {
+                        if ($deposit->payment_id) {
+                            return '<code class="bg-light p-1">' . $deposit->payment_id . '</code><br><small class="text-muted">NOWPayments</small>';
+                        } else {
+                            return '<span class="badge bg-info">NOWPayments</span>';
+                        }
+                    }
+
+                    // For any other payment method
                     if ($deposit->payment_method) {
-                        return '<span class="badge badge-info">' . ucfirst($deposit->payment_method) . '</span>';
+                        return '<span class="badge bg-info">' . ucfirst($deposit->payment_method) . '</span>';
                     }
 
-                    return '<span class="badge badge-warning">Pending</span>';
+                    return '<span class="badge bg-warning">Pending</span>';
                 })
                 ->addColumn('status', function ($deposit) {
                     $statusClass = match($deposit->status) {
@@ -188,14 +198,14 @@ class NOWPaymentsController extends Controller
             // For NOWPayments deposits, try to get the outcome amount
             $creditAmount = $deposit->net_amount; // Default fallback
             $outcomeAmount = null;
-            
+
             if ($deposit->payment_id) {
                 // Try to get updated payment data from NOWPayments
                 $nowpaymentsData = $this->nowPayments->getPaymentStatus($deposit->payment_id);
                 if ($nowpaymentsData && isset($nowpaymentsData['outcome_amount'])) {
                     $outcomeAmount = round((float)$nowpaymentsData['outcome_amount'], 2);
                     $creditAmount = $outcomeAmount;
-                    
+
                     Log::info('Using outcome amount for manual approval', [
                         'deposit_id' => $deposit->id,
                         'outcome_amount' => $outcomeAmount,
@@ -217,6 +227,9 @@ class NOWPaymentsController extends Controller
             // Add bonus to upline (use the credited amount)
             Helpers::insertAiTradeV2($deposit->user_id, $creditAmount);
             Helpers::depositBonus($deposit->user_id, $creditAmount);
+
+            // Process deposit promo bonus if campaign is active
+            $promoBonusResult = Helpers::processDepositPromoBonus($deposit->user_id, $creditAmount);
 
             // Create success notification for the user
             NotificationService::createDepositSuccessNotification(
@@ -368,6 +381,7 @@ class NOWPaymentsController extends Controller
 
                         // Add bonus to upline
                         Helpers::depositBonus($deposit->user_id, $creditAmount);
+                        Helpers::processDepositPromoBonus($deposit->user_id, $creditAmount);
 
                         Log::info('Partially paid deposit completed via refresh - user credited', [
                             'deposit_id' => $deposit->id,
@@ -516,12 +530,12 @@ class NOWPaymentsController extends Controller
             if ($deposit->payment_id) {
                 // Try to get detailed payment information
                 $nowpaymentsData = $this->nowPayments->getDetailedPaymentInfo($deposit->payment_id);
-                
+
                 // If detailed info fails, fall back to basic status
                 if (!$nowpaymentsData) {
                     $nowpaymentsData = $this->nowPayments->getPaymentStatus($deposit->payment_id);
                 }
-                
+
                 // Log what data we received for debugging
                 if ($nowpaymentsData) {
                     Log::info('NOWPayments data retrieved successfully', [
@@ -657,6 +671,7 @@ class NOWPaymentsController extends Controller
 
                                 // Add bonus to upline
                                 Helpers::depositBonus($deposit->user_id, $creditAmount);
+                                Helpers::processDepositPromoBonus($deposit->user_id, $creditAmount);
 
                                 Log::info('Partially paid deposit completed via bulk refresh - user credited', [
                                     'deposit_id' => $deposit->id,
