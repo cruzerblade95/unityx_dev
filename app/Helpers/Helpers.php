@@ -458,4 +458,73 @@ class Helpers
 }
 CSS;
   }
+
+  /**
+   * Process deposit promo bonus for a user deposit
+   *
+   * @param int $user_id
+   * @param float $deposit_amount
+   * @return array Result with bonus information or null if no active campaign or minimum deposit not met
+   */
+  public static function processDepositPromoBonus($user_id, $deposit_amount)
+  {
+    // Check minimum deposit amount requirement
+    if ($deposit_amount < 1000) {
+      return null;
+    }
+
+    // Get active campaign
+    $campaign = \App\Models\DepositPromoCampaign::getActiveCampaign();
+
+    if (!$campaign) {
+      return null;
+    }
+
+    // Calculate bonus amounts
+    $userBonusAmount = ($deposit_amount * $campaign->percentage_bonus) / 100;
+    $uplineBonusAmount = ($userBonusAmount * $campaign->percentage_upline_bonus) / 100;
+
+    // Set expiration to campaign's end_datetime
+    $expiresAt = $campaign->end_datetime;
+
+    // Create bonus history record
+    $bonusHistory = \App\Models\DepositPromoBonusHistory::create([
+      'user_id' => $user_id,
+      'campaign_id' => $campaign->id,
+      'deposit_amount' => $deposit_amount,
+      'user_bonus_amount' => $userBonusAmount,
+      'upline_bonus_amount' => $uplineBonusAmount,
+      'status' => \App\Models\DepositPromoBonusHistory::STATUS_PENDING,
+      'expires_at' => $expiresAt
+    ]);
+
+    // Process upline bonus if applicable
+    if ($uplineBonusAmount > 0) {
+        $user = User::find($user_id);
+        if ($user && $user->upline_id) {
+            $uplineUser = User::find($user->upline_id);
+            if ($uplineUser) {
+
+            // Create bonus history record
+            $bonusHistory2 = \App\Models\DepositPromoBonusHistory::create([
+              'user_id' => $uplineUser->id,
+              'campaign_id' => $campaign->id,
+              'deposit_amount' => $deposit_amount,
+              'user_bonus_amount' => $uplineBonusAmount,
+              'upline_bonus_amount' => $uplineBonusAmount,
+              'status' => \App\Models\DepositPromoBonusHistory::STATUS_PENDING,
+              'expires_at' => $expiresAt
+            ]);
+            }
+        }
+    }
+
+    return [
+      'campaign' => $campaign,
+      'bonus_history' => $bonusHistory,
+      'user_bonus_amount' => $userBonusAmount,
+      'upline_bonus_amount' => $uplineBonusAmount,
+      'expires_at' => $expiresAt
+    ];
+  }
 }

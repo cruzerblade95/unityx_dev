@@ -175,5 +175,16 @@ Route::prefix('admin')->middleware('web')->group(function () {
             Route::post('/profile', [AdminSettingsController::class, 'updateProfile'])->name('profile.update');
             Route::post('/password', [AdminSettingsController::class, 'updatePassword'])->name('password.update');
         });
+
+        // Deposit Promo Bonus Routes
+        Route::prefix('deposit-promo')->name('admin.deposit-promo.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\DepositPromoBonusController::class, 'index'])->name('index');
+            Route::get('/campaigns-list', [App\Http\Controllers\Admin\DepositPromoBonusController::class, 'campaignsList'])->name('campaigns.list');
+            Route::post('/campaigns', [App\Http\Controllers\Admin\DepositPromoBonusController::class, 'store'])->name('campaigns.store');
+            Route::get('/campaigns/{id}', [App\Http\Controllers\Admin\DepositPromoBonusController::class, 'show'])->name('campaigns.show');
+            Route::put('/campaigns/{id}', [App\Http\Controllers\Admin\DepositPromoBonusController::class, 'update'])->name('campaigns.update');
+            Route::delete('/campaigns/{id}', [App\Http\Controllers\Admin\DepositPromoBonusController::class, 'destroy'])->name('campaigns.destroy');
+            Route::get('/bonus-history-list', [App\Http\Controllers\Admin\DepositPromoBonusController::class, 'bonusHistoryList'])->name('bonus-history.list');
+        });
     });
 });

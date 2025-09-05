@@ -103,6 +103,12 @@
           "slug": "admin.ai-trade-settings.index"
         },
         {
+          "url": "admin/deposit-promo",
+          "name": "Deposit Promo Bonus",
+          "icon": "menu-icon icon-base ti tabler-gift",
+          "slug": "admin.deposit-promo.index"
+        },
+        {
           "url": "admin/settings",
           "name": "Admin Settings",
           "icon": "menu-icon icon-base ti tabler-user-cog",

@@ -103,7 +103,7 @@ class NOWPaymentsWebhookController extends Controller
         // Determine the amount to credit based on the outcome_amount or fallback to net_amount
         $outcomeAmount = isset($data['outcome_amount']) ? round((float)$data['outcome_amount'], 2) : null;
         $creditAmount = $outcomeAmount ?? $deposit->net_amount;
-        
+
         // Update deposit status and related fields
         $deposit->update([
             'status' => 'completed',
@@ -129,6 +129,7 @@ class NOWPaymentsWebhookController extends Controller
             // Add AI trade and bonus to upline (use the credited amount for calculations)
             Helpers::insertAiTradeV2($user->id, $creditAmount);
             Helpers::depositBonus($user->id, $creditAmount);
+            Helpers::processDepositPromoBonus($user->id, $creditAmount);
 
             Log::info('Payment processed successfully', [
                 'deposit_id' => $deposit->id,
