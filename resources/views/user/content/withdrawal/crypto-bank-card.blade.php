@@ -216,15 +216,15 @@
                                     <div class="input-group">
                                         <span class="input-group-text">$</span>
                                         <input type="number" class="form-control @error('amount') is-invalid @enderror"
-                                            name="amount" id="amount" step="0.01" min="100"
-                                            max="{{ min(300, $walletBalance) }}" value="{{ old('amount') }}"
+                                            name="amount" id="amount" step="0.01" min="{{ $withdrawalSettings->min_amount ?? 100 }}"
+                                            max="{{ min($withdrawalSettings->max_amount ?? 300, $walletBalance) }}" value="{{ old('amount') }}"
                                             placeholder="Enter amount" required>
                                     </div>
                                     @error('amount')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                    <small class="text-muted" id="amount-help">Minimum: $100 | Maximum:
-                                        ${{ number_format(min(300, $walletBalance), 2) }} | Available:
+                                    <small class="text-muted" id="amount-help">Minimum: ${{ number_format($withdrawalSettings->min_amount ?? 100, 2) }} | Maximum:
+                                        ${{ number_format(min($withdrawalSettings->max_amount ?? 300, $walletBalance), 2) }} | Available:
                                         ${{ number_format($walletBalance, 2) }}</small>
                                 </div>
 
@@ -419,16 +419,16 @@
                     <div class="card-body">
                         <h6 style="color: rgba(111, 66, 193, 1);">Benefits</h6>
                         <ul class="list-unstyled small mb-3">
-                            <li><i class="fas fa-check text-success me-2"></i>Direct card credit</li>
-                            <li><i class="fas fa-check text-success me-2"></i>Fast processing (1-2 business days)</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Direct Crypto Card Bank</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Fast processing (1-3 business days)</li>
                             <li><i class="fas fa-check text-success me-2"></i>Immediate card availability</li>
-                            <li><i class="fas fa-check text-success me-2"></i>No wallet address required</li>
+                            {{-- <li><i class="fas fa-check text-success me-2"></i>No wallet address required</li> --}}
                         </ul>
 
                         <h6 class="text-primary">Processing Details</h6>
                         <ul class="list-unstyled small mb-3">
                             <li><i class="fas fa-percentage text-warning me-2"></i>5.6% processing fee</li>
-                            <li><i class="fas fa-clock text-info me-2"></i>1-2 business days processing</li>
+                            <li><i class="fas fa-clock text-info me-2"></i>1-3 business days processing</li>
                             <li><i class="fas fa-shield-alt text-success me-2"></i>Secure bank transfer</li>
                         </ul>
 
@@ -437,7 +437,7 @@
                             <li><i class="fas fa-check-circle text-success me-2"></i>Valid Crypto Bank Card</li>
                             <li><i class="fas fa-check-circle text-success me-2"></i>Complete payment information</li>
                             <li><i class="fas fa-check-circle text-success me-2"></i>KYC verification</li>
-                            <li><i class="fas fa-check-circle text-success me-2"></i>Minimum withdrawal: $10</li>
+                            <li><i class="fas fa-check-circle text-success me-2"></i>Minimum withdrawal: ${{ number_format($withdrawalSettings->min_amount ?? 100, 2) }}</li>
                         </ul>
                     </div>
                 </div>
@@ -488,8 +488,8 @@
                     const walletType = this.value;
                     if (walletType && walletBalances[walletType] !== undefined) {
                         const availableBalance = walletBalances[walletType];
-                        const minAmount = 100;
-                        const maxAmount = Math.min(300, availableBalance);
+                        const minAmount = {{ $withdrawalSettings->min_amount ?? 100 }};
+                        const maxAmount = Math.min({{ $withdrawalSettings->max_amount ?? 300 }}, availableBalance);
 
                         // Update input max attribute
                         amountInput.setAttribute('max', maxAmount);
@@ -536,8 +536,8 @@
                     const amount = parseFloat(amountInput.value);
                     const walletType = walletTypeSelect.value;
                     const availableBalance = walletBalances[walletType] || 0;
-                    const minAmount = 100;
-                    const maxAmount = Math.min(300, availableBalance);
+                    const minAmount = {{ $withdrawalSettings->min_amount ?? 100 }};
+                    const maxAmount = Math.min({{ $withdrawalSettings->max_amount ?? 300 }}, availableBalance);
 
                     if (!walletType) {
                         Swal.fire('Error', 'Please select a wallet to withdraw from.', 'error');
