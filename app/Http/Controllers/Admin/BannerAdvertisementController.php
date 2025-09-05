@@ -36,6 +36,7 @@ class BannerAdvertisementController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:500',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'mobile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'link_url' => 'nullable|url',
             'button_text' => 'required|string|max:50',
             'background_color' => 'required|string|max:7',
@@ -49,19 +50,27 @@ class BannerAdvertisementController extends Controller
             'end_date' => 'nullable|date|after:start_date',
         ]);
 
-        $data = $request->except('image');
+        $data = $request->except(['image', 'mobile_image']);
 
         // Handle boolean checkboxes (they don't send value when unchecked)
         $data['show_title'] = $request->has('show_title') ? true : false;
         $data['show_description'] = $request->has('show_description') ? true : false;
         $data['is_active'] = $request->has('is_active') ? true : false;
 
-        // Handle image upload
+        // Handle desktop image upload
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $imageName = time() . '_' . Str::random(10) . '.' . $image->extension();
+            $imageName = time() . '_desktop_' . Str::random(10) . '.' . $image->extension();
             $imagePath = $image->storeAs('banners', $imageName, 'public');
             $data['image_path'] = $imagePath;
+        }
+
+        // Handle mobile image upload
+        if ($request->hasFile('mobile_image')) {
+            $mobileImage = $request->file('mobile_image');
+            $mobileImageName = time() . '_mobile_' . Str::random(10) . '.' . $mobileImage->extension();
+            $mobileImagePath = $mobileImage->storeAs('banners', $mobileImageName, 'public');
+            $data['mobile_image_path'] = $mobileImagePath;
         }
 
         // Set default sort order if not provided
@@ -101,6 +110,7 @@ class BannerAdvertisementController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:500',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'mobile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'link_url' => 'nullable|url',
             'button_text' => 'required|string|max:50',
             'background_color' => 'required|string|max:7',
@@ -114,24 +124,37 @@ class BannerAdvertisementController extends Controller
             'end_date' => 'nullable|date|after:start_date',
         ]);
 
-        $data = $request->except('image');
+        $data = $request->except(['image', 'mobile_image']);
 
         // Handle boolean checkboxes (they don't send value when unchecked)
         $data['show_title'] = $request->has('show_title') ? true : false;
         $data['show_description'] = $request->has('show_description') ? true : false;
         $data['is_active'] = $request->has('is_active') ? true : false;
 
-        // Handle image upload
+        // Handle desktop image upload
         if ($request->hasFile('image')) {
-            // Delete old image if exists
+            // Delete old desktop image if exists
             if ($bannerAdvertisement->image_path) {
                 Storage::disk('public')->delete($bannerAdvertisement->image_path);
             }
 
             $image = $request->file('image');
-            $imageName = time() . '_' . Str::random(10) . '.' . $image->extension();
+            $imageName = time() . '_desktop_' . Str::random(10) . '.' . $image->extension();
             $imagePath = $image->storeAs('banners', $imageName, 'public');
             $data['image_path'] = $imagePath;
+        }
+
+        // Handle mobile image upload
+        if ($request->hasFile('mobile_image')) {
+            // Delete old mobile image if exists
+            if ($bannerAdvertisement->mobile_image_path) {
+                Storage::disk('public')->delete($bannerAdvertisement->mobile_image_path);
+            }
+
+            $mobileImage = $request->file('mobile_image');
+            $mobileImageName = time() . '_mobile_' . Str::random(10) . '.' . $mobileImage->extension();
+            $mobileImagePath = $mobileImage->storeAs('banners', $mobileImageName, 'public');
+            $data['mobile_image_path'] = $mobileImagePath;
         }
 
         $bannerAdvertisement->update($data);
@@ -145,9 +168,14 @@ class BannerAdvertisementController extends Controller
      */
     public function destroy(BannerAdvertisement $bannerAdvertisement)
     {
-        // Delete image file
+        // Delete desktop image file
         if ($bannerAdvertisement->image_path) {
             Storage::disk('public')->delete($bannerAdvertisement->image_path);
+        }
+
+        // Delete mobile image file
+        if ($bannerAdvertisement->mobile_image_path) {
+            Storage::disk('public')->delete($bannerAdvertisement->mobile_image_path);
         }
 
         $bannerAdvertisement->delete();
