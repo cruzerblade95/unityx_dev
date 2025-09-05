@@ -240,13 +240,13 @@
                             <div class="carousel-inner" style="border-radius: 0.375rem;">
                                 @foreach ($bannerAdvertisements as $index => $banner)
                                     <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                                        <div class="position-relative"
+                                        <div class="position-relative carousel-banner-item"
                                             style="height: 200px;
                                                     background: {{ $banner->gradient_color
                                                         ? 'linear-gradient(135deg, ' . $banner->background_color . ' 0%, ' . $banner->gradient_color . ' 100%)'
                                                         : $banner->background_color }};
                                                     overflow: hidden;
-                                                    {{ $banner->image_path ? 'background-image: url(' . $banner->image_url . '); background-size: cover; background-position: center;' : '' }}"
+                                                    {{ $banner->image_path ? 'background-image: url(' . $banner->image_url . ');' : '' }}"
                                             title="{{ $banner->description }}" data-bs-toggle="tooltip"
                                             data-bs-placement="top">
 
@@ -261,15 +261,19 @@
                                                 class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center">
                                                 <div class="container-fluid">
                                                     <div class="row align-items-center">
-                                                        <div class="col-md-8">
-                                                            <h3 class="fw-bold mb-2"
-                                                                style="color: {{ $banner->text_color ?? '#ffffff' }};">
-                                                                {{ $banner->title }}
-                                                            </h3>
-                                                            <p class="mb-3"
-                                                                style="color: {{ $banner->text_color ?? '#ffffff' }}; opacity: 0.8;">
-                                                                {{ $banner->description }}
-                                                            </p>
+                                                        <div class="col-12">
+                                                            @if ($banner->show_title)
+                                                                <h3 class="fw-bold mb-2"
+                                                                    style="color: {{ $banner->text_color ?? '#ffffff' }};">
+                                                                    {{ $banner->title }}
+                                                                </h3>
+                                                            @endif
+                                                            @if ($banner->show_description)
+                                                                <p class="mb-3"
+                                                                    style="color: {{ $banner->text_color ?? '#ffffff' }}; opacity: 0.8;">
+                                                                    {{ $banner->description }}
+                                                                </p>
+                                                            @endif
                                                             @if ($banner->link_url && $banner->button_text)
                                                                 <a href="{{ $banner->link_url }}" target="_blank"
                                                                     rel="noopener noreferrer" class="btn btn-light btn-sm">
@@ -277,10 +281,6 @@
                                                                     {{ $banner->button_text }}
                                                                 </a>
                                                             @endif
-                                                        </div>
-                                                        <div class="col-md-4 text-end">
-                                                            <i class="ti tabler-ad-2"
-                                                                style="font-size: 5rem; opacity: 0.3; color: {{ $banner->text_color ?? '#ffffff' }};"></i>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -307,6 +307,254 @@
             @endif
         </div>
         <!--/ Advertisement Banner Carousel -->
+
+        <!-- Custom CSS for mobile responsiveness -->
+        <style>
+            /* Ensure images fit properly on all screen sizes */
+            .carousel-banner-item {
+                background-size: contain !important;
+                background-repeat: no-repeat !important;
+                background-position: center !important;
+            }
+
+            /* Desktop and larger screens */
+            @media (min-width: 992px) {
+                .carousel-banner-item {
+                    height: 250px !important;
+                }
+            }
+
+            /* Tablet responsiveness */
+            @media (max-width: 991px) and (min-width: 769px) {
+                .carousel-banner-item {
+                    height: 180px !important;
+                }
+
+                .carousel-banner-item h3 {
+                    font-size: 1.5rem !important;
+                }
+
+                .carousel-banner-item p {
+                    font-size: 0.9rem !important;
+                    margin-bottom: 1rem !important;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .carousel-banner-item {
+                    height: 150px !important;
+                }
+
+                .carousel-banner-item h3 {
+                    font-size: 1.2rem !important;
+                    margin-bottom: 0.75rem !important;
+                }
+
+                .carousel-banner-item p {
+                    font-size: 0.85rem !important;
+                    margin-bottom: 1rem !important;
+                    line-height: 1.3 !important;
+                }
+
+                .carousel-banner-item .btn {
+                    font-size: 0.8rem !important;
+                    padding: 0.375rem 0.75rem !important;
+                }
+
+                .carousel-banner-item .container-fluid {
+                    padding-left: 1rem !important;
+                    padding-right: 1rem !important;
+                }
+            }
+
+            @media (max-width: 576px) {
+                .carousel-banner-item {
+                    height: 130px !important;
+                }
+
+                .carousel-banner-item h3 {
+                    font-size: 1rem !important;
+                    margin-bottom: 0.5rem !important;
+                    line-height: 1.2 !important;
+                }
+
+                .carousel-banner-item p {
+                    font-size: 0.75rem !important;
+                    margin-bottom: 0.75rem !important;
+                    line-height: 1.2 !important;
+                }
+
+                .carousel-banner-item .btn {
+                    font-size: 0.7rem !important;
+                    padding: 0.25rem 0.5rem !important;
+                }
+
+                .carousel-banner-item .container-fluid {
+                    padding-left: 0.75rem !important;
+                    padding-right: 0.75rem !important;
+                }
+            }
+
+            /* Improve text readability on all devices */
+            .carousel-banner-item h3,
+            .carousel-banner-item p {
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+                word-wrap: break-word;
+            }
+
+            .carousel-banner-item .btn {
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            }
+
+            /* Enable touch sliding for mobile */
+            .carousel-inner {
+                touch-action: pan-y pinch-zoom;
+            }
+
+            @media (max-width: 768px) {
+                .carousel-inner {
+                    overflow: hidden;
+                }
+
+                /* Move entire content to bottom on mobile to avoid blocking image */
+                .carousel-banner-item .d-flex.align-items-center {
+                    align-items: flex-end !important;
+                }
+
+                .carousel-banner-item .container-fluid {
+                    padding-bottom: 1.5rem !important;
+                }
+
+                /* Hide carousel controls on very small screens to save space */
+                .carousel-control-prev,
+                .carousel-control-next {
+                    display: none;
+                }
+
+                /* Show indicators more prominently on mobile */
+                .carousel-indicators {
+                    bottom: 10px;
+                }
+
+                .carousel-indicators [data-bs-target] {
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
+                    margin: 0 3px;
+                }
+            }
+        </style>
+
+        <!-- Touch Swipe JavaScript for Mobile Carousel -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const carousel = document.getElementById('advertisementCarousel');
+                if (!carousel) return;
+
+                let startX = 0;
+                let endX = 0;
+                let isDown = false;
+
+                // Touch events for mobile
+                carousel.addEventListener('touchstart', function(e) {
+                    startX = e.touches[0].clientX;
+                    isDown = true;
+                    // Pause auto-sliding when user starts touching
+                    const bsCarousel = bootstrap.Carousel.getInstance(carousel);
+                    if (bsCarousel) {
+                        bsCarousel.pause();
+                    }
+                }, {
+                    passive: true
+                });
+
+                carousel.addEventListener('touchmove', function(e) {
+                    if (!isDown) return;
+                    // Prevent default scrolling while swiping horizontally
+                    const currentX = e.touches[0].clientX;
+                    const deltaX = Math.abs(currentX - startX);
+                    if (deltaX > 10) { // Only prevent if significant horizontal movement
+                        e.preventDefault();
+                    }
+                }, {
+                    passive: false
+                });
+
+                carousel.addEventListener('touchend', function(e) {
+                    if (!isDown) return;
+                    isDown = false;
+                    endX = e.changedTouches[0].clientX;
+
+                    const deltaX = startX - endX;
+                    const threshold = 50; // Minimum swipe distance
+
+                    const bsCarousel = bootstrap.Carousel.getInstance(carousel) || new bootstrap.Carousel(
+                        carousel);
+
+                    if (Math.abs(deltaX) > threshold) {
+                        if (deltaX > 0) {
+                            // Swipe left - next slide
+                            bsCarousel.next();
+                        } else {
+                            // Swipe right - previous slide
+                            bsCarousel.prev();
+                        }
+                    }
+
+                    // Resume auto-sliding after a delay
+                    setTimeout(() => {
+                        bsCarousel.cycle();
+                    }, 3000);
+                }, {
+                    passive: true
+                });
+
+                // Mouse events for desktop (optional - for better UX)
+                carousel.addEventListener('mousedown', function(e) {
+                    startX = e.clientX;
+                    isDown = true;
+                    carousel.style.cursor = 'grabbing';
+                });
+
+                carousel.addEventListener('mousemove', function(e) {
+                    if (!isDown) return;
+                    e.preventDefault();
+                });
+
+                carousel.addEventListener('mouseup', function(e) {
+                    if (!isDown) return;
+                    isDown = false;
+                    endX = e.clientX;
+                    carousel.style.cursor = 'grab';
+
+                    const deltaX = startX - endX;
+                    const threshold = 50;
+
+                    const bsCarousel = bootstrap.Carousel.getInstance(carousel) || new bootstrap.Carousel(
+                        carousel);
+
+                    if (Math.abs(deltaX) > threshold) {
+                        if (deltaX > 0) {
+                            bsCarousel.next();
+                        } else {
+                            bsCarousel.prev();
+                        }
+                    }
+                });
+
+                carousel.addEventListener('mouseleave', function() {
+                    isDown = false;
+                    carousel.style.cursor = 'default';
+                });
+
+                // Add grab cursor on hover for desktop
+                carousel.addEventListener('mouseenter', function() {
+                    if (window.innerWidth > 768) {
+                        carousel.style.cursor = 'grab';
+                    }
+                });
+            });
+        </script>
 
         <!-- Announcements -->
         <div class="col-xl-12 mb-4">

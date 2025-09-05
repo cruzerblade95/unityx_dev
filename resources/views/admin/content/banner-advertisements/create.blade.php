@@ -3,322 +3,392 @@
 @section('title', 'Create Banner Advertisement')
 
 @section('vendor-style')
-@vite(['resources/assets/vendor/libs/select2/select2.scss', 'resources/assets/vendor/libs/flatpickr/flatpickr.scss'])
-<style>
-.color-preview {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    border: 2px solid #ddd;
-    cursor: pointer;
-}
-.banner-preview-live {
-    height: 200px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
-.banner-preview-live img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-.banner-preview-live .content {
-    position: relative;
-    z-index: 1;
-    text-align: center;
-    background: rgba(0,0,0,0.3);
-    padding: 20px;
-    border-radius: 8px;
-}
-</style>
+    @vite(['resources/assets/vendor/libs/select2/select2.scss', 'resources/assets/vendor/libs/flatpickr/flatpickr.scss'])
+    <style>
+        .color-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            cursor: pointer;
+        }
+
+        .banner-preview-live {
+            height: 200px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .banner-preview-live img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .banner-preview-live .content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 8px;
+        }
+    </style>
 @endsection
 
 @section('vendor-script')
-@vite(['resources/assets/vendor/libs/select2/select2.js', 'resources/assets/vendor/libs/flatpickr/flatpickr.js'])
+    @vite(['resources/assets/vendor/libs/select2/select2.js', 'resources/assets/vendor/libs/flatpickr/flatpickr.js'])
 @endsection
 
 @section('page-script')
-<script>
-$(document).ready(function() {
-    // Initialize flatpickr for date inputs
-    $('.flatpickr').flatpickr({
-        dateFormat: 'Y-m-d',
-        allowInput: true
-    });
+    <script>
+        $(document).ready(function() {
+            // Initialize flatpickr for date inputs
+            $('.flatpickr').flatpickr({
+                dateFormat: 'Y-m-d',
+                allowInput: true
+            });
 
-    // Live preview functionality
-    function updatePreview() {
-        const title = $('#title').val() || 'Banner Title';
-        const description = $('#description').val() || 'Banner description will appear here';
-        const buttonText = $('#button_text').val() || 'Learn More';
-        const backgroundColor = $('#background_color').val() || '#667eea';
-        const gradientColor = $('#gradient_color').val() || '#764ba2';
-        const textColor = $('#text_color').val() || '#ffffff';
-        
-        const $preview = $('.banner-preview-live');
-        $preview.css({
-            'background': `linear-gradient(135deg, ${backgroundColor} 0%, ${gradientColor} 100%)`,
-            'color': textColor
-        });
-        
-        $preview.find('.banner-title').text(title);
-        $preview.find('.banner-description').text(description);
-        $preview.find('.banner-button').text(buttonText);
-    }
+            // Live preview functionality
+            function updatePreview() {
+                const title = $('#title').val() || 'Banner Title';
+                const description = $('#description').val() || 'Banner description will appear here';
+                const buttonText = $('#button_text').val() || 'Learn More';
+                const backgroundColor = $('#background_color').val() || '#667eea';
+                const gradientColor = $('#gradient_color').val() || '#764ba2';
+                const textColor = $('#text_color').val() || '#ffffff';
+                const showTitle = $('#show_title').is(':checked');
+                const showDescription = $('#show_description').is(':checked');
 
-    // Update preview on input change
-    $('#title, #description, #button_text, #background_color, #gradient_color, #text_color').on('input change', updatePreview);
+                const $preview = $('.banner-preview-live');
+                $preview.css({
+                    'background': `linear-gradient(135deg, ${backgroundColor} 0%, ${gradientColor} 100%)`,
+                    'color': textColor
+                });
 
-    // Image preview
-    $('#image').on('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                $('.banner-preview-live').css('background-image', `url(${e.target.result})`);
-                $('.banner-preview-live').css('background-size', 'cover');
-                $('.banner-preview-live').css('background-position', 'center');
+                // Show/hide title based on toggle
+                if (showTitle) {
+                    $preview.find('.banner-title').text(title).show();
+                } else {
+                    $preview.find('.banner-title').hide();
+                }
+
+                // Show/hide description based on toggle
+                if (showDescription) {
+                    $preview.find('.banner-description').text(description).show();
+                } else {
+                    $preview.find('.banner-description').hide();
+                }
+
+                $preview.find('.banner-button').text(buttonText);
             }
-            reader.readAsDataURL(file);
-        }
-    });
 
-    // Color picker simulation
-    $('.color-preview').on('click', function() {
-        $(this).siblings('input[type="color"]').click();
-    });
+            // Update preview on input change
+            $('#title, #description, #button_text, #background_color, #gradient_color, #text_color, #show_title, #show_description')
+                .on('input change', updatePreview);
 
-    $('input[type="color"]').on('change', function() {
-        $(this).siblings('.color-preview').css('background-color', $(this).val());
-        updatePreview();
-    });
+            // Image preview
+            $('#image').on('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('.banner-preview-live').css('background-image', `url(${e.target.result})`);
+                        $('.banner-preview-live').css('background-size', 'cover');
+                        $('.banner-preview-live').css('background-position', 'center');
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
 
-    // Initialize preview
-    updatePreview();
-});
-</script>
+            // Color picker simulation
+            $('.color-preview').on('click', function() {
+                $(this).siblings('input[type="color"]').click();
+            });
+
+            $('input[type="color"]').on('change', function() {
+                $(this).siblings('.color-preview').css('background-color', $(this).val());
+                updatePreview();
+            });
+
+            // Initialize preview
+            updatePreview();
+        });
+    </script>
 @endsection
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
-    <div class="row">
-        <div class="col-12">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 class="fw-bold py-3 mb-0">
-                        <span class="text-muted fw-light">Admin / Banner Advertisements /</span> Create New
-                    </h4>
-                    <p class="text-muted">Create a new promotional banner for the user dashboard</p>
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <div class="row">
+            <div class="col-12">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="fw-bold py-3 mb-0">
+                            <span class="text-muted fw-light">Admin / Banner Advertisements /</span> Create New
+                        </h4>
+                        <p class="text-muted">Create a new promotional banner for the user dashboard</p>
+                    </div>
+                    <a href="{{ route('admin.banner-advertisements.index') }}" class="btn btn-outline-secondary">
+                        <i class="ti ti-arrow-left me-1"></i>
+                        Back to List
+                    </a>
                 </div>
-                <a href="{{ route('admin.banner-advertisements.index') }}" class="btn btn-outline-secondary">
-                    <i class="ti ti-arrow-left me-1"></i>
-                    Back to List
-                </a>
-            </div>
 
-            <div class="row">
-                <!-- Form -->
-                <div class="col-lg-8">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">Banner Details</h5>
-                        </div>
-                        <div class="card-body">
-                            <form action="{{ route('admin.banner-advertisements.store') }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                
-                                <!-- Basic Information -->
-                                <div class="row g-3">
-                                    <div class="col-12">
-                                        <label class="form-label" for="title">Banner Title *</label>
-                                        <input type="text" class="form-control @error('title') is-invalid @enderror" 
-                                               id="title" name="title" value="{{ old('title') }}" required>
-                                        @error('title')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
+                <div class="row">
+                    <!-- Form -->
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Banner Details</h5>
+                            </div>
+                            <div class="card-body">
+                                <form action="{{ route('admin.banner-advertisements.store') }}" method="POST"
+                                    enctype="multipart/form-data">
+                                    @csrf
 
-                                    <div class="col-12">
-                                        <label class="form-label" for="description">Description</label>
-                                        <textarea class="form-control @error('description') is-invalid @enderror" 
-                                                  id="description" name="description" rows="3" 
-                                                  placeholder="Brief description for hover tooltip">{{ old('description') }}</textarea>
-                                        @error('description')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label class="form-label" for="button_text">Button Text *</label>
-                                        <input type="text" class="form-control @error('button_text') is-invalid @enderror" 
-                                               id="button_text" name="button_text" value="{{ old('button_text', 'Learn More') }}" required>
-                                        @error('button_text')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label class="form-label" for="link_url">Link URL</label>
-                                        <input type="url" class="form-control @error('link_url') is-invalid @enderror" 
-                                               id="link_url" name="link_url" value="{{ old('link_url') }}" 
-                                               placeholder="https://example.com">
-                                        @error('link_url')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-12">
-                                        <label class="form-label" for="image">Banner Image *</label>
-                                        <input type="file" class="form-control @error('image') is-invalid @enderror" 
-                                               id="image" name="image" accept="image/*" required>
-                                        <div class="form-text">
-                                            Recommended size: 1200x400px. Supported formats: JPEG, PNG, GIF (max 2MB)
+                                    <!-- Basic Information -->
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <label class="form-label" for="title">Banner Title *</label>
+                                            <input type="text" class="form-control @error('title') is-invalid @enderror"
+                                                id="title" name="title" value="{{ old('title') }}" required>
+                                            @error('title')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
                                         </div>
-                                        @error('image')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
 
-                                <!-- Color Settings -->
-                                <div class="row g-3 mt-4">
-                                    <div class="col-12">
-                                        <h6 class="mb-3">Color Settings</h6>
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <label class="form-label" for="background_color">Background Color</label>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <input type="color" class="form-control @error('background_color') is-invalid @enderror" 
-                                                   id="background_color" name="background_color" value="{{ old('background_color', '#667eea') }}" style="display: none;">
-                                            <div class="color-preview" style="background-color: #667eea;"></div>
-                                            <input type="text" class="form-control" value="#667eea" readonly>
+                                        <div class="col-12">
+                                            <label class="form-label" for="description">Description</label>
+                                            <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description"
+                                                rows="3" placeholder="Brief description for hover tooltip">{{ old('description') }}</textarea>
+                                            @error('description')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
                                         </div>
-                                        @error('background_color')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
 
-                                    <div class="col-md-4">
-                                        <label class="form-label" for="gradient_color">Gradient Color</label>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <input type="color" class="form-control @error('gradient_color') is-invalid @enderror" 
-                                                   id="gradient_color" name="gradient_color" value="{{ old('gradient_color', '#764ba2') }}" style="display: none;">
-                                            <div class="color-preview" style="background-color: #764ba2;"></div>
-                                            <input type="text" class="form-control" value="#764ba2" readonly>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="button_text">Button Text *</label>
+                                            <input type="text"
+                                                class="form-control @error('button_text') is-invalid @enderror"
+                                                id="button_text" name="button_text"
+                                                value="{{ old('button_text', 'Learn More') }}" required>
+                                            @error('button_text')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
                                         </div>
-                                        @error('gradient_color')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
 
-                                    <div class="col-md-4">
-                                        <label class="form-label" for="text_color">Text Color</label>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <input type="color" class="form-control @error('text_color') is-invalid @enderror" 
-                                                   id="text_color" name="text_color" value="{{ old('text_color', '#ffffff') }}" style="display: none;">
-                                            <div class="color-preview" style="background-color: #ffffff;"></div>
-                                            <input type="text" class="form-control" value="#ffffff" readonly>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="link_url">Link URL</label>
+                                            <input type="url"
+                                                class="form-control @error('link_url') is-invalid @enderror" id="link_url"
+                                                name="link_url" value="{{ old('link_url') }}"
+                                                placeholder="https://example.com">
+                                            @error('link_url')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
                                         </div>
-                                        @error('text_color')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
 
-                                <!-- Schedule & Settings -->
-                                <div class="row g-3 mt-4">
-                                    <div class="col-12">
-                                        <h6 class="mb-3">Schedule & Settings</h6>
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <label class="form-label" for="sort_order">Sort Order</label>
-                                        <input type="number" class="form-control @error('sort_order') is-invalid @enderror" 
-                                               id="sort_order" name="sort_order" value="{{ old('sort_order', 0) }}" min="0">
-                                        <div class="form-text">Lower numbers appear first</div>
-                                        @error('sort_order')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <label class="form-label" for="start_date">Start Date</label>
-                                        <input type="text" class="form-control flatpickr @error('start_date') is-invalid @enderror" 
-                                               id="start_date" name="start_date" value="{{ old('start_date') }}" 
-                                               placeholder="Leave empty for immediate start">
-                                        @error('start_date')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <label class="form-label" for="end_date">End Date</label>
-                                        <input type="text" class="form-control flatpickr @error('end_date') is-invalid @enderror" 
-                                               id="end_date" name="end_date" value="{{ old('end_date') }}" 
-                                               placeholder="Leave empty for no expiry">
-                                        @error('end_date')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-12">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" value="1" id="is_active" name="is_active" {{ old('is_active', true) ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="is_active">
-                                                Activate banner immediately
-                                            </label>
+                                        <div class="col-12">
+                                            <label class="form-label" for="image">Banner Image *</label>
+                                            <input type="file" class="form-control @error('image') is-invalid @enderror"
+                                                id="image" name="image" accept="image/*" required>
+                                            <div class="form-text">
+                                                Recommended size: 1200x400px. Supported formats: JPEG, PNG, GIF (max 2MB)
+                                            </div>
+                                            @error('image')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
                                         </div>
                                     </div>
-                                </div>
 
-                                <!-- Submit Buttons -->
-                                <div class="row mt-4">
-                                    <div class="col-12">
-                                        <button type="submit" class="btn btn-primary me-2">
-                                            <i class="ti ti-check me-1"></i>
-                                            Create Banner
-                                        </button>
-                                        <a href="{{ route('admin.banner-advertisements.index') }}" class="btn btn-outline-secondary">
-                                            Cancel
-                                        </a>
+                                    <!-- Color Settings -->
+                                    <div class="row g-3 mt-4">
+                                        <div class="col-12">
+                                            <h6 class="mb-3">Color Settings</h6>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="background_color">Background Color</label>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <input type="color"
+                                                    class="form-control @error('background_color') is-invalid @enderror"
+                                                    id="background_color" name="background_color"
+                                                    value="{{ old('background_color', '#667eea') }}"
+                                                    style="display: none;">
+                                                <div class="color-preview" style="background-color: #667eea;"></div>
+                                                <input type="text" class="form-control" value="#667eea" readonly>
+                                            </div>
+                                            @error('background_color')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="gradient_color">Gradient Color</label>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <input type="color"
+                                                    class="form-control @error('gradient_color') is-invalid @enderror"
+                                                    id="gradient_color" name="gradient_color"
+                                                    value="{{ old('gradient_color', '#764ba2') }}" style="display: none;">
+                                                <div class="color-preview" style="background-color: #764ba2;"></div>
+                                                <input type="text" class="form-control" value="#764ba2" readonly>
+                                            </div>
+                                            @error('gradient_color')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="text_color">Text Color</label>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <input type="color"
+                                                    class="form-control @error('text_color') is-invalid @enderror"
+                                                    id="text_color" name="text_color"
+                                                    value="{{ old('text_color', '#ffffff') }}" style="display: none;">
+                                                <div class="color-preview" style="background-color: #ffffff;"></div>
+                                                <input type="text" class="form-control" value="#ffffff" readonly>
+                                            </div>
+                                            @error('text_color')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
                                     </div>
-                                </div>
-                            </form>
+
+                                    <!-- Schedule & Settings -->
+                                    <div class="row g-3 mt-4">
+                                        <div class="col-12">
+                                            <h6 class="mb-3">Schedule & Settings</h6>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="sort_order">Sort Order</label>
+                                            <input type="number"
+                                                class="form-control @error('sort_order') is-invalid @enderror"
+                                                id="sort_order" name="sort_order" value="{{ old('sort_order', 0) }}"
+                                                min="0">
+                                            <div class="form-text">Lower numbers appear first</div>
+                                            @error('sort_order')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="start_date">Start Date</label>
+                                            <input type="text"
+                                                class="form-control flatpickr @error('start_date') is-invalid @enderror"
+                                                id="start_date" name="start_date" value="{{ old('start_date') }}"
+                                                placeholder="Leave empty for immediate start">
+                                            @error('start_date')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="end_date">End Date</label>
+                                            <input type="text"
+                                                class="form-control flatpickr @error('end_date') is-invalid @enderror"
+                                                id="end_date" name="end_date" value="{{ old('end_date') }}"
+                                                placeholder="Leave empty for no expiry">
+                                            @error('end_date')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-12">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <h6 class="mb-3">Display Options</h6>
+                                                    <div class="form-check mb-3">
+                                                        <input class="form-check-input" type="checkbox" value="1"
+                                                            id="show_title" name="show_title"
+                                                            {{ old('show_title', true) ? 'checked' : '' }}>
+                                                        <label class="form-check-label" for="show_title">
+                                                            <i class="ti ti-typography me-1"></i>
+                                                            Show Banner Title
+                                                        </label>
+                                                        <div class="form-text">Display the banner title on the carousel
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" value="1"
+                                                            id="show_description" name="show_description"
+                                                            {{ old('show_description', true) ? 'checked' : '' }}>
+                                                        <label class="form-check-label" for="show_description">
+                                                            <i class="ti ti-file-text me-1"></i>
+                                                            Show Banner Description
+                                                        </label>
+                                                        <div class="form-text">Display the banner description on the
+                                                            carousel</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6 class="mb-3">Banner Status</h6>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" value="1"
+                                                            id="is_active" name="is_active"
+                                                            {{ old('is_active', true) ? 'checked' : '' }}>
+                                                        <label class="form-check-label" for="is_active">
+                                                            <i class="ti ti-toggle-right me-1"></i>
+                                                            Activate banner immediately
+                                                        </label>
+                                                        <div class="form-text">Banner will be visible on user dashboard
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Submit Buttons -->
+                                    <div class="row mt-4">
+                                        <div class="col-12">
+                                            <button type="submit" class="btn btn-primary me-2">
+                                                <i class="ti ti-check me-1"></i>
+                                                Create Banner
+                                            </button>
+                                            <a href="{{ route('admin.banner-advertisements.index') }}"
+                                                class="btn btn-outline-secondary">
+                                                Cancel
+                                            </a>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Live Preview -->
-                <div class="col-lg-4">
-                    <div class="card sticky-top" style="top: 1rem;">
-                        <div class="card-header">
-                            <h5 class="mb-0">Live Preview</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="banner-preview-live" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                                <div class="content">
-                                    <h4 class="banner-title mb-2">Banner Title</h4>
-                                    <p class="banner-description mb-3">Banner description will appear here</p>
-                                    <button class="btn btn-light btn-sm banner-button">Learn More</button>
-                                </div>
+                    <!-- Live Preview -->
+                    <div class="col-lg-4">
+                        <div class="card sticky-top" style="top: 1rem;">
+                            <div class="card-header">
+                                <h5 class="mb-0">Live Preview</h5>
                             </div>
-                            <div class="mt-3">
-                                <small class="text-muted">
-                                    <i class="ti ti-info-circle me-1"></i>
-                                    This preview shows how your banner will appear on the user dashboard.
-                                </small>
+                            <div class="card-body">
+                                <div class="banner-preview-live"
+                                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                    <div class="content">
+                                        <h4 class="banner-title mb-2">Banner Title</h4>
+                                        <p class="banner-description mb-3">Banner description will appear here</p>
+                                        <button class="btn btn-light btn-sm banner-button">Learn More</button>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <small class="text-muted">
+                                        <i class="ti ti-info-circle me-1"></i>
+                                        This preview shows how your banner will appear on the user dashboard.
+                                    </small>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -326,5 +396,4 @@ $(document).ready(function() {
             </div>
         </div>
     </div>
-</div>
 @endsection
