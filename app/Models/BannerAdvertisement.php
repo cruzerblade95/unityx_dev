@@ -14,6 +14,7 @@ class BannerAdvertisement extends Model
         'title',
         'description',
         'image_path',
+        'mobile_image_path',
         'link_url',
         'button_text',
         'background_color',
@@ -42,6 +43,17 @@ class BannerAdvertisement extends Model
     {
         if ($this->image_path) {
             return Storage::url($this->image_path);
+        }
+        return null;
+    }
+
+    /**
+     * Get the full URL for the mobile banner image
+     */
+    public function getMobileImageUrlAttribute()
+    {
+        if ($this->mobile_image_path) {
+            return Storage::url($this->mobile_image_path);
         }
         return null;
     }

@@ -118,6 +118,21 @@
                 }
             });
 
+            // Mobile image preview
+            $('#mobile_image').on('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Update the help text to show mobile image loaded
+                    $('#mobile_image').next('.form-text').html(
+                        'Mobile image loaded. Recommended size: 540x130px for optimal mobile display. Supported formats: JPEG, PNG, GIF (max 2MB)'
+                    );
+                } else {
+                    $('#mobile_image').next('.form-text').html(
+                        'Leave empty to keep current mobile image. Recommended size: 540x130px for optimal mobile display. Supported formats: JPEG, PNG, GIF (max 2MB)'
+                    );
+                }
+            });
+
             // Color picker functionality
             $('input[type="color"]').on('change', function() {
                 const colorValue = $(this).val();
@@ -241,10 +256,10 @@
                                         </div>
 
                                         <div class="col-12">
-                                            <label class="form-label" for="image">Banner Image</label>
+                                            <label class="form-label" for="image">Desktop Banner Image</label>
                                             @if ($bannerAdvertisement->image_path)
                                                 <div class="mb-2">
-                                                    <small class="text-muted">Current image:</small><br>
+                                                    <small class="text-muted">Current desktop image:</small><br>
                                                     <img src="{{ $bannerAdvertisement->image_url }}" alt="Current banner"
                                                         class="current-image">
                                                 </div>
@@ -252,10 +267,40 @@
                                             <input type="file" class="form-control @error('image') is-invalid @enderror"
                                                 id="image" name="image" accept="image/*">
                                             <div class="form-text">
-                                                Leave empty to keep current image. Recommended size: 1200x400px. Supported
+                                                Leave empty to keep current image. <strong>Recommended size:
+                                                    1400x250px</strong> for optimal
+                                                desktop display. Supported
                                                 formats: JPEG, PNG, GIF (max 2MB)
                                             </div>
                                             @error('image')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label class="form-label" for="mobile_image">Mobile Banner Image</label>
+                                            @if ($bannerAdvertisement->mobile_image_path)
+                                                <div class="mb-2">
+                                                    <small class="text-muted">Current mobile image:</small><br>
+                                                    <img src="{{ $bannerAdvertisement->mobile_image_url }}"
+                                                        alt="Current mobile banner" class="current-image">
+                                                </div>
+                                            @else
+                                                <div class="mb-2">
+                                                    <small class="text-muted">No mobile image uploaded. Desktop image will
+                                                        be used for mobile display.</small>
+                                                </div>
+                                            @endif
+                                            <input type="file"
+                                                class="form-control @error('mobile_image') is-invalid @enderror"
+                                                id="mobile_image" name="mobile_image" accept="image/*">
+                                            <div class="form-text">
+                                                Leave empty to keep current mobile image. <strong>Recommended size:
+                                                    1200x400px</strong> for
+                                                optimal mobile display. Supported
+                                                formats: JPEG, PNG, GIF (max 2MB)
+                                            </div>
+                                            @error('mobile_image')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>

@@ -106,8 +106,28 @@
                         $('.banner-preview-live').css('background-image', `url(${e.target.result})`);
                         $('.banner-preview-live').css('background-size', 'cover');
                         $('.banner-preview-live').css('background-position', 'center');
+
+                        // Add desktop label
+                        $('#image').next('.form-text').html(
+                            'Desktop image loaded. Recommended size: 1140x250px for optimal desktop display. Supported formats: JPEG, PNG, GIF (max 2MB)'
+                            );
                     }
                     reader.readAsDataURL(file);
+                }
+            });
+
+            // Mobile image preview
+            $('#mobile_image').on('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Add mobile label
+                    $('#mobile_image').next('.form-text').html(
+                        'Mobile image loaded. Recommended size: 540x130px for optimal mobile display. Supported formats: JPEG, PNG, GIF (max 2MB)'
+                        );
+                } else {
+                    $('#mobile_image').next('.form-text').html(
+                        'Recommended size: 540x130px for optimal mobile display. If not provided, desktop image will be used for mobile. Supported formats: JPEG, PNG, GIF (max 2MB)'
+                        );
                 }
             });
 
@@ -200,13 +220,30 @@
                                         </div>
 
                                         <div class="col-12">
-                                            <label class="form-label" for="image">Banner Image *</label>
+                                            <label class="form-label" for="image">Desktop Banner Image *</label>
                                             <input type="file" class="form-control @error('image') is-invalid @enderror"
                                                 id="image" name="image" accept="image/*" required>
                                             <div class="form-text">
-                                                Recommended size: 1200x400px. Supported formats: JPEG, PNG, GIF (max 2MB)
+                                                Recommended size: 1140x250px for optimal desktop display. Supported formats:
+                                                JPEG, PNG, GIF (max 2MB)
                                             </div>
                                             @error('image')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label class="form-label" for="mobile_image">Mobile Banner Image
+                                                (Optional)</label>
+                                            <input type="file"
+                                                class="form-control @error('mobile_image') is-invalid @enderror"
+                                                id="mobile_image" name="mobile_image" accept="image/*">
+                                            <div class="form-text">
+                                                Recommended size: 540x130px for optimal mobile display. If not provided,
+                                                desktop image will be used for mobile. Supported formats: JPEG, PNG, GIF
+                                                (max 2MB)
+                                            </div>
+                                            @error('mobile_image')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
@@ -240,7 +277,8 @@
                                                 <input type="color"
                                                     class="form-control @error('gradient_color') is-invalid @enderror"
                                                     id="gradient_color" name="gradient_color"
-                                                    value="{{ old('gradient_color', '#764ba2') }}" style="display: none;">
+                                                    value="{{ old('gradient_color', '#764ba2') }}"
+                                                    style="display: none;">
                                                 <div class="color-preview" style="background-color: #764ba2;"></div>
                                                 <input type="text" class="form-control" value="#764ba2" readonly>
                                             </div>

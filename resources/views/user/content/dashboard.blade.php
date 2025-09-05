@@ -245,12 +245,30 @@
                                                     background: {{ $banner->gradient_color
                                                         ? 'linear-gradient(135deg, ' . $banner->background_color . ' 0%, ' . $banner->gradient_color . ' 100%)'
                                                         : $banner->background_color }};
-                                                    overflow: hidden;
-                                                    {{ $banner->image_path ? 'background-image: url(' . $banner->image_url . ');' : '' }}"
+                                                    overflow: hidden;"
                                             title="{{ $banner->description }}" data-bs-toggle="tooltip"
-                                            data-bs-placement="top">
+                                            data-bs-placement="top"
+                                            data-desktop-image="{{ $banner->image_path ? $banner->image_url : '' }}"
+                                            data-mobile-image="{{ $banner->mobile_image_path ? $banner->mobile_image_url : ($banner->image_path ? $banner->image_url : '') }}">
 
-                                            @if ($banner->image_path)
+                                            <!-- Responsive Background Images -->
+                                            @if ($banner->image_path || $banner->mobile_image_path)
+                                                <!-- Desktop Image -->
+                                                <div class="desktop-image position-absolute top-0 start-0 w-100 h-100 d-none d-md-block"
+                                                    style="background-image: url('{{ $banner->image_path ? $banner->image_url : '' }}');
+                                                           background-size: contain;
+                                                           background-repeat: no-repeat;
+                                                           background-position: center;">
+                                                </div>
+
+                                                <!-- Mobile Image -->
+                                                <div class="mobile-image position-absolute top-0 start-0 w-100 h-100 d-block d-md-none"
+                                                    style="background-image: url('{{ $banner->mobile_image_path ? $banner->mobile_image_url : ($banner->image_path ? $banner->image_url : '') }}');
+                                                           background-size: contain;
+                                                           background-repeat: no-repeat;
+                                                           background-position: center;">
+                                                </div>
+
                                                 <!-- Overlay for better text readability on images -->
                                                 <div class="position-absolute top-0 start-0 w-100 h-100"
                                                     style="background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 100%);">
@@ -310,11 +328,9 @@
 
         <!-- Custom CSS for mobile responsiveness -->
         <style>
-            /* Ensure images fit properly on all screen sizes */
+            /* Remove global background image settings since we use separate divs now */
             .carousel-banner-item {
-                background-size: contain !important;
-                background-repeat: no-repeat !important;
-                background-position: center !important;
+                /* Background image is now handled by separate desktop/mobile divs */
             }
 
             /* Desktop and larger screens */
@@ -598,7 +614,8 @@
                             <!-- Telegram Connected but No Username -->
                             <div class="alert alert-warning mt-3" role="alert">
                                 <h6 class="alert-heading mb-2">⚠️ Telegram Username Required</h6>
-                                <p class="mb-2">Your Telegram is connected, but you need to set a username for marketplace
+                                <p class="mb-2">Your Telegram is connected, but you need to set a username for
+                                    marketplace
                                     transactions.</p>
                                 <div class="d-flex gap-2">
                                     <span class="badge bg-info">Step 1:</span>
