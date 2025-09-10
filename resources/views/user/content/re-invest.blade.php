@@ -711,10 +711,13 @@
                                                 </td>
                                                 <td>
                                                     @php
-                                                        $progress = min(
-                                                            100,
-                                                            ($currentValue / $investment->ending_amount) * 100,
-                                                        );
+                                                        $progress = 0;
+                                                        if ($investment->ending_amount > 0) {
+                                                            $progress = min(
+                                                                100,
+                                                                ($currentValue / $investment->ending_amount) * 100,
+                                                            );
+                                                        }
                                                         $progressClass =
                                                             $progress >= 75
                                                                 ? 'bg-success'
