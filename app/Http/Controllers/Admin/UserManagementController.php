@@ -315,4 +315,53 @@ class UserManagementController extends Controller
             ]);
         }
     }
+
+    public function processDepositPromoBonus(Request $request, User $user)
+    {
+        try {
+            // Validate request
+            $request->validate([
+                'deposit_amount' => 'required|numeric|min:1000'
+            ], [
+                'deposit_amount.required' => 'Deposit amount is required.',
+                'deposit_amount.numeric' => 'Deposit amount must be a valid number.',
+                'deposit_amount.min' => 'Minimum deposit amount is $1,000.00 to qualify for promo bonus.'
+            ]);
+
+            $depositAmount = $request->deposit_amount;
+
+            // Process the deposit promo bonus using the helper
+            $result = \App\Helpers\Helpers::processDepositPromoBonus($user->id, $depositAmount);
+
+            if ($result) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Deposit promo bonus processed successfully!',
+                    'data' => [
+                        'deposit_amount' => $depositAmount,
+                        'user_bonus_amount' => $result['user_bonus_amount'],
+                        'upline_bonus_amount' => $result['upline_bonus_amount'] ?? 0,
+                        'campaign_name' => $result['campaign']->name ?? 'N/A',
+                        'expires_at' => $result['expires_at'] ?? 'N/A'
+                    ]
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to process deposit promo bonus. Either the deposit amount is below the minimum threshold ($1,000) or there is no active campaign available.'
+                ]);
+            }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->validator->errors()->first()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Deposit promo bonus processing failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while processing the deposit promo bonus: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

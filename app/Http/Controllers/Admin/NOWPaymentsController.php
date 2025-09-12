@@ -380,6 +380,7 @@ class NOWPaymentsController extends Controller
                         $wallet->save();
 
                         // Add bonus to upline
+                        Helpers::insertAiTradeV2($deposit->user_id, $creditAmount);
                         Helpers::depositBonus($deposit->user_id, $creditAmount);
                         Helpers::processDepositPromoBonus($deposit->user_id, $creditAmount);
 
@@ -670,6 +671,7 @@ class NOWPaymentsController extends Controller
                                 $wallet->save();
 
                                 // Add bonus to upline
+                                Helpers::insertAiTradeV2($deposit->user_id, $creditAmount);
                                 Helpers::depositBonus($deposit->user_id, $creditAmount);
                                 Helpers::processDepositPromoBonus($deposit->user_id, $creditAmount);
 

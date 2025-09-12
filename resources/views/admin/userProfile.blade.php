@@ -100,10 +100,16 @@ use Illuminate\Support\Facades\Storage;
             <div class="card-header border-bottom">
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Wallet Information</h5>
-                    <a href="{{ route('admin.users.index') }}" class="btn btn-label-secondary">
-                        <i class="fas fa-arrow-left me-1"></i>
-                        Back to Users
-                    </a>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#depositPromoModal">
+                            <i class="fas fa-gift me-1"></i>
+                            Process Deposit Promo Bonus
+                        </button>
+                        <a href="{{ route('admin.users.index') }}" class="btn btn-label-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Back to Users
+                        </a>
+                    </div>
                 </div>
             </div>
             <div class="card-body">
@@ -194,6 +200,28 @@ use Illuminate\Support\Facades\Storage;
                         </button>
                     </div>
                 @endif
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Deposit Promo Bonus History Section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header border-bottom">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-gift me-2"></i>Deposit Promo Bonus History
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="depositPromoHistory">
+                    <div class="text-center py-3">
+                        <i class="fas fa-history fa-2x text-muted mb-2"></i>
+                        <p class="text-muted mb-0">No deposit promo bonus history available.</p>
+                        <small class="text-muted">Process a bonus to see history here.</small>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -582,6 +610,59 @@ use Illuminate\Support\Facades\Storage;
     </div>
 </div>
 
+<!-- Process Deposit Promo Bonus Modal -->
+<div class="modal fade" id="depositPromoModal" tabindex="-1" aria-labelledby="depositPromoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="depositPromoModalLabel">
+                    <i class="fas fa-gift me-2"></i>Process Deposit Promo Bonus
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="depositPromoForm">
+                <div class="modal-body">
+                    @csrf
+                    <input type="hidden" id="user_id" name="user_id" value="{{ $user->id }}">
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>User:</strong> {{ $user->firstname }} {{ $user->lastname }}<br>
+                        <strong>Email:</strong> {{ $user->email }}<br>
+                        <strong>Note:</strong> Minimum deposit amount is $1,000 to qualify for promo bonus.
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="deposit_amount" class="form-label">
+                            <i class="fas fa-dollar-sign me-1"></i>Deposit Amount <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number"
+                                   class="form-control"
+                                   id="deposit_amount"
+                                   name="deposit_amount"
+                                   min="1000"
+                                   step="0.01"
+                                   required
+                                   placeholder="Enter deposit amount">
+                        </div>
+                        <small class="text-muted">Minimum amount: $1,000.00</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn btn-success" id="processDepositBonusBtn">
+                        <i class="fas fa-gift me-1"></i>Process Bonus
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Add User Modal -->
 <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -919,6 +1000,121 @@ $(document).ready(function() {
         $('.is-invalid').removeClass('is-invalid');
         $('.invalid-feedback').text('');
     });
+
+    // Handle deposit promo bonus form submission
+    $('#depositPromoForm').on('submit', function(e) {
+        e.preventDefault();
+
+        const form = this;
+        const submitBtn = $('#processDepositBonusBtn');
+        const originalBtnText = submitBtn.html();
+        const depositAmount = parseFloat($('#deposit_amount').val());
+
+        // Validate minimum amount
+        if (depositAmount < 1000) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Invalid Amount',
+                text: 'Minimum deposit amount is $1,000.00 to qualify for promo bonus.',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        // Disable submit button and show loading state
+        submitBtn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...');
+        submitBtn.prop('disabled', true);
+
+        // Send AJAX request
+        $.ajax({
+            url: '{{ route("admin.users.process-deposit-promo-bonus", $user->id) }}',
+            type: 'POST',
+            data: {
+                _token: $('meta[name="csrf-token"]').attr('content'),
+                deposit_amount: depositAmount
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Hide modal
+                    $('#depositPromoModal').modal('hide');
+
+                    // Reset form
+                    form.reset();
+
+                    // Show success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: response.message,
+                        confirmButtonText: 'OK'
+                    });
+
+                    // Update history section
+                    updateDepositPromoHistory(response.data);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: response.message || 'Failed to process deposit promo bonus.',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                let errorMessage = 'An error occurred while processing the deposit promo bonus.';
+
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: errorMessage,
+                    confirmButtonText: 'OK'
+                });
+            },
+            complete: function() {
+                // Reset button state
+                submitBtn.html(originalBtnText);
+                submitBtn.prop('disabled', false);
+            }
+        });
+    });
+
+    // Reset deposit promo form when modal is hidden
+    $('#depositPromoModal').on('hidden.bs.modal', function() {
+        $('#depositPromoForm')[0].reset();
+    });
+
+    // Function to update deposit promo history
+    function updateDepositPromoHistory(data) {
+        if (!data) return;
+
+        const historyDiv = $('#depositPromoHistory');
+        const now = new Date().toLocaleString();
+
+        const historyHtml = `
+            <div class="alert alert-success border-0">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="alert-heading mb-1">
+                            <i class="fas fa-check-circle me-1"></i>Bonus Processed Successfully
+                        </h6>
+                        <p class="mb-2"><strong>Deposit Amount:</strong> $${parseFloat(data.deposit_amount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                        <p class="mb-2"><strong>User Bonus:</strong> $${parseFloat(data.user_bonus_amount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                        ${data.upline_bonus_amount > 0 ? `<p class="mb-2"><strong>Upline Bonus:</strong> $${parseFloat(data.upline_bonus_amount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>` : ''}
+                        <p class="mb-2"><strong>Campaign:</strong> ${data.campaign_name}</p>
+                        <p class="mb-0"><strong>Expires:</strong> ${data.expires_at}</p>
+                    </div>
+                    <small class="text-muted">${now}</small>
+                </div>
+            </div>
+        `;
+
+        // Replace the "no history" message with the new result
+        historyDiv.html(historyHtml);
+    }
 
     function showError(message) {
         Swal.fire({
