@@ -68,7 +68,7 @@ class Helpers
    */
   public static function roiMatchingBonus($userId, $amount)
   {
-    $percentages = [5, 3, 2, 1, 0.5, 0.5, 0.5, 0.5, 5, 0.5];
+    $percentages = [5, 3, 2, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5];
     $totalPercent = 14;
     $bonusBase = $amount * ($totalPercent / 100);
     $currentUserId = $userId;
@@ -101,14 +101,16 @@ class Helpers
   }
 
   /**
-   * Distribute Deposit Bonus to 10-level referral downline
+   * Distribute Deposit Bonus to referral downline based on level 1 referrer's direct downline count
    * @param int $userId The user who made the deposit
    * @param float $amount The base amount for bonus calculation
    */
   public static function depositBonus($userId, $amount)
   {
-    $percentages = [10, 5, 3, 2, 1, 0.5, 0.5, 0.5, 5, 0.5];
-    $totalPercent = 22.5;
+    // $percentages = [10, 5, 3, 2, 1, 0.5, 0.5, 0.5, 0.5, 0.5];
+    $percentages = [6, 2, 1, 0.3, 0.2, 0.1, 0.1, 0.1, 0.1, 0.1];
+    // $totalPercent = 22.5;
+    $totalPercent = 10;
     $bonusBase = $amount * ($totalPercent / 100);
     $currentUserId = $userId;
 
@@ -116,7 +118,22 @@ class Helpers
     $fromUser = DB::table('users')->where('id', $userId)->first();
     $fromUsername = $fromUser ? $fromUser->username : 'Unknown User';
 
-    for ($level = 1; $level <= 10; $level++) {
+    // Get level 1 referrer (direct upline)
+    $level1Referrer = DB::table('users')->where('id', $currentUserId)->value('upline_id');
+
+    // Determine maximum levels based on level 1 referrer's direct downline count
+    $maxLevels = 3; // Default to 3 levels
+    if ($level1Referrer) {
+      // Count direct downlines of level 1 referrer (only level 1 downlines)
+      $directDownlineCount = DB::table('users')->where('upline_id', $level1Referrer)->count();
+
+      // If level 1 referrer has 10 or more direct downlines, distribute to 10 levels
+      if ($directDownlineCount >= 10) {
+        $maxLevels = 10;
+      }
+    }
+
+    for ($level = 1; $level <= $maxLevels; $level++) {
       $referrer = DB::table('users')->where('id', $currentUserId)->value('upline_id');
       if (!$referrer) break;
       $percent = $percentages[$level-1];
@@ -131,7 +148,7 @@ class Helpers
         'percent' => $percent,
         'bonus_type' => 'deposit',
         'level' => $level,
-        'note' => 'Deposit Bonus from ' . $fromUsername,
+        'note' => 'Deposit Bonus from ' . $fromUsername . ' (Max levels: ' . $maxLevels . ')',
         'created_at' => now(),
         'updated_at' => now(),
       ]);
