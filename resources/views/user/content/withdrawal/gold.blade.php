@@ -1,4 +1,4 @@
-@include('components.coming-soon-overlay')
+{{-- @include('components.coming-soon-overlay') --}}
 
 @extends('user.layouts.layoutMaster')
 
@@ -286,33 +286,44 @@
                                     </div>
                                 </div>
 
-                                <!-- Branch Selection Information -->
+                                <!-- Branch Assignment Information -->
                                 <div class="card bg-light mb-4">
                                     <div class="card-body">
                                         <h6 class="card-title">
                                             <i class="fas fa-map-marker-alt me-2 text-info"></i>
-                                            Branch Selection Process
+                                            Branch Assignment Process
                                         </h6>
-                                        <p class="mb-2">After your redemption request is approved, you'll be able to
-                                            select your preferred Musleem Gold branch for pickup.</p>
+                                        <p class="mb-2">After your redemption request is approved, our admin will assign
+                                            the most suitable Musleem Gold branch for your pickup based on your location and
+                                            branch availability.</p>
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <h6 class="small text-primary">Available Branches:</h6>
                                                 <ul class="list-unstyled small">
-                                                    <li><i class="fas fa-map-pin text-success me-1"></i>SHAH ALAM</li>
+                                                    <li><i class="fas fa-map-pin text-success me-1"></i>UTC</li>
                                                     <li><i class="fas fa-map-pin text-success me-1"></i>BANGI</li>
-                                                    <li><i class="fas fa-map-pin text-success me-1"></i>BANTING</li>
-                                                    <li><i class="fas fa-map-pin text-success me-1"></i>ALOR SETAR</li>
+                                                    <li><i class="fas fa-map-pin text-success me-1"></i>JELAWAT</li>
+                                                    <li><i class="fas fa-map-pin text-success me-1"></i>KOTA BHARU</li>
+                                                    <li><i class="fas fa-map-pin text-success me-1"></i>ADDA HEIGHT</li>
+                                                    <li><i class="fas fa-map-pin text-success me-1"></i>IPOH</li>
                                                 </ul>
                                             </div>
                                             <div class="col-md-6">
                                                 <ul class="list-unstyled small">
-                                                    <li><i class="fas fa-map-pin text-success me-1"></i>JELAWAT</li>
+                                                    <li><i class="fas fa-map-pin text-success me-1"></i>SHAH ALAM</li>
+                                                    <li><i class="fas fa-map-pin text-success me-1"></i>BBU</li>
                                                     <li><i class="fas fa-map-pin text-success me-1"></i>KOTA TINGGI</li>
-                                                    <li><i class="fas fa-map-pin text-success me-1"></i>BANDAR BARU UDA
+                                                    <li><i class="fas fa-map-pin text-success me-1"></i>BANTING</li>
+                                                    <li><i class="fas fa-map-pin text-success me-1"></i>SETAPAK</li>
+                                                    <li><i class="fas fa-map-pin text-success me-1"></i>KUALA TERENGGANU
                                                     </li>
                                                 </ul>
                                             </div>
+                                        </div>
+                                        <div class="alert alert-info mt-3 mb-0">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            <strong>Note:</strong> You will be contacted by the assigned branch manager with
+                                            pickup details once your request is approved and processed.
                                         </div>
                                     </div>
                                 </div>
@@ -411,7 +422,8 @@
                         <ul class="list-unstyled small mb-3">
                             <li><i class="fas fa-percentage text-warning me-2"></i>7.0% processing fee</li>
                             <li><i class="fas fa-clock text-info me-2"></i>3-5 business days processing</li>
-                            <li><i class="fas fa-map-marker-alt text-success me-2"></i>Choose pickup branch after approval
+                            <li><i class="fas fa-map-marker-alt text-success me-2"></i>Branch assigned by admin after
+                                approval
                             </li>
                             <li><i class="fas fa-shield-alt text-success me-2"></i>Secure verification required</li>
                         </ul>

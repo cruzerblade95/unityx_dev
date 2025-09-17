@@ -75,6 +75,8 @@ Route::prefix('admin')->middleware('web')->group(function () {
         Route::get('/withdrawals/list', [WithdrawalManagementController::class, 'list'])->name('admin.withdrawals.list');
         Route::get('/withdrawals/{id}', [WithdrawalManagementController::class, 'show'])->name('admin.withdrawals.show');
         Route::post('/withdrawals/{id}/approve', [WithdrawalManagementController::class, 'approve'])->name('admin.withdrawals.approve');
+        Route::post('/withdrawals/{id}/approve-gold', [WithdrawalManagementController::class, 'approveGold'])->name('admin.withdrawals.approve-gold');
+        Route::get('/withdrawals/{id}/receipt', [WithdrawalManagementController::class, 'receipt'])->name('admin.withdrawals.receipt');
         Route::post('/withdrawals/{id}/reject', [WithdrawalManagementController::class, 'reject'])->name('admin.withdrawals.reject');
 
         // Marketplace Management Routes

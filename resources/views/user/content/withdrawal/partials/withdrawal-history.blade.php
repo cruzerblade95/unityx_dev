@@ -89,12 +89,19 @@
                                                 : $withdrawal->payment_details;
                                         @endphp
                                         <div class="small">
-                                            <strong>Gold Redeem</strong><br>
+                                            <strong>Gold Redemption</strong><br>
                                             ID: {{ $paymentDetails['national_id'] ?? 'N/A' }}<br>
-                                            @if ($withdrawal->branch_name)
-                                                Branch: {{ $withdrawal->branch_name }}
+                                            @if ($withdrawal->branch_name && $withdrawal->branch_selected)
+                                                <strong class="text-success">Branch:
+                                                    {{ $withdrawal->branch_name }}</strong><br>
+                                                @if ($withdrawal->branch_manager_name)
+                                                    Manager: {{ $withdrawal->branch_manager_name }}<br>
+                                                    Phone: {{ $withdrawal->branch_manager_phone }}
+                                                @endif
+                                            @elseif ($withdrawal->status === 'approved')
+                                                <em class="text-info">Branch being assigned...</em>
                                             @else
-                                                <em class="text-muted">Branch not selected</em>
+                                                <em class="text-muted">Awaiting approval</em>
                                             @endif
                                         </div>
                                     @endif
@@ -107,7 +114,7 @@
                                     @elseif($withdrawal->status === 'approved')
                                         @if ($withdrawal->withdrawal_type === 'gold' && !$withdrawal->branch_selected)
                                             <span class="badge bg-info">
-                                                <i class="fas fa-map-marker-alt me-1"></i>Select Branch
+                                                <i class="fas fa-cog me-1"></i>Processing
                                             </span>
                                         @else
                                             <span class="badge bg-success">
@@ -140,61 +147,24 @@
                                     {{ $withdrawal->created_at->format('g:i A') }}
                                 </td>
                                 <td>
-                                    @if ($withdrawal->withdrawal_type === 'gold' && $withdrawal->status === 'approved' && !$withdrawal->branch_selected)
-                                        <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal"
-                                            data-bs-target="#branchModal{{ $withdrawal->id }}">
-                                            <i class="fas fa-map-marker-alt me-1"></i>Select Branch
+                                    @if ($withdrawal->withdrawal_type === 'gold' && $withdrawal->status === 'approved' && $withdrawal->branch_selected)
+                                        <!-- Receipt Download Button for Gold Withdrawals -->
+                                        <a href="{{ route('user.withdrawal.receipt', $withdrawal->id) }}"
+                                            class="btn btn-sm btn-success" target="_blank">
+                                            <i class="fas fa-receipt me-1"></i>Download Receipt
+                                        </a>
+                                    @elseif ($withdrawal->withdrawal_type === 'gold' && $withdrawal->status === 'approved' && !$withdrawal->branch_selected)
+                                        <!-- Gold withdrawal approved but no branch assigned yet -->
+                                        <span class="badge bg-info">
+                                            <i class="fas fa-clock me-1"></i>Awaiting Branch Assignment
+                                        </span>
+                                    @elseif ($withdrawal->status === 'rejected' && $withdrawal->rejection_reason)
+                                        <!-- View Rejection Reason Button -->
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#rejectionModal{{ $withdrawal->id }}">
+                                            <i class="fas fa-exclamation-circle me-1"></i>View Reason
                                         </button>
-
-                                        <!-- Branch Selection Modal -->
-                                        <div class="modal fade" id="branchModal{{ $withdrawal->id }}" tabindex="-1">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">Select Musleem Gold Branch</h5>
-                                                        <button type="button" class="btn-close"
-                                                            data-bs-dismiss="modal"></button>
-                                                    </div>
-                                                    <form method="POST"
-                                                        action="{{ route('user.withdrawal.select-branch', $withdrawal->id) }}">
-                                                        @csrf
-                                                        <div class="modal-body">
-                                                            <p>Please select your preferred Musleem Gold branch for
-                                                                pickup:</p>
-                                                            <div class="mb-3">
-                                                                <label class="form-label">Branch Location <span
-                                                                        class="text-danger">*</span></label>
-                                                                <select class="form-control" name="branch_name"
-                                                                    required>
-                                                                    <option value="">Select a branch...</option>
-                                                                    <option value="SHAH ALAM">SHAH ALAM</option>
-                                                                    <option value="BANGI">BANGI</option>
-                                                                    <option value="BANTING">BANTING</option>
-                                                                    <option value="ALOR SETAR">ALOR SETAR</option>
-                                                                    <option value="JELAWAT">JELAWAT</option>
-                                                                    <option value="KOTA TINGGI">KOTA TINGGI</option>
-                                                                    <option value="BANDAR BARU UDA">BANDAR BARU UDA
-                                                                    </option>
-                                                                </select>
-                                                            </div>
-                                                            <div class="alert alert-info">
-                                                                <small>
-                                                                    <i class="fas fa-info-circle me-1"></i>
-                                                                    Once you select a branch, you'll receive further
-                                                                    instructions for pickup.
-                                                                </small>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary"
-                                                                data-bs-dismiss="modal">Cancel</button>
-                                                            <button type="submit" class="btn btn-primary">Confirm
-                                                                Branch</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
                                     @else
                                         <span class="text-muted small">No actions</span>
                                     @endif

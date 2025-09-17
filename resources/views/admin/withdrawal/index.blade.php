@@ -262,6 +262,109 @@
                     });
                 });
 
+                // Gold withdrawal approval with branch assignment
+                $(document).on('click', '.gold-approve-btn', function() {
+                    var withdrawalId = $(this).data('id');
+
+                    // Load withdrawal details
+                    $.ajax({
+                        url: "/admin/withdrawals/" + withdrawalId,
+                        type: 'GET',
+                        success: function(response) {
+                            if (response.success) {
+                                var data = response.data;
+
+                                // Populate withdrawal summary
+                                var summaryHtml = `
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p><strong>Withdrawal ID:</strong> #${data.id}</p>
+                                            <p><strong>User:</strong> ${data.user.firstname} ${data.user.lastname}</p>
+                                            <p><strong>Username:</strong> @${data.user.username}</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p><strong>Amount:</strong> $${parseFloat(data.amount).toFixed(2)}</p>
+                                            <p><strong>Net Amount:</strong> <strong class="text-success">$${parseFloat(data.net_amount).toFixed(2)}</strong></p>
+                                            <p><strong>Wallet:</strong> ${(data.wallet_type || 'profit').charAt(0).toUpperCase() + (data.wallet_type || 'profit').slice(1)}</p>
+                                        </div>
+                                    </div>
+                                `;
+
+                                $('#withdrawalDetails').html(summaryHtml);
+                                $('#branchAssignmentForm').data('withdrawal-id', withdrawalId);
+
+                                // Reset form
+                                $('#branchSelect').val('');
+                                $('#branchManagerInfo').hide();
+                                $('#adminNotes').val('');
+                            } else {
+                                Swal.fire('Error!', response.message, 'error');
+                            }
+                        },
+                        error: function(xhr) {
+                            Swal.fire('Error!', 'Failed to load withdrawal details', 'error');
+                        }
+                    });
+                });
+
+                // Handle branch selection
+                $(document).on('change', '#branchSelect', function() {
+                    var selectedOption = $(this).find(':selected');
+                    if (selectedOption.val()) {
+                        var managerName = selectedOption.data('manager');
+                        var managerPhone = selectedOption.data('phone');
+
+                        $('#managerName').text(managerName);
+                        $('#managerPhone').text(managerPhone);
+                        $('#branchManagerInfo').show();
+                    } else {
+                        $('#branchManagerInfo').hide();
+                    }
+                });
+
+                // Handle branch assignment form submission
+                $(document).on('submit', '#branchAssignmentForm', function(e) {
+                    e.preventDefault();
+
+                    var withdrawalId = $(this).data('withdrawal-id');
+                    var selectedBranch = $('#branchSelect').val();
+                    var adminNotes = $('#adminNotes').val();
+
+                    if (!selectedBranch) {
+                        Swal.fire('Error!', 'Please select a branch', 'error');
+                        return;
+                    }
+
+                    var selectedOption = $('#branchSelect').find(':selected');
+                    var branchData = {
+                        branch_key: selectedBranch,
+                        branch_name: selectedOption.text(),
+                        manager_name: selectedOption.data('manager'),
+                        manager_phone: selectedOption.data('phone'),
+                        admin_notes: adminNotes,
+                        _token: "{{ csrf_token() }}"
+                    };
+
+                    $.ajax({
+                        url: "/admin/withdrawals/" + withdrawalId + "/approve-gold",
+                        type: 'POST',
+                        data: branchData,
+                        success: function(response) {
+                            if (response.success) {
+                                $('#branchAssignmentModal').modal('hide');
+                                Swal.fire('Success!', response.message, 'success');
+                                table.ajax.reload(null, false);
+                            } else {
+                                Swal.fire('Error!', response.message, 'error');
+                            }
+                        },
+                        error: function(xhr) {
+                            var response = JSON.parse(xhr.responseText);
+                            Swal.fire('Error!', response.message, 'error');
+                        }
+                    });
+                });
+
                 // Reject withdrawal
                 $(document).on('click', '.reject-btn', function() {
                     var withdrawalId = $(this).data('id');
@@ -650,6 +753,88 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Branch Assignment Modal for Gold Withdrawals -->
+    <div class="modal fade" id="branchAssignmentModal" tabindex="-1" aria-labelledby="branchAssignmentModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="branchAssignmentModalLabel">
+                        <i class="fas fa-coins me-2 text-warning"></i>Approve Gold Withdrawal & Assign Branch
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="branchAssignmentForm">
+                    <div class="modal-body">
+                        <div id="withdrawalSummary" class="card bg-light mb-4">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="fas fa-info-circle me-2"></i>Withdrawal Summary
+                                </h6>
+                                <div id="withdrawalDetails">
+                                    <!-- Withdrawal details will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="branchSelect" class="form-label">
+                                <i class="fas fa-map-marker-alt me-2"></i>Select Branch <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="branchSelect" name="branch" required>
+                                <option value="">Choose a branch...</option>
+                                @foreach (config('gold_branches.branches') as $key => $branch)
+                                    <option value="{{ $key }}" data-manager="{{ $branch['manager_name'] }}"
+                                        data-phone="{{ $branch['manager_phone'] }}">
+                                        {{ $branch['name'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div id="branchManagerInfo" class="card border-success mb-4" style="display: none;">
+                            <div class="card-body">
+                                <h6 class="card-title text-success">
+                                    <i class="fas fa-user-tie me-2"></i>Branch Manager Information
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <p class="mb-1"><strong>Manager Name:</strong></p>
+                                        <p class="mb-2" id="managerName">-</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><strong>Contact:</strong></p>
+                                        <p class="mb-2" id="managerPhone">-</p>
+                                    </div>
+                                </div>
+                                <div class="alert alert-info mb-0">
+                                    <small>
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        The branch manager will be contacted automatically after approval.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="adminNotes" class="form-label">
+                                <i class="fas fa-sticky-note me-2"></i>Admin Notes (Optional)
+                            </label>
+                            <textarea class="form-control" id="adminNotes" name="admin_notes" rows="3"
+                                placeholder="Any special instructions or notes for this gold withdrawal..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check me-2"></i>Approve & Assign Branch
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

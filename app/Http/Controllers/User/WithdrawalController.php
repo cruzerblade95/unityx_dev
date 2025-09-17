@@ -451,38 +451,6 @@ class WithdrawalController extends Controller
         }
     }
 
-    public function selectBranch(Request $request, $withdrawalId)
-    {
-        $user = Auth::user();
-        $withdrawal = Withdrawal::where('id', $withdrawalId)
-            ->where('user_id', $user->id)
-            ->where('withdrawal_type', 'gold')
-            ->where('status', 'approved')
-            ->where('branch_selected', false)
-            ->firstOrFail();
-
-        $validBranches = [
-            'SHAH ALAM',
-            'BANGI',
-            'BANTING',
-            'ALOR SETAR',
-            'JELAWAT',
-            'KOTA TINGGI',
-            'BANDAR BARU UDA'
-        ];
-
-        $request->validate([
-            'branch_name' => 'required|in:' . implode(',', $validBranches)
-        ]);
-
-        $withdrawal->update([
-            'branch_name' => $request->branch_name,
-            'branch_selected' => true,
-        ]);
-
-        return redirect()->back()->with('success', 'Branch selected successfully! Your gold withdrawal is ready for pickup at Musleem Gold - ' . $request->branch_name);
-    }
-
     public function sendOtp(Request $request)
     {
         $user = Auth::user();
@@ -663,5 +631,27 @@ class WithdrawalController extends Controller
             'success' => true,
             'message' => 'Withdrawal request submitted successfully! Net amount after ' . $taxPercent . '% fee: $' . number_format($net_amount, 2)
         ]);
+    }
+
+    public function receipt($id)
+    {
+        try {
+            $withdrawal = Withdrawal::where('user_id', Auth::id())->findOrFail($id);
+
+            // Validate that this is an approved gold withdrawal with branch assigned
+            if ($withdrawal->withdrawal_type !== 'gold') {
+                abort(404, 'Receipt not available for this withdrawal type.');
+            }
+
+            if ($withdrawal->status !== 'approved' || !$withdrawal->branch_selected) {
+                abort(404, 'Receipt only available for approved gold withdrawals with assigned branch.');
+            }
+
+            // Use the admin receipt template but pass user context
+            return view('admin.withdrawal.receipt', compact('withdrawal'));
+
+        } catch (\Exception $e) {
+            abort(500, 'Error generating receipt: ' . $e->getMessage());
+        }
     }
 }
