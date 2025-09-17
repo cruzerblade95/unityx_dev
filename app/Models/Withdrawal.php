@@ -24,6 +24,10 @@ class Withdrawal extends Model
         'wallet_type',
         'branch_name',
         'branch_selected',
+        'branch_manager_name',
+        'branch_manager_phone',
+        'branch_assigned_at',
+        'assigned_by_admin_id',
         'payment_details'
     ];
 

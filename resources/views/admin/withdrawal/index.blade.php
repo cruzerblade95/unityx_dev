@@ -131,13 +131,26 @@
                                 } else if (data.card_number) {
                                     html += '<small class="text-muted">Card: ' + data.card_number +
                                         '</small>';
-                                } else if (data.bank_name) {
+                                } else if (data.branch && data.manager) {
+                                    // For gold withdrawals with branch assignment, show branch info instead of bank info
+                                    html +=
+                                        '<small class="text-success"><i class="fas fa-map-marker-alt me-1"></i>Branch: ' +
+                                        data.branch + '</small>';
+                                    html += '<br><small class="text-success">Manager: ' + data
+                                        .manager + '</small>';
+                                } else if (data.bank_name && data.bank_name !== 'Not provided') {
+                                    // Only show bank info if it's not "Not provided"
                                     html += '<small class="text-muted">Bank: ' + data.bank_name +
                                         '</small>';
-                                    if (data.account_number) {
+                                    if (data.account_number && data.account_number !==
+                                        'Not provided') {
                                         html += '<br><small class="text-muted">Account: ' + data
                                             .account_number + '</small>';
                                     }
+                                } else if (data.type === 'Gold Bank') {
+                                    // For gold withdrawals without branch assignment
+                                    html +=
+                                        '<small class="text-warning">Awaiting branch assignment</small>';
                                 }
 
                                 html += '</div>';
@@ -426,6 +439,7 @@
                     $.ajax({
                         url: "/admin/withdrawals/" + withdrawalId,
                         type: 'GET',
+                        dataType: 'json',
                         success: function(response) {
                             if (response.success) {
                                 var data = response.data;
@@ -472,6 +486,23 @@
                                 <p><strong>Bank Name:</strong> ${details.bank_name || 'Not provided'}</p>
                                 <p><strong>Account Number:</strong> ${details.account_number || 'Not provided'}</p>
                                 <p><strong>Account Holder:</strong> ${details.account_holder || 'Not provided'}</p>`;
+
+                                    // Add branch assignment information if available
+                                    if (details.branch_assigned) {
+                                        modalContent += `
+                                <div class="mt-3 p-3 bg-light border-start border-success border-4">
+                                    <h6 class="text-success mb-2"><i class="fas fa-map-marker-alt me-2"></i>Branch Assignment</h6>
+                                    <p class="mb-1"><strong>Branch:</strong> ${details.branch_name}</p>
+                                    <p class="mb-1"><strong>Manager:</strong> ${details.branch_manager_name}</p>
+                                    <p class="mb-1"><strong>Contact:</strong> ${details.branch_manager_phone}</p>
+                                    ${details.branch_assigned_at ? '<p class="mb-0 small text-muted"><strong>Assigned:</strong> ' + details.branch_assigned_at + '</p>' : ''}
+                                </div>`;
+                                    } else if (data.status === 'approved') {
+                                        modalContent += `
+                                <div class="mt-3 p-3 bg-warning bg-opacity-10 border-start border-warning border-4">
+                                    <p class="mb-0 text-warning"><i class="fas fa-exclamation-triangle me-2"></i>Branch not yet assigned</p>
+                                </div>`;
+                                    }
                                 }
 
                                 modalContent += `
@@ -512,7 +543,109 @@
                             }
                         },
                         error: function(xhr) {
-                            Swal.fire('Error!', 'Failed to load withdrawal details', 'error');
+                            console.log('AJAX Error:', xhr);
+                            console.log('Status:', xhr.status);
+                            console.log('Response Text:', xhr.responseText);
+
+                            // Try to parse the response even if jQuery failed due to BOM
+                            if (xhr.status === 200 && xhr.responseText) {
+                                try {
+                                    // Remove BOM characters and parse JSON
+                                    var cleanText = xhr.responseText.replace(/^\uFEFF/, '')
+                                        .replace(/^\ufeff/, '');
+                                    var response = JSON.parse(cleanText);
+
+                                    if (response.success) {
+                                        var data = response.data;
+                                        var details = data.withdrawal_details || {};
+
+                                        var modalContent = `
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h6 class="text-primary mb-3"><i class="fas fa-info-circle me-2"></i>Withdrawal Information</h6>
+                                                    <p><strong>Withdrawal ID:</strong> #${data.id}</p>
+                                                    <p><strong>Type:</strong> <span class="badge bg-info">${details.type || 'Unknown'}</span></p>
+                                                    <p><strong>Wallet Used:</strong> <span class="badge bg-secondary">${(data.wallet_type || 'profit').charAt(0).toUpperCase() + (data.wallet_type || 'profit').slice(1)}</span></p>
+                                                    <p><strong>Amount:</strong> $${parseFloat(data.amount).toFixed(2)}</p>
+                                                    <p><strong>Fee Amount:</strong> $${parseFloat(data.tax_amount).toFixed(2)}</p>
+                                                    <p><strong>Net Amount:</strong> <strong class="text-success">$${parseFloat(data.net_amount).toFixed(2)}</strong></p>
+                                                    <p><strong>Status:</strong>
+                                                        <span class="badge ${data.status === 'approved' ? 'bg-success' : data.status === 'pending' ? 'bg-warning' : 'bg-danger'}">
+                                                            ${data.status.charAt(0).toUpperCase() + data.status.slice(1)}
+                                                        </span>
+                                                    </p>
+                                                    <p><strong>Date:</strong> ${data.created_at}</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6 class="text-primary mb-3"><i class="fas fa-user me-2"></i>User Information</h6>
+                                                    <p><strong>Username:</strong> @${data.user.username}</p>
+                                                    <p><strong>Name:</strong> ${data.user.firstname} ${data.user.lastname}</p>
+                                                    <p><strong>Email:</strong> ${data.user.email}</p>
+
+                                                    ${data.reference ? `<p><strong>Reference:</strong> ${data.reference}</p>` : ''}
+                                                    ${data.note ? `<p><strong>Note:</strong> ${data.note}</p>` : ''}
+                                                    ${data.rejection_reason ? `<p><strong>Rejection Reason:</strong> <span class="text-danger">${data.rejection_reason}</span></p>` : ''}
+                                                </div>
+                                            </div>
+                                            <hr>
+                                            <div class="row">
+                                                <div class="col-12">`;
+
+                                        if (details.type === 'Crypto Withdrawal') {
+                                            modalContent += `
+                                                <h6 class="text-info mb-3"><i class="fas fa-coins me-2"></i>Crypto Details</h6>
+                                                <p><strong>Currency:</strong> ${details.currency || 'Unknown'}</p>
+                                                <p><strong>Wallet Address:</strong> <code class="small">${details.wallet_address || 'Not provided'}</code></p>
+                                                <p><strong>Network:</strong> ${details.network || 'BEP20'}</p>`;
+                                        } else if (details.type ===
+                                            'Crypto Bank Card Withdrawal') {
+                                            modalContent +=
+                                                `
+                                                <h6 class="text-warning mb-3"><i class="fas fa-credit-card me-2"></i>Bank Card Details</h6>
+                                                <p><strong>Card Number:</strong> ${details.card_number || 'Not provided'}</p>
+                                                <p><strong>Cardholder:</strong> ${details.cardholder_name || 'Not provided'}</p>
+                                                <p><strong>Account Number:</strong> ${details.account_number || 'Not provided'}</p>`;
+                                        } else if (details.type === 'Gold Bank Withdrawal') {
+                                            modalContent +=
+                                                `
+                                                <h6 class="text-success mb-3"><i class="fas fa-coins me-2"></i>Gold Withdrawal Details</h6>
+                                                <p><strong>Bank Name:</strong> ${details.bank_name || 'Not provided'}</p>
+                                                <p><strong>Account Number:</strong> ${details.account_number || 'Not provided'}</p>
+                                                <p><strong>Account Holder:</strong> ${details.account_holder || 'Not provided'}</p>`;
+
+                                            if (details.branch_assigned) {
+                                                modalContent += `
+                                                    <div class="mt-3 p-3 bg-light border-start border-success border-4">
+                                                        <h6 class="text-success mb-2"><i class="fas fa-map-marker-alt me-2"></i>Branch Assignment</h6>
+                                                        <p class="mb-1"><strong>Branch:</strong> ${details.branch_name}</p>
+                                                        <p class="mb-1"><strong>Manager:</strong> ${details.branch_manager_name}</p>
+                                                        <p class="mb-1"><strong>Contact:</strong> ${details.branch_manager_phone}</p>
+                                                        ${details.branch_assigned_at ? `<p class="mb-0"><strong>Assigned:</strong> ${details.branch_assigned_at}</p>` : ''}
+                                                    </div>`;
+                                            } else {
+                                                modalContent += `
+                                                    <div class="mt-3 p-3 bg-warning bg-opacity-10 border-start border-warning border-4">
+                                                        <p class="text-warning mb-0"><i class="fas fa-clock me-2"></i>Branch assignment pending</p>
+                                                    </div>`;
+                                            }
+                                        }
+
+                                        modalContent += `
+                                                </div>
+                                            </div>`;
+
+                                        $('#viewModalBody').html(modalContent);
+                                        $('#viewModal').modal('show');
+                                        return; // Success, don't show error
+                                    }
+                                } catch (e) {
+                                    console.log('Failed to parse response as JSON:', e);
+                                }
+                            }
+
+                            Swal.fire('Error!',
+                                'Failed to load withdrawal details. Check console for details.',
+                                'error');
                         }
                     });
                 });

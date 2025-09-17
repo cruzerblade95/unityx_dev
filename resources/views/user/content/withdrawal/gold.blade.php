@@ -214,15 +214,18 @@
                                     <div class="input-group">
                                         <span class="input-group-text">$</span>
                                         <input type="number" class="form-control @error('amount') is-invalid @enderror"
-                                            name="amount" id="amount" step="0.01" min="300"
-                                            max="{{ min(3000, $walletBalance) }}" value="{{ old('amount') }}"
-                                            placeholder="Enter amount" required>
+                                            name="amount" id="amount" step="0.01"
+                                            min="{{ $withdrawalSettings->min_amount ?? 300 }}"
+                                            max="{{ min($withdrawalSettings->max_amount ?? 3000, $walletBalance) }}"
+                                            value="{{ old('amount') }}" placeholder="Enter amount" required>
                                     </div>
                                     @error('amount')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                    <small class="text-muted" id="amount-help">Minimum: $300 | Maximum:
-                                        ${{ number_format(min(3000, $walletBalance), 2) }} | Available:
+                                    <small class="text-muted" id="amount-help">Minimum:
+                                        ${{ number_format($withdrawalSettings->min_amount ?? 300, 2) }} | Maximum:
+                                        ${{ number_format(min($withdrawalSettings->max_amount ?? 3000, $walletBalance), 2) }}
+                                        | Available:
                                         ${{ number_format($walletBalance, 2) }}</small>
                                 </div>
 
@@ -432,7 +435,8 @@
                         <ul class="list-unstyled small">
                             <li><i class="fas fa-check-circle text-success me-2"></i>Valid National ID</li>
                             <li><i class="fas fa-check-circle text-success me-2"></i>KYC verification</li>
-                            <li><i class="fas fa-check-circle text-success me-2"></i>Minimum redemption: $50</li>
+                            <li><i class="fas fa-check-circle text-success me-2"></i>Minimum redemption:
+                                ${{ number_format($withdrawalSettings->min_amount ?? 300, 2) }}</li>
                             <li><i class="fas fa-check-circle text-success me-2"></i>In-person pickup required</li>
                         </ul>
                     </div>
@@ -444,16 +448,34 @@
                     </div>
                     <div class="card-body">
                         <div class="text-center">
-                            <h4 class="text-warning">~$2,000</h4>
-                            <p class="small text-muted mb-0">Current price per ounce</p>
+                            <h4 class="text-warning">
+                                ${{ number_format(App\Models\WithdrawalSettings::getMalaysianGoldPrice(), 2) }}
+                            </h4>
+                            <p class="small text-muted mb-0">Current price per ounce (Malaysian Market)</p>
                             <small class="text-muted">
                                 <i class="fas fa-chart-line me-1"></i>
-                                Market rate applies
+                                Updated:
+                                {{ $withdrawalSettings->updated_at ? $withdrawalSettings->updated_at->format('M d, Y H:i') : 'Recently' }}
                             </small>
                         </div>
                         <hr>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span class="text-muted">Price per gram:</span>
+                                    <span class="fw-bold">RM
+                                        {{ number_format((App\Models\WithdrawalSettings::getMalaysianGoldPrice() / 31.1035) * App\Models\WithdrawalSettings::getMyrConversionRate(), 2) }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between small mb-2">
+                                    <span class="text-muted">Exchange rate:</span>
+                                    <span class="fw-bold">1 USD = RM
+                                        {{ number_format(App\Models\WithdrawalSettings::getMyrConversionRate(), 2) }}</span>
+                                </div>
+                            </div>
+                        </div>
                         <div class="small text-muted">
-                            <p class="mb-1"><strong>Note:</strong> Gold prices fluctuate based on market conditions. The
+                            <p class="mb-1"><strong>Note:</strong> Gold prices fluctuate based on Malaysian market
+                                conditions. The
                                 actual amount of gold received will be calculated at the time of processing based on current
                                 market rates.</p>
                         </div>
@@ -500,14 +522,20 @@
                 'bonus': {{ $user->wallet->bonus ?? 0 }}
             };
 
+            // Withdrawal settings from server
+            const withdrawalSettings = {
+                minAmount: {{ $withdrawalSettings->min_amount ?? 300 }},
+                maxAmount: {{ $withdrawalSettings->max_amount ?? 3000 }}
+            };
+
             // Update available balance and max amount when wallet type changes
             if (walletTypeSelect && amountInput && amountHelp) {
                 walletTypeSelect.addEventListener('change', function() {
                     const walletType = this.value;
                     if (walletType && walletBalances[walletType] !== undefined) {
                         const availableBalance = walletBalances[walletType];
-                        const minAmount = 300;
-                        const maxAmount = Math.min(3000, availableBalance);
+                        const minAmount = withdrawalSettings.minAmount;
+                        const maxAmount = Math.min(withdrawalSettings.maxAmount, availableBalance);
 
                         // Update input max attribute
                         amountInput.setAttribute('max', maxAmount);
@@ -547,8 +575,8 @@
                     const amount = parseFloat(amountInput.value);
                     const walletType = walletTypeSelect.value;
                     const availableBalance = walletBalances[walletType] || 0;
-                    const minAmount = 300;
-                    const maxAmount = Math.min(3000, availableBalance);
+                    const minAmount = withdrawalSettings.minAmount;
+                    const maxAmount = Math.min(withdrawalSettings.maxAmount, availableBalance);
 
                     if (!walletType) {
                         e.preventDefault();
