@@ -7,6 +7,7 @@
 @section('title', 'Global Withdrawal Defaults')
 
 @section('vendor-style')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 @endsection
 
@@ -267,19 +268,25 @@
         </div>
     </div>
     </div>
+@endsection
 
 @section('page-script')
     <script>
         function saveGlobalDefaults(type) {
+            const enabledCheckbox = document.getElementById(`${type.replace('_', '-')}-enabled`);
+
             const formData = {
                 withdrawal_type: type,
-                min_amount: document.getElementById(`${type.replace('_', '-')}-min`).value,
-                max_amount: document.getElementById(`${type.replace('_', '-')}-max`).value,
-                processing_fee_percent: document.getElementById(`${type.replace('_', '-')}-fee-percent`).value,
-                processing_fee_fixed: document.getElementById(`${type.replace('_', '-')}-fee-fixed`).value,
-                cooldown_hours: document.getElementById(`${type.replace('_', '-')}-cooldown`).value,
-                is_enabled: document.getElementById(`${type.replace('_', '-')}-enabled`).checked
+                min_amount: parseFloat(document.getElementById(`${type.replace('_', '-')}-min`).value),
+                max_amount: parseFloat(document.getElementById(`${type.replace('_', '-')}-max`).value),
+                processing_fee_percent: parseFloat(document.getElementById(`${type.replace('_', '-')}-fee-percent`)
+                    .value),
+                processing_fee_fixed: parseFloat(document.getElementById(`${type.replace('_', '-')}-fee-fixed`).value),
+                cooldown_hours: parseInt(document.getElementById(`${type.replace('_', '-')}-cooldown`).value),
+                is_enabled: enabledCheckbox ? enabledCheckbox.checked : false
             };
+
+            console.log('Saving settings for', type, ':', formData);
 
             // Add MYR conversion rate for gold withdrawal type
             if (type === 'gold') {
@@ -294,17 +301,22 @@
                     },
                     body: JSON.stringify(formData)
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
                         alert(`${type.toUpperCase()} default settings updated successfully!`);
                     } else {
-                        alert('Error updating settings');
+                        alert(`Error updating settings: ${data.message || 'Unknown error'}`);
                     }
                 })
                 .catch(error => {
                     console.error('Error saving settings:', error);
-                    alert('Error saving settings');
+                    alert(`Error saving settings: ${error.message}`);
                 });
         }
 
@@ -435,7 +447,20 @@
                 saveGlobalDefaults(type);
             });
         }
-    </script>
-@endsection
 
+        // Add event listeners for automatic saving when checkboxes are changed
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add change event listeners to all enabled checkboxes
+            ['crypto', 'etc-black', 'gold'].forEach(type => {
+                const checkbox = document.getElementById(`${type}-enabled`);
+                if (checkbox) {
+                    checkbox.addEventListener('change', function() {
+                        const withdrawalType = type.replace('-', '_');
+                        console.log(`Checkbox changed for ${withdrawalType}:`, this.checked);
+                        saveGlobalDefaults(withdrawalType);
+                    });
+                }
+            });
+        });
+    </script>
 @endsection
