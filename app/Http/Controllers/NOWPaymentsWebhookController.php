@@ -129,7 +129,7 @@ class NOWPaymentsWebhookController extends Controller
             // Add AI trade and bonus to upline (use the credited amount for calculations)
             Helpers::insertAiTradeV2($user->id, $creditAmount);
             Helpers::depositBonus($user->id, $creditAmount);
-            Helpers::processDepositPromoBonus($user->id, $creditAmount);
+            Helpers::processDepositPromoBonus($user->id, $creditAmount, $deposit->id);
 
             Log::info('Payment processed successfully', [
                 'deposit_id' => $deposit->id,

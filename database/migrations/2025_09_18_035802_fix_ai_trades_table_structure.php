@@ -13,9 +13,15 @@ return new class extends Migration
     {
         Schema::table('ai_trades', function (Blueprint $table) {
             // Add missing columns that should exist based on the original migration
-            $table->decimal('amount_invest', 18, 8)->default(0.00000000)->after('user_id');
-            $table->decimal('current_amount', 18, 8)->default(0.00000000)->after('trade_status');
-            $table->decimal('ending_amount', 18, 8)->default(0.00000000)->after('current_amount');
+            if (!Schema::hasColumn('ai_trades', 'amount_invest')) {
+                $table->decimal('amount_invest', 18, 8)->default(0.00000000)->after('user_id');
+            }
+            if (!Schema::hasColumn('ai_trades', 'current_amount')) {
+                $table->decimal('current_amount', 18, 8)->default(0.00000000)->after('trade_status');
+            }
+            if (!Schema::hasColumn('ai_trades', 'ending_amount')) {
+                $table->decimal('ending_amount', 18, 8)->default(0.00000000)->after('current_amount');
+            }
         });
     }
 
