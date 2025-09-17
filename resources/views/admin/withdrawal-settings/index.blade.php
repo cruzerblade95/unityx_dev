@@ -7,6 +7,7 @@
 @section('title', 'Withdrawal Settings Management')
 
 @section('vendor-style')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     @vite(['resources/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.scss', 'resources/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.scss', 'resources/assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.scss'])
 @endsection
@@ -284,16 +285,19 @@
         function saveUserSettings() {
             const userId = document.getElementById('edit-user-id').value;
             const withdrawalType = document.getElementById('edit-withdrawal-type').value;
+            const enabledCheckbox = document.getElementById('edit-is-enabled');
 
             const formData = {
                 withdrawal_type: withdrawalType,
-                min_amount: document.getElementById('edit-min-amount').value,
-                max_amount: document.getElementById('edit-max-amount').value,
-                processing_fee_percent: document.getElementById('edit-fee-percent').value,
-                processing_fee_fixed: document.getElementById('edit-fee-fixed').value,
-                cooldown_hours: document.getElementById('edit-cooldown-hours').value,
-                is_enabled: document.getElementById('edit-is-enabled').checked
+                min_amount: parseFloat(document.getElementById('edit-min-amount').value),
+                max_amount: parseFloat(document.getElementById('edit-max-amount').value),
+                processing_fee_percent: parseFloat(document.getElementById('edit-fee-percent').value),
+                processing_fee_fixed: parseFloat(document.getElementById('edit-fee-fixed').value),
+                cooldown_hours: parseInt(document.getElementById('edit-cooldown-hours').value),
+                is_enabled: enabledCheckbox ? enabledCheckbox.checked : false
             };
+
+            console.log('Saving user settings:', formData);
 
             fetch(`/admin/withdrawal-settings/user/${userId}/update`, {
                     method: 'POST',
@@ -303,19 +307,24 @@
                     },
                     body: JSON.stringify(formData)
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
                         bootstrap.Modal.getInstance(document.getElementById('userSettingsModal')).hide();
                         loadUserSettingsPreview(userId);
                         alert(data.message);
                     } else {
-                        alert('Error updating settings');
+                        alert(`Error updating settings: ${data.message || 'Unknown error'}`);
                     }
                 })
                 .catch(error => {
                     console.error('Error saving settings:', error);
-                    alert('Error saving settings');
+                    alert(`Error saving settings: ${error.message}`);
                 });
         }
 
