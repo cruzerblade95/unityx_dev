@@ -172,18 +172,37 @@ class WithdrawalManagementController extends Controller
                     $actions = '<div class="btn-group" role="group">';
 
                     if ($withdrawal->status === 'pending') {
-                        $actions .= '<button type="button" class="btn btn-success btn-sm approve-btn"
-                                        data-id="' . $withdrawal->id . '"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#approveModal">
-                                        <i class="fas fa-check"></i> Approve
-                                    </button>';
+                        // Different approve button for gold withdrawals
+                        if ($withdrawal->withdrawal_type === 'gold') {
+                            $actions .= '<button type="button" class="btn btn-warning btn-sm gold-approve-btn"
+                                            data-id="' . $withdrawal->id . '"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#branchAssignmentModal">
+                                            <i class="fas fa-coins"></i> Assign Branch
+                                        </button>';
+                        } else {
+                            $actions .= '<button type="button" class="btn btn-success btn-sm approve-btn"
+                                            data-id="' . $withdrawal->id . '"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#approveModal">
+                                            <i class="fas fa-check"></i> Approve
+                                        </button>';
+                        }
+
                         $actions .= '<button type="button" class="btn btn-danger btn-sm reject-btn"
                                         data-id="' . $withdrawal->id . '"
                                         data-bs-toggle="modal"
                                         data-bs-target="#rejectModal">
                                         <i class="fas fa-times"></i> Reject
                                     </button>';
+                    }
+
+                    // Add receipt download button for approved gold withdrawals only
+                    if ($withdrawal->withdrawal_type === 'gold' && $withdrawal->status === 'approved') {
+                        $actions .= '<a href="' . route('admin.withdrawals.receipt', $withdrawal->id) . '"
+                                        class="btn btn-secondary btn-sm" target="_blank">
+                                        <i class="fas fa-receipt"></i> Receipt
+                                    </a>';
                     }
 
                     $actions .= '<button type="button" class="btn btn-info btn-sm view-btn"
@@ -286,6 +305,104 @@ class WithdrawalManagementController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error approving withdrawal: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function approveGold(Request $request, $id)
+    {
+        try {
+            // Validate request data
+            $request->validate([
+                'branch_key' => 'required|string',
+                'branch_name' => 'required|string',
+                'manager_name' => 'required|string',
+                'manager_phone' => 'required|string',
+                'admin_notes' => 'nullable|string|max:1000'
+            ]);
+
+            $withdrawal = Withdrawal::with('user.wallet')->findOrFail($id);
+
+            if ($withdrawal->status !== 'pending') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only pending withdrawals can be approved.'
+                ], 400);
+            }
+
+            if ($withdrawal->withdrawal_type !== 'gold') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This method is only for gold withdrawals.'
+                ], 400);
+            }
+
+            // Check if user has sufficient floating balance for this withdrawal type
+            $wallet = $withdrawal->user->wallet;
+            $floatingAmount = $wallet ? $wallet->getFloatingAmountForWithdrawal($withdrawal->withdrawal_type) : 0;
+
+            if (!$wallet || $floatingAmount < $withdrawal->amount) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error: Floating balance mismatch for gold withdrawals. Please contact system administrator.'
+                ], 400);
+            }
+
+            // Remove the amount from the appropriate floating field
+            if (!$wallet->deductFloatingForWithdrawal($withdrawal->amount, $withdrawal->withdrawal_type)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error: Failed to process floating amount for gold withdrawal. Please contact system administrator.'
+                ], 400);
+            }
+
+            // Update withdrawal with branch assignment
+            $withdrawal->update([
+                'status' => 'approved',
+                'branch_name' => $request->branch_name,
+                'branch_manager_name' => $request->manager_name,
+                'branch_manager_phone' => $request->manager_phone,
+                'branch_selected' => true,
+                'branch_assigned_at' => now(),
+                'assigned_by_admin_id' => auth('admin')->id(),
+                'note' => $request->admin_notes ? 'Admin Notes: ' . $request->admin_notes : null
+            ]);
+
+            // Check if user has telegram verification before sending notification
+            $telegramVerification = DB::table('telegram_verifications')
+                ->where('user_id', $withdrawal->user_id)
+                ->whereNotNull('telegram_username')
+                ->where('telegram_username', '!=', '')
+                ->first();
+
+            if ($telegramVerification) {
+                // Send Telegram notification with branch details
+                $title = "🥇 Gold Withdrawal Approved & Branch Assigned";
+                $message = "Your gold redemption request has been approved!\n\n" .
+                          "💰 Amount: $" . number_format($withdrawal->amount, 2) . "\n" .
+                          "💰 Processing Fee: $" . number_format($withdrawal->tax_amount, 2) . "\n" .
+                          "🥇 Net Gold Value: $" . number_format($withdrawal->net_amount, 2) . "\n\n" .
+                          "📍 Assigned Branch: " . $request->branch_name . "\n" .
+                          "👤 Branch Manager: " . $request->manager_name . "\n" .
+                          "📞 Contact: " . $request->manager_phone . "\n\n" .
+                          "Please contact the branch manager to arrange your gold pickup. Bring your ID and withdrawal reference #" . $withdrawal->id . ".";
+
+                TelegramNotificationService::sendNotificationToTelegram(
+                    $withdrawal->user_id,
+                    $title,
+                    $message
+                );
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Gold withdrawal approved successfully! Branch has been assigned and user will be notified.'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error approving gold withdrawal: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -464,6 +581,27 @@ class WithdrawalManagementController extends Controller
                 'success' => false,
                 'message' => 'Error fetching withdrawal details: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function receipt($id)
+    {
+        try {
+            $withdrawal = Withdrawal::with('user')->findOrFail($id);
+
+            // Validate that this is an approved gold withdrawal with branch assigned
+            if ($withdrawal->withdrawal_type !== 'gold') {
+                abort(404, 'Receipt not available for this withdrawal type.');
+            }
+
+            if ($withdrawal->status !== 'approved' || !$withdrawal->branch_selected) {
+                abort(404, 'Receipt only available for approved gold withdrawals with assigned branch.');
+            }
+
+            return view('admin.withdrawal.receipt', compact('withdrawal'));
+
+        } catch (\Exception $e) {
+            abort(500, 'Error generating receipt: ' . $e->getMessage());
         }
     }
 }
