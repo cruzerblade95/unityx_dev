@@ -167,6 +167,10 @@ class WalletManagementController extends Controller
      */
     public function createWallet(Request $request)
     {
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         try {
             $request->validate([
                 'user_id' => 'required|integer|exists:users,id',
@@ -217,6 +221,10 @@ class WalletManagementController extends Controller
      */
     public function adjustBalance(Request $request)
     {
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         try {
             $request->validate([
                 'wallet_id' => 'required|integer|exists:wallets,id',
@@ -293,6 +301,10 @@ class WalletManagementController extends Controller
      */
     public function getWallet($id)
     {
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         try {
             $wallet = Wallet::with('user')->findOrFail($id);
             $user = $wallet->user;
@@ -337,6 +349,10 @@ class WalletManagementController extends Controller
      */
     public function getTransactionHistory($walletId)
     {
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         try {
             $wallet = Wallet::with('user')->findOrFail($walletId);
             $user = $wallet->user;

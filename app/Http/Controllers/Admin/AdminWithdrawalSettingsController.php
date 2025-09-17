@@ -108,6 +108,11 @@ class AdminWithdrawalSettingsController extends Controller
 
     public function getUserSettings(Request $request, $userId)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         $user = User::findOrFail($userId);
         $userSettings = [];
 
@@ -123,6 +128,11 @@ class AdminWithdrawalSettingsController extends Controller
 
     public function updateUserSettings(Request $request, $userId)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         $request->validate([
             'withdrawal_type' => 'required|in:crypto,etc_black,gold',
             'min_amount' => 'required|numeric|min:0',
@@ -149,6 +159,11 @@ class AdminWithdrawalSettingsController extends Controller
 
     public function bulkUpdate(Request $request)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         $request->validate([
             'user_ids' => 'required|array',
             'user_ids.*' => 'exists:users,id',
@@ -186,6 +201,11 @@ class AdminWithdrawalSettingsController extends Controller
 
     public function resetToDefaults(Request $request)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         $request->validate([
             'user_ids' => 'required|array',
             'user_ids.*' => 'exists:users,id',
@@ -218,6 +238,11 @@ class AdminWithdrawalSettingsController extends Controller
 
     public function updateGlobalDefaults(Request $request)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         $validationRules = [
             'withdrawal_type' => 'required|in:crypto,etc_black,gold',
             'min_amount' => 'required|numeric|min:0',
@@ -263,6 +288,11 @@ class AdminWithdrawalSettingsController extends Controller
 
     public function disableWithdrawals(Request $request)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         $request->validate([
             'user_ids' => 'required|array',
             'user_ids.*' => 'exists:users,id',
@@ -286,6 +316,11 @@ class AdminWithdrawalSettingsController extends Controller
 
     public function enableWithdrawals(Request $request)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         $request->validate([
             'user_ids' => 'required|array',
             'user_ids.*' => 'exists:users,id',
@@ -312,6 +347,11 @@ class AdminWithdrawalSettingsController extends Controller
      */
     public function toggleMaintenance(Request $request)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         try {
             $enabled = $request->input('enabled', null);
             $message = $request->input('message', null);
@@ -345,6 +385,11 @@ class AdminWithdrawalSettingsController extends Controller
      */
     public function getMaintenanceStatus()
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         return response()->json([
             'maintenance_enabled' => SystemSettings::isWithdrawalMaintenanceMode(),
             'maintenance_message' => SystemSettings::getWithdrawalMaintenanceMessage()

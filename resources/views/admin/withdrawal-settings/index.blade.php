@@ -33,7 +33,14 @@
                 serverSide: true,
                 ajax: {
                     url: '/admin/withdrawal-settings/users-data',
-                    type: 'GET'
+                    type: 'GET',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    error: function(xhr, error, thrown) {
+                        console.error('DataTables AJAX Error:', xhr.responseText);
+                        alert('Error loading data: ' + xhr.status + ' ' + thrown);
+                    }
                 },
                 columns: [{
                         data: 'checkbox',
@@ -491,39 +498,43 @@
                 cancelButtonText: 'Cancel',
                 preConfirm: () => {
                     const message = document.getElementById('maintenance-message').value;
-                    return { message: message };
+                    return {
+                        message: message
+                    };
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
                     const formData = {
                         enabled: !isMaintenanceMode,
                         message: result.value.message
-                    };                    fetch('/admin/withdrawal-settings/toggle-maintenance', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify(formData)
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire({
-                                title: 'Success!',
-                                text: data.message,
-                                icon: 'success'
-                            }).then(() => {
-                                location.reload(); // Reload to update button state
-                            });
-                        } else {
-                            Swal.fire('Error!', data.message, 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error toggling maintenance mode:', error);
-                        Swal.fire('Error!', 'Failed to toggle maintenance mode', 'error');
-                    });
+                    };
+                    fetch('/admin/withdrawal-settings/toggle-maintenance', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                    'content')
+                            },
+                            body: JSON.stringify(formData)
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: data.message,
+                                    icon: 'success'
+                                }).then(() => {
+                                    location.reload(); // Reload to update button state
+                                });
+                            } else {
+                                Swal.fire('Error!', data.message, 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error toggling maintenance mode:', error);
+                            Swal.fire('Error!', 'Failed to toggle maintenance mode', 'error');
+                        });
                 }
             });
         }
@@ -538,7 +549,8 @@
                     <h4 class="card-title mb-0">Withdrawal Settings Management</h4>
                     <div class="d-flex gap-2">
                         <!-- Maintenance Mode Toggle -->
-                        <button class="btn {{ $isMaintenanceMode ? 'btn-danger' : 'btn-success' }}" onclick="toggleMaintenanceMode()">
+                        <button class="btn {{ $isMaintenanceMode ? 'btn-danger' : 'btn-success' }}"
+                            onclick="toggleMaintenanceMode()">
                             <i class="fas {{ $isMaintenanceMode ? 'fa-tools' : 'fa-shield-check' }}"></i>
                             {{ $isMaintenanceMode ? 'Maintenance ON' : 'Maintenance OFF' }}
                         </button>
