@@ -218,6 +218,17 @@
                                                 min="0" required>
                                         </div>
 
+                                        <div class="mb-3">
+                                            <label class="form-label">USD to MYR Conversion Rate</label>
+                                            <input type="number" class="form-control" id="gold-myr-rate"
+                                                value="{{ $globalDefaults['gold']->additional_settings['myr_conversion_rate'] ?? 4.7 }}"
+                                                step="0.01" min="0.1" required>
+                                            <div class="form-text">
+                                                <i class="fas fa-info-circle"></i>
+                                                Current rate used for MYR conversion on receipts
+                                            </div>
+                                        </div>
+
                                         <button type="button" class="btn btn-warning w-100"
                                             onclick="saveGlobalDefaults('gold')">
                                             <i class="fas fa-save"></i> Save Gold Settings
@@ -270,6 +281,11 @@
                 is_enabled: document.getElementById(`${type.replace('_', '-')}-enabled`).checked
             };
 
+            // Add MYR conversion rate for gold withdrawal type
+            if (type === 'gold') {
+                formData.myr_conversion_rate = document.getElementById('gold-myr-rate').value;
+            }
+
             fetch('/admin/withdrawal-settings/global-defaults/update', {
                     method: 'POST',
                     headers: {
@@ -320,7 +336,8 @@
                     feePercent: 4.75,
                     feeFixed: 0,
                     cooldown: 30,
-                    enabled: true
+                    enabled: true,
+                    myrRate: 4.7
                 }
             };
 
@@ -334,6 +351,11 @@
                 document.getElementById(`${prefix}-fee-fixed`).value = settings.feeFixed;
                 document.getElementById(`${prefix}-cooldown`).value = settings.cooldown;
                 document.getElementById(`${prefix}-enabled`).checked = settings.enabled;
+
+                // Set MYR rate for gold type
+                if (type === 'gold' && settings.myrRate) {
+                    document.getElementById('gold-myr-rate').value = settings.myrRate;
+                }
 
                 saveGlobalDefaults(type);
             });
@@ -389,7 +411,8 @@
                     feePercent: 7.5,
                     feeFixed: 5,
                     cooldown: 72,
-                    enabled: true
+                    enabled: true,
+                    myrRate: 4.7
                 }
             };
 
@@ -403,6 +426,11 @@
                 document.getElementById(`${prefix}-fee-fixed`).value = settings.feeFixed;
                 document.getElementById(`${prefix}-cooldown`).value = settings.cooldown;
                 document.getElementById(`${prefix}-enabled`).checked = settings.enabled;
+
+                // Set MYR rate for gold type
+                if (type === 'gold' && settings.myrRate) {
+                    document.getElementById('gold-myr-rate').value = settings.myrRate;
+                }
 
                 saveGlobalDefaults(type);
             });

@@ -173,4 +173,32 @@ class WithdrawalSettings extends Model
         $settings = self::getUserSettings($userId, $withdrawalType);
         return $settings ? $settings->cooldown_hours : 30; // default 30 hours
     }
+
+    /**
+     * Get USD to MYR conversion rate from admin settings (optimized with caching)
+     */
+    public static function getMyrConversionRate()
+    {
+        // Use Laravel's cache to avoid repeated database queries
+        return cache()->remember('gold_myr_conversion_rate', 3600, function () {
+            try {
+                // Try to get the conversion rate from global admin settings for 'gold' withdrawal type
+                $settings = self::where('user_id', null)
+                               ->where('withdrawal_type', 'gold')
+                               ->where('is_global_default', true)
+                               ->select('additional_settings')
+                               ->first();
+
+                if ($settings && isset($settings->additional_settings['myr_conversion_rate'])) {
+                    return (float) $settings->additional_settings['myr_conversion_rate'];
+                }
+            } catch (\Exception $e) {
+                // Log error but don't break the application
+                \Log::error('Error fetching MYR conversion rate: ' . $e->getMessage());
+            }
+
+            // Default fallback rate
+            return 4.7;
+        });
+    }
 }

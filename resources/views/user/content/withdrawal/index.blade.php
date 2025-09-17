@@ -160,7 +160,7 @@
                     <div class="card-body">
                         <p class="small text-muted mb-3">Contact our support team for assistance with withdrawals</p>
                         <div class="d-grid gap-2">
-                            <a href="mailto:support@unityx.com" class="btn btn-outline-primary btn-sm">
+                            <a href="mailto:support@unityx.pro" class="btn btn-outline-primary btn-sm">
                                 <i class="fas fa-envelope me-1"></i>Email Support
                             </a>
                             <a href="#" class="btn btn-outline-success btn-sm">

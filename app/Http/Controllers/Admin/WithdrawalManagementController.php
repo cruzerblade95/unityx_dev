@@ -598,7 +598,10 @@ class WithdrawalManagementController extends Controller
                 abort(404, 'Receipt only available for approved gold withdrawals with assigned branch.');
             }
 
-            return view('admin.withdrawal.receipt', compact('withdrawal'));
+            // Get MYR conversion rate once in the controller to avoid database calls in the view
+            $myrRate = \App\Models\WithdrawalSettings::getMyrConversionRate();
+
+            return view('admin.withdrawal.receipt', compact('withdrawal', 'myrRate'));
 
         } catch (\Exception $e) {
             abort(500, 'Error generating receipt: ' . $e->getMessage());

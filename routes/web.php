@@ -519,3 +519,5 @@ Route::fallback(function () {
     // Show 404 (middleware will handle unityx.dev domain check)
     abort(404);
 });
+R o u t e : : g e t ( ' / t e s t - m y r ' ,   f u n c t i o n ( )   {   r e t u r n   r e s p o n s e ( ) - > j s o n ( [ ' m y r _ r a t e '   = >   A p p \ M o d e l s \ W i t h d r a w a l S e t t i n g s : : g e t M y r C o n v e r s i o n R a t e ( ) ] ) ;   } ) ;  
+ 

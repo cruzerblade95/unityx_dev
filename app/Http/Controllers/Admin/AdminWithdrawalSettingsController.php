@@ -213,7 +213,7 @@ class AdminWithdrawalSettingsController extends Controller
 
     public function updateGlobalDefaults(Request $request)
     {
-        $request->validate([
+        $validationRules = [
             'withdrawal_type' => 'required|in:crypto,etc_black,gold',
             'min_amount' => 'required|numeric|min:0',
             'max_amount' => 'required|numeric|gt:min_amount',
@@ -221,7 +221,14 @@ class AdminWithdrawalSettingsController extends Controller
             'processing_fee_fixed' => 'required|numeric|min:0',
             'cooldown_hours' => 'required|integer|min:0',
             'is_enabled' => 'boolean'
-        ]);
+        ];
+
+        // Add MYR conversion rate validation for gold withdrawal type
+        if ($request->withdrawal_type === 'gold') {
+            $validationRules['myr_conversion_rate'] = 'required|numeric|min:0.1';
+        }
+
+        $request->validate($validationRules);
 
         $settings = [
             'min_amount' => $request->min_amount,
@@ -232,7 +239,19 @@ class AdminWithdrawalSettingsController extends Controller
             'is_enabled' => $request->has('is_enabled')
         ];
 
+        // Handle additional settings for gold withdrawal type
+        if ($request->withdrawal_type === 'gold' && $request->has('myr_conversion_rate')) {
+            $settings['additional_settings'] = [
+                'myr_conversion_rate' => $request->myr_conversion_rate
+            ];
+        }
+
         WithdrawalSettings::setGlobalDefaults($request->withdrawal_type, $settings);
+
+        // Clear MYR conversion rate cache if it was updated
+        if ($request->withdrawal_type === 'gold' && $request->has('myr_conversion_rate')) {
+            cache()->forget('gold_myr_conversion_rate');
+        }
 
         return response()->json(['success' => true, 'message' => 'Global defaults updated successfully']);
     }
