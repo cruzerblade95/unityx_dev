@@ -238,10 +238,6 @@
                         <div class="info-value">${{ number_format($withdrawal->amount, 2) }}</div>
                     </div>
                     <div class="info-row">
-                        <div class="info-label">Processing Fee (7.0%)</div>
-                        <div class="info-value">${{ number_format($withdrawal->tax_amount, 2) }}</div>
-                    </div>
-                    <div class="info-row">
                         <div class="info-label">Branch Assigned</div>
                         <div class="info-value">
                             @if ($withdrawal->branch_selected && $withdrawal->branch_name)
@@ -257,6 +253,12 @@
             </div>
 
             <!-- Amount Summary -->
+            @php
+                // Ensure myrRate is defined with fallback
+                if (!isset($myrRate)) {
+                    $myrRate = 4.7; // Default fallback rate
+                }
+            @endphp
             <div class="amount-highlight">
                 <h3 class="mb-2">
                     <i class="fas fa-coins me-2"></i>Net Gold Value
@@ -267,12 +269,13 @@
                         <small>Original withdrawal amount</small>
                     </div>
                     <div class="col-md-6">
-                        <h2 class="mb-0">RM {{ number_format($withdrawal->net_amount * 4.7, 2) }}</h2>
+                        <h2 class="mb-0">RM {{ number_format($withdrawal->net_amount * $myrRate, 2) }}</h2>
                         <small>Approximate value in Malaysian Ringgit</small>
                     </div>
                 </div>
                 <div class="mt-2">
-                    <small><em>* Exchange rate is approximate and subject to current market rates at time of
+                    <small><em>* Exchange rate ({{ $myrRate }}) is approximate and subject to current market rates
+                            at time of
                             redemption</em></small>
                 </div>
             </div>
@@ -398,7 +401,7 @@
                 <p class="small mb-0">
                     This receipt is generated electronically and serves as proof of your approved gold withdrawal
                     request.<br>
-                    For support, contact: <a href="mailto:support@unityx.com">support@unityx.com</a>
+                    For support, contact: <a href="mailto:support@unityx.pro">support@unityx.pro</a>
                 </p>
                 <div class="mt-3">
                     <small class="text-muted">

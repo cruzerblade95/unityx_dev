@@ -87,6 +87,11 @@ class AiTradeSettingsController extends Controller
      */
     public function getUsersList(Request $request)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         try {
             $query = AiTradeActivate::with(['user'])
                 ->select([

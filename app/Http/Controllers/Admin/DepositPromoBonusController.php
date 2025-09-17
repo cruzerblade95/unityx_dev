@@ -36,6 +36,11 @@ class DepositPromoBonusController extends Controller
      */
     public function campaignsList(Request $request)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         $campaigns = DepositPromoCampaign::with('creator:id,username')
             ->select('deposit_promo_campaigns.*')
             ->orderBy('created_at', 'desc');
@@ -216,6 +221,11 @@ class DepositPromoBonusController extends Controller
      */
     public function bonusHistoryList(Request $request)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         $bonusHistory = DepositPromoBonusHistory::with(['user:id,firstname,lastname,email', 'campaign:id,name'])
             ->select('deposit_promo_bonus_history.*')
             ->orderBy('created_at', 'desc');

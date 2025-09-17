@@ -17,6 +17,11 @@ class KycApprovalController extends Controller
 
     public function getKycData(Request $request)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         $query = KycVerification::with('user')
             ->where('kyc_status', KycVerification::STATUS_PENDING)
             ->orderBy('created_at', 'desc');

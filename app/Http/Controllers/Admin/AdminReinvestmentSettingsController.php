@@ -25,6 +25,11 @@ class AdminReinvestmentSettingsController extends Controller
 
     public function getUsersData(Request $request)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         $query = User::query()->select('id', 'firstname', 'lastname', 'email', 'username');
 
         // Apply search filter if provided
@@ -95,6 +100,11 @@ class AdminReinvestmentSettingsController extends Controller
 
     public function getUserSettings(Request $request, $userId)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         try {
             $user = User::findOrFail($userId);
             $userSettings = [];
@@ -125,6 +135,11 @@ class AdminReinvestmentSettingsController extends Controller
 
     public function updateUserSettings(Request $request, $userId)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         try {
             $request->validate([
                 'wallet_type' => 'required|in:profit,bonus',
@@ -152,6 +167,11 @@ class AdminReinvestmentSettingsController extends Controller
 
     public function bulkUpdate(Request $request)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         $request->validate([
             'user_ids' => 'required|array',
             'user_ids.*' => 'exists:users,id',
@@ -187,6 +207,11 @@ class AdminReinvestmentSettingsController extends Controller
 
     public function updateGlobalDefaults(Request $request)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         try {
             $request->validate([
                 'wallet_type' => 'required|in:profit,bonus',
@@ -214,6 +239,10 @@ class AdminReinvestmentSettingsController extends Controller
 
     public function getSettingsPreview(Request $request)
     {
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         $userIds = explode(',', $request->user_ids);
         $walletType = $request->wallet_type;
 
@@ -245,6 +274,10 @@ class AdminReinvestmentSettingsController extends Controller
 
     public function deleteUserSettings(Request $request, $userId)
     {
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         $request->validate([
             'wallet_type' => 'required|in:profit,bonus'
         ]);
@@ -258,6 +291,10 @@ class AdminReinvestmentSettingsController extends Controller
 
     public function setUserToFollowDefaults(Request $request, $userId)
     {
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         try {
             $user = User::findOrFail($userId);
 

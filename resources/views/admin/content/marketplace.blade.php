@@ -3,12 +3,11 @@
 @section('title', 'Marketplace Transactions')
 
 @section('vendor-style')
-    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/flatpickr/flatpickr.css') }}">
+    @vite(['resources/assets/vendor/libs/flatpickr/flatpickr.scss'])
 @endsection
 
 @section('vendor-script')
-    <script src="{{ asset('assets/vendor/libs/moment/moment.js') }}"></script>
-    <script src="{{ asset('assets/vendor/libs/flatpickr/flatpickr.js') }}"></script>
+    @vite(['resources/assets/vendor/libs/moment/moment.js', 'resources/assets/vendor/libs/flatpickr/flatpickr.js'])
 @endsection
 
 @section('content')
@@ -293,11 +292,11 @@
                                             <td>
                                                 @if ($transaction->verification_screenshot)
                                                     <a href="{{ asset('storage/' . $transaction->verification_screenshot) }}"
-                                                       target="_blank"
-                                                       class="btn btn-sm btn-outline-primary">
+                                                        target="_blank" class="btn btn-sm btn-outline-primary">
                                                         <i class="ti tabler-eye"></i>
                                                     </a>
-                                                    <br><small class="text-muted">{{ $transaction->screenshot_uploaded_at ? $transaction->screenshot_uploaded_at->format('M d, H:i') : '' }}</small>
+                                                    <br><small
+                                                        class="text-muted">{{ $transaction->screenshot_uploaded_at ? $transaction->screenshot_uploaded_at->format('M d, H:i') : '' }}</small>
                                                 @else
                                                     <span class="text-muted">No screenshot</span>
                                                 @endif

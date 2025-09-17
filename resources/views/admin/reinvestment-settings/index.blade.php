@@ -31,7 +31,14 @@
                 serverSide: true,
                 ajax: {
                     url: '/admin/reinvestment-settings/users-data',
-                    type: 'GET'
+                    type: 'GET',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    error: function(xhr, error, thrown) {
+                        console.error('DataTables AJAX Error:', xhr.responseText);
+                        alert('Error loading data: ' + xhr.status + ' ' + thrown);
+                    }
                 },
                 columns: [{
                         data: 'checkbox',
