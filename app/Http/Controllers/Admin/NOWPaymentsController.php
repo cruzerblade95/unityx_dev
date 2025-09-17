@@ -234,7 +234,7 @@ class NOWPaymentsController extends Controller
             Helpers::depositBonus($deposit->user_id, $creditAmount);
 
             // Process deposit promo bonus if campaign is active
-            $promoBonusResult = Helpers::processDepositPromoBonus($deposit->user_id, $creditAmount);
+            $promoBonusResult = Helpers::processDepositPromoBonus($deposit->user_id, $creditAmount, $deposit->id);
 
             // Create success notification for the user
             NotificationService::createDepositSuccessNotification(
@@ -387,7 +387,7 @@ class NOWPaymentsController extends Controller
                         // Add bonus to upline
                         Helpers::insertAiTradeV2($deposit->user_id, $creditAmount);
                         Helpers::depositBonus($deposit->user_id, $creditAmount);
-                        Helpers::processDepositPromoBonus($deposit->user_id, $creditAmount);
+                        Helpers::processDepositPromoBonus($deposit->user_id, $creditAmount, $deposit->id);
 
                         Log::info('Partially paid deposit completed via refresh - user credited', [
                             'deposit_id' => $deposit->id,
@@ -678,7 +678,7 @@ class NOWPaymentsController extends Controller
                                 // Add bonus to upline
                                 Helpers::insertAiTradeV2($deposit->user_id, $creditAmount);
                                 Helpers::depositBonus($deposit->user_id, $creditAmount);
-                                Helpers::processDepositPromoBonus($deposit->user_id, $creditAmount);
+                                Helpers::processDepositPromoBonus($deposit->user_id, $creditAmount, $deposit->id);
 
                                 Log::info('Partially paid deposit completed via bulk refresh - user credited', [
                                     'deposit_id' => $deposit->id,

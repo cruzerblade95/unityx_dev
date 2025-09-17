@@ -481,9 +481,10 @@ CSS;
    *
    * @param int $user_id
    * @param float $deposit_amount
+   * @param string|null $deposit_id Optional deposit ID to prevent duplicate processing
    * @return array Result with bonus information or null if no active campaign or minimum deposit not met
    */
-  public static function processDepositPromoBonus($user_id, $deposit_amount)
+  public static function processDepositPromoBonus($user_id, $deposit_amount, $deposit_id = null)
   {
     // Check minimum deposit amount requirement
     if ($deposit_amount < 1000) {
@@ -497,6 +498,36 @@ CSS;
       return null;
     }
 
+    // Check if bonus has already been processed for this user and deposit amount
+    // to prevent duplicate processing during status refreshes
+    if ($deposit_id) {
+      // For manual processing (starts with 'manual_'), allow processing but log it
+      if (strpos($deposit_id, 'manual_') === 0) {
+        Log::info('Manual deposit promo bonus processing requested', [
+          'user_id' => $user_id,
+          'deposit_amount' => $deposit_amount,
+          'manual_id' => $deposit_id
+        ]);
+      } else {
+        // For regular deposits, check for duplicates
+        $existingBonus = \App\Models\DepositPromoBonusHistory::where('user_id', $user_id)
+          ->where('deposit_amount', $deposit_amount)
+          ->where('campaign_id', $campaign->id)
+          ->where('created_at', '>=', now()->subHours(24)) // Within last 24 hours
+          ->first();
+
+        if ($existingBonus) {
+          Log::info('Deposit promo bonus already processed, skipping duplicate', [
+            'user_id' => $user_id,
+            'deposit_amount' => $deposit_amount,
+            'deposit_id' => $deposit_id,
+            'existing_bonus_id' => $existingBonus->id
+          ]);
+          return null;
+        }
+      }
+    }
+
     // Calculate bonus amounts
     $userBonusAmount = ($deposit_amount * $campaign->percentage_bonus) / 100;
     $uplineBonusAmount = ($userBonusAmount * $campaign->percentage_upline_bonus) / 100;
@@ -504,8 +535,8 @@ CSS;
     // Set expiration to campaign's end_datetime
     $expiresAt = $campaign->end_datetime;
 
-    // Create bonus history record
-    $bonusHistory = \App\Models\DepositPromoBonusHistory::create([
+    // Create bonus history record with deposit reference
+    $historyData = [
       'user_id' => $user_id,
       'campaign_id' => $campaign->id,
       'deposit_amount' => $deposit_amount,
@@ -513,7 +544,14 @@ CSS;
       'upline_bonus_amount' => $uplineBonusAmount,
       'status' => \App\Models\DepositPromoBonusHistory::STATUS_PENDING,
       'expires_at' => $expiresAt
-    ]);
+    ];
+
+    // Add deposit reference if provided
+    if ($deposit_id) {
+      $historyData['deposit_reference'] = (string)$deposit_id;
+    }
+
+    $bonusHistory = \App\Models\DepositPromoBonusHistory::create($historyData);
 
     // Process upline bonus if applicable
     if ($uplineBonusAmount > 0) {
@@ -522,8 +560,8 @@ CSS;
             $uplineUser = User::find($user->upline_id);
             if ($uplineUser) {
 
-            // Create bonus history record
-            $bonusHistory2 = \App\Models\DepositPromoBonusHistory::create([
+            // Create upline bonus history record with deposit reference
+            $uplineHistoryData = [
               'user_id' => $uplineUser->id,
               'campaign_id' => $campaign->id,
               'deposit_amount' => $deposit_amount,
@@ -531,7 +569,14 @@ CSS;
               'upline_bonus_amount' => $uplineBonusAmount,
               'status' => \App\Models\DepositPromoBonusHistory::STATUS_PENDING,
               'expires_at' => $expiresAt
-            ]);
+            ];
+
+            // Add deposit reference if provided
+            if ($deposit_id) {
+              $uplineHistoryData['deposit_reference'] = (string)$deposit_id . '_upline';
+            }
+
+            $bonusHistory2 = \App\Models\DepositPromoBonusHistory::create($uplineHistoryData);
             }
         }
     }

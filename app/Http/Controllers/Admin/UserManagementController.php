@@ -336,7 +336,9 @@ class UserManagementController extends Controller
             $depositAmount = $request->deposit_amount;
 
             // Process the deposit promo bonus using the helper
-            $result = \App\Helpers\Helpers::processDepositPromoBonus($user->id, $depositAmount);
+            // Use a unique identifier for manual admin processing to prevent duplicates
+            $manualDepositId = 'manual_' . time() . '_' . $user->id;
+            $result = \App\Helpers\Helpers::processDepositPromoBonus($user->id, $depositAmount, $manualDepositId);
 
             if ($result) {
                 return response()->json([
