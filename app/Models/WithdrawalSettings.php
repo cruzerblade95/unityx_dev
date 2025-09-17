@@ -201,4 +201,32 @@ class WithdrawalSettings extends Model
             return 4.7;
         });
     }
+
+    /**
+     * Get current Malaysian gold price per ounce from admin settings (optimized with caching)
+     */
+    public static function getMalaysianGoldPrice()
+    {
+        // Use Laravel's cache to avoid repeated database queries
+        return cache()->remember('malaysian_gold_price_per_oz', 1800, function () { // Cache for 30 minutes
+            try {
+                // Try to get the gold price from global admin settings for 'gold' withdrawal type
+                $settings = self::where('user_id', null)
+                               ->where('withdrawal_type', 'gold')
+                               ->where('is_global_default', true)
+                               ->select('additional_settings')
+                               ->first();
+
+                if ($settings && isset($settings->additional_settings['gold_price_per_oz'])) {
+                    return (float) $settings->additional_settings['gold_price_per_oz'];
+                }
+            } catch (\Exception $e) {
+                // Log error but don't break the application
+                \Log::error('Error fetching Malaysian gold price: ' . $e->getMessage());
+            }
+
+            // Default fallback price (Malaysian market rate)
+            return 2650.00;
+        });
+    }
 }

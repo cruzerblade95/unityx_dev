@@ -13,6 +13,7 @@ use App\Models\WithdrawalOtp;
 use App\Services\TelegramNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class WithdrawalController extends Controller
 {
@@ -647,8 +648,16 @@ class WithdrawalController extends Controller
                 abort(404, 'Receipt only available for approved gold withdrawals with assigned branch.');
             }
 
+            // Get MYR conversion rate once in the controller to avoid database calls in the view
+            try {
+                $myrRate = WithdrawalSettings::getMyrConversionRate();
+            } catch (\Exception $e) {
+                Log::error('Error getting MYR rate: ' . $e->getMessage());
+                $myrRate = 4.7; // Default fallback
+            }
+
             // Use the admin receipt template but pass user context
-            return view('admin.withdrawal.receipt', compact('withdrawal'));
+            return view('admin.withdrawal.receipt', compact('withdrawal', 'myrRate'));
 
         } catch (\Exception $e) {
             abort(500, 'Error generating receipt: ' . $e->getMessage());
