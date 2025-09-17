@@ -134,7 +134,7 @@ class AdminWithdrawalSettingsController extends Controller
             'processing_fee_percent' => $request->processing_fee_percent,
             'processing_fee_fixed' => $request->processing_fee_fixed,
             'cooldown_hours' => $request->cooldown_hours,
-            'is_enabled' => $request->has('is_enabled')
+            'is_enabled' => $request->boolean('is_enabled')
         ];
 
         WithdrawalSettings::setUserSettings($userId, $request->withdrawal_type, $settings);
@@ -229,7 +229,7 @@ class AdminWithdrawalSettingsController extends Controller
             'processing_fee_percent' => $request->processing_fee_percent,
             'processing_fee_fixed' => $request->processing_fee_fixed,
             'cooldown_hours' => $request->cooldown_hours,
-            'is_enabled' => $request->has('is_enabled')
+            'is_enabled' => $request->boolean('is_enabled')
         ];
 
         WithdrawalSettings::setGlobalDefaults($request->withdrawal_type, $settings);
