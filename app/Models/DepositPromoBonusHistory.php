@@ -18,6 +18,7 @@ class DepositPromoBonusHistory extends Model
         'deposit_amount',
         'user_bonus_amount',
         'upline_bonus_amount',
+        'deposit_reference',
         'status',
         'expires_at',
         'claimed_at'
