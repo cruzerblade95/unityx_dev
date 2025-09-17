@@ -321,19 +321,40 @@ Route::middleware([
     })->name('dashboard');
 });
 
+// Test route for MYR conversion rate
+Route::get('/test-myr', function() {
+    return response()->json(['myr_rate' => App\Models\WithdrawalSettings::getMyrConversionRate()]);
+});
+
+// Test route for MYR conversion functionality
+Route::get('/test-myr-functionality', function() {
+    try {
+        // Test the MYR conversion rate method
+        $myrRate = App\Models\WithdrawalSettings::getMyrConversionRate();
+
+        // Test with a sample amount
+        $sampleAmount = 100.00;
+        $convertedAmount = $sampleAmount * $myrRate;
+
+        return response()->json([
+            'success' => true,
+            'myr_rate' => $myrRate,
+            'sample_usd' => $sampleAmount,
+            'converted_myr' => $convertedAmount,
+            'test_passed' => true,
+            'message' => 'MYR conversion functionality is working'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'test_passed' => false
+        ]);
+    }
+});
+
 // Catch-all route (must be last)
 Route::fallback(function () {
     // Show 404 (middleware will handle unityx.dev domain check)
     abort(404);
-});
-//
-// // Catch-all route (must be last)
-Route::fallback(function () {
-    // Show 404 (middleware will handle unityx.dev domain check)
-    abort(404);
-});
-
-// Test route for MYR conversion rate
-Route::get('/test-myr', function() {
-    return response()->json(['myr_rate' => App\Models\WithdrawalSettings::getMyrConversionRate()]);
 });

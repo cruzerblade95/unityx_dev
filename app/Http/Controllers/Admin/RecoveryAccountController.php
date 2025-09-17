@@ -18,6 +18,11 @@ class RecoveryAccountController extends Controller
 
     public function getRecoveryData(Request $request)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         $query = RecoveryAccount::with(['processedBy'])
             ->leftJoin('users', 'recovery_accounts.email', '=', 'users.email')
             ->select('recovery_accounts.*', 'users.username')

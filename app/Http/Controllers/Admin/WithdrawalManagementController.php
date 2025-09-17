@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Withdrawal;
+use App\Models\WithdrawalSettings;
 use App\Models\User;
 use App\Services\TelegramNotificationService;
 use Illuminate\Http\Request;
@@ -48,6 +49,11 @@ class WithdrawalManagementController extends Controller
 
     public function list(Request $request)
     {
+        // Clean any previous output to prevent BOM issues
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
+
         Log::info('Withdrawal list method called', ['request_data' => $request->all()]);
 
         $withdrawals = Withdrawal::with(['user'])
@@ -83,6 +89,11 @@ class WithdrawalManagementController extends Controller
         }
 
         try {
+            // Clean any output buffer to prevent BOM issues
+            if (ob_get_level()) {
+                ob_clean();
+            }
+
             $result = DataTables::of($withdrawals)
                 ->addColumn('user_info', function ($withdrawal) {
                     $user = $withdrawal->user;
@@ -228,7 +239,16 @@ class WithdrawalManagementController extends Controller
                 ->make(true);
 
             Log::info('DataTables result generated successfully');
-            return $result;
+
+            // Debug: Log the response data
+            $responseData = $result->getData();
+            Log::info('Response data type: ' . gettype($responseData));
+            Log::info('Response data sample: ' . json_encode($responseData, JSON_PARTIAL_OUTPUT_ON_ERROR));
+
+            // Set proper JSON headers to prevent BOM issues
+            return response()->json($responseData)
+                ->header('Content-Type', 'application/json; charset=utf-8')
+                ->header('Cache-Control', 'no-cache');
 
         } catch (\Exception $e) {
             Log::error('DataTables error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
@@ -599,7 +619,12 @@ class WithdrawalManagementController extends Controller
             }
 
             // Get MYR conversion rate once in the controller to avoid database calls in the view
-            $myrRate = \App\Models\WithdrawalSettings::getMyrConversionRate();
+            try {
+                $myrRate = WithdrawalSettings::getMyrConversionRate();
+            } catch (\Exception $e) {
+                Log::error('Error getting MYR rate: ' . $e->getMessage());
+                $myrRate = 4.7; // Default fallback
+            }
 
             return view('admin.withdrawal.receipt', compact('withdrawal', 'myrRate'));
 

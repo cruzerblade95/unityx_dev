@@ -30,6 +30,11 @@ class AdminWithdrawalSettingsController extends Controller
 
     public function getUsersData(Request $request)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         $query = User::query()->select('id', 'firstname', 'lastname', 'email', 'username');
 
         // Apply search filter if provided

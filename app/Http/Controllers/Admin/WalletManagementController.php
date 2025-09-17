@@ -29,6 +29,11 @@ class WalletManagementController extends Controller
      */
     public function list(Request $request)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         try {
             $wallets = Wallet::with('user')->select('wallets.*');
 

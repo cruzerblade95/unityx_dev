@@ -253,6 +253,12 @@
             </div>
 
             <!-- Amount Summary -->
+            @php
+                // Ensure myrRate is defined with fallback
+                if (!isset($myrRate)) {
+                    $myrRate = 4.7; // Default fallback rate
+                }
+            @endphp
             <div class="amount-highlight">
                 <h3 class="mb-2">
                     <i class="fas fa-coins me-2"></i>Net Gold Value

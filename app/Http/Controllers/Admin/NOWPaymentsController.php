@@ -64,6 +64,11 @@ class NOWPaymentsController extends Controller
      */
     public function list(Request $request)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         try {
             $deposits = Deposit::with('user:id,firstname,lastname,email')
                 ->select('deposits.*')

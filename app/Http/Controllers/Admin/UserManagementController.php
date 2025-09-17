@@ -47,6 +47,11 @@ class UserManagementController extends Controller
 
     public function list(Request $request)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         $users = User::select([
             'id',
             'firstname',

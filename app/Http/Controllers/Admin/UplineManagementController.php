@@ -32,6 +32,11 @@ class UplineManagementController extends Controller
      */
     public function getUsersData(Request $request)
     {
+        // Clean any output buffer to prevent BOM characters in JSON response
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         try {
             Log::info('UplineManagement getUsersData called', [
                 'user_authenticated' => auth()->check(),
