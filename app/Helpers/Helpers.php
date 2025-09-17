@@ -127,8 +127,8 @@ class Helpers
       // Count direct downlines of level 1 referrer (only level 1 downlines)
       $directDownlineCount = DB::table('users')->where('upline_id', $level1Referrer)->count();
 
-      // If level 1 referrer has 10 or more direct downlines, distribute to 10 levels
-      if ($directDownlineCount >= 10) {
+      // If level 1 referrer has 6 or more direct downlines, distribute to 10 levels
+      if ($directDownlineCount >= 6) {
         $maxLevels = 10;
       }
     }
