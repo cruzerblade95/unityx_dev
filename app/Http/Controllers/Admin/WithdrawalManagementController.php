@@ -70,6 +70,10 @@ class WithdrawalManagementController extends Controller
                 'withdrawals.wallet_type',
                 'withdrawals.reference',
                 'withdrawals.note',
+                'withdrawals.branch_selected',
+                'withdrawals.branch_name',
+                'withdrawals.branch_manager_name',
+                'withdrawals.branch_manager_phone',
                 'withdrawals.created_at'
             ]);
 
@@ -163,14 +167,22 @@ class WithdrawalManagementController extends Controller
                             ];
 
                         case 'gold':
-                            // For gold withdrawals, show bank information
-                            return [
+                            // For gold withdrawals, show bank information and branch details if assigned
+                            $goldInfo = [
                                 'type' => 'Gold Bank',
                                 'bank_name' => $withdrawal->bank_name ?? 'Not provided',
                                 'account_number' => $withdrawal->account_number ?
                                     '****' . substr($withdrawal->account_number, -4) :
                                     'Not provided'
                             ];
+
+                            // Add branch info if assigned
+                            if ($withdrawal->branch_selected && $withdrawal->branch_name) {
+                                $goldInfo['branch'] = $withdrawal->branch_name;
+                                $goldInfo['manager'] = $withdrawal->branch_manager_name ?? 'Not assigned';
+                            }
+
+                            return $goldInfo;
 
                         default:
                             return [
@@ -501,6 +513,11 @@ class WithdrawalManagementController extends Controller
     public function show($id)
     {
         try {
+            // Clean any output buffer to prevent BOM issues
+            if (ob_get_level()) {
+                ob_clean();
+            }
+
             $withdrawal = Withdrawal::with('user')->findOrFail($id);
             $user = $withdrawal->user;
 
@@ -560,6 +577,18 @@ class WithdrawalManagementController extends Controller
                         'account_number' => $withdrawal->account_number ?? 'Not provided',
                         'account_holder' => $user ? $user->firstname . ' ' . $user->lastname : 'Not provided'
                     ];
+
+                    // Add branch assignment details if available
+                    if ($withdrawal->branch_selected && $withdrawal->branch_name) {
+                        $withdrawalDetails['branch_assigned'] = true;
+                        $withdrawalDetails['branch_name'] = $withdrawal->branch_name;
+                        $withdrawalDetails['branch_manager_name'] = $withdrawal->branch_manager_name ?? 'Not assigned';
+                        $withdrawalDetails['branch_manager_phone'] = $withdrawal->branch_manager_phone ?? 'Not provided';
+                        $withdrawalDetails['branch_assigned_at'] = $withdrawal->branch_assigned_at ?
+                            $withdrawal->branch_assigned_at->format('M d, Y H:i') : null;
+                    } else {
+                        $withdrawalDetails['branch_assigned'] = false;
+                    }
                     break;
 
                 default:
