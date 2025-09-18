@@ -633,7 +633,8 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th>Date</th>
-                                            <th>Amount Invested</th>
+                                            <th>Investment Details</th>
+                                            <th>Wallet Type</th>
                                             <th>Expected Return</th>
                                             <th>Current Value</th>
                                             <th>Status</th>
@@ -641,30 +642,48 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($reInvestHistory as $investment)
+                                        @foreach ($reInvestHistory as $reinvestment)
                                             <tr>
                                                 <td>
                                                     <div class="d-flex flex-column">
                                                         <span
-                                                            class="fw-medium">{{ \Carbon\Carbon::parse($investment->created_at)->format('M d, Y') }}</span>
+                                                            class="fw-medium">{{ \Carbon\Carbon::parse($reinvestment->created_at)->format('M d, Y') }}</span>
                                                         <small
-                                                            class="text-muted">{{ \Carbon\Carbon::parse($investment->created_at)->format('H:i A') }}</small>
+                                                            class="text-muted">{{ \Carbon\Carbon::parse($reinvestment->created_at)->format('H:i A') }}</small>
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <span
-                                                        class="fw-bold text-primary">${{ number_format($investment->amount_invest, 2) }}</span>
+                                                    <div>
+                                                        <span class="fw-bold text-primary">${{ number_format($reinvestment->original_amount, 2) }}</span>
+                                                        <small class="text-muted d-block">Original Amount</small>
+                                                    </div>
+                                                    @if($reinvestment->tax_amount > 0)
+                                                        <div class="mt-1">
+                                                            <span class="fw-bold text-warning">${{ number_format($reinvestment->tax_amount, 2) }}</span>
+                                                            <small class="text-muted d-block">Tax Deducted</small>
+                                                        </div>
+                                                    @endif
+                                                    <div class="mt-1">
+                                                        <span class="fw-bold text-info">${{ number_format($reinvestment->net_amount, 2) }}</span>
+                                                        <small class="text-muted d-block">Net Invested</small>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-{{ $reinvestment->wallet_type === 'profit' ? 'warning' : 'info' }}">
+                                                        {{ ucfirst($reinvestment->wallet_type) }}
+                                                    </span>
                                                 </td>
                                                 <td>
                                                     <span
-                                                        class="fw-bold text-success">${{ number_format($investment->ending_amount, 2) }}</span>
+                                                        class="fw-bold text-success">${{ number_format($reinvestment->expected_return ?? 0, 2) }}</span>
                                                     <small class="text-muted d-block">5x Return</small>
                                                 </td>
                                                 <td>
                                                     @php
-                                                        $currentValue =
-                                                            $investment->current_amount ?? $investment->amount_invest;
-                                                        $profit = $currentValue - $investment->amount_invest;
+                                                        $currentValue = $reinvestment->aiTrade
+                                                            ? ($reinvestment->aiTrade->current_amount ?? $reinvestment->net_amount)
+                                                            : $reinvestment->net_amount;
+                                                        $profit = $currentValue - $reinvestment->net_amount;
                                                         $profitClass = $profit >= 0 ? 'text-success' : 'text-danger';
                                                     @endphp
                                                     <div>
@@ -679,45 +698,28 @@
                                                 </td>
                                                 <td>
                                                     @php
-                                                        // Map trade_status values: 0=cancel, 1=running, 2=trade end
-                                                        $tradeStatus = $investment->trade_status ?? 1;
-                                                        $statusMap = [
-                                                            0 => [
-                                                                'label' => 'Cancelled',
-                                                                'class' => 'bg-danger',
-                                                                'icon' => 'fas fa-times',
-                                                            ],
-                                                            1 => [
-                                                                'label' => 'Active',
-                                                                'class' => 'bg-primary',
-                                                                'icon' => 'fas fa-cog fa-spin',
-                                                            ],
-                                                            2 => [
-                                                                'label' => 'Completed',
-                                                                'class' => 'bg-success',
-                                                                'icon' => 'fas fa-check',
-                                                            ],
-                                                        ];
-                                                        $statusInfo = $statusMap[$tradeStatus] ?? [
-                                                            'label' => 'Unknown',
-                                                            'class' => 'bg-secondary',
-                                                            'icon' => 'fas fa-question',
-                                                        ];
+                                                        $statusClass = match ($reinvestment->status) {
+                                                            'completed' => 'success',
+                                                            'pending' => 'warning',
+                                                            'failed' => 'danger',
+                                                            'cancelled' => 'secondary',
+                                                            default => 'primary',
+                                                        };
+                                                        $statusIcon = match ($reinvestment->status) {
+                                                            'completed' => 'fas fa-check',
+                                                            'pending' => 'fas fa-clock',
+                                                            'failed' => 'fas fa-times',
+                                                            'cancelled' => 'fas fa-ban',
+                                                            default => 'fas fa-cog',
+                                                        };
                                                     @endphp
-                                                    <span class="badge {{ $statusInfo['class'] }}">
-                                                        <i
-                                                            class="{{ $statusInfo['icon'] }} me-1"></i>{{ $statusInfo['label'] }}
+                                                    <span class="badge bg-{{ $statusClass }}">
+                                                        <i class="{{ $statusIcon }} me-1"></i>{{ ucfirst($reinvestment->status) }}
                                                     </span>
                                                 </td>
                                                 <td>
                                                     @php
-                                                        $progress = 0;
-                                                        if ($investment->ending_amount > 0) {
-                                                            $progress = min(
-                                                                100,
-                                                                ($currentValue / $investment->ending_amount) * 100,
-                                                            );
-                                                        }
+                                                        $progress = $reinvestment->progress_percentage ?? 0;
                                                         $progressClass =
                                                             $progress >= 75
                                                                 ? 'bg-success'
@@ -757,33 +759,37 @@
                                 <div class="col-md-3">
                                     <div class="d-flex flex-column">
                                         <span
-                                            class="h5 mb-0 text-primary">${{ number_format($reInvestHistory->sum('amount_invest'), 2) }}</span>
-                                        <small class="text-muted">Total Invested</small>
+                                            class="h5 mb-0 text-primary">${{ number_format($reInvestHistory->sum('original_amount'), 2) }}</span>
+                                        <small class="text-muted">Total Original Amount</small>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="d-flex flex-column">
                                         <span
-                                            class="h5 mb-0 text-success">${{ number_format($reInvestHistory->sum('ending_amount'), 2) }}</span>
+                                            class="h5 mb-0 text-info">${{ number_format($reInvestHistory->sum('net_amount'), 2) }}</span>
+                                        <small class="text-muted">Net Invested</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="d-flex flex-column">
+                                        <span
+                                            class="h5 mb-0 text-success">${{ number_format($reInvestHistory->sum('expected_return'), 2) }}</span>
                                         <small class="text-muted">Expected Returns</small>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="d-flex flex-column">
                                         @php
-                                            $totalCurrent =
-                                                $reInvestHistory->sum('current_amount') ?:
-                                                $reInvestHistory->sum('amount_invest');
-                                            $totalProfit = $totalCurrent - $reInvestHistory->sum('amount_invest');
+                                            $totalCurrent = 0;
+                                            $totalNetInvested = $reInvestHistory->sum('net_amount');
+                                            foreach ($reInvestHistory as $reinvestment) {
+                                                $currentValue = $reinvestment->aiTrade
+                                                    ? ($reinvestment->aiTrade->current_amount ?? $reinvestment->net_amount)
+                                                    : $reinvestment->net_amount;
+                                                $totalCurrent += $currentValue;
+                                            }
+                                            $totalProfit = $totalCurrent - $totalNetInvested;
                                         @endphp
-                                        <span class="h5 mb-0 {{ $totalProfit >= 0 ? 'text-success' : 'text-danger' }}">
-                                            ${{ number_format($totalCurrent, 2) }}
-                                        </span>
-                                        <small class="text-muted">Current Value</small>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="d-flex flex-column">
                                         <span class="h5 mb-0 {{ $totalProfit >= 0 ? 'text-success' : 'text-danger' }}">
                                             {{ $totalProfit >= 0 ? '+' : '' }}${{ number_format($totalProfit, 2) }}
                                         </span>

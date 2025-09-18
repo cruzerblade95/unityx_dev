@@ -95,6 +95,14 @@ Route::prefix('admin')->middleware('web')->group(function () {
         Route::post('/recovery-accounts/{id}/approve', [App\Http\Controllers\Admin\RecoveryAccountController::class, 'approve'])->name('admin.recovery_accounts.approve');
         Route::post('/recovery-accounts/{id}/reject', [App\Http\Controllers\Admin\RecoveryAccountController::class, 'reject'])->name('admin.recovery_accounts.reject');
 
+        // Reinvestment History Management Routes
+        Route::get('/reinvest-history', [App\Http\Controllers\Admin\ReInvestHistoryController::class, 'index'])->name('admin.reinvest-history.index');
+        Route::get('/reinvest-history/data', [App\Http\Controllers\Admin\ReInvestHistoryController::class, 'getData'])->name('admin.reinvest-history.data');
+        Route::get('/reinvest-history/stats', [App\Http\Controllers\Admin\ReInvestHistoryController::class, 'getStats'])->name('admin.reinvest-history.stats');
+        Route::get('/reinvest-history/export', [App\Http\Controllers\Admin\ReInvestHistoryController::class, 'export'])->name('admin.reinvest-history.export');
+        Route::get('/reinvest-history/{id}/edit', [App\Http\Controllers\Admin\ReInvestHistoryController::class, 'edit'])->name('admin.reinvest-history.edit');
+        Route::put('/reinvest-history/{id}', [App\Http\Controllers\Admin\ReInvestHistoryController::class, 'update'])->name('admin.reinvest-history.update');
+
         // Banner Advertisement Management Routes
         Route::resource('banner-advertisements', BannerAdvertisementController::class)->names([
             'index' => 'admin.banner-advertisements.index',
