@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\ReinvestmentSettings;
+use App\Models\ReInvestHistory;
 use App\Helpers\Helpers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -36,8 +37,8 @@ class ReInvestController extends Controller
             ->limit(5)
             ->get();
 
-        // Get re-investment history (AI trades created through re-investment)
-        $reInvestHistory = DB::table('ai_trades')
+        // Get re-investment history from dedicated table
+        $reInvestHistory = ReInvestHistory::with(['aiTrade', 'user'])
             ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->limit(20)
@@ -156,8 +157,22 @@ class ReInvestController extends Controller
             $aiTradeId = Helpers::insertAiTradeV2($user->id, $netAmount);
             Helpers::depositBonus($user->id, $netAmount);
 
+            // Create reinvestment history record
+            $expectedReturn = $netAmount * 5; // 5x potential return as shown in the UI
+            $reinvestHistory = ReInvestHistory::create([
+                'user_id' => $user->id,
+                'ai_trade_id' => $aiTradeId,
+                'original_amount' => $request->amount,
+                'tax_amount' => $taxAmount,
+                'net_amount' => $netAmount,
+                'wallet_type' => $request->wallet_type,
+                'status' => 'completed',
+                'expected_return' => $expectedReturn,
+                'processed_at' => now()
+            ]);
+
             // Log the transaction
-            Log::info("Re-Investment: User {$user->id} transferred {$request->amount} from {$request->wallet_type} to deposit (net: {$netAmount}, tax: {$taxAmount}) and created AI Trade {$aiTradeId}");
+            Log::info("Re-Investment: User {$user->id} transferred {$request->amount} from {$request->wallet_type} to deposit (net: {$netAmount}, tax: {$taxAmount}) and created AI Trade {$aiTradeId}. History ID: {$reinvestHistory->id}");
 
             DB::commit();
 

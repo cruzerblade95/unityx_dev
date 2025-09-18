@@ -353,6 +353,8 @@ Route::get('/test-myr-functionality', function() {
     }
 });
 
+
+
 // Catch-all route (must be last)
 Route::fallback(function () {
     // Show 404 (middleware will handle unityx.dev domain check)

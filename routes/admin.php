@@ -73,6 +73,28 @@ Route::prefix('admin')->middleware('web')->group(function () {
         // Withdrawal Management Routes
         Route::get('/withdrawals', [WithdrawalManagementController::class, 'index'])->name('admin.withdrawals.index');
         Route::get('/withdrawals/list', [WithdrawalManagementController::class, 'list'])->name('admin.withdrawals.list');
+        Route::get('/withdrawals/{id}/debug', function($id) {
+            // Debug route to check withdrawal data structure
+            try {
+                $withdrawal = \App\Models\Withdrawal::with('user')->findOrFail($id);
+                return response()->json([
+                    'withdrawal_exists' => true,
+                    'withdrawal_id' => $withdrawal->id,
+                    'user_exists' => !is_null($withdrawal->user),
+                    'user_id' => $withdrawal->user_id,
+                    'withdrawal_columns' => array_keys($withdrawal->getAttributes()),
+                    'user_columns' => $withdrawal->user ? array_keys($withdrawal->user->getAttributes()) : [],
+                    'withdrawal_type' => $withdrawal->withdrawal_type,
+                    'status' => $withdrawal->status,
+                    'error' => null
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ], 500);
+            }
+        })->name('admin.withdrawals.debug');
         Route::get('/withdrawals/{id}', [WithdrawalManagementController::class, 'show'])->name('admin.withdrawals.show');
         Route::post('/withdrawals/{id}/approve', [WithdrawalManagementController::class, 'approve'])->name('admin.withdrawals.approve');
         Route::post('/withdrawals/{id}/approve-gold', [WithdrawalManagementController::class, 'approveGold'])->name('admin.withdrawals.approve-gold');
@@ -94,6 +116,14 @@ Route::prefix('admin')->middleware('web')->group(function () {
         Route::get('/recovery-accounts/{id}', [App\Http\Controllers\Admin\RecoveryAccountController::class, 'show'])->name('admin.recovery_accounts.show');
         Route::post('/recovery-accounts/{id}/approve', [App\Http\Controllers\Admin\RecoveryAccountController::class, 'approve'])->name('admin.recovery_accounts.approve');
         Route::post('/recovery-accounts/{id}/reject', [App\Http\Controllers\Admin\RecoveryAccountController::class, 'reject'])->name('admin.recovery_accounts.reject');
+
+        // Reinvestment History Management Routes
+        Route::get('/reinvest-history', [App\Http\Controllers\Admin\ReInvestHistoryController::class, 'index'])->name('admin.reinvest-history.index');
+        Route::get('/reinvest-history/data', [App\Http\Controllers\Admin\ReInvestHistoryController::class, 'getData'])->name('admin.reinvest-history.data');
+        Route::get('/reinvest-history/stats', [App\Http\Controllers\Admin\ReInvestHistoryController::class, 'getStats'])->name('admin.reinvest-history.stats');
+        Route::get('/reinvest-history/export', [App\Http\Controllers\Admin\ReInvestHistoryController::class, 'export'])->name('admin.reinvest-history.export');
+        Route::get('/reinvest-history/{id}/edit', [App\Http\Controllers\Admin\ReInvestHistoryController::class, 'edit'])->name('admin.reinvest-history.edit');
+        Route::put('/reinvest-history/{id}', [App\Http\Controllers\Admin\ReInvestHistoryController::class, 'update'])->name('admin.reinvest-history.update');
 
         // Banner Advertisement Management Routes
         Route::resource('banner-advertisements', BannerAdvertisementController::class)->names([

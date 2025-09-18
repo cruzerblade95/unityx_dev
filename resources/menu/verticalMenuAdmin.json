@@ -62,6 +62,12 @@
       "slug": "admin.recovery_accounts.index"
     },
     {
+      "url": "admin/reinvest-history",
+      "name": "Reinvestment History",
+      "icon": "menu-icon icon-base ti tabler-recycle",
+      "slug": "admin.reinvest-history.index"
+    },
+    {
       "url": "admin/banner-advertisements",
       "name": "Banner Advertisements",
       "icon": "menu-icon icon-base ti tabler-ad",
