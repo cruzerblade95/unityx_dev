@@ -518,10 +518,21 @@ class WithdrawalManagementController extends Controller
                 ob_clean();
             }
 
+            // Fetch withdrawal with user relationship, handle missing user gracefully
             $withdrawal = Withdrawal::with('user')->findOrFail($id);
+
+            // Check if user exists (might be deleted)
+            if (!$withdrawal->user) {
+                Log::warning("Withdrawal ID {$id} has no associated user");
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Associated user not found for this withdrawal'
+                ], 404);
+            }
+
             $user = $withdrawal->user;
 
-            // Prepare withdrawal type specific data
+            // Prepare withdrawal type specific data with safe property access
             $withdrawalDetails = [];
 
             switch ($withdrawal->withdrawal_type) {
@@ -529,23 +540,22 @@ class WithdrawalManagementController extends Controller
                     $currency = $withdrawal->bank_name ?? 'Unknown';
                     $walletAddress = null;
 
-                    if ($user) {
-                        switch (strtolower($currency)) {
-                            case 'usdt':
-                            case 'usdt bep20':
-                                $walletAddress = $user->usdt_bep20_address;
-                                break;
-                            case 'usdc':
-                            case 'usdc bep20':
-                                $walletAddress = $user->usdc_bep20_address;
-                                break;
-                            case 'fdusd':
-                            case 'fdusd bep20':
-                                $walletAddress = $user->fdusd_bep20_address;
-                                break;
-                            default:
-                                $walletAddress = $withdrawal->account_number;
-                        }
+                    // Safely access user crypto addresses
+                    switch (strtolower($currency)) {
+                        case 'usdt':
+                        case 'usdt bep20':
+                            $walletAddress = $user->usdt_bep20_address ?? null;
+                            break;
+                        case 'usdc':
+                        case 'usdc bep20':
+                            $walletAddress = $user->usdc_bep20_address ?? null;
+                            break;
+                        case 'fdusd':
+                        case 'fdusd bep20':
+                            $walletAddress = $user->fdusd_bep20_address ?? null;
+                            break;
+                        default:
+                            $walletAddress = $withdrawal->account_number ?? null;
                     }
 
                     $withdrawalDetails = [
@@ -559,11 +569,11 @@ class WithdrawalManagementController extends Controller
                 case 'etc_black':
                     $withdrawalDetails = [
                         'type' => 'Crypto Bank Card Withdrawal',
-                        'card_number' => $user && $user->etc_black_card_number ?
+                        'card_number' => ($user->etc_black_card_number ?? null) ?
                             '****-****-****-' . substr($user->etc_black_card_number, -4) :
                             'Not provided',
                         'cardholder_name' => $user->cardholder_name ?? 'Not provided',
-                        'account_number' => $user && $user->account_number ?
+                        'account_number' => ($user->account_number ?? null) ?
                             '****' . substr($user->account_number, -4) :
                             'Not provided',
                         'card_wallet_address' => $user->card_wallet_address ?? 'Not provided'
@@ -575,16 +585,16 @@ class WithdrawalManagementController extends Controller
                         'type' => 'Gold Bank Withdrawal',
                         'bank_name' => $withdrawal->bank_name ?? 'Not provided',
                         'account_number' => $withdrawal->account_number ?? 'Not provided',
-                        'account_holder' => $user ? $user->firstname . ' ' . $user->lastname : 'Not provided'
+                        'account_holder' => trim(($user->firstname ?? '') . ' ' . ($user->lastname ?? '')) ?: 'Not provided'
                     ];
 
                     // Add branch assignment details if available
-                    if ($withdrawal->branch_selected && $withdrawal->branch_name) {
+                    if (($withdrawal->branch_selected ?? false) && ($withdrawal->branch_name ?? null)) {
                         $withdrawalDetails['branch_assigned'] = true;
                         $withdrawalDetails['branch_name'] = $withdrawal->branch_name;
                         $withdrawalDetails['branch_manager_name'] = $withdrawal->branch_manager_name ?? 'Not assigned';
                         $withdrawalDetails['branch_manager_phone'] = $withdrawal->branch_manager_phone ?? 'Not provided';
-                        $withdrawalDetails['branch_assigned_at'] = $withdrawal->branch_assigned_at ?
+                        $withdrawalDetails['branch_assigned_at'] = ($withdrawal->branch_assigned_at ?? null) ?
                             $withdrawal->branch_assigned_at->format('M d, Y H:i') : null;
                     } else {
                         $withdrawalDetails['branch_assigned'] = false;
@@ -598,37 +608,47 @@ class WithdrawalManagementController extends Controller
                     ];
             }
 
+            // Safely prepare response data with null coalescing
             return response()->json([
                 'success' => true,
                 'data' => [
                     'id' => $withdrawal->id,
-                    'amount' => $withdrawal->amount,
-                    'tax_amount' => $withdrawal->tax_amount,
-                    'net_amount' => $withdrawal->net_amount,
-                    'status' => $withdrawal->status,
-                    'withdrawal_type' => $withdrawal->withdrawal_type,
+                    'amount' => $withdrawal->amount ?? 0,
+                    'tax_amount' => $withdrawal->tax_amount ?? 0,
+                    'net_amount' => $withdrawal->net_amount ?? $withdrawal->amount ?? 0,
+                    'status' => $withdrawal->status ?? 'pending',
+                    'withdrawal_type' => $withdrawal->withdrawal_type ?? 'unknown',
                     'wallet_type' => $withdrawal->wallet_type ?? 'profit',
-                    'bank_name' => $withdrawal->bank_name,
-                    'account_number' => $withdrawal->account_number,
-                    'reference' => $withdrawal->reference,
-                    'note' => $withdrawal->note,
-                    'created_at' => $withdrawal->created_at->format('M d, Y H:i'),
-                    'rejection_reason' => $withdrawal->rejection_reason,
+                    'bank_name' => $withdrawal->bank_name ?? null,
+                    'account_number' => $withdrawal->account_number ?? null,
+                    'reference' => $withdrawal->reference ?? null,
+                    'note' => $withdrawal->note ?? null,
+                    'created_at' => $withdrawal->created_at ? $withdrawal->created_at->format('M d, Y H:i') : 'Unknown',
+                    'rejection_reason' => $withdrawal->rejection_reason ?? null,
                     'withdrawal_details' => $withdrawalDetails,
                     'user' => [
-                        'id' => $withdrawal->user->id,
-                        'username' => $withdrawal->user->username,
-                        'email' => $withdrawal->user->email,
-                        'firstname' => $withdrawal->user->firstname,
-                        'lastname' => $withdrawal->user->lastname
+                        'id' => $user->id,
+                        'username' => $user->username ?? 'Unknown',
+                        'email' => $user->email ?? 'Unknown',
+                        'firstname' => $user->firstname ?? '',
+                        'lastname' => $user->lastname ?? ''
                     ]
                 ]
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            Log::error("Withdrawal not found: ID {$id}");
             return response()->json([
                 'success' => false,
-                'message' => 'Error fetching withdrawal details: ' . $e->getMessage()
+                'message' => 'Withdrawal not found'
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error("Error fetching withdrawal details for ID {$id}: " . $e->getMessage());
+            Log::error("Stack trace: " . $e->getTraceAsString());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching withdrawal details. Please check server logs for details.'
             ], 500);
         }
     }

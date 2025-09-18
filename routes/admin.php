@@ -73,6 +73,28 @@ Route::prefix('admin')->middleware('web')->group(function () {
         // Withdrawal Management Routes
         Route::get('/withdrawals', [WithdrawalManagementController::class, 'index'])->name('admin.withdrawals.index');
         Route::get('/withdrawals/list', [WithdrawalManagementController::class, 'list'])->name('admin.withdrawals.list');
+        Route::get('/withdrawals/{id}/debug', function($id) {
+            // Debug route to check withdrawal data structure
+            try {
+                $withdrawal = \App\Models\Withdrawal::with('user')->findOrFail($id);
+                return response()->json([
+                    'withdrawal_exists' => true,
+                    'withdrawal_id' => $withdrawal->id,
+                    'user_exists' => !is_null($withdrawal->user),
+                    'user_id' => $withdrawal->user_id,
+                    'withdrawal_columns' => array_keys($withdrawal->getAttributes()),
+                    'user_columns' => $withdrawal->user ? array_keys($withdrawal->user->getAttributes()) : [],
+                    'withdrawal_type' => $withdrawal->withdrawal_type,
+                    'status' => $withdrawal->status,
+                    'error' => null
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ], 500);
+            }
+        })->name('admin.withdrawals.debug');
         Route::get('/withdrawals/{id}', [WithdrawalManagementController::class, 'show'])->name('admin.withdrawals.show');
         Route::post('/withdrawals/{id}/approve', [WithdrawalManagementController::class, 'approve'])->name('admin.withdrawals.approve');
         Route::post('/withdrawals/{id}/approve-gold', [WithdrawalManagementController::class, 'approveGold'])->name('admin.withdrawals.approve-gold');
