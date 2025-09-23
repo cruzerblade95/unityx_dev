@@ -46,6 +46,12 @@
           "name": "Marketplace",
           "icon": "menu-icon icon-base ti tabler-shopping-cart",
           "slug": "admin.marketplace.index"
+        },
+        {
+          "url": "admin/wallet-profit-checker",
+          "name": "Wallet Profit Checker",
+          "icon": "menu-icon icon-base ti tabler-transfer",
+          "slug": "admin.wallet-profit-checker.index"
         }
       ]
     },

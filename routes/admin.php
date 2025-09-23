@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\AdminReinvestmentSettingsController;
 use App\Http\Controllers\Admin\UplineManagementController;
 use App\Http\Controllers\Admin\AiTradeSettingsController;
 use App\Http\Controllers\Admin\AdminSettingsController;
+use App\Http\Controllers\Admin\WalletProfitCheckerController;
 
 Route::prefix('admin')->middleware('web')->group(function () {
     // Guest routes
@@ -218,6 +219,34 @@ Route::prefix('admin')->middleware('web')->group(function () {
             Route::put('/campaigns/{id}', [App\Http\Controllers\Admin\DepositPromoBonusController::class, 'update'])->name('campaigns.update');
             Route::delete('/campaigns/{id}', [App\Http\Controllers\Admin\DepositPromoBonusController::class, 'destroy'])->name('campaigns.destroy');
             Route::get('/bonus-history-list', [App\Http\Controllers\Admin\DepositPromoBonusController::class, 'bonusHistoryList'])->name('bonus-history.list');
+        });
+
+        // Wallet Profit Checker Routes
+        Route::prefix('wallet-profit-checker')->name('admin.wallet-profit-checker.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\WalletProfitCheckerController::class, 'index'])->name('index');
+            Route::get('/debug-users-data', function() {
+                try {
+                    $controller = new App\Http\Controllers\Admin\WalletProfitCheckerController();
+                    $request = new Illuminate\Http\Request();
+                    $result = $controller->getUsersData($request);
+                    return ['success' => true, 'result' => 'Method executed successfully'];
+                } catch (Exception $e) {
+                    return ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()];
+                }
+            })->name('debug-users-data');
+            Route::get('/users-data', [App\Http\Controllers\Admin\WalletProfitCheckerController::class, 'getUsersData'])->name('users-data');
+            Route::get('/transfer-history-data', [App\Http\Controllers\Admin\WalletProfitCheckerController::class, 'getTransferHistoryData'])->name('transfer-history-data');
+            Route::get('/batch-summary-data', [App\Http\Controllers\Admin\WalletProfitCheckerController::class, 'getBatchSummary'])->name('batch-summary-data');
+            Route::post('/transfer-profit-to-temp', [App\Http\Controllers\Admin\WalletProfitCheckerController::class, 'transferProfitToTemp'])->name('transfer-profit-to-temp');
+            Route::post('/transfer-temp-to-deposit', [App\Http\Controllers\Admin\WalletProfitCheckerController::class, 'transferTempToDeposit'])->name('transfer-temp-to-deposit');
+            Route::post('/transfer-all-profit-to-deposit', [App\Http\Controllers\Admin\WalletProfitCheckerController::class, 'transferAllProfitToDeposit'])->name('transfer-all-profit-to-deposit');
+            Route::post('/return-temp-to-profit', [App\Http\Controllers\Admin\WalletProfitCheckerController::class, 'returnTempToProfit'])->name('return-temp-to-profit');
+            Route::post('/rollback-transfer', [App\Http\Controllers\Admin\WalletProfitCheckerController::class, 'rollbackTransfer'])->name('rollback-transfer');
+            Route::post('/rollback', [App\Http\Controllers\Admin\WalletProfitCheckerController::class, 'rollbackTransfer'])->name('rollback');
+            Route::post('/update-threshold', [App\Http\Controllers\Admin\WalletProfitCheckerController::class, 'updateThreshold'])->name('update-threshold');
+            Route::get('/over-threshold', [App\Http\Controllers\Admin\WalletProfitCheckerController::class, 'overThreshold'])->name('over-threshold');
+            Route::get('/over-threshold-data', [App\Http\Controllers\Admin\WalletProfitCheckerController::class, 'getOverThresholdData'])->name('over-threshold-data');
+            Route::post('/adjust-user-profit', [App\Http\Controllers\Admin\WalletProfitCheckerController::class, 'adjustUserProfit'])->name('adjust-user-profit');
         });
     });
 });
