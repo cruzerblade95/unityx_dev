@@ -23,7 +23,8 @@ class Wallet extends Model
         'floating',
         'crypto_floating',
         'bank_floating',
-        'gold_floating'
+        'gold_floating',
+        'temporary_profit'
     ];
 
     /**
