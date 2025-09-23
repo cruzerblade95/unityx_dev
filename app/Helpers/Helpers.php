@@ -68,8 +68,8 @@ class Helpers
    */
   public static function roiMatchingBonus($userId, $amount)
   {
-    $percentages = [5, 3, 2, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5];
-    $totalPercent = 14;
+    $percentages = [6, 3, 2, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5];
+    $totalPercent = 15;
     $bonusBase = $amount * ($totalPercent / 100);
     $currentUserId = $userId;
 
