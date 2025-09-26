@@ -218,10 +218,17 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-12 text-center">
-                            <button class="btn btn-danger" onclick="showRollbackModal()">
+                        <div class="col-md-6">
+                            <button class="btn btn-danger w-100" onclick="showRollbackModal()">
                                 <i class="fas fa-history me-2"></i>
                                 Rollback Transfer Batch
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-dark w-100" onclick="rejectAllPendingWithdrawals()" id="rejectAllWithdrawalsBtn">
+                                <i class="fas fa-ban me-2"></i>
+                                Reject All Pending Withdrawals
+                                <br><small class="text-muted">Amount → deposit wallet</small>
                             </button>
                         </div>
                     </div>
@@ -722,6 +729,93 @@ function returnTempToProfit() {
     }).then((result) => {
         if (result.isConfirmed) {
             executeTransfer('temp-to-profit');
+        }
+    });
+}
+
+function rejectAllPendingWithdrawals() {
+    Swal.fire({
+        title: 'Reject All Pending Withdrawals',
+        html: `
+            <div class="text-start">
+                <p>This will reject <strong>ALL pending withdrawals</strong> and move amounts to deposit wallets.</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Important:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>All pending withdrawals will be marked as rejected</li>
+                        <li>Rejection reason: "Rescheduling Withdrawal"</li>
+                        <li>Amounts will be moved from floating to deposit wallets</li>
+                        <li>This action supports rollback if needed</li>
+                    </ul>
+                </div>
+            </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        confirmButtonText: 'Yes, Reject All Pending Withdrawals!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            executeRejectAllPendingWithdrawals();
+        }
+    });
+}
+
+function executeRejectAllPendingWithdrawals() {
+    const button = document.getElementById('rejectAllWithdrawalsBtn');
+    const originalText = button.innerHTML;
+
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+
+    $.ajax({
+        url: '{{ route("admin.wallet-profit-checker.reject-all-pending-withdrawals") }}',
+        type: 'POST',
+        data: {
+            _token: '{{ csrf_token() }}'
+        },
+        success: function(response) {
+            if (response.success) {
+                let message = response.message;
+                if (response.errors && response.errors.length > 0) {
+                    message += '\\n\\nErrors:\\n' + response.errors.join('\\n');
+                }
+
+                Swal.fire({
+                    title: 'Success!',
+                    html: message.replace(/\\n/g, '<br>'),
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    // Refresh page data
+                    refreshStats();
+                    if (typeof usersTable !== 'undefined') {
+                        usersTable.ajax.reload();
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error!',
+                    text: response.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        },
+        error: function(xhr) {
+            const message = xhr.responseJSON?.message || 'Error rejecting pending withdrawals';
+            Swal.fire({
+                title: 'Error!',
+                text: message,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        },
+        complete: function() {
+            button.disabled = false;
+            button.innerHTML = originalText;
         }
     });
 }

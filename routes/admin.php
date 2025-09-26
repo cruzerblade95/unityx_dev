@@ -247,6 +247,7 @@ Route::prefix('admin')->middleware('web')->group(function () {
             Route::get('/over-threshold', [App\Http\Controllers\Admin\WalletProfitCheckerController::class, 'overThreshold'])->name('over-threshold');
             Route::get('/over-threshold-data', [App\Http\Controllers\Admin\WalletProfitCheckerController::class, 'getOverThresholdData'])->name('over-threshold-data');
             Route::post('/adjust-user-profit', [App\Http\Controllers\Admin\WalletProfitCheckerController::class, 'adjustUserProfit'])->name('adjust-user-profit');
+            Route::post('/reject-all-pending-withdrawals', [App\Http\Controllers\Admin\WalletProfitCheckerController::class, 'rejectAllPendingWithdrawals'])->name('reject-all-pending-withdrawals');
         });
     });
 });

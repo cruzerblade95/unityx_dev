@@ -883,6 +883,191 @@ class WalletProfitCheckerController extends Controller
     }
 
     /**
+     * Reject all pending withdrawals and add amounts to deposit wallet
+     */
+    public function rejectAllPendingWithdrawals(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Generate batch ID for this rejection operation
+            $batchId = Str::uuid();
+
+            // Get all pending withdrawals
+            $pendingWithdrawals = DB::table('withdrawals')
+                ->where('status', 'pending')
+                ->get();
+
+            Log::info('Reject All Pending Withdrawals - Found withdrawals', [
+                'count' => $pendingWithdrawals->count(),
+                'withdrawals' => $pendingWithdrawals->take(3)->toArray(),
+                'batch_id' => $batchId
+            ]);
+
+            if ($pendingWithdrawals->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No pending withdrawals found.'
+                ]);
+            }
+
+            $rejectedCount = 0;
+            $totalAmount = 0;
+            $errors = [];
+
+            foreach ($pendingWithdrawals as $withdrawal) {
+                try {
+                    Log::info('Processing withdrawal', ['id' => $withdrawal->id, 'user_id' => $withdrawal->user_id]);
+
+                    // Get user wallet
+                    $wallet = DB::table('wallets')
+                        ->where('user_id', $withdrawal->user_id)
+                        ->first();
+
+                    if (!$wallet) {
+                        $errors[] = "Wallet not found for user ID {$withdrawal->user_id}";
+                        Log::warning('Wallet not found', ['user_id' => $withdrawal->user_id]);
+                        continue;
+                    }
+
+                    // Get floating field for logging purposes
+                    $floatingField = $this->getFloatingFieldForWithdrawalType($withdrawal->withdrawal_type);
+
+                    Log::info('Wallet check', [
+                        'floating_field' => $floatingField,
+                        'floating_balance' => $wallet->{$floatingField},
+                        'withdrawal_amount' => $withdrawal->amount,
+                        'current_deposit' => $wallet->deposit
+                    ]);
+
+                    // For withdrawal rescheduling, we add the amount back to deposit wallet
+                    // regardless of floating balance (since this is a cancellation/rescheduling)
+                    $newDepositBalance = $wallet->deposit + $withdrawal->amount;
+
+                    // Update wallet: add withdrawal amount back to deposit
+                    DB::table('wallets')
+                        ->where('user_id', $withdrawal->user_id)
+                        ->update([
+                            'deposit' => $newDepositBalance,
+                            'updated_at' => now()
+                        ]);
+
+                    Log::info('Updated wallet balance', [
+                        'user_id' => $withdrawal->user_id,
+                        'previous_deposit' => $wallet->deposit,
+                        'new_deposit' => $newDepositBalance,
+                        'added_amount' => $withdrawal->amount
+                    ]);
+
+                    // Update withdrawal status
+                    DB::table('withdrawals')
+                        ->where('id', $withdrawal->id)
+                        ->update([
+                            'status' => 'rejected',
+                            'rejection_reason' => 'Rescheduling Withdrawal',
+                            'updated_at' => now()
+                        ]);
+
+                    // Create transfer record for audit trail and potential rollback
+                    try {
+                        WalletProfitTransfer::create([
+                            'user_id' => $withdrawal->user_id,
+                            'amount' => $withdrawal->amount,
+                            'transfer_type' => 'rollback', // Using proven field value
+                            'status' => 'pending', // Using proven field value
+                            'batch_id' => $batchId,
+                            'processed_by' => auth()->id() ?? 1, // Fallback to admin ID 1 if not authenticated
+                            'original_profit_balance' => 0, // Not applicable for withdrawal rejection
+                            'original_deposit_balance' => $wallet->deposit,
+                            'original_temp_balance' => 0, // Not applicable for withdrawal rejection
+                            'notes' => "Withdrawal #" . $withdrawal->id . " rejected and amount $" . number_format($withdrawal->amount, 2) . " added back to deposit wallet",
+                            'processed_at' => now()
+                        ]);
+
+                        Log::info('Transfer record created successfully', [
+                            'withdrawal_id' => $withdrawal->id,
+                            'batch_id' => $batchId
+                        ]);
+                    } catch (\Exception $transferError) {
+                        Log::error('Failed to create transfer record', [
+                            'withdrawal_id' => $withdrawal->id,
+                            'error' => $transferError->getMessage()
+                        ]);
+                        // Don't add to errors array as the main operation (wallet update) succeeded
+                    }
+
+                    $rejectedCount++;
+                    $totalAmount += $withdrawal->amount;
+
+                    Log::info('Successfully processed withdrawal', [
+                        'id' => $withdrawal->id,
+                        'amount' => $withdrawal->amount,
+                        'batch_id' => $batchId,
+                        'transfer_record_created' => true
+                    ]);
+
+                } catch (\Exception $e) {
+                    $errors[] = "Error processing withdrawal ID {$withdrawal->id}: " . $e->getMessage();
+                    Log::error('Error processing withdrawal', ['id' => $withdrawal->id, 'error' => $e->getMessage()]);
+                }
+            }
+
+            Log::info('Processing complete', ['rejected_count' => $rejectedCount, 'errors' => $errors]);
+
+            if ($rejectedCount === 0) {
+                DB::rollback();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No withdrawals were processed successfully.',
+                    'errors' => $errors
+                ], 400);
+            }
+
+            DB::commit();
+
+            $message = "Successfully rejected {$rejectedCount} pending withdrawals. Total amount $" . number_format($totalAmount, 2) . " added to deposit wallets. Batch ID: {$batchId}";
+            if (!empty($errors)) {
+                $message .= " Errors occurred with some withdrawals.";
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'rejected_count' => $rejectedCount,
+                'total_amount' => $totalAmount,
+                'batch_id' => $batchId,
+                'errors' => $errors
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Error rejecting all pending withdrawals: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error rejecting pending withdrawals: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get floating field name for withdrawal type
+     */
+    private function getFloatingFieldForWithdrawalType($withdrawalType)
+    {
+        switch ($withdrawalType) {
+            case 'crypto':
+                return 'crypto_floating';
+            case 'etc_black':
+                return 'bank_floating';
+            case 'gold':
+                return 'gold_floating';
+            default:
+                return 'crypto_floating'; // Default fallback
+        }
+    }
+
+    /**
      * Get transfer statistics
      */
     private function getTransferStats()
