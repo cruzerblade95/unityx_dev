@@ -332,6 +332,8 @@
     /* Table styling for history */
     .table {
         margin-bottom: 0;
+        table-layout: fixed;
+        width: 100%;
     }
 
     .table th {
@@ -343,9 +345,103 @@
     }
 
     .table td {
-        vertical-align: middle;
+        vertical-align: top;
         border-bottom: 1px solid var(--bs-border-color-translucent);
         color: var(--bs-body-color);
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* Specific column width constraints */
+    .table th:nth-child(1),
+    .table td:nth-child(1) {
+        width: 60px;
+    }
+
+    /* ID */
+    .table th:nth-child(2),
+    .table td:nth-child(2) {
+        width: 100px;
+    }
+
+    /* Amount */
+    .table th:nth-child(3),
+    .table td:nth-child(3) {
+        width: 70px;
+    }
+
+    /* Tax % */
+    .table th:nth-child(4),
+    .table td:nth-child(4) {
+        width: 100px;
+    }
+
+    /* Tax Amount */
+    .table th:nth-child(5),
+    .table td:nth-child(5) {
+        width: 100px;
+    }
+
+    /* Net Amount */
+    .table th:nth-child(6),
+    .table td:nth-child(6) {
+        width: 90px;
+    }
+
+    /* Status */
+    .table th:nth-child(7),
+    .table td:nth-child(7) {
+        width: 140px;
+        min-height: 50px;
+    }
+
+    /* Payment Address */
+    .table th:nth-child(8),
+    .table td:nth-child(8) {
+        width: 120px;
+    }
+
+    /* Payment ID */
+    .table th:nth-child(9),
+    .table td:nth-child(9) {
+        width: 100px;
+    }
+
+    /* Reference */
+    .table th:nth-child(10),
+    .table td:nth-child(10) {
+        width: 100px;
+    }
+
+    /* Note */
+    .table th:nth-child(11),
+    .table td:nth-child(11) {
+        width: 130px;
+    }
+
+    /* Created At */
+
+    /* Payment address column specific styling */
+    .table td:nth-child(7) {
+        line-height: 1.3;
+        padding: 0.75rem 0.5rem;
+    }
+
+    .table td:nth-child(7) small {
+        display: block;
+        font-size: 0.8rem;
+        line-height: 1.3;
+    }
+
+    .table td:nth-child(7) code {
+        display: block;
+        margin-top: 3px;
+        padding: 2px 4px;
+        font-size: 0.7rem;
+        background: rgba(var(--bs-info-rgb), 0.1);
+        border: 1px solid rgba(var(--bs-info-rgb), 0.2);
+        border-radius: 3px;
+        word-break: break-all;
     }
 
     .table-striped>tbody>tr:nth-of-type(odd)>td {
@@ -355,6 +451,43 @@
     .table tbody tr:hover {
         background-color: var(--bs-secondary-bg);
         transition: background-color 0.2s ease;
+    }
+
+    /* Responsive table adjustments */
+    @media (max-width: 992px) {
+
+        .table th:nth-child(7),
+        .table td:nth-child(7) {
+            width: 120px;
+        }
+
+        .table td:nth-child(7) small {
+            font-size: 0.75rem;
+        }
+
+        .table td:nth-child(7) code {
+            font-size: 0.65rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .table {
+            font-size: 0.85rem;
+        }
+
+        .table th:nth-child(7),
+        .table td:nth-child(7) {
+            width: 100px;
+        }
+
+        .table td:nth-child(7) small {
+            font-size: 0.7rem;
+        }
+
+        .table td:nth-child(7) code {
+            font-size: 0.6rem;
+            padding: 1px 2px;
+        }
     }
 
     /* Copy button styling */
@@ -552,6 +685,10 @@
 @section('vendor-style')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+@endsection
+
+@section('vendor-script')
+    @vite(['resources/assets/vendor/libs/jquery/jquery.js'])
 @endsection
 
 @section('content')
@@ -1057,21 +1194,27 @@
         }
 
         // Make wallet address box clickable for copying
-        $(document).ready(function() {
-            $(document).on('click', '.wallet-address-box', function() {
-                copyToClipboard('walletAddress');
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('click', function(event) {
+                if (event.target.closest('.wallet-address-box')) {
+                    copyToClipboard('walletAddress');
 
-                // Visual feedback
-                const overlay = $(this).find('.wallet-address-overlay');
-                const originalContent = overlay.html();
+                    // Visual feedback
+                    const walletBox = event.target.closest('.wallet-address-box');
+                    const overlay = walletBox.querySelector('.wallet-address-overlay');
 
-                overlay.html('<i class="fas fa-check-circle"></i><span>Copied!</span>');
-                overlay.css('opacity', '1');
+                    if (overlay) {
+                        const originalContent = overlay.innerHTML;
 
-                setTimeout(function() {
-                    overlay.html(originalContent);
-                    overlay.css('opacity', '0');
-                }, 1500);
+                        overlay.innerHTML = '<i class="fas fa-check-circle"></i><span>Copied!</span>';
+                        overlay.style.opacity = '1';
+
+                        setTimeout(function() {
+                            overlay.innerHTML = originalContent;
+                            overlay.style.opacity = '0';
+                        }, 1500);
+                    }
+                }
             });
         });
     </script>

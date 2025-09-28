@@ -7,6 +7,12 @@
 (function () {
   // Flat Picker
   // --------------------------------------------------------------------
+  // Check if flatpickr is available before proceeding
+  if (typeof flatpickr === 'undefined') {
+    console.warn('Flatpickr library not loaded');
+    return;
+  }
+
   const flatpickrDate = document.querySelector('#flatpickr-date'),
     flatpickrTime = document.querySelector('#flatpickr-time'),
     flatpickrDateTime = document.querySelector('#flatpickr-datetime'),

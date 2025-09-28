@@ -109,6 +109,7 @@ Route::prefix('user')->middleware('web')->group(function () {
     Route::post('withdrawal/send-otp', [WithdrawalController::class, 'sendOtp'])->name('user.withdrawal.send_otp')->middleware('require.payment.info');
     Route::post('withdrawal/verify-otp', [WithdrawalController::class, 'verifyOtp'])->name('user.withdrawal.verify_otp')->middleware('require.payment.info');
     Route::get('withdrawal/{id}/receipt', [WithdrawalController::class, 'receipt'])->name('user.withdrawal.receipt')->middleware('require.payment.info');
+    Route::get('withdrawal/history/list', [WithdrawalController::class, 'historyList'])->name('user.withdrawal.history.list')->middleware('require.payment.info');
 
     // Investment
     Route::get('investment', [InvestmentController::class, 'index'])->name('user.investment.index');

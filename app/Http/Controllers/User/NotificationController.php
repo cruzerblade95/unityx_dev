@@ -51,7 +51,7 @@ class NotificationController extends Controller
         return response()->json([
             'notifications' => $notifications,
             'unread_count' => $unread_count
-        ]);
+        ], 200, ['Content-Type' => 'application/json; charset=utf-8']);
     }    /**
      * Mark a notification as read
      */

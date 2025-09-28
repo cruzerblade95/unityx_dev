@@ -5,16 +5,16 @@
 @section('title', 'Crypto Bank Card Withdrawal')
 
 @section('vendor-style')
-    @vite(['resources/assets/vendor/libs/flatpickr/flatpickr.scss'])
+    @vite(['resources/assets/vendor/libs/flatpickr/flatpickr.scss', 'resources/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.scss', 'resources/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.scss', 'resources/assets/vendor/libs/notyf/notyf.scss'])
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection
 
 @section('vendor-script')
-    @vite(['resources/assets/vendor/libs/flatpickr/flatpickr.js'])
+    @vite(['resources/assets/vendor/libs/flatpickr/flatpickr.js', 'resources/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js', 'resources/assets/vendor/libs/notyf/notyf.js'])
 @endsection
 
 @section('page-script')
-    @vite(['resources/assets/js/forms-pickers.js'])
+    {{-- forms-pickers.js removed as it's not needed for crypto bank card withdrawal and causes flatpickr errors --}}
 @endsection
 
 @section('content')
@@ -216,15 +216,18 @@
                                     <div class="input-group">
                                         <span class="input-group-text">$</span>
                                         <input type="number" class="form-control @error('amount') is-invalid @enderror"
-                                            name="amount" id="amount" step="0.01" min="{{ $withdrawalSettings->min_amount ?? 100 }}"
-                                            max="{{ min($withdrawalSettings->max_amount ?? 300, $walletBalance) }}" value="{{ old('amount') }}"
-                                            placeholder="Enter amount" required>
+                                            name="amount" id="amount" step="0.01"
+                                            min="{{ $withdrawalSettings->min_amount ?? 100 }}"
+                                            max="{{ min($withdrawalSettings->max_amount ?? 300, $walletBalance) }}"
+                                            value="{{ old('amount') }}" placeholder="Enter amount" required>
                                     </div>
                                     @error('amount')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                    <small class="text-muted" id="amount-help">Minimum: ${{ number_format($withdrawalSettings->min_amount ?? 100, 2) }} | Maximum:
-                                        ${{ number_format(min($withdrawalSettings->max_amount ?? 300, $walletBalance), 2) }} | Available:
+                                    <small class="text-muted" id="amount-help">Minimum:
+                                        ${{ number_format($withdrawalSettings->min_amount ?? 100, 2) }} | Maximum:
+                                        ${{ number_format(min($withdrawalSettings->max_amount ?? 300, $walletBalance), 2) }}
+                                        | Available:
                                         ${{ number_format($walletBalance, 2) }}</small>
                                 </div>
 
@@ -342,27 +345,32 @@
                             </form>
 
                             <!-- OTP Modal -->
-                            <div class="modal fade" id="otpModal" tabindex="-1" aria-labelledby="otpModalLabel" aria-hidden="true">
+                            <div class="modal fade" id="otpModal" tabindex="-1" aria-labelledby="otpModalLabel"
+                                aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <h5 class="modal-title" id="otpModalLabel">
                                                 <i class="fab fa-telegram me-2"></i>Telegram OTP Verification
                                             </h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
                                             <div class="text-center mb-4">
                                                 <i class="fab fa-telegram text-primary fa-3x mb-3"></i>
-                                                <p class="mb-0">We've sent a 6-digit OTP code to your Telegram account.</p>
-                                                <p class="text-muted small">Please enter the code below to complete your withdrawal.</p>
+                                                <p class="mb-0">We've sent a 6-digit OTP code to your Telegram account.
+                                                </p>
+                                                <p class="text-muted small">Please enter the code below to complete your
+                                                    withdrawal.</p>
                                             </div>
 
                                             <form id="otpVerificationForm">
                                                 <div class="mb-3">
                                                     <label for="otpCode" class="form-label">OTP Code</label>
-                                                    <input type="text" class="form-control text-center" id="otpCode" name="otp"
-                                                           maxlength="6" placeholder="000000" style="font-size: 1.5rem; letter-spacing: 0.5rem;">
+                                                    <input type="text" class="form-control text-center" id="otpCode"
+                                                        name="otp" maxlength="6" placeholder="000000"
+                                                        style="font-size: 1.5rem; letter-spacing: 0.5rem;">
                                                     <div class="invalid-feedback" id="otpError"></div>
                                                 </div>
 
@@ -370,9 +378,12 @@
                                                     <button type="submit" class="btn btn-primary" id="verifyOtpBtn">
                                                         <i class="fas fa-check me-2"></i>Verify & Complete Withdrawal
                                                     </button>
-                                                    <button type="button" class="btn btn-outline-secondary" id="resendOtpBtn">
-                                                        <i class="fas fa-redo me-2"></i><span id="resendBtnText">Resend OTP</span>
-                                                        <span id="resendCountdown" class="d-none">(<span id="countdownTimer">60</span>s)</span>
+                                                    <button type="button" class="btn btn-outline-secondary"
+                                                        id="resendOtpBtn">
+                                                        <i class="fas fa-redo me-2"></i><span id="resendBtnText">Resend
+                                                            OTP</span>
+                                                        <span id="resendCountdown" class="d-none">(<span
+                                                                id="countdownTimer">60</span>s)</span>
                                                     </button>
                                                     <small class="text-muted text-center" id="otpExpiryInfo">
                                                         OTP expires in <span id="otpExpiryTimer">5:00</span> minutes
@@ -437,7 +448,8 @@
                             <li><i class="fas fa-check-circle text-success me-2"></i>Valid Crypto Bank Card</li>
                             <li><i class="fas fa-check-circle text-success me-2"></i>Complete payment information</li>
                             <li><i class="fas fa-check-circle text-success me-2"></i>KYC verification</li>
-                            <li><i class="fas fa-check-circle text-success me-2"></i>Minimum withdrawal: ${{ number_format($withdrawalSettings->min_amount ?? 100, 2) }}</li>
+                            <li><i class="fas fa-check-circle text-success me-2"></i>Minimum withdrawal:
+                                ${{ number_format($withdrawalSettings->min_amount ?? 100, 2) }}</li>
                         </ul>
                     </div>
                 </div>
@@ -489,7 +501,8 @@
                     if (walletType && walletBalances[walletType] !== undefined) {
                         const availableBalance = walletBalances[walletType];
                         const minAmount = {{ $withdrawalSettings->min_amount ?? 100 }};
-                        const maxAmount = Math.min({{ $withdrawalSettings->max_amount ?? 300 }}, availableBalance);
+                        const maxAmount = Math.min({{ $withdrawalSettings->max_amount ?? 300 }},
+                            availableBalance);
 
                         // Update input max attribute
                         amountInput.setAttribute('max', maxAmount);
@@ -537,7 +550,8 @@
                     const walletType = walletTypeSelect.value;
                     const availableBalance = walletBalances[walletType] || 0;
                     const minAmount = {{ $withdrawalSettings->min_amount ?? 100 }};
-                    const maxAmount = Math.min({{ $withdrawalSettings->max_amount ?? 300 }}, availableBalance);
+                    const maxAmount = Math.min({{ $withdrawalSettings->max_amount ?? 300 }},
+                        availableBalance);
 
                     if (!walletType) {
                         Swal.fire('Error', 'Please select a wallet to withdraw from.', 'error');
@@ -545,17 +559,22 @@
                     }
 
                     if (amount > maxAmount) {
-                        Swal.fire('Error', `Maximum withdrawal amount is $${maxAmount.toFixed(2)} for the selected wallet.`, 'error');
+                        Swal.fire('Error',
+                            `Maximum withdrawal amount is $${maxAmount.toFixed(2)} for the selected wallet.`,
+                            'error');
                         return false;
                     }
 
                     if (amount < minAmount) {
-                        Swal.fire('Error', `Minimum withdrawal amount is $${minAmount.toFixed(2)}.`, 'error');
+                        Swal.fire('Error', `Minimum withdrawal amount is $${minAmount.toFixed(2)}.`,
+                            'error');
                         return false;
                     }
 
                     if (amount > availableBalance) {
-                        Swal.fire('Error', `Insufficient balance in selected wallet. Available: $${availableBalance.toFixed(2)}.`, 'error');
+                        Swal.fire('Error',
+                            `Insufficient balance in selected wallet. Available: $${availableBalance.toFixed(2)}.`,
+                            'error');
                         return false;
                     }
 
@@ -660,75 +679,76 @@
                 const formData = new FormData(form);
 
                 fetch('/user/withdrawal/send-otp', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                'content')
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
 
-                    if (data.success) {
-                        // Clear any existing timers
-                        clearAllTimers();
-
-                        // Show OTP modal
-                        otpModal.show();
-                        document.getElementById('otpCode').focus();
-
-                        // Start countdown timers
-                        startResendCountdown(60); // 60 seconds before resend is allowed
-                        startOtpExpiryCountdown(data.expires_at); // Use actual expiration time
-                    } else {
-                        // Handle "OTP already sent" case by showing modal again
-                        if (data.message && data.message.includes('An OTP has already been sent')) {
+                        if (data.success) {
                             // Clear any existing timers
                             clearAllTimers();
 
-                            // Show OTP modal instead of error
+                            // Show OTP modal
                             otpModal.show();
                             document.getElementById('otpCode').focus();
 
-                            // Start countdown timers for existing OTP
-                            startResendCountdown(60);
+                            // Start countdown timers
+                            startResendCountdown(60); // 60 seconds before resend is allowed
                             startOtpExpiryCountdown(data.expires_at); // Use actual expiration time
-
-                            // Show info toast that OTP is still valid
-                            Swal.fire({
-                                toast: true,
-                                position: 'top-end',
-                                icon: 'info',
-                                title: 'Previous OTP is still valid',
-                                showConfirmButton: false,
-                                timer: 3000
-                            });
-                        } else if (data.error === 'telegram_not_verified') {
-                            Swal.fire({
-                                title: 'Telegram Not Verified',
-                                text: data.message,
-                                icon: 'warning',
-                                showCancelButton: true,
-                                confirmButtonText: 'Go to Profile',
-                                cancelButtonText: 'Cancel'
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    window.location.href = '/user/profile';
-                                }
-                            });
                         } else {
-                            Swal.fire('Error', data.message, 'error');
+                            // Handle "OTP already sent" case by showing modal again
+                            if (data.message && data.message.includes('An OTP has already been sent')) {
+                                // Clear any existing timers
+                                clearAllTimers();
+
+                                // Show OTP modal instead of error
+                                otpModal.show();
+                                document.getElementById('otpCode').focus();
+
+                                // Start countdown timers for existing OTP
+                                startResendCountdown(60);
+                                startOtpExpiryCountdown(data.expires_at); // Use actual expiration time
+
+                                // Show info toast that OTP is still valid
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: 'info',
+                                    title: 'Previous OTP is still valid',
+                                    showConfirmButton: false,
+                                    timer: 3000
+                                });
+                            } else if (data.error === 'telegram_not_verified') {
+                                Swal.fire({
+                                    title: 'Telegram Not Verified',
+                                    text: data.message,
+                                    icon: 'warning',
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Go to Profile',
+                                    cancelButtonText: 'Cancel'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        window.location.href = '/user/profile';
+                                    }
+                                });
+                            } else {
+                                Swal.fire('Error', data.message, 'error');
+                            }
                         }
-                    }
-                })
-                .catch(error => {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
-                    console.error('Error:', error);
-                    Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
-                });
+                    })
+                    .catch(error => {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                        console.error('Error:', error);
+                        Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
+                    });
             }
 
             function resendOtp() {
@@ -742,93 +762,94 @@
                 const formData = new FormData(form);
 
                 fetch('/user/withdrawal/send-otp', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    resendBtn.disabled = false;
-                    resendBtn.innerHTML = originalText;
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                'content')
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        resendBtn.disabled = false;
+                        resendBtn.innerHTML = originalText;
 
-                    if (data.success) {
-                        // Clear any existing timers
-                        clearAllTimers();
+                        if (data.success) {
+                            // Clear any existing timers
+                            clearAllTimers();
 
-                        // Reset OTP input
-                        document.getElementById('otpCode').value = '';
-                        document.getElementById('otpCode').classList.remove('is-invalid');
-                        document.getElementById('otpError').textContent = '';
+                            // Reset OTP input
+                            document.getElementById('otpCode').value = '';
+                            document.getElementById('otpCode').classList.remove('is-invalid');
+                            document.getElementById('otpError').textContent = '';
 
-                        // Start countdown timers again
-                        startResendCountdown(60);
-                        startOtpExpiryCountdown(data.expires_at); // Use actual expiration time
+                            // Start countdown timers again
+                            startResendCountdown(60);
+                            startOtpExpiryCountdown(data.expires_at); // Use actual expiration time
 
-                        // Show success toast
+                            // Show success toast
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'success',
+                                title: 'New OTP sent to your Telegram',
+                                showConfirmButton: false,
+                                timer: 3000
+                            });
+                        } else {
+                            // Handle "OTP already sent" case silently for better UX
+                            if (data.message && data.message.includes('An OTP has already been sent')) {
+                                // Show a friendly message instead of error
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: 'info',
+                                    title: 'Please wait before requesting a new OTP',
+                                    showConfirmButton: false,
+                                    timer: 3000
+                                });
+                                // Reset timers since existing OTP is still valid
+                                clearAllTimers();
+                                startResendCountdown(60);
+                                startOtpExpiryCountdown(data.expires_at); // Use actual expiration time
+                            } else if (data.error === 'telegram_not_verified') {
+                                Swal.fire({
+                                    title: 'Telegram Not Verified',
+                                    text: data.message,
+                                    icon: 'warning',
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Go to Profile',
+                                    cancelButtonText: 'Cancel'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        window.location.href = '/user/profile';
+                                    }
+                                });
+                            } else {
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: 'error',
+                                    title: data.message || 'Failed to send OTP',
+                                    showConfirmButton: false,
+                                    timer: 3000
+                                });
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        resendBtn.disabled = false;
+                        resendBtn.innerHTML = originalText;
+                        console.error('Error:', error);
                         Swal.fire({
                             toast: true,
                             position: 'top-end',
-                            icon: 'success',
-                            title: 'New OTP sent to your Telegram',
+                            icon: 'error',
+                            title: 'Something went wrong. Please try again.',
                             showConfirmButton: false,
                             timer: 3000
                         });
-                    } else {
-                        // Handle "OTP already sent" case silently for better UX
-                        if (data.message && data.message.includes('An OTP has already been sent')) {
-                            // Show a friendly message instead of error
-                            Swal.fire({
-                                toast: true,
-                                position: 'top-end',
-                                icon: 'info',
-                                title: 'Please wait before requesting a new OTP',
-                                showConfirmButton: false,
-                                timer: 3000
-                            });
-                            // Reset timers since existing OTP is still valid
-                            clearAllTimers();
-                            startResendCountdown(60);
-                            startOtpExpiryCountdown(data.expires_at); // Use actual expiration time
-                        } else if (data.error === 'telegram_not_verified') {
-                            Swal.fire({
-                                title: 'Telegram Not Verified',
-                                text: data.message,
-                                icon: 'warning',
-                                showCancelButton: true,
-                                confirmButtonText: 'Go to Profile',
-                                cancelButtonText: 'Cancel'
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    window.location.href = '/user/profile';
-                                }
-                            });
-                        } else {
-                            Swal.fire({
-                                toast: true,
-                                position: 'top-end',
-                                icon: 'error',
-                                title: data.message || 'Failed to send OTP',
-                                showConfirmButton: false,
-                                timer: 3000
-                            });
-                        }
-                    }
-                })
-                .catch(error => {
-                    resendBtn.disabled = false;
-                    resendBtn.innerHTML = originalText;
-                    console.error('Error:', error);
-                    Swal.fire({
-                        toast: true,
-                        position: 'top-end',
-                        icon: 'error',
-                        title: 'Something went wrong. Please try again.',
-                        showConfirmButton: false,
-                        timer: 3000
                     });
-                });
             }
 
             // OTP verification
@@ -846,42 +867,46 @@
                 }
 
                 verifyBtn.disabled = true;
-                verifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Verifying...';
+                verifyBtn.innerHTML =
+                    '<span class="spinner-border spinner-border-sm me-2"></span>Verifying...';
 
                 fetch('/user/withdrawal/verify-otp', {
-                    method: 'POST',
-                    body: JSON.stringify({ otp: otpCode }),
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    verifyBtn.disabled = false;
-                    verifyBtn.innerHTML = originalText;
+                        method: 'POST',
+                        body: JSON.stringify({
+                            otp: otpCode
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                .getAttribute('content')
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        verifyBtn.disabled = false;
+                        verifyBtn.innerHTML = originalText;
 
-                    if (data.success) {
-                        otpModal.hide();
-                        Swal.fire({
-                            title: 'Success!',
-                            text: data.message,
-                            icon: 'success',
-                            confirmButtonText: 'OK'
-                        }).then(() => {
-                            window.location.reload();
-                        });
-                    } else {
-                        document.getElementById('otpCode').classList.add('is-invalid');
-                        document.getElementById('otpError').textContent = data.message;
-                    }
-                })
-                .catch(error => {
-                    verifyBtn.disabled = false;
-                    verifyBtn.innerHTML = originalText;
-                    console.error('Error:', error);
-                    Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
-                });
+                        if (data.success) {
+                            otpModal.hide();
+                            Swal.fire({
+                                title: 'Success!',
+                                text: data.message,
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            document.getElementById('otpCode').classList.add('is-invalid');
+                            document.getElementById('otpError').textContent = data.message;
+                        }
+                    })
+                    .catch(error => {
+                        verifyBtn.disabled = false;
+                        verifyBtn.innerHTML = originalText;
+                        console.error('Error:', error);
+                        Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
+                    });
             });
 
             // Resend OTP
