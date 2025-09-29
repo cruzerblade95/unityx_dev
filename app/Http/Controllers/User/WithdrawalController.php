@@ -754,11 +754,7 @@ class WithdrawalController extends Controller
                             return '<span class="badge bg-success"><i class="fas fa-check me-1"></i>Approved</span>';
                         }
                     } elseif ($withdrawal->status === 'rejected') {
-                        $badge = '<span class="badge bg-danger"><i class="fas fa-times me-1"></i>Rejected</span>';
-                        if ($withdrawal->rejection_reason) {
-                            $badge .= '<br><small class="text-muted mt-1" style="display: block;"><i class="fas fa-info-circle me-1"></i><button type="button" class="btn btn-sm btn-outline-danger mt-1 rejection-btn" data-bs-toggle="modal" data-bs-target="#rejectionModal' . $withdrawal->id . '">View Reason</button></small>';
-                        }
-                        return $badge;
+                        return '<span class="badge bg-danger"><i class="fas fa-times me-1"></i>Rejected</span>';
                     } elseif ($withdrawal->status === 'completed') {
                         return '<span class="badge bg-success"><i class="fas fa-check-double me-1"></i>Completed</span>';
                     }
@@ -770,14 +766,56 @@ class WithdrawalController extends Controller
                 ->addColumn('actions', function ($withdrawal) {
                     $actions = '';
 
-                    if ($withdrawal->withdrawal_type === 'gold' && $withdrawal->status === 'approved' && $withdrawal->branch_selected) {
-                        $actions .= '<a href="' . route('user.withdrawal.receipt', $withdrawal->id) . '" class="btn btn-sm btn-success" target="_blank"><i class="fas fa-receipt me-1"></i>Download Receipt</a>';
-                    } elseif ($withdrawal->withdrawal_type === 'gold' && $withdrawal->status === 'approved' && !$withdrawal->branch_selected) {
-                        $actions .= '<span class="badge bg-info"><i class="fas fa-clock me-1"></i>Awaiting Branch Assignment</span>';
-                    } elseif ($withdrawal->status === 'rejected' && $withdrawal->rejection_reason) {
-                        $actions .= '<button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#rejectionModal' . $withdrawal->id . '"><i class="fas fa-exclamation-circle me-1"></i>View Reason</button>';
+                    // Generate payment details for modal (same logic as table display)
+                    $paymentDetailsForModal = '';
+                    if ($withdrawal->withdrawal_type === 'crypto') {
+                        $bankName = $withdrawal->bank_name ?? 'N/A';
+                        $accountNumber = $withdrawal->account_number ? \Illuminate\Support\Str::limit($withdrawal->account_number, 20) : 'N/A';
+                        $paymentDetailsForModal = $bankName . ' - ' . $accountNumber;
+                    } elseif ($withdrawal->withdrawal_type === 'gold') {
+                        if ($withdrawal->branch_name && $withdrawal->branch_selected) {
+                            $paymentDetailsForModal = 'Branch: ' . $withdrawal->branch_name;
+                            if ($withdrawal->branch_manager_name) {
+                                $paymentDetailsForModal .= ' | Manager: ' . $withdrawal->branch_manager_name . ' | Phone: ' . $withdrawal->branch_manager_phone;
+                            }
+                        } elseif ($withdrawal->status === 'approved') {
+                            $paymentDetailsForModal = 'Branch being assigned...';
+                        } else {
+                            $paymentDetailsForModal = 'Awaiting approval';
+                        }
                     } else {
-                        $actions .= '<span class="text-muted small">No actions</span>';
+                        $paymentDetailsForModal = 'N/A';
+                    }
+
+                    // Always show View Details button for all withdrawals
+                    $withdrawalData = [
+                        'id' => $withdrawal->id,
+                        'type' => ucfirst(str_replace('_', ' ', $withdrawal->withdrawal_type)),
+                        'wallet' => ucfirst($withdrawal->wallet_type),
+                        'amount' => number_format($withdrawal->amount, 2),
+                        'fee' => $withdrawal->tax_percent . '%',
+                        'net_amount' => number_format($withdrawal->net_amount, 2),
+                        'status' => ucfirst($withdrawal->status),
+                        'date' => $withdrawal->created_at->format('M j, Y g:i A'),
+                        'payment_details' => $paymentDetailsForModal,
+                        'rejection_reason' => $withdrawal->rejection_reason ?: null,
+                        'branch_info' => null
+                    ];
+
+                    // Add branch info for gold withdrawals
+                    if ($withdrawal->withdrawal_type === 'gold') {
+                        if ($withdrawal->branch_selected && $withdrawal->goldBranch) {
+                            $withdrawalData['branch_info'] = $withdrawal->goldBranch->name . ', ' . $withdrawal->goldBranch->address;
+                        } elseif ($withdrawal->status === 'approved' && !$withdrawal->branch_selected) {
+                            $withdrawalData['branch_info'] = 'Awaiting branch assignment';
+                        }
+                    }
+
+                    $actions .= '<button type="button" class="btn btn-sm btn-outline-primary details-btn" data-bs-toggle="modal" data-bs-target="#detailsModal' . $withdrawal->id . '" data-details="' . htmlspecialchars(json_encode($withdrawalData), ENT_QUOTES) . '"><i class="fas fa-eye me-1 d-none d-sm-inline"></i><span class="d-none d-md-inline">View Details</span><span class="d-inline d-md-none">Details</span></button>';
+
+                    // Add receipt download button for completed gold withdrawals
+                    if ($withdrawal->withdrawal_type === 'gold' && $withdrawal->status === 'approved' && $withdrawal->branch_selected) {
+                        $actions .= ' <a href="' . route('user.withdrawal.receipt', $withdrawal->id) . '" class="btn btn-sm btn-success" target="_blank"><i class="fas fa-receipt me-1 d-none d-sm-inline"></i><span class="d-none d-md-inline">Receipt</span><span class="d-inline d-md-none">PDF</span></a>';
                     }
 
                     return $actions;

@@ -464,7 +464,7 @@
                             <a href="mailto:support@unityx.pro" class="btn btn-outline-primary btn-sm">
                                 <i class="fas fa-envelope me-1"></i>Email Support
                             </a>
-                            <a href="https://t.me/unityxpro" class="btn btn-outline-success btn-sm">
+                            <a href="https://t.me/unityxpro" class="btn btn-outline-success btn-sm" target="_blank">
                                 <i class="fab fa-telegram me-1"></i>Telegram Support
                             </a>
                         </div>

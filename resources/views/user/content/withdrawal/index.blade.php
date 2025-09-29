@@ -21,7 +21,7 @@
 
     <div class="container-xxl flex-grow-1 container-p-y">
         <!-- Page Title -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="page-header-mobile mb-4">
             <div>
                 <h4 class="py-3 mb-0">Withdrawal Options</h4>
                 <p class="text-muted mb-0">Choose your preferred withdrawal method</p>
