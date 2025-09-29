@@ -13,6 +13,73 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
+    /* Mobile responsive adjustments for cards */
+    @media (max-width: 768px) {
+        .withdrawal-type-card {
+            min-height: 140px;
+        }
+
+        .withdrawal-type-card .card-body {
+            padding: 1.25rem 1rem !important;
+        }
+
+        .withdrawal-type-card .card-icon {
+            font-size: 2.5rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+
+        .withdrawal-type-card .card-title {
+            font-size: 1rem !important;
+        }
+
+        .withdrawal-type-card .card-text {
+            font-size: 0.8rem !important;
+            line-height: 1.3;
+        }
+
+        .withdrawal-type-card .fee-badge {
+            font-size: 0.7rem !important;
+            padding: 0.25rem 0.5rem !important;
+            top: 8px;
+            right: 8px;
+        }
+
+        .withdrawal-type-card .btn {
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .withdrawal-type-card {
+            min-height: 120px;
+        }
+
+        .withdrawal-type-card .card-body {
+            padding: 1rem 0.75rem !important;
+        }
+
+        .withdrawal-type-card .card-icon {
+            font-size: 2rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+
+        .withdrawal-type-card .card-title {
+            font-size: 0.95rem !important;
+            margin-bottom: 0.25rem !important;
+        }
+
+        .withdrawal-type-card .card-text {
+            font-size: 0.75rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+
+        .withdrawal-type-card .btn {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+        }
+    }
+
     .withdrawal-type-card::before {
         content: '';
         position: absolute;
@@ -274,9 +341,99 @@
         background-color: var(--bs-tertiary-bg);
     }
 
+    /* Mobile Responsive Enhancements */
+    @media (max-width: 768px) {
+        .withdrawal-page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .withdrawal-page-header .back-button {
+            margin-right: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        .withdrawal-page-header h4 {
+            font-size: 1.25rem !important;
+            margin-bottom: 0.25rem !important;
+        }
+
+        .withdrawal-page-header p {
+            font-size: 0.875rem;
+        }
+    }
+
     .withdrawal-form-container {
         max-width: 600px;
         margin: 0 auto;
+    }
+
+    /* Mobile responsive forms */
+    @media (max-width: 768px) {
+        .withdrawal-form-container {
+            max-width: 100%;
+            padding: 0 0.5rem;
+        }
+
+        .card-body {
+            padding: 1.25rem !important;
+        }
+
+        .form-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .form-control,
+        .form-select {
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .card-body {
+            padding: 1rem !important;
+        }
+
+        .form-label {
+            font-size: 0.85rem;
+        }
+
+        .form-control,
+        .form-select {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-lg {
+            padding: 0.6rem 1.25rem;
+            font-size: 0.9rem;
+        }
+
+        .alert {
+            padding: 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .alert h5 {
+            font-size: 1rem;
+        }
     }
 
     .withdrawal-type-banner {
@@ -286,6 +443,46 @@
         margin-bottom: 2rem;
         position: relative;
         overflow: hidden;
+    }
+
+    /* Mobile responsive banner */
+    @media (max-width: 768px) {
+        .withdrawal-type-banner {
+            padding: 1.5rem 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .withdrawal-type-banner .banner-icon {
+            font-size: 3rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+
+        .withdrawal-type-banner h3 {
+            font-size: 1.4rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+
+        .withdrawal-type-banner p {
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .withdrawal-type-banner {
+            padding: 1.25rem 0.75rem;
+        }
+
+        .withdrawal-type-banner .banner-icon {
+            font-size: 2.5rem !important;
+        }
+
+        .withdrawal-type-banner h3 {
+            font-size: 1.25rem !important;
+        }
+
+        .withdrawal-type-banner p {
+            font-size: 0.85rem;
+        }
     }
 
     .withdrawal-type-banner.crypto-banner {
@@ -317,6 +514,116 @@
     }
 
     .withdrawal-type-banner.gold-banner .banner-icon {
-        color: #fd7e14;
+        \n color: #fd7e14;
+        \n
     }
+
+    \n\n
+
+    /* Mobile page header improvements */
+    \n .page-header-mobile h4 {
+        \n font-size: 1.5rem;
+        \n
+    }
+
+    \n\n @media (max-width: 768px) {
+        \n .page-header-mobile h4 {
+            \n font-size: 1.3rem;
+            \n padding: 1rem 0 !important;
+            \n
+        }
+
+        \n \n .page-header-mobile p {
+            \n font-size: 0.9rem;
+            \n
+        }
+
+        \n \n .container-xxl {
+            \n padding-left: 1rem;
+            \n padding-right: 1rem;
+            \n
+        }
+
+        \n
+    }
+
+    \n\n @media (max-width: 576px) {
+        \n .page-header-mobile h4 {
+            \n font-size: 1.2rem;
+            \n
+        }
+
+        \n \n .page-header-mobile p {
+            \n font-size: 0.85rem;
+            \n
+        }
+
+        \n \n .container-xxl {
+            \n padding-left: 0.75rem;
+            \n padding-right: 0.75rem;
+            \n
+        }
+
+        \n \n .card {
+            \n border-radius: 0.75rem;
+            \n
+        }
+
+        \n \n .btn {
+            \n border-radius: 0.5rem;
+            \n
+        }
+
+        \n
+    }
+
+    \n\n
+    /* Countdown timer mobile responsive */
+    \n @media (max-width: 768px) {
+        \n .countdown-display {
+            \n flex-wrap: wrap;
+            \n justify-content: center;
+            \n gap: 0.5rem;
+            \n
+        }
+
+        \n \n .countdown-item {
+            \n min-width: 80px;
+            \n
+        }
+
+        \n \n .countdown-number {
+            \n font-size: 1.5rem;
+            \n
+        }
+
+        \n \n .countdown-label {
+            \n font-size: 0.8rem;
+            \n
+        }
+
+        \n
+    }
+
+    \n\n @media (max-width: 576px) {
+        \n .countdown-item {
+            \n min-width: 70px;
+            \n
+        }
+
+        \n \n .countdown-number {
+            \n font-size: 1.3rem;
+            \n
+        }
+
+        \n \n .countdown-label {
+            \n font-size: 0.75rem;
+            \n
+        }
+
+        \n
+    }
+
+    \n
+</style>
 </style>

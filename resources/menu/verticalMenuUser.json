@@ -67,7 +67,7 @@
     {
       "name": "Bonus",
       "icon": "menu-icon icon-base ti tabler-wallet",
-      "slug": "user.bonus",
+      "slug": "user.bonuses",
       "submenu": [
         {
           "url": "user/referral-bonus-histories",

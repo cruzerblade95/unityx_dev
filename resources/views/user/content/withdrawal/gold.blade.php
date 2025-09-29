@@ -5,15 +5,15 @@
 @section('title', 'Gold Redemption Withdrawal')
 
 @section('vendor-style')
-    @vite(['resources/assets/vendor/libs/flatpickr/flatpickr.scss'])
+    @vite(['resources/assets/vendor/libs/flatpickr/flatpickr.scss', 'resources/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.scss', 'resources/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.scss', 'resources/assets/vendor/libs/notyf/notyf.scss'])
 @endsection
 
 @section('vendor-script')
-    @vite(['resources/assets/vendor/libs/flatpickr/flatpickr.js'])
+    @vite(['resources/assets/vendor/libs/flatpickr/flatpickr.js', 'resources/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js', 'resources/assets/vendor/libs/notyf/notyf.js'])
 @endsection
 
 @section('page-script')
-    @vite(['resources/assets/js/forms-pickers.js'])
+    {{-- forms-pickers.js removed as it's not needed and causes flatpickr errors --}}
 @endsection
 
 @section('content')
@@ -492,7 +492,7 @@
                             <a href="mailto:support@unityx.pro" class="btn btn-outline-primary btn-sm">
                                 <i class="fas fa-envelope me-1"></i>Email Support
                             </a>
-                            <a href="https://t.me/unityxpro" class="btn btn-outline-success btn-sm">
+                            <a href="https://t.me/unityxpro" class="btn btn-outline-success btn-sm" target="_blank">
                                 <i class="fab fa-telegram me-1"></i>Telegram Support
                             </a>
                         </div>

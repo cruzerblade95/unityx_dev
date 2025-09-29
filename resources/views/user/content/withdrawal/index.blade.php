@@ -5,15 +5,15 @@
 @section('title', 'Withdrawal Options')
 
 @section('vendor-style')
-    @vite(['resources/assets/vendor/libs/flatpickr/flatpickr.scss'])
+    @vite(['resources/assets/vendor/libs/flatpickr/flatpickr.scss', 'resources/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.scss', 'resources/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.scss', 'resources/assets/vendor/libs/notyf/notyf.scss'])
 @endsection
 
 @section('vendor-script')
-    @vite(['resources/assets/vendor/libs/flatpickr/flatpickr.js'])
+    @vite(['resources/assets/vendor/libs/flatpickr/flatpickr.js', 'resources/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js', 'resources/assets/vendor/libs/notyf/notyf.js'])
 @endsection
 
 @section('page-script')
-    @vite(['resources/assets/js/forms-pickers.js'])
+    {{-- forms-pickers.js removed as it's not needed and causes flatpickr errors --}}
 @endsection
 
 @section('content')
@@ -21,7 +21,7 @@
 
     <div class="container-xxl flex-grow-1 container-p-y">
         <!-- Page Title -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="page-header-mobile mb-4">
             <div>
                 <h4 class="py-3 mb-0">Withdrawal Options</h4>
                 <p class="text-muted mb-0">Choose your preferred withdrawal method</p>

@@ -260,9 +260,28 @@
                 // Function to load notifications
                 function loadNotifications() {
                     fetch('/user/notifications/api')
-                        .then(response => response.json())
-                        .then(data => {
-                            updateNotificationUI(data.notifications, data.unread_count);
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.text();
+                        })
+                        .then(text => {
+                            try {
+                                const data = JSON.parse(text);
+                                updateNotificationUI(data.notifications, data.unread_count);
+                            } catch (e) {
+                                console.error('JSON parsing error:', e);
+                                console.error('Response text:', text);
+                                // Try to clean the text and parse again
+                                const cleanText = text.replace(/^\uFEFF/, '').replace(/^\u00EF\u00BB\u00BF/, '');
+                                try {
+                                    const data = JSON.parse(cleanText);
+                                    updateNotificationUI(data.notifications, data.unread_count);
+                                } catch (e2) {
+                                    console.error('Failed to parse cleaned JSON:', e2);
+                                }
+                            }
                         })
                         .catch(error => {
                             console.error('Error loading notifications:', error);
