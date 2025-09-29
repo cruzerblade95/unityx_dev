@@ -685,7 +685,7 @@
                                     <span class="badge bg-label-secondary small">Code: ${user.referral_code}</span>
                                     <span class="badge bg-label-${levelColor} small">Level ${level + 1}</span>
                                     <span class="text-muted small d-flex align-items-center">
-                                        <i class="ti ti-arrow-down-right me-1"></i>
+                                        <i class="icon-base ti tabler-arrow-down-right me-1"></i>
                                         <span class="text-truncate">
                                             ${user.downlines && user.downlines.length > 0 ? user.downlines.length + ' ref' : 'No ref'}
                                         </span>
@@ -775,7 +775,7 @@
                 <div class="text-center py-4">
                     <div class="avatar-lg mx-auto mb-3">
                         <span class="avatar-initial rounded-circle bg-label-secondary">
-                            <i class="ti ti-users text-muted" style="font-size: 2rem;"></i>
+                            <i class="icon-base ti tabler-users text-muted" style="font-size: 2rem;"></i>
                         </span>
                     </div>
                     <h6 class="mb-1">No Downlines Yet</h6>
@@ -901,7 +901,7 @@
             const statsHtml = `
             <div class="d-flex align-items-center justify-content-between text-sm">
                 <div class="d-flex align-items-center">
-                    <i class="ti ti-info-circle me-1 text-muted"></i>
+                    <i class="icon-base ti tabler-info-circle me-1 text-muted"></i>
                     <span class="text-muted">Click nodes to expand/collapse levels</span>
                 </div>
                 <div class="d-flex align-items-center gap-2">
@@ -991,7 +991,7 @@
                         <div class="d-flex align-items-center mb-2">
                             <div class="avatar avatar-sm me-2">
                                 <span class="avatar-initial rounded-circle bg-primary">
-                                    <i class="ti ti-qrcode text-white"></i>
+                                    <i class="icon-base ti tabler-qrcode text-white"></i>
                                 </span>
                             </div>
                             <div>
@@ -1000,7 +1000,7 @@
                             </div>
                         </div>
                         <button class="btn btn-primary btn-sm" onclick="copyReferralCode()">
-                            <i class="ti ti-copy me-1"></i>Copy Code
+                            <i class="icon-base ti tabler-copy me-1"></i>Copy Code
                         </button>
                     </div>
                     <div class="col-5 text-center">
@@ -1018,7 +1018,7 @@
                         <div class="d-flex align-items-center">
                             <div class="avatar avatar-sm me-2">
                                 <span class="avatar-initial rounded-circle bg-info">
-                                    <i class="ti ti-arrow-up text-white"></i>
+                                    <i class="icon-base ti tabler-arrow-up text-white"></i>
                                 </span>
                             </div>
                             <div>
@@ -1043,7 +1043,7 @@
                     <div class="text-end">
                         <div class="avatar">
                             <span class="avatar-initial rounded-circle bg-label-primary">
-                                <i class="ti ti-share"></i>
+                                <i class="icon-base ti tabler-share"></i>
                             </span>
                         </div>
                     </div>
@@ -1057,7 +1057,7 @@
                     <div class="card-footer bg-label-light">
                         <div class="d-flex align-items-center justify-content-between text-sm">
                             <div class="d-flex align-items-center">
-                                <i class="ti ti-info-circle me-1 text-muted"></i>
+                                <i class="icon-base ti tabler-info-circle me-1 text-muted"></i>
                                 <span class="text-muted">Click nodes to expand/collapse levels</span>
                             </div>
                             <div class="d-flex align-items-center">
