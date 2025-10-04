@@ -26,7 +26,7 @@
                         </h5>
                         <div class="d-flex gap-2">
                             <span class="badge bg-info">{{ $totalTransactions }} Total</span>
-                            <span class="badge bg-success">{{ $completedTransactions }} Completed</span>
+                            <span class="badge bg-success">{{ $completedTransactions }} Sold</span>
                             <span class="badge bg-warning">{{ $pendingTransactions }} Pending</span>
                             <span class="badge bg-danger">{{ $cancelledTransactions }} Cancelled</span>
                             <span class="badge bg-dark">{{ $rejectedTransactions }} Rejected</span>
@@ -47,7 +47,7 @@
                                 <div class="d-flex align-items-center my-1">
                                     <h4 class="mb-0 me-2">${{ number_format($totalVolume, 2) }}</h4>
                                 </div>
-                                <small class="mb-0">Completed transactions</small>
+                                <small class="mb-0">Sold transactions</small>
                             </div>
                             <div class="avatar">
                                 <span class="avatar-initial rounded bg-label-success">
@@ -144,8 +144,8 @@
                                         <option value="pending_verification"
                                             {{ request('status') == 'pending_verification' ? 'selected' : '' }}>Pending
                                             Verification</option>
-                                        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>
-                                            Completed</option>
+                                        <option value="sold" {{ request('status') == 'sold' ? 'selected' : '' }}>
+                                            Sold</option>
                                         <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>
                                             Cancelled</option>
                                         <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>
@@ -264,8 +264,8 @@
                                             </td>
                                             <td>
                                                 @switch($transaction->status)
-                                                    @case('completed')
-                                                        <span class="badge bg-success">Completed</span>
+                                                    @case('sold')
+                                                        <span class="badge bg-success">Sold</span>
                                                     @break
 
                                                     @case('pending_verification')

@@ -53,17 +53,17 @@ class MarketplaceController extends Controller
 
         // Calculate totals for summary
         $totalTransactions = MarketplaceListing::whereNotNull('buyer_id')->count();
-        $completedTransactions = MarketplaceListing::whereNotNull('buyer_id')->where('status', 'completed')->count();
+        $completedTransactions = MarketplaceListing::whereNotNull('buyer_id')->where('status', 'sold')->count();
         $pendingTransactions = MarketplaceListing::whereNotNull('buyer_id')->where('status', 'pending_verification')->count();
         $cancelledTransactions = MarketplaceListing::whereNotNull('buyer_id')->where('status', 'cancelled')->count();
         $rejectedTransactions = MarketplaceListing::whereNotNull('buyer_id')->where('status', 'rejected')->count();
 
         $totalVolume = MarketplaceListing::whereNotNull('buyer_id')
-            ->where('status', 'completed')
+            ->where('status', 'sold')
             ->sum('total_price');
 
         $totalFees = MarketplaceListing::whereNotNull('buyer_id')
-            ->where('status', 'completed')
+            ->where('status', 'sold')
             ->sum(DB::raw('total_price * 0.018')); // 1.8% fee
 
         return view('admin.content.marketplace', compact(
