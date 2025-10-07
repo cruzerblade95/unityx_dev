@@ -42,6 +42,12 @@
           "slug": "admin.nowpayments.index"
         },
         {
+          "url": "admin/deposit-report",
+          "name": "Deposit Report",
+          "icon": "menu-icon icon-base ti tabler-chart-bar",
+          "slug": "admin.deposit-report.index"
+        },
+        {
           "url": "admin/marketplace",
           "name": "Marketplace",
           "icon": "menu-icon icon-base ti tabler-shopping-cart",
