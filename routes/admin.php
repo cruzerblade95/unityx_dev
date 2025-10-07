@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\UplineManagementController;
 use App\Http\Controllers\Admin\AiTradeSettingsController;
 use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\WalletProfitCheckerController;
+use App\Http\Controllers\Admin\DepositReportController;
 
 Route::prefix('admin')->middleware('web')->group(function () {
     // Guest routes
@@ -70,6 +71,10 @@ Route::prefix('admin')->middleware('web')->group(function () {
         Route::get('/nowpayments/deposit-details/{depositId}', [NOWPaymentsController::class, 'showDepositDetails'])->name('admin.nowpayments.deposit-details');
         Route::post('/deposits/approve/{depositId}', [NOWPaymentsController::class, 'approveDeposit'])->name('admin.deposits.approve');
         Route::post('/deposits/reject/{depositId}', [NOWPaymentsController::class, 'rejectDeposit'])->name('admin.deposits.reject');
+
+        // Deposit Report Routes
+        Route::get('/deposit-report', [DepositReportController::class, 'index'])->name('admin.deposit-report.index');
+        Route::get('/deposit-report/list', [DepositReportController::class, 'list'])->name('admin.deposit-report.list');
 
         // Withdrawal Management Routes
         Route::get('/withdrawals', [WithdrawalManagementController::class, 'index'])->name('admin.withdrawals.index');
