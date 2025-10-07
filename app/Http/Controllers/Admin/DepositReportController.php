@@ -165,12 +165,48 @@ class DepositReportController extends Controller
                     return '<small>' . $date->format('M d, Y H:i') . '</small>';
                 })
                 ->addColumn('actions', function ($deposit) {
+                    $user = $deposit['user'];
+                    $userName = ($user['firstname'] ?? '') . ' ' . ($user['lastname'] ?? '');
+                    $userName = trim($userName) ?: ($user['username'] ?? 'N/A');
+
+                    // Get user ID - for marketplace deposits it's in $deposit['user_id'], for others it's in $user['id']
+                    $userId = $deposit['user_id'] ?? ($user['id'] ?? null);
+
                     $actions = '<div class="btn-group">';
+
+                    // View Details/Transaction button and Adjust Wallet
                     if ($deposit['source_type'] === 'marketplace') {
                         $actions .= '<a href="' . route('admin.marketplace.show', $deposit['reference']) . '" class="btn btn-sm btn-outline-primary">View Transaction</a>';
+
+                        // Add Adjust Wallet button for marketplace transactions
+                        if ($userId) {
+                            $wallet = \App\Models\Wallet::where('user_id', $userId)->first();
+                            if ($wallet) {
+                                $actions .= '<button class="btn btn-sm btn-outline-success ms-1 btn-adjust-wallet"
+                                                data-wallet-id="' . $wallet->id . '"
+                                                data-user-name="' . htmlspecialchars($userName) . '"
+                                                title="Adjust User Wallet">
+                                                <i class="fas fa-wallet"></i> Adjust Wallet
+                                            </button>';
+                            }
+                        }
                     } else {
                         $actions .= '<button class="btn btn-sm btn-outline-primary" onclick="viewDeposit(\'' . $deposit['id'] . '\')">View Details</button>';
+
+                        // Add Adjust Wallet button for other deposit types
+                        if ($userId) {
+                            $wallet = \App\Models\Wallet::where('user_id', $userId)->first();
+                            if ($wallet) {
+                                $actions .= '<button class="btn btn-sm btn-outline-success ms-1 btn-adjust-wallet"
+                                                data-wallet-id="' . $wallet->id . '"
+                                                data-user-name="' . htmlspecialchars($userName) . '"
+                                                title="Adjust User Wallet">
+                                                <i class="fas fa-wallet"></i> Adjust Wallet
+                                            </button>';
+                            }
+                        }
                     }
+
                     $actions .= '</div>';
                     return $actions;
                 })

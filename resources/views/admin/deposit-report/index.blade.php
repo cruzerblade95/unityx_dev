@@ -326,6 +326,145 @@
             </div>
         </div>
     </div>
+
+    <!-- Adjust Wallet Modal -->
+    <div class="modal fade" id="adjustWalletModal" tabindex="-1" aria-labelledby="adjustWalletModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="adjustWalletModalLabel">
+                        <i class="fas fa-wallet me-2"></i>Adjust User Wallet
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="adjustWalletForm">
+                        <input type="hidden" id="wallet_id" name="wallet_id">
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>User:</strong> <span id="modal_user_name">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Current Balances Display -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6>Current Wallet Balances</h6>
+                                <div class="row">
+                                    <div class="col-md-3 col-6">
+                                        <div class="card bg-light">
+                                            <div class="card-body p-3 text-center">
+                                                <h6 class="card-title mb-1">Deposit</h6>
+                                                <h5 class="text-primary mb-0">$<span id="current_deposit">0.00</span></h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6">
+                                        <div class="card bg-light">
+                                            <div class="card-body p-3 text-center">
+                                                <h6 class="card-title mb-1">Profit</h6>
+                                                <h5 class="text-success mb-0">$<span id="current_profit">0.00</span></h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6">
+                                        <div class="card bg-light">
+                                            <div class="card-body p-3 text-center">
+                                                <h6 class="card-title mb-1">Bonus</h6>
+                                                <h5 class="text-warning mb-0">$<span id="current_bonus">0.00</span></h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6">
+                                        <div class="card bg-light">
+                                            <div class="card-body p-3 text-center">
+                                                <h6 class="card-title mb-1">Cash</h6>
+                                                <h5 class="text-info mb-0">$<span id="current_cash">0.00</span></h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Adjustment Form -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="balance_type" class="form-label">Balance Type</label>
+                                <select class="form-select" id="balance_type" name="type" required>
+                                    <option value="">Select Balance Type</option>
+                                    <option value="deposit">Deposit</option>
+                                    <option value="profit">Profit</option>
+                                    <option value="bonus">Bonus</option>
+                                    <option value="cash">Cash</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="adjustment_action" class="form-label">Action</label>
+                                <select class="form-select" id="adjustment_action" name="action" required>
+                                    <option value="">Select Action</option>
+                                    <option value="add">Add Amount</option>
+                                    <option value="deduct">Deduct Amount</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="adjustment_amount" class="form-label">Amount ($)</label>
+                                <input type="number" class="form-control" id="adjustment_amount" name="amount"
+                                    step="0.01" min="0" required placeholder="0.00">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="adjustment_reason" class="form-label">Reason</label>
+                                <input type="text" class="form-control" id="adjustment_reason" name="reason"
+                                    required placeholder="Enter reason for adjustment">
+                            </div>
+                        </div>
+
+                        <!-- Deposit Bonus Trigger (only for deposit additions) -->
+                        <div class="row" id="deposit_bonus_row" style="display: none;">
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="trigger_deposit_bonus"
+                                        name="trigger_deposit_bonus">
+                                    <label class="form-check-label" for="trigger_deposit_bonus">
+                                        Trigger deposit bonus for referral downline
+                                    </label>
+                                    <div class="form-text">
+                                        Check this to trigger deposit bonus script for the user's referral network.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Warning:</strong> This action will immediately modify the user's wallet balance.
+                                    Please ensure the amount and reason are correct before proceeding.
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </button>
+                    <button type="submit" form="adjustWalletForm" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Adjust Balance
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('vendor-script')
@@ -524,5 +663,187 @@
                 modal.style.display = 'none';
             }
         }
+
+        // ===== WALLET ADJUSTMENT FUNCTIONALITY =====
+
+        // Handle adjust wallet button click
+        $(document).on('click', '.btn-adjust-wallet', function() {
+            var walletId = $(this).data('wallet-id');
+            var userName = $(this).data('user-name');
+
+            // Set wallet ID and user name
+            $('#wallet_id').val(walletId);
+            $('#modal_user_name').text(userName);
+
+            // Reset form
+            $('#adjustWalletForm')[0].reset();
+            $('#wallet_id').val(walletId); // Keep wallet ID after reset
+
+            // Hide deposit bonus checkbox initially
+            $('#deposit_bonus_row').hide();
+
+            // Load current wallet data
+            loadWalletData(walletId);
+
+            // Show modal
+            $('#adjustWalletModal').modal('show');
+        });
+
+        // Handle balance type and action change to show/hide deposit bonus checkbox
+        $('#balance_type, #adjustment_action').on('change', function() {
+            var balanceType = $('#balance_type').val();
+            var action = $('#adjustment_action').val();
+
+            // Show checkbox only when adding to deposit balance
+            if (balanceType === 'deposit' && action === 'add') {
+                $('#deposit_bonus_row').show();
+            } else {
+                $('#deposit_bonus_row').hide();
+                $('#trigger_deposit_bonus').prop('checked', false);
+            }
+        });
+
+        // Function to load wallet data
+        function loadWalletData(walletId) {
+            $.ajax({
+                url: '{{ url('/admin/wallets') }}/' + walletId,
+                type: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Update balance displays
+                        $('#current_deposit').text(response.wallet.deposit);
+                        $('#current_profit').text(response.wallet.profit);
+                        $('#current_bonus').text(response.wallet.bonus);
+                        $('#current_cash').text(response.wallet.cash);
+                    }
+                },
+                error: function() {
+                    console.error('Failed to load wallet data');
+                }
+            });
+        }
+
+        // Handle wallet adjustment form submission
+        $('#adjustWalletForm').on('submit', function(e) {
+            e.preventDefault();
+
+            var form = $(this);
+            var formData = {
+                wallet_id: $('#wallet_id').val(),
+                type: $('#balance_type').val(),
+                action: $('#adjustment_action').val(),
+                amount: $('#adjustment_amount').val(),
+                reason: $('#adjustment_reason').val(),
+                trigger_deposit_bonus: $('#trigger_deposit_bonus').is(':checked')
+            };
+
+            // Validation
+            if (!formData.wallet_id || !formData.type || !formData.action || !formData.amount || !formData.reason) {
+                Swal.fire('Error!', 'Please fill in all required fields.', 'error');
+                return;
+            }
+
+            var actionText = formData.action === 'add' ? 'add $' + formData.amount + ' to' : 'deduct $' + formData
+                .amount + ' from';
+            var bonusText = '';
+
+            if (formData.type === 'deposit' && formData.action === 'add' && formData.trigger_deposit_bonus) {
+                bonusText =
+                    '<br><br><span class="text-info"><i class="fas fa-info-circle me-1"></i><strong>Note:</strong> Deposit bonus script will be triggered for referral downline.</span>';
+            }
+
+            // Close modal first to ensure SweetAlert appears in front
+            $('#adjustWalletModal').modal('hide');
+
+            // Show confirmation after modal is hidden
+            setTimeout(function() {
+                Swal.fire({
+                    title: 'Confirm Wallet Adjustment',
+                    html: 'Are you sure you want to <strong>' + actionText +
+                        '</strong> the <strong>' + formData.type +
+                        '</strong> balance?<br><br><strong>Reason:</strong> ' + formData.reason +
+                        bonusText,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#696cff',
+                    cancelButtonColor: '#8592a3',
+                    confirmButtonText: 'Yes, proceed',
+                    cancelButtonText: 'Cancel'
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        submitWalletAdjustment(formData);
+                    } else {
+                        // If user cancels, show the modal again
+                        $('#adjustWalletModal').modal('show');
+                    }
+                });
+            }, 300); // Small delay to ensure modal is fully hidden
+        });
+
+        // Function to submit wallet adjustment
+        function submitWalletAdjustment(formData) {
+            $.ajax({
+                url: '{{ route('admin.wallets.adjust') }}',
+                type: 'POST',
+                data: formData,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                beforeSend: function() {
+                    $('button[type="submit"]', '#adjustWalletForm')
+                        .prop('disabled', true)
+                        .html('<i class="fas fa-spinner fa-spin me-1"></i>Processing...');
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: response.message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+
+                        // Refresh the deposit report table
+                        if (window.depositReportTable && typeof window.depositReportTable.ajax !==
+                            'undefined') {
+                            window.depositReportTable.ajax.reload();
+                        }
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message || 'Failed to adjust wallet balance'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    var errorMessage = 'An error occurred while adjusting wallet balance';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMessage
+                    });
+                },
+                complete: function() {
+                    $('button[type="submit"]', '#adjustWalletForm')
+                        .prop('disabled', false)
+                        .html('<i class="fas fa-save me-1"></i>Adjust Balance');
+                }
+            });
+        }
+
+        // Clear form when modal is hidden
+        $('#adjustWalletModal').on('hidden.bs.modal', function() {
+            $('#adjustWalletForm')[0].reset();
+            $('#deposit_bonus_row').hide();
+        });
     </script>
 @endsection
