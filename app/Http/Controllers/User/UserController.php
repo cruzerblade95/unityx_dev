@@ -54,6 +54,7 @@ class UserController extends Controller
             'lastname' => 'required|string|max:255',
             'username' => 'nullable|string|max:255|unique:users,username,' . $user->id . '|regex:/^\S*$/u',
             'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:20|regex:/^[\+]?[0-9\s\-\(\)]+$/',
             'address' => 'nullable|string|max:255',
             'state' => 'nullable|string|max:255',
             'zipCode' => 'nullable|string|max:10',
@@ -61,6 +62,7 @@ class UserController extends Controller
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
             'username.regex' => 'Username must not contain spaces.',
+            'phone.regex' => 'Please enter a valid phone number format.',
         ]);
 
         // Handle profile photo upload

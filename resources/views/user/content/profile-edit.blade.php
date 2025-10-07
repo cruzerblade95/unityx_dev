@@ -129,7 +129,8 @@
                             <div class="col-md-6 form-control-validation">
                                 <label for="username" class="form-label">Username</label>
                                 <input class="form-control @error('username') is-invalid @enderror" type="text"
-                                    name="username" id="username" value="{{ old('username', $user->username ?? '') }}" disabled/>
+                                    name="username" id="username" value="{{ old('username', $user->username ?? '') }}"
+                                    disabled />
                                 @error('username')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -147,13 +148,15 @@
               <label for="organization" class="form-label">Organization</label>
               <input type="text" class="form-control" id="organization" name="organization" value="{{ auth()->user()->organization ?? '' }}" />
             </div> --}}
-                            {{-- <div class=" col-md-6">
-              <label class="form-label" for="phoneNumber">Phone Number</label>
-              <div class="input-group input-group-merge">
-                <span class="input-group-text">US (+1)</span>
-                <input type="text" id="phoneNumber" name="phoneNumber" class="form-control" value="{{ auth()->user()->phone ?? '' }}" placeholder="202 555 0111" />
-              </div>
-            </div> --}}
+                            <div class="col-md-6">
+                                <label class="form-label" for="phone">Phone Number</label>
+                                <input type="text" id="phone" name="phone"
+                                    class="form-control @error('phone') is-invalid @enderror"
+                                    value="{{ old('phone', $user->phone ?? '') }}" placeholder="+1 234 567 8900" />
+                                @error('phone')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                             <div class="col-md-6">
                                 <label for="address" class="form-label">Address</label>
                                 <input type="text" class="form-control @error('address') is-invalid @enderror"

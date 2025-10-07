@@ -1,4 +1,5 @@
-@push('scripts')    <script>
+@push('scripts')
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             @if (session('profile_updated'))
                 var toastEl = document.getElementById('profileToast');
@@ -91,8 +92,8 @@
             <div class="nav-align-top">
                 <ul class="nav nav-pills flex-column flex-sm-row mb-6 gap-sm-0 gap-2">
                     <li class="nav-item">
-                        <a class="nav-link active" href="javascript:void(0);"><i
-                                class="fas fa-user icon-sm me-1_5"></i> Profile</a>
+                        <a class="nav-link active" href="javascript:void(0);"><i class="fas fa-user icon-sm me-1_5"></i>
+                            Profile</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('user.kyc.index') }}">
@@ -165,6 +166,12 @@
                             <label class="form-label">Email</label>
                             <div class="form-control-plaintext">{{ auth()->user()->email }}</div>
                         </div>
+                        @if (auth()->user()->phone)
+                            <div class="mb-3">
+                                <label class="form-label">Phone Number</label>
+                                <div class="form-control-plaintext">{{ auth()->user()->phone }}</div>
+                            </div>
+                        @endif
                         <div class="d-flex gap-2">
                             <a href="{{ url('/user/profile/edit') }}" class="btn btn-primary">Edit Profile</a>
                             <a href="{{ route('user.payment-info.index') }}" class="btn btn-outline-info">
@@ -180,20 +187,22 @@
                             <div class="d-flex align-items-center">
                                 <i class="fab fa-telegram text-success me-2"></i>
                                 <span class="fw-medium text-success">Connected</span>
-                                @if(auth()->user()->telegramVerification->telegram_username)
+                                @if (auth()->user()->telegramVerification->telegram_username)
                                     <span
                                         class="text-muted ms-2">({{ auth()->user()->telegramVerification->telegram_username }})</span>
                                 @else
                                     <span class="text-warning ms-2">(No Username Set)</span>
                                 @endif
                             </div>
-                            @if(auth()->user()->telegramVerification->telegram_username)
+                            @if (auth()->user()->telegramVerification->telegram_username)
                                 <small class="text-muted">You will receive notifications on Telegram</small>
                             @else
                                 <div class="alert alert-warning mt-2" role="alert">
                                     <i class="fas fa-exclamation-triangle me-2"></i>
-                                    <strong>Action Required:</strong> You need to set a Telegram username for others to contact you in the marketplace.
-                                    <br><small>Set your username in Telegram settings, then verify again using the bot.</small>
+                                    <strong>Action Required:</strong> You need to set a Telegram username for others to
+                                    contact you in the marketplace.
+                                    <br><small>Set your username in Telegram settings, then verify again using the
+                                        bot.</small>
                                 </div>
                             @endif
                         @else
@@ -244,8 +253,8 @@
                                 <div class="toast-body">
                                     Profile updated successfully!
                                 </div>
-                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                                    aria-label="Close"></button>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                                    data-bs-dismiss="toast" aria-label="Close"></button>
                             </div>
                         </div>
                     </div>
@@ -371,43 +380,45 @@
     </div> --}}
             <!--/ Activity Timeline -->
             <div class="row">
-              <!-- Downlines -->
-              <div class="col-lg-12 col-xl-12">
-                <div class="card card-action mb-6">
-                  <div class="card-header align-items-center">
-                    <h5 class="card-action-title mb-0">Referral Downlines</h5>
-                  </div>
-                  <div class="card-body">
-                    <ul class="list-unstyled mb-0">
-                      @foreach(auth()->user()->downlines->take(5) as $downline)
-                        <li class="mb-4">
-                          <div class="d-flex align-items-center">
-                            <div class="d-flex align-items-center">
-                              <div class="avatar me-2">
-                                <img src="{{ asset('assets/img/icons/unityx.png') }}" alt="Avatar" class="rounded-circle" />
-                              </div>
-                              <div class="me-2">
-                                <h6 class="mb-0">{{ $downline->username }}</h6>
-                                <small>{{ $downline->email }}</small>
-                              </div>
-                            </div>
-                            <div class="ms-auto">
-                              <span class="badge bg-primary">Level 1</span>
-                            </div>
-                          </div>
-                        </li>
-                      @endforeach
-                      @if(auth()->user()->downlines->isEmpty())
-                        <li class="text-center">No downlines found.</li>
-                      @endif
-                    <li class="text-center mt-3">
-                      <a href="{{ route('user.downline') }}" class="btn btn-outline-primary">Show all referral</a>
-                    </li>
-                    </ul>
-                  </div>
+                <!-- Downlines -->
+                <div class="col-lg-12 col-xl-12">
+                    <div class="card card-action mb-6">
+                        <div class="card-header align-items-center">
+                            <h5 class="card-action-title mb-0">Referral Downlines</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled mb-0">
+                                @foreach (auth()->user()->downlines->take(5) as $downline)
+                                    <li class="mb-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar me-2">
+                                                    <img src="{{ asset('assets/img/icons/unityx.png') }}" alt="Avatar"
+                                                        class="rounded-circle" />
+                                                </div>
+                                                <div class="me-2">
+                                                    <h6 class="mb-0">{{ $downline->username }}</h6>
+                                                    <small>{{ $downline->email }}</small>
+                                                </div>
+                                            </div>
+                                            <div class="ms-auto">
+                                                <span class="badge bg-primary">Level 1</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                @endforeach
+                                @if (auth()->user()->downlines->isEmpty())
+                                    <li class="text-center">No downlines found.</li>
+                                @endif
+                                <li class="text-center mt-3">
+                                    <a href="{{ route('user.downline') }}" class="btn btn-outline-primary">Show all
+                                        referral</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
-              </div>
-              <!--/ Downlines -->
+                <!--/ Downlines -->
                 <!-- Teams -->
                 {{-- <div class="col-lg-12 col-xl-6">
         <div class="card card-action mb-6">
