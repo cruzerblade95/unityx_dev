@@ -8,6 +8,7 @@ use App\Models\Deposit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 use App\Helpers\Helpers;
 
@@ -219,38 +220,73 @@ class NOWPaymentsController extends Controller
                 }
             }
 
-            // Update deposit status
-            $deposit->status = 'completed';
-            $deposit->save();
-
-            // Update user wallet balance (add to deposit balance)
-            if ($deposit->user && $deposit->user->wallet) {
-                $deposit->user->wallet->deposit += $creditAmount;
-                $deposit->user->wallet->save();
+            // Validate credit amount is positive
+            if ($creditAmount <= 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid credit amount: ' . $creditAmount
+                ]);
             }
 
-            // Add bonus to upline (use the credited amount)
-            Helpers::insertAiTradeV2($deposit->user_id, $creditAmount);
-            Helpers::depositBonus($deposit->user_id, $creditAmount);
+            // Start database transaction for atomic operation
+            \DB::beginTransaction();
 
-            // Process deposit promo bonus if campaign is active
-            $promoBonusResult = Helpers::processDepositPromoBonus($deposit->user_id, $creditAmount, $deposit->id);
+            try {
+                // Update deposit status
+                $deposit->status = 'completed';
+                $deposit->save();
 
-            // Create success notification for the user
-            NotificationService::createDepositSuccessNotification(
-                $deposit->user_id,
-                $creditAmount,
-                $deposit->id
-            );
+                // Update user wallet balance (add to deposit balance)
+                if ($deposit->user && $deposit->user->wallet) {
+                    $originalBalance = $deposit->user->wallet->deposit;
+                    $deposit->user->wallet->deposit += $creditAmount;
+                    $deposit->user->wallet->save();
 
-            Log::info('Deposit approved manually', [
-                'deposit_id' => $deposit->id,
-                'user_id' => $deposit->user_id,
-                'credited_amount' => $creditAmount,
-                'outcome_amount_used' => $outcomeAmount,
-                'original_net_amount' => $deposit->net_amount,
-                'was_nowpayments_deposit' => $deposit->payment_id ? true : false
-            ]);
+                    // Verify the credit was applied
+                    $wallet = $deposit->user->wallet->fresh();
+                    $actualCreditedAmount = $wallet->deposit - $originalBalance;
+
+                    if (abs($actualCreditedAmount - $creditAmount) > 0.01) {
+                        throw new \Exception("Wallet credit verification failed - expected: {$creditAmount}, actual: {$actualCreditedAmount}");
+                    }
+                } else {
+                    throw new \Exception('User or wallet not found');
+                }
+
+                // Add bonus to upline (use the credited amount)
+                Helpers::insertAiTradeV2($deposit->user_id, $creditAmount);
+                Helpers::depositBonus($deposit->user_id, $creditAmount);
+
+                // Process deposit promo bonus if campaign is active
+                $promoBonusResult = Helpers::processDepositPromoBonus($deposit->user_id, $creditAmount, $deposit->id);
+
+                // Create success notification for the user
+                NotificationService::createDepositSuccessNotification(
+                    $deposit->user_id,
+                    $creditAmount,
+                    $deposit->id
+                );
+
+                // Commit transaction if all operations succeeded
+                \DB::commit();
+
+                Log::info('Deposit approved manually', [
+                    'deposit_id' => $deposit->id,
+                    'user_id' => $deposit->user_id,
+                    'credited_amount' => $creditAmount,
+                    'outcome_amount_used' => $outcomeAmount,
+                    'original_net_amount' => $deposit->net_amount,
+                    'was_nowpayments_deposit' => $deposit->payment_id ? true : false
+                ]);
+
+            } catch (\Exception $e) {
+                \DB::rollBack();
+                Log::error('Error in manual deposit approval transaction: ' . $e->getMessage());
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Transaction failed: ' . $e->getMessage()
+                ], 500);
+            }
 
             return response()->json([
                 'success' => true,
