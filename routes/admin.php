@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\AiTradeSettingsController;
 use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\WalletProfitCheckerController;
 use App\Http\Controllers\Admin\DepositReportController;
+use App\Http\Controllers\Admin\GroupSalesController;
 
 Route::prefix('admin')->middleware('web')->group(function () {
     // Guest routes
@@ -253,6 +254,18 @@ Route::prefix('admin')->middleware('web')->group(function () {
             Route::get('/over-threshold-data', [App\Http\Controllers\Admin\WalletProfitCheckerController::class, 'getOverThresholdData'])->name('over-threshold-data');
             Route::post('/adjust-user-profit', [App\Http\Controllers\Admin\WalletProfitCheckerController::class, 'adjustUserProfit'])->name('adjust-user-profit');
             Route::post('/reject-all-pending-withdrawals', [App\Http\Controllers\Admin\WalletProfitCheckerController::class, 'rejectAllPendingWithdrawals'])->name('reject-all-pending-withdrawals');
+        });
+
+        // Group Sales Management Routes
+        Route::prefix('group-sales')->name('admin.group-sales.')->group(function () {
+            Route::get('/', [GroupSalesController::class, 'index'])->name('index');
+            Route::get('/data', [GroupSalesController::class, 'getRewardsData'])->name('data');
+            Route::get('/history', [GroupSalesController::class, 'history'])->name('history');
+            Route::get('/history/data', [GroupSalesController::class, 'getHistoryData'])->name('history.data');
+            Route::post('/', [GroupSalesController::class, 'store'])->name('store');
+            Route::get('/{id}', [GroupSalesController::class, 'show'])->name('show');
+            Route::put('/{id}', [GroupSalesController::class, 'update'])->name('update');
+            Route::delete('/{id}', [GroupSalesController::class, 'destroy'])->name('destroy');
         });
     });
 });

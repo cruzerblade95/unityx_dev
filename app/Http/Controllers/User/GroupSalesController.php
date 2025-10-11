@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\Deposit;
 use App\Models\Wallet;
+use App\Models\GroupSalesReward;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -35,17 +36,21 @@ class GroupSalesController extends Controller
             ->pluck('reward_level')
             ->toArray();
 
-        // Define reward thresholds and tax percentages
-        $rewards = [
-            1 => ['threshold' => 5000, 'tax' => 3],
-            2 => ['threshold' => 15000, 'tax' => 4],
-            3 => ['threshold' => 50000, 'tax' => 5],
-            4 => ['threshold' => 100000, 'tax' => 6],
-            5 => ['threshold' => 150000, 'tax' => 7],
-            6 => ['threshold' => 300000, 'tax' => 8],
-            7 => ['threshold' => 500000, 'tax' => 9],
-            8 => ['threshold' => 1000000, 'tax' => 10],
-        ];
+        // Get reward configurations from database
+        $rewards = GroupSalesReward::active()
+            ->orderBy('reward_level')
+            ->get()
+            ->keyBy('reward_level')
+            ->map(function ($reward) {
+                return [
+                    'title' => $reward->reward_title,
+                    'threshold' => $reward->sales_required,
+                    'tax' => $reward->tax_percentage,
+                    'base_percentage' => $reward->base_percentage,
+                    'reward_amount' => $reward->reward_amount
+                ];
+            })
+            ->toArray();
 
         return view('user.group-sales.index', compact('downlineSales', 'totalSales', 'rewards', 'claimedRewards'));
     }
@@ -77,26 +82,29 @@ class GroupSalesController extends Controller
             ]);
         }
 
-        // Define reward thresholds and tax percentages
-        $rewards = [
-            1 => ['threshold' => 5000, 'tax' => 3],
-            2 => ['threshold' => 15000, 'tax' => 4],
-            3 => ['threshold' => 50000, 'tax' => 5],
-            4 => ['threshold' => 100000, 'tax' => 6],
-            5 => ['threshold' => 150000, 'tax' => 7],
-            6 => ['threshold' => 300000, 'tax' => 8],
-            7 => ['threshold' => 500000, 'tax' => 9],
-            8 => ['threshold' => 1000000, 'tax' => 10],
-        ];
+        // Define reward thresholds and tax percentages from database
+        $rewardConfigs = GroupSalesReward::active()
+            ->orderBy('reward_level')
+            ->get()
+            ->keyBy('reward_level')
+            ->map(function ($reward) {
+                return [
+                    'title' => $reward->reward_title,
+                    'threshold' => $reward->sales_required,
+                    'tax' => $reward->tax_percentage,
+                    'base_percentage' => $reward->base_percentage
+                ];
+            })
+            ->toArray();
 
-        if (!isset($rewards[$rewardLevel])) {
+        if (!isset($rewardConfigs[$rewardLevel])) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid reward level.'
             ]);
         }
 
-        $reward = $rewards[$rewardLevel];
+        $reward = $rewardConfigs[$rewardLevel];
         $totalSales = $this->getTotalDownlineSales($user->id, 10);
 
         // Check if user meets the sales threshold
@@ -110,11 +118,8 @@ class GroupSalesController extends Controller
         try {
             DB::beginTransaction();
 
-            // Calculate reward amount: threshold * 15% * tax%
-            // Example: Reward 1: $5,000 sales x 15% x 3% tax = $5,000 * 0.15 * 0.03 = $22.50
-            $basePercentage = 15; // 15% of sales threshold
-            $taxPercentage = $reward['tax']; // Tax percentage for this reward level
-            $rewardAmount = $reward['threshold'] * ($basePercentage / 100) * ($taxPercentage / 100);
+            // Calculate reward amount using configured percentages
+            $rewardAmount = $reward['threshold'] * ($reward['base_percentage'] / 100) * ($reward['tax'] / 100);
 
             // Add to user's wallet bonus
             $wallet = Wallet::where('user_id', $user->id)->first();
@@ -137,7 +142,7 @@ class GroupSalesController extends Controller
                 'reward_level' => $rewardLevel,
                 'sales_threshold' => $reward['threshold'],
                 'reward_amount' => $rewardAmount,
-                'tax_percentage' => $taxPercentage,
+                'tax_percentage' => $reward['tax'],
                 'total_sales_at_claim' => $totalSales,
                 'claimed_month' => $currentMonth,
                 'claimed_at' => now(),

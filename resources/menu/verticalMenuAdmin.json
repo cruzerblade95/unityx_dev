@@ -58,6 +58,12 @@
           "name": "Wallet Profit Checker",
           "icon": "menu-icon icon-base ti tabler-transfer",
           "slug": "admin.wallet-profit-checker.index"
+        },
+        {
+          "url": "admin/group-sales",
+          "name": "Group Sales",
+          "icon": "menu-icon icon-base ti tabler-chart-line",
+          "slug": "admin.group-sales.index"
         }
       ]
     },
