@@ -114,11 +114,8 @@
                                 $isAvailable = $totalSales >= $reward['threshold'] && !$isClaimed;
                                 $progressPercentage = min(($totalSales / $reward['threshold']) * 100, 100);
 
-                                // Calculate reward amount: threshold * 15% * tax%
-                                // Example: Reward 1: $5,000 sales x 15% x 3% tax = $5,000 * 0.15 * 0.03 = $22.50
-                                $basePercentage = 15; // 15% of sales threshold
-                                $taxPercentage = $reward['tax']; // Tax percentage for this reward level
-                                $rewardAmount = $reward['threshold'] * ($basePercentage / 100) * ($taxPercentage / 100);
+                                // Use the pre-calculated reward amount from the configuration
+                                $rewardAmount = $reward['reward_amount'];
                             @endphp
 
                             <div class="col-md-6 col-lg-4 mb-3">
@@ -126,7 +123,7 @@
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
                                             <div>
-                                                <h6 class="card-title mb-1">Reward {{ $level }}</h6>
+                                                <h6 class="card-title mb-1">{{ $reward['title'] ?? 'Reward ' . $level }}</h6>
                                                 <span class="badge bg-{{ $isClaimed ? 'success' : ($isAvailable ? 'primary' : 'secondary') }}">
                                                     @if($isClaimed)
                                                         <i class="fas fa-check me-1"></i>Claimed
