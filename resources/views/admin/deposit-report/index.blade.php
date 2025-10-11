@@ -529,7 +529,8 @@
                         },
                         {
                             data: 'created_at',
-                            name: 'created_at'
+                            name: 'created_at',
+                            type: 'html-data-order'
                         },
                         {
                             data: 'actions',
@@ -541,6 +542,7 @@
                     order: [
                         [5, 'desc']
                     ], // Order by date descending
+                    stateSave: false, // Disable state saving to prevent cached ordering
                     pageLength: 10,
                     dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-end"f>>' +
                         '<"table-responsive"t>' +
@@ -618,7 +620,8 @@
             }
         }
 
-        function viewDepositDetails(depositId) {
+        // Make functions globally accessible
+        window.viewDepositDetails = function(depositId) {
             // Open modal
             document.getElementById('depositDetailsModal').style.display = 'block';
 
@@ -650,11 +653,11 @@
             </div>
         `;
             }, 500);
-        }
+        };
 
-        function closeDepositModal() {
+        window.closeDepositModal = function() {
             document.getElementById('depositDetailsModal').style.display = 'none';
-        }
+        };
 
         // Close modal when clicking outside
         window.onclick = function(event) {
