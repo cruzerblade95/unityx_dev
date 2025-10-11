@@ -34,6 +34,15 @@ class DepositReportController extends Controller
     {
         try {
             Log::info('=== DEPOSIT REPORT LIST START ===');
+            Log::info('DataTables request parameters:', $request->all());
+
+            // Check if DataTables is requesting ordering
+            $orderColumn = $request->input('order.0.column', 5);
+            $orderDir = $request->input('order.0.dir', 'desc');
+            Log::info('DataTables ordering request:', [
+                'column' => $orderColumn,
+                'direction' => $orderDir
+            ]);
 
             // Get all deposit sources
             $deposits = collect();
@@ -136,13 +145,53 @@ class DepositReportController extends Controller
                 });
             $deposits = $deposits->merge($manualDeposits);
 
-            // Sort by created_at descending
-            $testData = $deposits->sortByDesc('created_at');
+            // FORCE sorting by created_at descending (latest first)
+            // Add a sort timestamp to ensure proper ordering
+            $depositsWithSortKey = $deposits->map(function($item) {
+                $date = $item['created_at'];
+                $timestamp = $date instanceof Carbon ? $date->timestamp : Carbon::parse($date)->timestamp;
+                $item['sort_timestamp'] = $timestamp;
+                return $item;
+            });
+
+            // Sort by timestamp descending (latest first)
+            $testData = $depositsWithSortKey->sortByDesc('sort_timestamp')->values();
+
+            // Log first few items to debug sorting
+            Log::info('First 5 deposits after sorting:', [
+                'items' => $testData->take(5)->map(function($item) {
+                    $date = $item['created_at'];
+                    $timestamp = $date instanceof Carbon ? $date->timestamp : Carbon::parse($date)->timestamp;
+                    return [
+                        'id' => $item['id'],
+                        'created_at' => $date,
+                        'timestamp' => $timestamp,
+                        'formatted_date' => Carbon::parse($date)->format('Y-m-d H:i:s'),
+                        'source_type' => $item['source_type']
+                    ];
+                })->toArray()
+            ]);
 
             Log::info('Test data created, count: ' . $testData->count());
+            Log::info('All deposits in order:', [
+                'deposits' => $testData->map(function($item, $index) {
+                    $date = $item['created_at'];
+                    $timestamp = $date instanceof Carbon ? $date->timestamp : Carbon::parse($date)->timestamp;
+                    return [
+                        'index' => $index,
+                        'id' => $item['id'],
+                        'timestamp' => $timestamp,
+                        'formatted_date' => Carbon::parse($date)->format('Y-m-d H:i:s'),
+                        'source' => $item['source_type']
+                    ];
+                })->toArray()
+            ]);
 
             return DataTables::of($testData)
                 ->addIndexColumn()
+                ->order(function ($query) {
+                    // Don't apply any ordering - we've already sorted the collection
+                })
                 ->addColumn('user_info', function ($deposit) {
                     $user = $deposit['user'] ?? [];
                     $displayName = ($user['firstname'] ?? '') . ' ' . ($user['lastname'] ?? '');
@@ -160,9 +209,10 @@ class DepositReportController extends Controller
                 ->addColumn('status', function ($deposit) {
                     return '<span class="badge bg-success">Completed</span>';
                 })
-                ->addColumn('created_at', function ($deposit) {
+                ->editColumn('created_at', function ($deposit) {
                     $date = Carbon::parse($deposit['created_at']);
-                    return '<small>' . $date->format('M d, Y H:i') . '</small>';
+                    // Use the sort_timestamp we added for proper ordering
+                    return '<small data-order="' . $deposit['sort_timestamp'] . '">' . $date->format('M d, Y H:i') . '</small>';
                 })
                 ->addColumn('actions', function ($deposit) {
                     $user = $deposit['user'];
@@ -191,7 +241,7 @@ class DepositReportController extends Controller
                             }
                         }
                     } else {
-                        $actions .= '<button class="btn btn-sm btn-outline-primary" onclick="viewDeposit(\'' . $deposit['id'] . '\')">View Details</button>';
+                        $actions .= '<button class="btn btn-sm btn-outline-primary" onclick="viewDepositDetails(\'' . $deposit['id'] . '\')">View Details</button>';
 
                         // Add Adjust Wallet button for other deposit types
                         if ($userId) {
