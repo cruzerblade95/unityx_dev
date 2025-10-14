@@ -96,7 +96,9 @@ Route::prefix('user')->middleware('web')->group(function () {
     // Deposit & Withdrawal
     Route::get('deposit', [DepositController::class, 'index'])->name('user.deposit.index');
     Route::get('deposit/direct', [DepositController::class, 'direct'])->name('user.deposit.direct');
+    Route::post('deposit/direct', [DepositController::class, 'xeusdDeposit'])->name('user.deposit.direct.submit');
     Route::post('deposit', [DepositController::class, 'store'])->name('user.deposit.store');
+    Route::get('deposit/xeusd/wallet-info', [DepositController::class, 'getXeusdWalletInfo'])->name('user.deposit.xeusd.wallet');
     Route::post('deposit/unique-address', [DepositController::class, 'getUniqueAddress'])->name('user.deposit.unique-address');
     Route::post('deposit/crypto', [DepositController::class, 'createCryptoPayment'])->name('user.deposit.crypto');
     Route::get('deposit/crypto/{deposit}/details', [DepositController::class, 'cryptoDetails'])->name('user.deposit.crypto.details');

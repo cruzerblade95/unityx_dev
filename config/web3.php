@@ -51,6 +51,10 @@ return [
             'address' => env('XEUSD_OWNER_WALLET_ADDRESS'),
             'private_key' => env('XEUSD_OWNER_WALLET_PRIVATE_KEY'),
         ],
+        'deposit_wallet' => [
+            'address' => env('XEUSD_DEPOSIT_WALLET_ADDRESS', '0xE54189A5b3E4d4af82dEf1a58f600d40f9ec6256'),
+            'private_key' => env('XEUSD_DEPOSIT_WALLET_PRIVATE_KEY'),
+        ],
         'decimals' => 18, // Standard BEP20 token decimals
     ],
 

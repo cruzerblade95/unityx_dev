@@ -105,7 +105,7 @@ class Web3Service
                 'amount' => $amountWei,
                 'privateKey' => $this->ownerPrivateKey,
                 'rpcUrl' => $this->rpcUrl,
-                'chainId' => $this->chainId
+                'chainId' => intval($this->chainId) // Ensure it's an integer
             ]);
 
             if (!$result['success']) {
@@ -303,28 +303,41 @@ class Web3Service
             throw new Exception("Node.js script not found: {$scriptPath}");
         }
 
-        // Escape params for Windows command line
-        $paramsJson = json_encode($params);
-        $paramsJson = str_replace('"', '""', $paramsJson);
+        // Use temp file to avoid Windows command line escaping issues
+        $tempFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'web3_params_' . uniqid() . '.json';
+        file_put_contents($tempFile, json_encode($params));
 
-        $command = "node \"{$scriptPath}\" \"{$paramsJson}\"";
+        try {
+            $command = "node \"{$scriptPath}\" \"{$tempFile}\"";
 
-        $output = [];
-        $returnCode = 0;
+            $output = [];
+            $returnCode = 0;
 
-        exec($command . ' 2>&1', $output, $returnCode);
+            exec($command . ' 2>&1', $output, $returnCode);
 
-        if ($returnCode !== 0) {
-            throw new Exception("Node.js script failed: " . implode("\n", $output));
+            // Clean up temp file
+            if (file_exists($tempFile)) {
+                unlink($tempFile);
+            }
+
+            if ($returnCode !== 0) {
+                throw new Exception("Node.js script failed: " . implode("\n", $output));
+            }
+
+            $result = json_decode(implode("\n", $output), true);
+
+            if (!$result) {
+                throw new Exception("Failed to parse Node.js script output: " . implode("\n", $output));
+            }
+
+            return $result;
+        } catch (Exception $e) {
+            // Clean up temp file on error
+            if (file_exists($tempFile)) {
+                unlink($tempFile);
+            }
+            throw $e;
         }
-
-        $result = json_decode(implode("\n", $output), true);
-
-        if (!$result) {
-            throw new Exception("Failed to parse Node.js script output: " . implode("\n", $output));
-        }
-
-        return $result;
     }
 
     /**

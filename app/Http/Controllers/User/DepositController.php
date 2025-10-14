@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Deposit;
 use App\Services\NOWPaymentsService;
 use App\Services\WalletAddressService;
+use App\Services\XeusdDepositService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -14,11 +15,16 @@ class DepositController extends Controller
 {
     protected $nowPayments;
     protected $walletService;
+    protected $xeusdDepositService;
 
-    public function __construct(NOWPaymentsService $nowPayments, WalletAddressService $walletService)
-    {
+    public function __construct(
+        NOWPaymentsService $nowPayments,
+        WalletAddressService $walletService,
+        XeusdDepositService $xeusdDepositService
+    ) {
         $this->nowPayments = $nowPayments;
         $this->walletService = $walletService;
+        $this->xeusdDepositService = $xeusdDepositService;
     }
 
     public function index()
@@ -38,13 +44,17 @@ class DepositController extends Controller
 
     public function direct()
     {
-        // Manual deposit ONLY page - 1.8% fee added to amount
+        // XEUSD deposit ONLY page - 0% fee, blockchain verified
         $deposits = Deposit::where('user_id', Auth::id())
-                          ->where('payment_method', 'manual')
+                          ->where('payment_method', 'xeusd')
                           ->latest()
                           ->get();
 
-        return view('user.content.deposit-direct', compact('deposits'));
+        // Get XEUSD deposit wallet info
+        $xeusdWalletAddress = $this->xeusdDepositService->getDepositWalletAddress();
+        $xeusdNetworkInfo = $this->xeusdDepositService->getNetworkInfo();
+
+        return view('user.content.deposit-direct', compact('deposits', 'xeusdWalletAddress', 'xeusdNetworkInfo'));
     }
 
     public function store(Request $request)
@@ -252,6 +262,110 @@ class DepositController extends Controller
     public function cancel()
     {
         return redirect()->route('user.deposit.index')->with('warning', 'Payment was cancelled.');
+    }
+
+    /**
+     * Submit XEUSD deposit request
+     */
+    public function xeusdDeposit(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:1|max:10000',
+            'transaction_hash' => 'required|string|min:66|max:66',
+        ], [
+            'transaction_hash.min' => 'Invalid transaction hash format. Must be 66 characters (0x + 64 hex)',
+            'transaction_hash.max' => 'Invalid transaction hash format. Must be 66 characters (0x + 64 hex)',
+        ]);
+
+        try {
+            $txHash = $request->transaction_hash;
+
+            // Check if transaction already processed
+            $existing = Deposit::where('payment_id', $txHash)
+                              ->where('payment_method', 'xeusd')
+                              ->first();
+
+            if ($existing) {
+                return redirect()->back()->with('error', 'This transaction has already been processed!');
+            }
+
+            // Verify the transaction on blockchain
+            $txData = $this->xeusdDepositService->verifyTransaction($txHash);
+
+            if (!$txData) {
+                return redirect()->back()->with('error', 'Transaction not found or still pending. Please wait for blockchain confirmation and try again.');
+            }
+
+            // Validate amount matches
+            if ($txData['amount'] < $request->amount - 0.01) { // Allow small rounding difference
+                return redirect()->back()->with('error',
+                    'Transaction amount mismatch! You sent ' . $txData['amount'] . ' XEUSD but claimed ' . $request->amount . ' XEUSD.');
+            }
+
+            // Create deposit record
+            $deposit = Deposit::create([
+                'user_id' => Auth::id(),
+                'amount' => $txData['amount'],
+                'tax_percent' => 0, // No fee for XEUSD deposits
+                'tax_amount' => 0,
+                'net_amount' => $txData['amount'],
+                'status' => 'pending', // Pending admin approval
+                'reference' => 'XEUSD_' . substr($txHash, 2, 10),
+                'note' => 'XEUSD deposit from ' . $txData['from'],
+                'payment_method' => 'xeusd',
+                'payment_id' => $txHash,
+                'crypto_currency' => 'XEUSD',
+                'payment_address' => $txData['from'],
+                'unique_address' => $this->xeusdDepositService->getDepositWalletAddress(),
+                'address_memo' => 'Block: ' . $txData['block_number'],
+            ]);
+
+            Log::info("XEUSD deposit request submitted", [
+                'user_id' => Auth::id(),
+                'amount' => $txData['amount'],
+                'tx_hash' => $txHash,
+                'deposit_id' => $deposit->id
+            ]);
+
+            return redirect()->back()->with('success',
+                'XEUSD deposit verified! Amount: $' . number_format($txData['amount'], 2) .
+                ' XEUSD. Your deposit is pending admin approval.');
+
+        } catch (\Exception $e) {
+            Log::error("XEUSD deposit verification failed", [
+                'user_id' => Auth::id(),
+                'tx_hash' => $request->transaction_hash ?? null,
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->back()->with('error',
+                'Failed to verify XEUSD transaction: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get XEUSD deposit wallet info
+     */
+    public function getXeusdWalletInfo()
+    {
+        try {
+            $networkInfo = $this->xeusdDepositService->getNetworkInfo();
+            $balance = $this->xeusdDepositService->getDepositWalletBalance();
+
+            return response()->json([
+                'success' => true,
+                'wallet_address' => $networkInfo['deposit_wallet'],
+                'contract_address' => $networkInfo['contract_address'],
+                'network' => $networkInfo['network'],
+                'chain_id' => $networkInfo['chain_id'],
+                'balance' => $balance
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
 }

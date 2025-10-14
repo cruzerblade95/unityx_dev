@@ -1,4 +1,5 @@
 const { Web3 } = require('web3');
+const fs = require('fs');
 
 /**
  * Send BEP20 tokens (XEUSD) on BSC network
@@ -8,24 +9,51 @@ const { Web3 } = require('web3');
 
 async function sendToken() {
   try {
-    // Parse parameters from PHP (handle Windows escaped quotes)
-    let paramString = process.argv[2];
+    // Read parameters from temp file (avoid Windows command line escaping issues)
+    const tempFilePath = process.argv[2];
 
-    // Remove double quotes escaping for Windows
-    paramString = paramString.replace(/""/g, '"');
+    if (!tempFilePath || !fs.existsSync(tempFilePath)) {
+      throw new Error('Parameter file not found');
+    }
 
-    const params = JSON.parse(paramString);
+    const fileContent = fs.readFileSync(tempFilePath, 'utf8');
+    const params = JSON.parse(fileContent);
 
     const { contractAddress, recipientAddress, amount, privateKey, rpcUrl, chainId } = params;
+
+    // Validate required parameters
+    if (!privateKey) {
+      throw new Error('Private key is missing');
+    }
+
+    if (!contractAddress) {
+      throw new Error('Contract address is missing');
+    }
+
+    if (!recipientAddress) {
+      throw new Error('Recipient address is missing');
+    }
+
+    if (!amount) {
+      throw new Error('Amount is missing');
+    }
+
+    if (!rpcUrl) {
+      throw new Error('RPC URL is missing');
+    }
+
+    // Ensure private key has 0x prefix
+    let formattedPrivateKey = privateKey;
+    if (!formattedPrivateKey.startsWith('0x')) {
+      formattedPrivateKey = '0x' + formattedPrivateKey;
+    }
 
     // Initialize Web3
     const web3 = new Web3(rpcUrl);
 
     // Get account from private key
-    const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-    web3.eth.accounts.wallet.add(account);
-
-    // BEP20 Token ABI (minimal - only transfer function)
+    const account = web3.eth.accounts.privateKeyToAccount(formattedPrivateKey);
+    web3.eth.accounts.wallet.add(account); // BEP20 Token ABI (minimal - only transfer function)
     const tokenABI = [
       {
         constant: false,
@@ -61,21 +89,22 @@ async function sendToken() {
       .transfer(recipientAddress, amount)
       .estimateGas({ from: account.address });
 
+    // Convert gas to Number to avoid BigInt mixing issues
+    const gasLimit = Math.floor(Number(gasEstimate) * 1.2); // Add 20% buffer
+
     // Send transaction
     const tx = await contract.methods.transfer(recipientAddress, amount).send({
       from: account.address,
-      gas: Math.floor(gasEstimate * 1.2), // Add 20% buffer
+      gas: gasLimit,
       gasPrice: gasPrice,
       chainId: chainId
-    });
-
-    // Return success response
+    }); // Return success response
     console.log(
       JSON.stringify({
         success: true,
         transactionHash: tx.transactionHash,
-        blockNumber: tx.blockNumber,
-        gasUsed: tx.gasUsed
+        blockNumber: Number(tx.blockNumber),
+        gasUsed: Number(tx.gasUsed)
       })
     );
   } catch (error) {
