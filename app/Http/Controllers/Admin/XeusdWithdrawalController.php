@@ -233,10 +233,10 @@ class XeusdWithdrawalController extends Controller
         // Initialize Web3 service
         $web3Service = new Web3Service();
 
-        // Send blockchain transaction
+        // Send blockchain transaction (use amount_xeusd which has fee already deducted)
         $result = $web3Service->sendXEUSD(
             $withdrawal->recipient_address,
-            $withdrawal->amount_usd
+            $withdrawal->amount_xeusd
         );
 
         if ($result['success']) {
@@ -259,7 +259,8 @@ class XeusdWithdrawalController extends Controller
             Log::info("XEUSD Withdrawal processed via blockchain", [
                 'withdrawal_id' => $withdrawal->unique_id,
                 'user_id' => $withdrawal->user_id,
-                'amount' => $withdrawal->amount_usd,
+                'amount_usd' => $withdrawal->amount_usd,
+                'amount_xeusd' => $withdrawal->amount_xeusd,
                 'transaction_hash' => $result['transaction_hash'],
                 'admin_id' => Auth::guard('admin')->id()
             ]);
@@ -318,7 +319,8 @@ class XeusdWithdrawalController extends Controller
         Log::info("XEUSD Withdrawal manually approved", [
             'withdrawal_id' => $withdrawal->unique_id,
             'user_id' => $withdrawal->user_id,
-            'amount' => $withdrawal->amount_usd,
+            'amount_usd' => $withdrawal->amount_usd,
+            'amount_xeusd' => $withdrawal->amount_xeusd,
             'transaction_hash' => $request->transaction_hash,
             'admin_id' => Auth::guard('admin')->id()
         ]);

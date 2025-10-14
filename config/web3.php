@@ -8,11 +8,11 @@ return [
     |--------------------------------------------------------------------------
     |
     | This value determines which blockchain network to use. Can be either
-    | 'mainnet' or 'testnet'. In production, this should be 'mainnet'.
+    | 'BSC BEP20' or 'testnet'. In production, this should be 'BSC BEP20'.
     |
     */
 
-    'environment' => env('BLOCKCHAIN_ENVIRONMENT', 'mainnet'),
+    'environment' => env('BLOCKCHAIN_ENVIRONMENT', 'BSC BEP20'),
 
     /*
     |--------------------------------------------------------------------------

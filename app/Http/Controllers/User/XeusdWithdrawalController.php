@@ -106,6 +106,11 @@ class XeusdWithdrawalController extends Controller
         $sourceWallet = $request->source_wallet;
         $amount = $request->amount;
 
+        // Calculate 1.8% withdrawal fee
+        $feePercentage = 0.018; // 1.8%
+        $feeAmount = $amount * $feePercentage;
+        $netAmount = $amount - $feeAmount; // Amount user will receive
+
         // Check if sufficient balance exists in selected wallet
         $availableBalance = match($sourceWallet) {
             'profit' => $wallet->profit,
@@ -122,7 +127,7 @@ class XeusdWithdrawalController extends Controller
         try {
             DB::beginTransaction();
 
-            // Deduct from selected wallet
+            // Deduct full amount from selected wallet
             match($sourceWallet) {
                 'profit' => $wallet->profit -= $amount,
                 'bonus' => $wallet->bonus -= $amount,
@@ -130,12 +135,12 @@ class XeusdWithdrawalController extends Controller
             };
             $wallet->save();
 
-            // Create withdrawal request
+            // Create withdrawal request (user receives net amount after fee)
             $withdrawal = XeusdWithdrawal::create([
                 'user_id' => $user->id,
                 'unique_id' => XeusdWithdrawal::generateUniqueId(),
                 'amount_usd' => $amount,
-                'amount_xeusd' => $amount, // 1:1 conversion rate
+                'amount_xeusd' => $netAmount, // Net amount after 1.8% fee deduction
                 'source_wallet' => $sourceWallet,
                 'recipient_address' => $user->wallet_address,
                 'status' => 'pending'

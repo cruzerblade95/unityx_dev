@@ -694,7 +694,7 @@
 @section('content')
     {{-- @include('components.coming-soon-overlay') --}}
     <div class="container py-4 position-relative" style="z-index: 1;">
-        <h2><i class="fas fa-coins me-2"></i>XEUSD Deposit (0% Fee)</h2>
+        <h2><i class="fas fa-coins me-2"></i>XEUSD Deposit (1% Fee)</h2>
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
@@ -719,7 +719,7 @@
                     <div class="card-header">
                         <h5 class="mb-0">
                             <i class="fas fa-wallet me-2"></i>
-                            XEUSD Token Deposit (0% Fee)
+                            XEUSD Token Deposit (1% Fee)
                         </h5>
                     </div>
                     <div class="card-body">
@@ -753,7 +753,7 @@
                             <div class="wallet-network-info">
                                 <small>
                                     <strong><i class="fas fa-network-wired me-1"></i>Network:</strong>
-                                    {{ $xeusdNetworkInfo['network'] ?? 'BSC Mainnet' }}<br>
+                                    {{ $xeusdNetworkInfo['network'] ?? 'BSC BEP20' }}<br>
                                     <strong><i class="fas fa-link me-1"></i>Chain ID:</strong>
                                     {{ $xeusdNetworkInfo['chain_id'] ?? '56' }}<br>
                                     <strong><i class="fas fa-file-contract me-1"></i>Token Contract:</strong>
@@ -778,13 +778,31 @@
                                         required min="1" placeholder="Enter amount you sent">
                                     <span class="input-group-text">XEUSD</span>
                                 </div>
-                                <div class="form-text">Minimum deposit: 1 XEUSD | <strong class="text-success">0%
+                                <div class="form-text">Minimum deposit: 1 XEUSD | <strong class="text-warning">1%
                                         Fee</strong></div>
 
                                 <!-- Fee Display -->
                                 <div class="fee-display mt-2">
-                                    <i class="fas fa-gift me-2"></i>
-                                    <strong>Zero Fees!</strong> You receive exactly what you deposit.
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>1% Fee Applied</strong> - Net amount will be credited after deducting 1% fee.
+                                </div>
+
+                                <!-- Net Amount Calculator -->
+                                <div class="alert alert-success mt-2" id="netAmountDisplay" style="display: none;">
+                                    <div class="row text-center">
+                                        <div class="col-md-4">
+                                            <small class="text-muted d-block">Deposit Amount</small>
+                                            <strong class="fs-5">$<span id="depositAmount">0.00</span></strong>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <small class="text-muted d-block">Fee (1%)</small>
+                                            <strong class="fs-5 text-warning">-$<span id="feeAmount">0.00</span></strong>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <small class="text-muted d-block">You Will Receive</small>
+                                            <strong class="fs-4 text-success">$<span id="netAmount">0.00</span></strong>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -828,7 +846,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <ul class="small">
-                                    <li><strong class="text-success">0% Fees</strong> - No deposit fees</li>
+                                    <li><strong class="text-warning">1% Fee</strong> - Low deposit fee</li>
                                     <li><strong>Fast</strong> - Blockchain confirmed in minutes</li>
                                     <li><strong>Secure</strong> - Automatic blockchain verification</li>
                                 </ul>
@@ -948,6 +966,34 @@
             const amountInput = document.getElementById('amount');
             const txHashInput = document.getElementById('transaction_hash');
 
+            // Net amount calculator - real-time update
+            const netAmountDisplay = document.getElementById('netAmountDisplay');
+            const depositAmountSpan = document.getElementById('depositAmount');
+            const feeAmountSpan = document.getElementById('feeAmount');
+            const netAmountSpan = document.getElementById('netAmount');
+            const feePercent = 1; // 1% fee
+
+            function calculateNetAmount() {
+                const amount = parseFloat(amountInput.value);
+
+                if (amount && amount > 0) {
+                    const fee = amount * (feePercent / 100);
+                    const net = amount - fee;
+
+                    depositAmountSpan.textContent = amount.toFixed(2);
+                    feeAmountSpan.textContent = fee.toFixed(2);
+                    netAmountSpan.textContent = net.toFixed(2);
+
+                    netAmountDisplay.style.display = 'block';
+                } else {
+                    netAmountDisplay.style.display = 'none';
+                }
+            }
+
+            // Update calculation on amount change
+            amountInput.addEventListener('input', calculateNetAmount);
+            amountInput.addEventListener('change', calculateNetAmount);
+
             // Form validation before submit
             form.addEventListener('submit', function(e) {
                 const amount = parseFloat(amountInput.value);
@@ -974,7 +1020,7 @@
                     e.preventDefault();
                     alert(
                         'Please enter a valid BSC transaction hash (should start with 0x and be 66 characters long).'
-                        );
+                    );
                     txHashInput.focus();
                     return;
                 }

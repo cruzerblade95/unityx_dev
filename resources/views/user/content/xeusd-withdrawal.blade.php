@@ -16,6 +16,7 @@
     @include('user.content.withdrawal.partials.styles')
 
     <style>
+        /* Dark mode theme for XEUSD withdrawal */
         .metamask-connect-section {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             border-radius: 15px;
@@ -37,32 +38,136 @@
         }
 
         .balance-card {
-            background: #f8f9fa;
-            border: 2px solid #dee2e6;
+            background: #2b2c40;
+            border: 2px solid #4a4b68;
             border-radius: 10px;
             padding: 20px;
             margin-bottom: 20px;
             transition: all 0.3s ease;
+            color: #ffffff;
         }
 
         .balance-card:hover {
             border-color: #6f42c1;
             transform: translateY(-2px);
+            background: #34354a;
+        }
+
+        .balance-card h6 {
+            color: #a5a5ba;
+        }
+
+        .balance-card small {
+            color: #a5a5ba;
         }
 
         .token-info {
-            background: #e7f3ff;
-            border: 1px solid #b8daff;
+            background: #2b2c40;
+            border: 1px solid #4a4b68;
             border-radius: 8px;
             padding: 15px;
             margin: 15px 0;
+            color: #ffffff;
+        }
+
+        .token-info h6 {
+            color: #ffffff;
+        }
+
+        .token-info p {
+            color: #d2d2dc;
         }
 
         .withdrawal-form {
-            background: white;
+            background: #2b2c40;
             border-radius: 15px;
-            box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
             padding: 30px;
+            color: #ffffff;
+        }
+
+        .withdrawal-form h5 {
+            color: #ffffff;
+        }
+
+        .withdrawal-form .form-label {
+            color: #d2d2dc;
+        }
+
+        .withdrawal-form .form-text {
+            color: #a5a5ba;
+        }
+
+        .withdrawal-form small {
+            color: #a5a5ba;
+        }
+
+        /* Dark mode form controls */
+        .withdrawal-form .form-select,
+        .withdrawal-form .form-control {
+            background-color: #34354a;
+            border-color: #4a4b68;
+            color: #ffffff;
+        }
+
+        .withdrawal-form .form-select:focus,
+        .withdrawal-form .form-control:focus {
+            background-color: #34354a;
+            border-color: #6f42c1;
+            color: #ffffff;
+        }
+
+        .withdrawal-form .form-select option {
+            background-color: #34354a;
+            color: #ffffff;
+        }
+
+        .withdrawal-form .input-group-text {
+            background-color: #34354a;
+            border-color: #4a4b68;
+            color: #a5a5ba;
+        }
+
+        /* Dark mode table */
+        .card {
+            background-color: #2b2c40;
+            border-color: #4a4b68;
+        }
+
+        .card-header {
+            background-color: #34354a;
+            border-bottom-color: #4a4b68;
+        }
+
+        .card-title {
+            color: #ffffff;
+        }
+
+        .table {
+            color: #d2d2dc;
+        }
+
+        .table thead th {
+            background-color: #34354a;
+            color: #ffffff;
+            border-color: #4a4b68;
+        }
+
+        .table tbody td {
+            border-color: #4a4b68;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #34354a;
+        }
+
+        /* Dark mode text colors */
+        .withdrawal-page-header h4 {
+            color: #ffffff;
+        }
+
+        .withdrawal-page-header .text-muted {
+            color: #a5a5ba !important;
         }
     </style>
 
@@ -73,7 +178,7 @@
                 <i class="fas fa-arrow-left"></i>
             </a>
             <div>
-                <h4 class="py-3 mb-0">XEUSD Token Withdrawal</h4>
+                <h4 class="py-3 mb-0"><i class="fas fa-coins me-2"></i>XEUSD Token Withdrawal</h4>
                 <p class="text-muted mb-0">Withdraw your balance as XEUSD tokens to BSC network</p>
             </div>
         </div>
@@ -87,8 +192,8 @@
                         XEUSD Token Withdrawal
                     </h3>
                     <p class="mb-2">Withdraw your USD balance as XEUSD tokens on BSC BEP20 network</p>
-                    <p class="mb-0"><strong>Exchange Rate:</strong> 1 USD = 1 XEUSD | <strong>Network:</strong> BSC
-                        (BEP20) | <strong>Gas Fees:</strong> Covered by platform</p>
+                    <p class="mb-0"><strong>Network:</strong> BSC
+                        (BEP20) | <strong>Withdrawal Fee:</strong> 1.8% | <strong>Gas Fees:</strong> Covered by platform</p>
                 </div>
                 <div class="col-md-4 text-end">
                     <div class="token-info">
@@ -231,9 +336,12 @@
                     </h6>
                     <div class="row">
                         <div class="col-md-6">
+                            <p class="mb-1"><strong>Withdrawal Amount:</strong> $<span id="withdrawal-amount">0.00</span>
+                            </p>
+                            <p class="mb-1"><strong>Withdrawal Fee (1.8%):</strong> $<span id="fee-amount">0.00</span>
+                            </p>
                             <p class="mb-1"><strong>You will receive:</strong> <span id="xeusd-amount">0</span> XEUSD
                                 tokens</p>
-                            <p class="mb-1"><strong>Exchange Rate:</strong> 1 USD = 1 XEUSD</p>
                         </div>
                         <div class="col-md-6">
                             <p class="mb-1"><strong>Network:</strong> BSC (BEP20)</p>
@@ -307,12 +415,12 @@
                                         <td>
                                             <button class="btn btn-sm btn-outline-primary"
                                                 onclick="viewWithdrawalDetails('{{ $withdrawal->unique_id }}')">
-                                                <i class="fas fa-eye"></i>
+                                                <i class="ti tabler-eye"></i>
                                             </button>
                                             @if ($withdrawal->transaction_hash)
                                                 <a href="https://bscscan.com/tx/{{ $withdrawal->transaction_hash }}"
                                                     target="_blank" class="btn btn-sm btn-outline-success">
-                                                    <i class="fas fa-external-link-alt"></i>
+                                                    <i class="ti tabler-external-link"></i>
                                                 </a>
                                             @endif
                                         </td>
@@ -327,7 +435,7 @@
                     </div>
                 @else
                     <div class="text-center py-4">
-                        <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                        <i class="ti tabler-clock-history" style="font-size: 3rem;"></i>
                         <h5 class="text-muted">No withdrawal history</h5>
                         <p class="text-muted">Your XEUSD withdrawal requests will appear here</p>
                     </div>
@@ -486,7 +594,13 @@
         // Update XEUSD amount display
         function updateXeusdAmount() {
             const amount = parseFloat(document.getElementById('amount').value) || 0;
-            document.getElementById('xeusd-amount').textContent = amount.toFixed(8);
+            const feePercentage = 0.018; // 1.8%
+            const feeAmount = amount * feePercentage;
+            const netAmount = amount - feeAmount;
+
+            document.getElementById('withdrawal-amount').textContent = amount.toFixed(2);
+            document.getElementById('fee-amount').textContent = feeAmount.toFixed(2);
+            document.getElementById('xeusd-amount').textContent = netAmount.toFixed(8);
         }
 
         // View withdrawal details

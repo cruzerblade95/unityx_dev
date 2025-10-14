@@ -548,11 +548,11 @@
                                     <span class="detail-value">${deposit.unique_address || 'N/A'}</span>
                                 </div>
                                 ${deposit.address_memo ? `
-                                                                                        <div class="detail-row">
-                                                                                            <span class="detail-label">Address Memo:</span>
-                                                                                            <span class="detail-value">${deposit.address_memo}</span>
-                                                                                        </div>
-                                                                                        ` : ''}
+                                                                                            <div class="detail-row">
+                                                                                                <span class="detail-label">Address Memo:</span>
+                                                                                                <span class="detail-value">${deposit.address_memo}</span>
+                                                                                            </div>
+                                                                                            ` : ''}
                             </div>
                         `;
                         }
@@ -615,7 +615,7 @@
                                 <span class="detail-value">${data.nowpayments_data.order_description || 'N/A'}</span>
                             </div>
                         `;
-                            
+
                             // Financial Information Section
                             modalContent += `
                             </div>
@@ -678,7 +678,7 @@
                                 </div>
                             `;
 
-                            // Address Information Section  
+                            // Address Information Section
                             if (data.nowpayments_data.payin_address || data.nowpayments_data.payout_address) {
                                 modalContent += `
                                 </div>
@@ -704,8 +704,8 @@
                                     <div class="detail-row">
                                         <span class="detail-label">Payin Hash:</span>
                                         <span class="detail-value">
-                                            ${data.nowpayments_data.payin_hash ? 
-                                                `<code class="small">${data.nowpayments_data.payin_hash}</code>` : 
+                                            ${data.nowpayments_data.payin_hash ?
+                                                `<code class="small">${data.nowpayments_data.payin_hash}</code>` :
                                                 'N/A'
                                             }
                                         </span>
@@ -713,8 +713,8 @@
                                     <div class="detail-row">
                                         <span class="detail-label">Payout Hash:</span>
                                         <span class="detail-value">
-                                            ${data.nowpayments_data.payout_hash ? 
-                                                `<code class="small">${data.nowpayments_data.payout_hash}</code>` : 
+                                            ${data.nowpayments_data.payout_hash ?
+                                                `<code class="small">${data.nowpayments_data.payout_hash}</code>` :
                                                 'N/A'
                                             }
                                         </span>

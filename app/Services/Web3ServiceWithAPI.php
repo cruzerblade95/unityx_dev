@@ -73,9 +73,9 @@ class Web3ServiceWithAPI
                 throw new Exception('Invalid recipient address format');
             }
 
-            // Validate amount
-            if ($amountUSD < 1 || $amountUSD > 500) {
-                throw new Exception('Amount must be between $1 and $500');
+            // Validate amount (allow minimum 0.01 for fee-deducted withdrawals)
+            if ($amountUSD < 0.01 || $amountUSD > 500) {
+                throw new Exception('Amount must be between $0.01 and $500');
             }
 
             // Check owner wallet balance

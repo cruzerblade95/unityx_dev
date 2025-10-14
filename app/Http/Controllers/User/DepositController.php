@@ -44,7 +44,7 @@ class DepositController extends Controller
 
     public function direct()
     {
-        // XEUSD deposit ONLY page - 0% fee, blockchain verified
+        // XEUSD deposit ONLY page - 1% fee, blockchain verified
         $deposits = Deposit::where('user_id', Auth::id())
                           ->where('payment_method', 'xeusd')
                           ->latest()
@@ -302,13 +302,18 @@ class DepositController extends Controller
                     'Transaction amount mismatch! You sent ' . $txData['amount'] . ' XEUSD but claimed ' . $request->amount . ' XEUSD.');
             }
 
+            // Calculate 1% fee for XEUSD deposits
+            $feePercent = 1;
+            $feeAmount = $txData['amount'] * ($feePercent / 100);
+            $netAmount = $txData['amount'] - $feeAmount;
+
             // Create deposit record
             $deposit = Deposit::create([
                 'user_id' => Auth::id(),
                 'amount' => $txData['amount'],
-                'tax_percent' => 0, // No fee for XEUSD deposits
-                'tax_amount' => 0,
-                'net_amount' => $txData['amount'],
+                'tax_percent' => $feePercent,
+                'tax_amount' => $feeAmount,
+                'net_amount' => $netAmount,
                 'status' => 'pending', // Pending admin approval
                 'reference' => 'XEUSD_' . substr($txHash, 2, 10),
                 'note' => 'XEUSD deposit from ' . $txData['from'],
@@ -329,7 +334,9 @@ class DepositController extends Controller
 
             return redirect()->back()->with('success',
                 'XEUSD deposit verified! Amount: $' . number_format($txData['amount'], 2) .
-                ' XEUSD. Your deposit is pending admin approval.');
+                ' XEUSD. Fee (1%): $' . number_format($feeAmount, 2) .
+                '. Net amount: $' . number_format($netAmount, 2) .
+                '. Your deposit is pending admin approval.');
 
         } catch (\Exception $e) {
             Log::error("XEUSD deposit verification failed", [

@@ -111,12 +111,26 @@ class NOWPaymentsController extends Controller
                     return '<span class="font-weight-bold text-success">$' . number_format($deposit->amount, 2) . '</span>';
                 })
                 ->addColumn('payment_id', function ($deposit) {
-                    // First check the actual payment_method column
+                    // Check for XEUSD payment method first
+                    if ($deposit->payment_method === 'xeusd') {
+                        if ($deposit->payment_id) {
+                            // Show transaction hash with BSCScan link
+                            $shortTxHash = substr($deposit->payment_id, 0, 10) . '...' . substr($deposit->payment_id, -8);
+                            return '<a href="https://bscscan.com/tx/' . $deposit->payment_id . '" target="_blank" class="text-decoration-none">' .
+                                   '<code class="bg-light p-1">' . $shortTxHash . '</code></a>' .
+                                   '<br><span class="badge bg-success">XEUSD</span>';
+                        } else {
+                            return '<span class="badge bg-success">XEUSD</span>';
+                        }
+                    }
+
+                    // Check for manual deposit
                     if ($deposit->payment_method === 'manual') {
                         return '<span class="badge bg-secondary">Manual</span>';
                     }
 
-                    if ($deposit->payment_method === 'nowpayments' || $deposit->payment_id) {
+                    // Check for NOWPayments or crypto deposits
+                    if ($deposit->payment_method === 'nowpayments' || $deposit->payment_method === 'crypto' || $deposit->payment_id) {
                         if ($deposit->payment_id) {
                             return '<code class="bg-light p-1">' . $deposit->payment_id . '</code><br><small class="text-muted">NOWPayments</small>';
                         } else {
@@ -159,8 +173,8 @@ class NOWPaymentsController extends Controller
                                     <i class="fas fa-info-circle"></i> Details
                                 </button>';
 
-                    // Add refresh status button for NOWPayments deposits
-                    if ($deposit->payment_id) {
+                    // Add refresh status button ONLY for NOWPayments/crypto deposits (not XEUSD)
+                    if ($deposit->payment_id && $deposit->payment_method !== 'xeusd') {
                         $actions .= ' <button class="btn btn-sm btn-outline-warning ml-1" onclick="refreshPaymentStatus(\'' . $deposit->payment_id . '\', ' . $deposit->id . ', this)">
                                         <i class="fas fa-sync"></i> Refresh
                                     </button>';
@@ -171,7 +185,7 @@ class NOWPaymentsController extends Controller
                                         <i class="fas fa-check"></i> Approve
                                     </button>';
 
-                        if ($deposit->payment_method === 'manual' || !$deposit->payment_id) {
+                        if ($deposit->payment_method === 'manual' || $deposit->payment_method === 'xeusd' || !$deposit->payment_id) {
                             $userName = $deposit->user ? $deposit->user->firstname . ' ' . $deposit->user->lastname : 'Unknown User';
                             $actions .= ' <button class="btn btn-sm btn-danger ml-1" onclick="showRejectModal(' . $deposit->id . ', \'' . $userName . '\', ' . $deposit->amount . ')">
                                             <i class="fas fa-times"></i> Reject
@@ -192,7 +206,21 @@ class NOWPaymentsController extends Controller
     public function approveDeposit($depositId)
     {
         try {
+            Log::info('=== APPROVE DEPOSIT CALLED ===', [
+                'deposit_id' => $depositId,
+                'timestamp' => now()
+            ]);
+
             $deposit = Deposit::findOrFail($depositId);
+
+            Log::info('Deposit loaded', [
+                'id' => $deposit->id,
+                'payment_method' => $deposit->payment_method,
+                'status' => $deposit->status,
+                'amount' => $deposit->amount,
+                'net_amount' => $deposit->net_amount,
+                'payment_id' => $deposit->payment_id
+            ]);
 
             if ($deposit->status === 'completed') {
                 return response()->json([
@@ -205,7 +233,8 @@ class NOWPaymentsController extends Controller
             $creditAmount = $deposit->net_amount; // Default fallback
             $outcomeAmount = null;
 
-            if ($deposit->payment_id) {
+            // Only query NOWPayments API for NOWPayments/crypto deposits
+            if (($deposit->payment_method === 'nowpayments' || $deposit->payment_method === 'crypto') && $deposit->payment_id) {
                 // Try to get updated payment data from NOWPayments
                 $nowpaymentsData = $this->nowPayments->getPaymentStatus($deposit->payment_id);
                 if ($nowpaymentsData && isset($nowpaymentsData['outcome_amount'])) {
@@ -218,6 +247,15 @@ class NOWPaymentsController extends Controller
                         'original_net_amount' => $deposit->net_amount
                     ]);
                 }
+            } elseif ($deposit->payment_method === 'xeusd') {
+                // For XEUSD deposits, use the amount (which is already verified on blockchain)
+                $creditAmount = $deposit->amount; // XEUSD has no fees, use full amount
+
+                Log::info('Approving XEUSD deposit', [
+                    'deposit_id' => $deposit->id,
+                    'amount' => $creditAmount,
+                    'tx_hash' => $deposit->payment_id
+                ]);
             }
 
             // Validate credit amount is positive
@@ -229,7 +267,7 @@ class NOWPaymentsController extends Controller
             }
 
             // Start database transaction for atomic operation
-            \DB::beginTransaction();
+            DB::beginTransaction();
 
             try {
                 // Update deposit status
@@ -268,7 +306,7 @@ class NOWPaymentsController extends Controller
                 );
 
                 // Commit transaction if all operations succeeded
-                \DB::commit();
+                DB::commit();
 
                 Log::info('Deposit approved manually', [
                     'deposit_id' => $deposit->id,
@@ -279,9 +317,13 @@ class NOWPaymentsController extends Controller
                     'was_nowpayments_deposit' => $deposit->payment_id ? true : false
                 ]);
 
-            } catch (\Exception $e) {
-                \DB::rollBack();
-                Log::error('Error in manual deposit approval transaction: ' . $e->getMessage());
+            } catch (\Throwable $e) {
+                DB::rollBack();
+                Log::error('Error in manual deposit approval transaction: ' . $e->getMessage(), [
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString()
+                ]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Transaction failed: ' . $e->getMessage()
@@ -295,11 +337,22 @@ class NOWPaymentsController extends Controller
                 'outcome_amount_used' => $outcomeAmount !== null
             ]);
 
-        } catch (\Exception $e) {
-            Log::error('Error approving deposit: ' . $e->getMessage());
+        } catch (\Throwable $e) {
+            Log::error('=== ERROR APPROVING DEPOSIT ===', [
+                'deposit_id' => $depositId,
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Error approving payment: ' . $e->getMessage()
+                'message' => 'Error approving payment: ' . $e->getMessage(),
+                'debug_info' => config('app.debug') ? [
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine()
+                ] : null
             ], 500);
         }
     }
