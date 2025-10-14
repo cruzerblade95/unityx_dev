@@ -719,7 +719,7 @@
                     <div class="card-header">
                         <h5 class="mb-0">
                             <i class="fas fa-wallet me-2"></i>
-                            XEUSD Token Deposit (1% Fee)
+                            XEVIEX USD Deposit (1% Fee)
                         </h5>
                     </div>
                     <div class="card-body">
@@ -727,7 +727,7 @@
                         <div class="alert alert-info">
                             <h6><i class="fas fa-info-circle me-2"></i>How to Deposit XEUSD</h6>
                             <ol class="mb-0 mt-2">
-                                <li>Send XEUSD tokens from your wallet to our deposit address below</li>
+                                <li>Send XEVIEX USD from your wallet to our deposit address below</li>
                                 <li>Wait for blockchain confirmation (usually 1-2 minutes)</li>
                                 <li>Copy your transaction hash and paste it in the form below</li>
                                 <li>Submit and wait for admin approval</li>

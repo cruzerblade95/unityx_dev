@@ -178,8 +178,8 @@
                 <i class="fas fa-arrow-left"></i>
             </a>
             <div>
-                <h4 class="py-3 mb-0"><i class="fas fa-coins me-2"></i>XEUSD Token Withdrawal</h4>
-                <p class="text-muted mb-0">Withdraw your balance as XEUSD tokens to BSC network</p>
+                <h4 class="py-3 mb-0"><i class="fas fa-coins me-2"></i>XEVIEX USD Withdrawal</h4>
+                <p class="text-muted mb-0">Withdraw your balance as XEVIEX USD to BSC network</p>
             </div>
         </div>
 
@@ -189,9 +189,9 @@
                 <div class="col-md-8">
                     <h3 class="mb-2">
                         <i class="fas fa-coins me-2"></i>
-                        XEUSD Token Withdrawal
+                        XEVIEX USD Withdrawal
                     </h3>
-                    <p class="mb-2">Withdraw your USD balance as XEUSD tokens on BSC BEP20 network</p>
+                    <p class="mb-2">Withdraw your USD balance as XEVIEX USD on BSC BEP20 network</p>
                     <p class="mb-0"><strong>Network:</strong> BSC
                         (BEP20) | <strong>Withdrawal Fee:</strong> 1.8% | <strong>Gas Fees:</strong> Covered by platform</p>
                 </div>
@@ -239,7 +239,7 @@
                             <i class="fab fa-ethereum me-2"></i>
                             Connect Your MetaMask Wallet
                         </h5>
-                        <p class="mb-0">Connect your MetaMask wallet to receive XEUSD tokens on BSC network</p>
+                        <p class="mb-0">Connect your MetaMask wallet to receive XEVIEX USD on BSC network</p>
                     @endif
                 </div>
                 <div class="col-md-4 text-end">
