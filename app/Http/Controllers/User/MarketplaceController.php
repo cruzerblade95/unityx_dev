@@ -35,6 +35,8 @@ class MarketplaceController extends Controller
         $wallet = $user->wallet;
         $cashBalance = $wallet ? $wallet->cash : 0;
         $profitBalance = $wallet ? $wallet->profit : 0;
+        $bonusBalance = $wallet ? $wallet->bonus : 0;
+        $depositBalance = $wallet ? $wallet->deposit : 0;
 
         // Get active listings with pagination (16 per page for 4x4 grid)
         $listings = MarketplaceListing::with('seller')
@@ -112,6 +114,8 @@ class MarketplaceController extends Controller
             'verificationRequests',
             'cashBalance',
             'profitBalance',
+            'bonusBalance',
+            'depositBalance',
             'telegramVerification'
         ));
     }
@@ -312,15 +316,11 @@ class MarketplaceController extends Controller
             // Calculate buyer receives amount (listing amount minus 1.8% fee)
             $buyerReceives = $listing->amount * 0.982;
 
-            // Add USDT to buyer's deposit balance
-            $buyerWallet->deposit += $buyerReceives;
+            // Add USDT to buyer's cash balance (for marketplace trading)
+            $buyerWallet->cash += $buyerReceives;
             $buyerWallet->save();
 
-            // Automatically create AI Trade investment with the received USDT
-            $aiTradeId = Helpers::insertAiTradeV2($buyer->id, $buyerReceives);
-            Helpers::depositBonus($buyer->id, $buyerReceives);
-
-            Log::info("Marketplace: AI Trade created for buyer {$buyer->id}, Trade ID: {$aiTradeId}, Amount: {$buyerReceives}");
+            Log::info("Marketplace: USDT transferred to cash wallet for buyer {$buyer->id}, Amount: {$buyerReceives}");
 
             // Release the full escrowed amount from seller's floating balance
             // (The 1.8% fee is kept by the system/platform)
@@ -330,7 +330,7 @@ class MarketplaceController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Transaction approved! ' . number_format($buyerReceives, 2) . ' USDT transferred to buyer and automatically invested in AI Trade (5x potential return).');
+            return redirect()->back()->with('success', 'Transaction approved! ' . number_format($buyerReceives, 2) . ' USDT transferred to buyer\'s cash wallet for marketplace trading.');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -428,30 +428,44 @@ class MarketplaceController extends Controller
     }
 
     /**
-     * Top up cash wallet from profit wallet
+     * Top up cash wallet from profit or bonus wallet
      */
     public function topUpCash(Request $request)
     {
         $request->validate([
             'amount' => 'required|numeric|min:1',
+            'source_wallet' => 'required|in:profit,bonus',
         ]);
 
         $user = Auth::user();
         $wallet = $user->wallet;
 
+        if (!$wallet) {
+            return redirect()->back()->withErrors(['error' => 'Wallet not found.']);
+        }
+
         $feePercent = 1.5;
         $feeAmount = $request->amount * ($feePercent / 100);
         $totalDeduction = $request->amount + $feeAmount;
+        $sourceWallet = $request->source_wallet;
 
-        if (!$wallet || $wallet->profit < $totalDeduction) {
-            return redirect()->back()->withErrors(['error' => 'Insufficient profit balance. You need $' . number_format($totalDeduction, 2) . ' (including 1.5% fee).']);
+        // Check if sufficient balance exists in selected wallet
+        $availableBalance = $sourceWallet === 'profit' ? $wallet->profit : $wallet->bonus;
+
+        if ($availableBalance < $totalDeduction) {
+            $walletName = ucfirst($sourceWallet);
+            return redirect()->back()->withErrors(['error' => "Insufficient {$walletName} balance. You need $" . number_format($totalDeduction, 2) . ' (including 1.5% fee).']);
         }
 
         try {
             DB::beginTransaction();
 
-            // Deduct from profit wallet (including fee)
-            $wallet->profit -= $totalDeduction;
+            // Deduct from selected wallet (including fee)
+            if ($sourceWallet === 'profit') {
+                $wallet->profit -= $totalDeduction;
+            } else {
+                $wallet->bonus -= $totalDeduction;
+            }
 
             // Add to cash wallet (without fee)
             $wallet->cash += $request->amount;
@@ -460,12 +474,58 @@ class MarketplaceController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Cash wallet topped up successfully! $' . number_format($request->amount, 2) . ' added to your cash wallet.');
+            $walletName = ucfirst($sourceWallet);
+            return redirect()->back()->with('success', "Cash wallet topped up successfully! $" . number_format($request->amount, 2) . " transferred from {$walletName} wallet to Cash wallet.");
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error topping up cash wallet: ' . $e->getMessage());
             return redirect()->back()->withErrors(['error' => 'Failed to top up cash wallet. Please try again.']);
+        }
+    }
+
+    /**
+     * Transfer cash wallet to deposit wallet
+     */
+    public function transferToDeposit(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+        ]);
+
+        $user = Auth::user();
+        $wallet = $user->wallet;
+
+        if (!$wallet) {
+            return redirect()->back()->withErrors(['error' => 'Wallet not found.']);
+        }
+
+        if ($wallet->cash < $request->amount) {
+            return redirect()->back()->withErrors(['error' => 'Insufficient cash balance. You have $' . number_format($wallet->cash, 2) . ' available.']);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Transfer from cash to deposit
+            $wallet->cash -= $request->amount;
+            $wallet->deposit += $request->amount;
+            $wallet->save();
+
+            // Automatically create AI Trade investment with the transferred amount
+            $aiTradeId = Helpers::insertAiTradeV2($user->id, $request->amount);
+            Helpers::depositBonus($user->id, $request->amount);
+
+            Log::info("Marketplace: Cash to Deposit transfer - AI Trade created for user {$user->id}, Trade ID: {$aiTradeId}, Amount: {$request->amount}");
+
+            DB::commit();
+
+            return redirect()->back()->with('success', '$' . number_format($request->amount, 2) . ' transferred from Cash to Deposit wallet and automatically invested in AI Trade (5x potential return).');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error transferring cash to deposit wallet: ' . $e->getMessage());
+            return redirect()->back()->withErrors(['error' => 'Failed to transfer to deposit wallet. Please try again.']);
         }
     }
 }

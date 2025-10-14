@@ -15,16 +15,16 @@
     {
       "name": "Deposit",
       "icon": "menu-icon icon-base ti tabler-wallet",
-      "slug": "user.wallet",
+      "slug": "user.deposit",
       "submenu": [
         {
           "url": "user/deposit",
-          "name": "Crypto",
-          "slug": "user.deposit"
+          "name": "NOWPayment Crypto",
+          "slug": "user.deposit.index"
         },
         {
           "url": "user/deposit/direct",
-          "name": "Direct",
+          "name": "XEUSD Direct",
           "slug": "user.deposit.direct"
         }
       ]
@@ -37,8 +37,8 @@
       "submenu": [
         {
           "url": "user/withdrawal/crypto",
-          "name": "Crypto",
-          "slug": "user.withdrawal.crypto"
+          "name": "XEUSD Token",
+          "slug": "user.withdrawal.xeusd"
         },
         {
           "url": "user/withdrawal/crypto-bank-card",
@@ -67,7 +67,7 @@
     {
       "name": "Bonus",
       "icon": "menu-icon icon-base ti tabler-wallet",
-      "slug": "user.bonuses",
+      "slug": "user.referral_bonus_histories",
       "submenu": [
         {
           "url": "user/referral-bonus-histories",

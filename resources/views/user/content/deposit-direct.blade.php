@@ -1,6 +1,6 @@
 @extends('user.layouts.layoutMaster')
 
-@section('title', 'Deposit Direct')
+@section('title', 'XEUSD Deposit')
 
 <style>
     /* Enhanced deposit-direct form styling - Crypto green theme like withdrawal */
@@ -694,9 +694,12 @@
 @section('content')
     {{-- @include('components.coming-soon-overlay') --}}
     <div class="container py-4 position-relative" style="z-index: 1;">
-        <h2>Deposit Direct</h2>
+        <h2><i class="fas fa-coins me-2"></i>XEUSD Deposit (1% Fee)</h2>
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+        @if (session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
         @if (session('warning'))
             <div class="alert alert-warning">{{ session('warning') }}</div>
@@ -710,152 +713,152 @@
         @endif
 
         <div class="row">
-            <!-- Manual Deposit Form -->
+            <!-- XEUSD Deposit Form -->
             <div class="col-md-8 mx-auto">
                 <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0">
                             <i class="fas fa-wallet me-2"></i>
-                            Manual USDT Deposit (1.8% Fee)
+                            XEUSD Token Deposit (1% Fee)
                         </h5>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="{{ route('user.deposit.store') }}" id="usdtDepositForm">
+                        <!-- Info Alert -->
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle me-2"></i>How to Deposit XEUSD</h6>
+                            <ol class="mb-0 mt-2">
+                                <li>Send XEUSD tokens from your wallet to our deposit address below</li>
+                                <li>Wait for blockchain confirmation (usually 1-2 minutes)</li>
+                                <li>Copy your transaction hash and paste it in the form below</li>
+                                <li>Submit and wait for admin approval</li>
+                            </ol>
+                        </div>
+
+                        <!-- XEUSD Deposit Wallet Info -->
+                        <div class="payment-info">
+                            <h6><i class="fas fa-wallet me-2"></i>Send XEUSD to this Address:</h6>
+
+                            <!-- Wallet Address Display with Click to Copy -->
+                            <div class="wallet-address-box mb-3">
+                                <div class="wallet-address-content">
+                                    <code class="wallet-address-text" id="walletAddress">{{ $xeusdWalletAddress }}</code>
+                                </div>
+                                <div class="wallet-address-overlay">
+                                    <i class="fas fa-copy"></i>
+                                    <span>Click to Copy</span>
+                                </div>
+                            </div>
+
+                            <!-- Network Information -->
+                            <div class="wallet-network-info">
+                                <small>
+                                    <strong><i class="fas fa-network-wired me-1"></i>Network:</strong>
+                                    {{ $xeusdNetworkInfo['network'] ?? 'BSC BEP20' }}<br>
+                                    <strong><i class="fas fa-link me-1"></i>Chain ID:</strong>
+                                    {{ $xeusdNetworkInfo['chain_id'] ?? '56' }}<br>
+                                    <strong><i class="fas fa-file-contract me-1"></i>Token Contract:</strong>
+                                    <a href="https://bscscan.com/token/{{ $xeusdNetworkInfo['contract_address'] ?? '' }}"
+                                        target="_blank" class="text-decoration-none">
+                                        {{ substr($xeusdNetworkInfo['contract_address'] ?? '', 0, 10) }}...{{ substr($xeusdNetworkInfo['contract_address'] ?? '', -8) }}
+                                        <i class="fas fa-external-link-alt ms-1"></i>
+                                    </a>
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Deposit Form -->
+                        <form method="POST" action="{{ route('user.deposit.direct.submit') }}" id="xeusdDepositForm">
                             @csrf
+
                             <div class="mb-3">
-                                <label for="amount" class="form-label">USDT Amount</label>
+                                <label for="amount" class="form-label">Amount (XEUSD) <span
+                                        class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <input type="number" step="0.01" class="form-control" id="amount" name="amount"
-                                        required min="100">
-                                    <span class="input-group-text">USDT</span>
+                                        required min="1" placeholder="Enter amount you sent">
+                                    <span class="input-group-text">XEUSD</span>
                                 </div>
-                                <div class="form-text">Minimum deposit: 100 USDT</div>
+                                <div class="form-text">Minimum deposit: 1 XEUSD | <strong class="text-warning">1%
+                                        Fee</strong></div>
 
-                                <!-- Fee Calculation Display -->
-                                <div id="feeCalculation" class="mt-2" style="display: none;">
-                                    <div class="card card-body bg-light border-0">
-                                        <div class="row g-2 small">
-                                            <div class="col-6">
-                                                <div class="d-flex justify-content-between">
-                                                    <span class="text-muted">Requested Amount:</span>
-                                                    <span class="fw-medium">$<span id="displayAmount">0.00</span></span>
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <div class="d-flex justify-content-between">
-                                                    <span class="text-muted">Manual Fee (1.8%):</span>
-                                                    <span class="text-info fw-medium">+$<span
-                                                            id="displayFee">0.00</span></span>
-                                                </div>
-                                            </div>
-                                            <div class="col-12">
-                                                <hr class="my-2">
-                                                <div class="d-flex justify-content-between">
-                                                    <span class="fw-semibold">You must send:</span>
-                                                    <span class="fw-semibold text-primary">$<span
-                                                            id="displayTotalAmount">0.00</span> USDT</span>
-                                                </div>
-                                            </div>
+                                <!-- Fee Display -->
+                                <div class="fee-display mt-2">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>1% Fee Applied</strong> - Net amount will be credited after deducting 1% fee.
+                                </div>
+
+                                <!-- Net Amount Calculator -->
+                                <div class="alert alert-success mt-2" id="netAmountDisplay" style="display: none;">
+                                    <div class="row text-center">
+                                        <div class="col-md-4">
+                                            <small class="text-muted d-block">Deposit Amount</small>
+                                            <strong class="fs-5">$<span id="depositAmount">0.00</span></strong>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <small class="text-muted d-block">Fee (1%)</small>
+                                            <strong class="fs-5 text-warning">-$<span id="feeAmount">0.00</span></strong>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <small class="text-muted d-block">You Will Receive</small>
+                                            <strong class="fs-4 text-success">$<span id="netAmount">0.00</span></strong>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="mb-3">
-                                <label for="reference" class="form-label">Reference</label>
-                                <input type="text" class="form-control" id="reference" name="reference"
-                                    placeholder="Optional reference">
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="note" class="form-label">Note</label>
-                                <textarea class="form-control" id="note" name="note" placeholder="Optional note for this deposit"></textarea>
-                            </div>
-
-                            <!-- Payment Instructions (Initially Hidden) -->
-                            <div id="paymentInstructions" class="alert alert-info" style="display: none;">
-                                <h6><i class="fas fa-info-circle me-2"></i>Payment Instructions</h6>
-                                <div id="loadingAddress" class="text-center py-3">
-                                    <i class="fas fa-spinner fa-spin me-2"></i>Generating unique wallet address...
-                                </div>
-                                <div id="addressContent" style="display: none;">
-                                    <p><strong>Please transfer your USDT to the following wallet address:</strong></p>
-
-                                    <!-- Enhanced Wallet Address Display -->
-                                    <div class="wallet-address-container mb-3">
-                                        <div class="wallet-address-content">
-                                            <code class="wallet-address-text" id="walletAddress">Loading...</code>
-                                        </div>
-                                    </div>
-                                    <div class="alert alert-success">
-                                        <small><strong>✅ Reference code will be automatically included when you submit this
-                                                form</strong></small>
-                                        <ul class="mb-0 mt-1 small">
-                                            <li>No need to manually add memo or reference</li>
-                                            <li>Just send USDT to the address above</li>
-                                            <li>Enter your transaction hash below and submit</li>
-                                        </ul>
-                                    </div>
-                                    <div class="alert alert-warning">
-                                        <small><strong>Important Security Notes:</strong></small>
-                                        <ul class="mb-0 mt-1 small">
-                                            <li>This address is unique to your deposit and expires in 24 hours</li>
-                                            <li>Only send USDT to this address</li>
-                                            <li>Sending other cryptocurrencies may result in permanent loss</li>
-                                        </ul>
-                                    </div>
+                                <label for="transaction_hash" class="form-label">Transaction Hash <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="transaction_hash" name="transaction_hash"
+                                    required placeholder="0x..." minlength="66" maxlength="66">
+                                <div class="form-text">
+                                    Enter the transaction hash (TX hash) from your wallet after sending XEUSD.
+                                    <a href="https://bscscan.com/" target="_blank">Check on BSCScan <i
+                                            class="fas fa-external-link-alt ms-1"></i></a>
                                 </div>
                             </div>
 
-                            <!-- Payment ID Field (Initially Hidden) -->
-                            <div id="paymentIdField" style="display: none;">
-                                <div class="mb-3">
-                                    <label for="payment_id" class="form-label">Payment ID / Transaction Hash <span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="payment_id" name="payment_id"
-                                        placeholder="Enter your transaction hash after sending USDT">
-                                    <div class="form-text">Please enter the transaction hash from your USDT transfer</div>
-                                </div>
-
-                                <!-- Show auto-generated reference for user records -->
-                                <div class="alert alert-light border">
-                                    <small class="text-muted"><strong>Auto-generated Reference (for your
-                                            records):</strong></small>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <code class="text-primary" id="referencePreview">Generating...</code>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary"
-                                            onclick="copyToClipboard('referencePreview')">
-                                            <i class="fas fa-copy"></i> Copy
-                                        </button>
-                                    </div>
-                                    <small class="text-muted d-block mt-1">This reference will be automatically included in
-                                        your deposit request</small>
-                                </div>
+                            <!-- Warning about verification -->
+                            <div class="alert alert-warning">
+                                <small><strong><i class="fas fa-exclamation-triangle me-2"></i>Important:</strong></small>
+                                <ul class="mb-0 mt-1 small">
+                                    <li>Transaction will be automatically verified on the blockchain</li>
+                                    <li>Amount must match what you actually sent</li>
+                                    <li>Make sure transaction is confirmed before submitting</li>
+                                    <li>Each transaction hash can only be used once</li>
+                                </ul>
                             </div>
 
-                            <!-- Hidden fields for auto-generated reference -->
-                            <input type="hidden" id="auto_reference" name="auto_reference" value="">
-                            <input type="hidden" id="deposit_address" name="deposit_address" value="">
-
-                            <button type="button" class="btn btn-primary w-100" id="showInstructionsBtn">
-                                <i class="fas fa-arrow-right me-2"></i>
-                                Continue to Payment
-                            </button>
-
-                            <div id="paymentButtons" style="display: none;">
-                                <div class="d-flex gap-2">
-                                    <button type="button" class="btn btn-outline-secondary flex-fill"
-                                        id="cancelPaymentBtn">
-                                        <i class="fas fa-times me-2"></i>
-                                        Cancel
-                                    </button>
-                                    <button type="submit" class="btn btn-success flex-fill" id="submitDepositBtn">
-                                        <i class="fas fa-check me-2"></i>
-                                        Submit Deposit Request
-                                    </button>
-                                </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary" id="submitBtn">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    Submit Deposit Request
+                                </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+
+                <!-- Additional Info Card -->
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h6><i class="fas fa-question-circle me-2"></i>Why Use XEUSD Deposit?</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="small">
+                                    <li><strong class="text-warning">1% Fee</strong> - Low deposit fee</li>
+                                    <li><strong>Fast</strong> - Blockchain confirmed in minutes</li>
+                                    <li><strong>Secure</strong> - Automatic blockchain verification</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="small">
+                                    <li><strong>Transparent</strong> - Verify on BSCScan</li>
+                                    <li><strong>Simple</strong> - Just send & submit TX hash</li>
+                                    <li><strong>Direct</strong> - No intermediaries</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -867,7 +870,7 @@
             <div class="card-header">
                 <h5 class="mb-0">
                     <i class="fas fa-history me-2"></i>
-                    Direct Deposit History
+                    XEUSD Deposit History
                 </h5>
             </div>
             <div class="card-body">
@@ -876,26 +879,26 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Amount</th>
-                                <th>Tax %</th>
-                                <th>Tax Amount</th>
-                                <th>Net Amount</th>
+                                <th>Amount (XEUSD)</th>
                                 <th>Status</th>
-                                <th>Payment Address</th>
-                                <th>Payment ID</th>
+                                <th>Transaction Hash</th>
+                                <th>From Address</th>
                                 <th>Reference</th>
                                 <th>Note</th>
                                 <th>Created At</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($deposits->where('payment_method', '!=', 'crypto') as $deposit)
+                            @forelse($deposits as $deposit)
                                 <tr>
                                     <td>{{ $deposit->id }}</td>
-                                    <td>${{ number_format($deposit->amount, 2) }}</td>
-                                    <td>{{ $deposit->tax_percent }}%</td>
-                                    <td>${{ number_format($deposit->tax_amount, 2) }}</td>
-                                    <td>${{ number_format($deposit->net_amount, 2) }}</td>
+                                    <td>
+                                        <strong>${{ number_format($deposit->amount, 2) }}</strong>
+                                        <br>
+                                        <small class="text-success">
+                                            <i class="fas fa-gift"></i> 0% Fee
+                                        </small>
+                                    </td>
                                     <td>
                                         @if ($deposit->status === 'completed')
                                             <span class="badge bg-success">Completed</span>
@@ -910,18 +913,32 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($deposit->unique_address || $deposit->payment_address)
+                                        @if ($deposit->payment_id)
                                             <small>
-                                                {{ substr($deposit->unique_address ?: $deposit->payment_address, 0, 6) }}...{{ substr($deposit->unique_address ?: $deposit->payment_address, -6) }}
-                                                @if ($deposit->address_memo)
-                                                    <br><code class="small">{{ $deposit->address_memo }}</code>
-                                                @endif
+                                                <a href="https://bscscan.com/tx/{{ $deposit->payment_id }}"
+                                                    target="_blank" class="text-decoration-none"
+                                                    title="{{ $deposit->payment_id }}">
+                                                    {{ substr($deposit->payment_id, 0, 10) }}...{{ substr($deposit->payment_id, -8) }}
+                                                    <i class="fas fa-external-link-alt ms-1"></i>
+                                                </a>
                                             </small>
                                         @else
                                             <span class="text-muted">N/A</span>
                                         @endif
                                     </td>
-                                    <td>{{ $deposit->payment_id ? substr($deposit->payment_id, 0, 10) . '...' : 'N/A' }}
+                                    <td>
+                                        @if ($deposit->payment_address)
+                                            <small>
+                                                <a href="https://bscscan.com/address/{{ $deposit->payment_address }}"
+                                                    target="_blank" class="text-decoration-none"
+                                                    title="{{ $deposit->payment_address }}">
+                                                    {{ substr($deposit->payment_address, 0, 6) }}...{{ substr($deposit->payment_address, -6) }}
+                                                    <i class="fas fa-external-link-alt ms-1"></i>
+                                                </a>
+                                            </small>
+                                        @else
+                                            <span class="text-muted">N/A</span>
+                                        @endif
                                     </td>
                                     <td>{{ $deposit->reference }}</td>
                                     <td>{{ $deposit->note }}</td>
@@ -929,8 +946,9 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="11" class="text-center text-muted py-4">
-                                        No direct deposits found
+                                    <td colspan="8" class="text-center text-muted py-4">
+                                        <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
+                                        No XEUSD deposits found. Make your first deposit above!
                                     </td>
                                 </tr>
                             @endforelse
@@ -943,219 +961,81 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const showInstructionsBtn = document.getElementById('showInstructionsBtn');
-            const submitDepositBtn = document.getElementById('submitDepositBtn');
-            const cancelPaymentBtn = document.getElementById('cancelPaymentBtn');
-            const paymentButtons = document.getElementById('paymentButtons');
-            const paymentInstructions = document.getElementById('paymentInstructions');
-            const paymentIdField = document.getElementById('paymentIdField');
+            const form = document.getElementById('xeusdDepositForm');
+            const submitBtn = document.getElementById('submitBtn');
             const amountInput = document.getElementById('amount');
-            const referenceInput = document.getElementById('reference');
-            const noteInput = document.getElementById('note');
-            const paymentIdInput = document.getElementById('payment_id');
-            const form = document.getElementById('usdtDepositForm');
-            const feeCalculation = document.getElementById('feeCalculation');
+            const txHashInput = document.getElementById('transaction_hash');
 
-            // Fee calculation on amount input
-            amountInput.addEventListener('input', function() {
-                calculateFee();
-            });
+            // Net amount calculator - real-time update
+            const netAmountDisplay = document.getElementById('netAmountDisplay');
+            const depositAmountSpan = document.getElementById('depositAmount');
+            const feeAmountSpan = document.getElementById('feeAmount');
+            const netAmountSpan = document.getElementById('netAmount');
+            const feePercent = 1; // 1% fee
 
-            function calculateFee() {
-                const amount = parseFloat(amountInput.value) || 0;
+            function calculateNetAmount() {
+                const amount = parseFloat(amountInput.value);
 
-                if (amount >= 100) {
-                    // Manual deposit fee is 1.8% ADDED to the amount
-                    const feePercent = 1.8;
-                    const feeAmount = amount * (feePercent / 100);
-                    const totalAmount = amount + feeAmount; // User pays MORE
+                if (amount && amount > 0) {
+                    const fee = amount * (feePercent / 100);
+                    const net = amount - fee;
 
-                    document.getElementById('displayAmount').textContent = amount.toFixed(2);
-                    document.getElementById('displayFee').textContent = feeAmount.toFixed(2);
-                    document.getElementById('displayTotalAmount').textContent = totalAmount.toFixed(2);
+                    depositAmountSpan.textContent = amount.toFixed(2);
+                    feeAmountSpan.textContent = fee.toFixed(2);
+                    netAmountSpan.textContent = net.toFixed(2);
 
-                    feeCalculation.style.display = 'block';
+                    netAmountDisplay.style.display = 'block';
                 } else {
-                    feeCalculation.style.display = 'none';
+                    netAmountDisplay.style.display = 'none';
                 }
             }
 
-            // Show payment instructions when continue button is clicked
-            showInstructionsBtn.addEventListener('click', function() {
-                const amount = amountInput.value;
+            // Update calculation on amount change
+            amountInput.addEventListener('input', calculateNetAmount);
+            amountInput.addEventListener('change', calculateNetAmount);
 
-                if (!amount || amount < 100) {
-                    alert('Please enter a valid USDT amount (minimum 100 USDT).');
+            // Form validation before submit
+            form.addEventListener('submit', function(e) {
+                const amount = parseFloat(amountInput.value);
+                const txHash = txHashInput.value.trim();
+
+                // Validate amount
+                if (!amount || amount < 1) {
+                    e.preventDefault();
+                    alert('Please enter a valid amount (minimum 1 XEUSD).');
                     amountInput.focus();
                     return;
                 }
 
-                // Lock the form fields
-                lockFormFields();
-
-                // Show payment instructions
-                paymentInstructions.style.display = 'block';
-
-                // Hide continue button, show payment buttons
-                showInstructionsBtn.style.display = 'none';
-                paymentButtons.style.display = 'block';
-
-                // Fetch unique wallet address
-                fetchUniqueAddress(amount);
-            });
-
-            // Cancel payment and reset form
-            cancelPaymentBtn.addEventListener('click', function() {
-                if (confirm('Are you sure you want to cancel? This will reset the form.')) {
-                    resetForm();
-                }
-            });
-
-            function lockFormFields() {
-                amountInput.readOnly = true;
-                referenceInput.readOnly = true;
-                noteInput.readOnly = true;
-
-                // Add visual indication that fields are locked
-                amountInput.classList.add('bg-light');
-                referenceInput.classList.add('bg-light');
-                noteInput.classList.add('bg-light');
-            }
-
-            function unlockFormFields() {
-                amountInput.readOnly = false;
-                referenceInput.readOnly = false;
-                noteInput.readOnly = false;
-
-                // Remove visual indication
-                amountInput.classList.remove('bg-light');
-                referenceInput.classList.remove('bg-light');
-                noteInput.classList.remove('bg-light');
-            }
-
-            function resetForm() {
-                // Reset form fields
-                form.reset();
-
-                // Unlock fields
-                unlockFormFields();
-
-                // Hide payment sections
-                paymentInstructions.style.display = 'none';
-                paymentIdField.style.display = 'none';
-                paymentButtons.style.display = 'none';
-                feeCalculation.style.display = 'none';
-
-                // Show continue button
-                showInstructionsBtn.style.display = 'block';
-
-                // Reset payment ID requirement
-                paymentIdInput.required = false;
-
-                // Clear hidden fields
-                document.getElementById('auto_reference').value = '';
-                document.getElementById('deposit_address').value = '';
-
-                // Reset loading states
-                document.getElementById('loadingAddress').style.display = 'block';
-                document.getElementById('addressContent').style.display = 'none';
-                document.getElementById('loadingAddress').innerHTML =
-                    '<i class="fas fa-spinner fa-spin me-2"></i>Generating unique wallet address...';
-            }
-
-            // Function to fetch unique wallet address
-            function fetchUniqueAddress(amount) {
-                const loadingDiv = document.getElementById('loadingAddress');
-                const contentDiv = document.getElementById('addressContent');
-
-                fetch('{{ route('user.deposit.unique-address') }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                                'content')
-                        },
-                        body: JSON.stringify({
-                            amount: amount
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        loadingDiv.style.display = 'none';
-
-                        if (data.success) {
-                            // Update address and store auto-generated reference
-                            document.getElementById('walletAddress').textContent = data.address;
-                            document.getElementById('auto_reference').value = data.memo || '';
-                            document.getElementById('deposit_address').value = data.address;
-                            document.getElementById('referencePreview').textContent = data.memo || 'AUTO_REF_' +
-                                Date.now();
-
-                            contentDiv.style.display = 'block';
-
-                            // Show payment ID field and submit button
-                            paymentIdField.style.display = 'block';
-                            paymentIdInput.required = true;
-
-                        } else {
-                            loadingDiv.innerHTML =
-                                '<div class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Failed to generate address: ' +
-                                data.message + '</div>';
-
-                            // Show fallback address
-                            setTimeout(() => {
-                                const fallbackRef = 'FALLBACK_' + Date.now();
-                                document.getElementById('walletAddress').textContent =
-                                    '0x8cAA7c9988E731F68598941503C41E00339de533';
-                                document.getElementById('auto_reference').value = fallbackRef;
-                                document.getElementById('deposit_address').value =
-                                    '0x8cAA7c9988E731F68598941503C41E00339de533';
-                                document.getElementById('referencePreview').textContent = fallbackRef;
-                                loadingDiv.style.display = 'none';
-                                contentDiv.style.display = 'block';
-                                paymentIdField.style.display = 'block';
-                                paymentIdInput.required = true;
-                            }, 2000);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        loadingDiv.innerHTML =
-                            '<div class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Network error. Using fallback address.</div>';
-
-                        // Show fallback address
-                        setTimeout(() => {
-                            const fallbackRef = 'FALLBACK_' + Date.now();
-                            document.getElementById('walletAddress').textContent =
-                                '0x8cAA7c9988E731F68598941503C41E00339de533';
-                            document.getElementById('auto_reference').value = fallbackRef;
-                            document.getElementById('deposit_address').value =
-                                '0x8cAA7c9988E731F68598941503C41E00339de533';
-                            document.getElementById('referencePreview').textContent = fallbackRef;
-                            loadingDiv.style.display = 'none';
-                            contentDiv.style.display = 'block';
-                            paymentIdField.style.display = 'block';
-                            paymentIdInput.required = true;
-                        }, 2000);
-                    });
-            }
-
-            // Form validation before submit
-            form.addEventListener('submit', function(e) {
-                const paymentId = paymentIdInput.value.trim();
-
-                if (!paymentId) {
+                // Validate transaction hash
+                if (!txHash) {
                     e.preventDefault();
-                    alert('Please enter your payment ID / transaction hash.');
-                    paymentIdInput.focus();
+                    alert('Please enter your transaction hash.');
+                    txHashInput.focus();
                     return;
                 }
 
-                if (paymentId.length < 10) {
+                // Check if transaction hash looks valid (0x followed by 64 hex characters)
+                if (!txHash.match(/^0x[a-fA-F0-9]{64}$/)) {
                     e.preventDefault();
-                    alert('Please enter a valid transaction hash.');
-                    paymentIdInput.focus();
+                    alert(
+                        'Please enter a valid BSC transaction hash (should start with 0x and be 66 characters long).'
+                    );
+                    txHashInput.focus();
                     return;
+                }
+
+                // Disable submit button to prevent double submission
+                submitBtn.disabled = true;
+                submitBtn.innerHTML =
+                    '<i class="fas fa-spinner fa-spin me-2"></i>Verifying on blockchain...';
+            });
+
+            // Auto-format transaction hash (add 0x if missing)
+            txHashInput.addEventListener('blur', function() {
+                let value = this.value.trim();
+                if (value && !value.startsWith('0x')) {
+                    this.value = '0x' + value;
                 }
             });
         });
@@ -1168,18 +1048,7 @@
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(text).then(function() {
                     // Show success message
-                    const button = event.target.closest('button');
-                    const originalText = button.innerHTML;
-                    button.innerHTML = '<i class="fas fa-check"></i> Copied!';
-                    button.classList.remove('btn-outline-primary', 'btn-outline-dark');
-                    button.classList.add('btn-success');
-
-                    setTimeout(function() {
-                        button.innerHTML = originalText;
-                        button.classList.remove('btn-success');
-                        button.classList.add(elementId === 'memoCode' ? 'btn-outline-dark' :
-                            'btn-outline-primary');
-                    }, 2000);
+                    alert('Copied to clipboard: ' + text);
                 });
             } else {
                 // Fallback for older browsers
@@ -1204,13 +1073,12 @@
                     const overlay = walletBox.querySelector('.wallet-address-overlay');
 
                     if (overlay) {
-                        const originalContent = overlay.innerHTML;
-
                         overlay.innerHTML = '<i class="fas fa-check-circle"></i><span>Copied!</span>';
                         overlay.style.opacity = '1';
 
                         setTimeout(function() {
-                            overlay.innerHTML = originalContent;
+                            overlay.innerHTML =
+                                '<i class="fas fa-copy"></i><span>Click to Copy</span>';
                             overlay.style.opacity = '0';
                         }, 1500);
                     }

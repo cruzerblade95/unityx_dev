@@ -1,0 +1,256 @@
+# Admin NOWPayments Controller - XEUSD Integration Fix
+
+## Issues Fixed
+
+### Issue 1: XEUSD Deposits Showing as "NOWPayments"
+**Problem:** XEUSD deposits (payment_method='xeusd') were displaying as "NOWPayments" in the admin deposit list.
+
+**Solution:** Updated the `payment_id` column rendering to detect XEUSD deposits first and display them with a green "XEUSD" badge.
+
+### Issue 2: 500 Error When Approving XEUSD Deposits
+**Problem:**
+- Clicking "Approve" on XEUSD deposits caused a 500 Internal Server Error
+- Console error: "Unexpected token '<', "<!DOCTYPE "... is not valid JSON"
+- Root cause: Code was trying to query NOWPayments API for XEUSD deposits
+
+**Solution:** Updated approval logic to skip NOWPayments API call for XEUSD deposits and use the already-verified amount.
+
+---
+
+## Changes Made
+
+### File: `app/Http/Controllers/Admin/NOWPaymentsController.php`
+
+#### Change 1: Payment Method Display
+
+**Before:**
+```php
+->addColumn('payment_id', function ($deposit) {
+    if ($deposit->payment_method === 'manual') {
+        return '<span class="badge bg-secondary">Manual</span>';
+    }
+    if ($deposit->payment_method === 'nowpayments' || $deposit->payment_id) {
+        // XEUSD was falling into this condition
+        return '<code>...' . $deposit->payment_id . '</code><br>NOWPayments';
+    }
+    ...
+})
+```
+
+**After:**
+```php
+->addColumn('payment_id', function ($deposit) {
+    // Check for XEUSD payment method FIRST
+    if ($deposit->payment_method === 'xeusd') {
+        if ($deposit->payment_id) {
+            $shortTxHash = substr($deposit->payment_id, 0, 10) . '...' . substr($deposit->payment_id, -8);
+            return '<a href="https://bscscan.com/tx/' . $deposit->payment_id . '" target="_blank">' .
+                   '<code>' . $shortTxHash . '</code></a>' .
+                   '<br><span class="badge bg-success">XEUSD</span>';
+        }
+        return '<span class="badge bg-success">XEUSD</span>';
+    }
+
+    if ($deposit->payment_method === 'manual') {
+        return '<span class="badge bg-secondary">Manual</span>';
+    }
+
+    // Now check for NOWPayments/crypto
+    if ($deposit->payment_method === 'nowpayments' || $deposit->payment_method === 'crypto') {
+        return '<code>...' . $deposit->payment_id . '</code><br>NOWPayments';
+    }
+    ...
+})
+```
+
+#### Change 2: Approval Logic
+
+**Before:**
+```php
+public function approveDeposit($depositId)
+{
+    // For ALL deposits with payment_id, query NOWPayments
+    if ($deposit->payment_id) {
+        $nowpaymentsData = $this->nowPayments->getPaymentStatus($deposit->payment_id);
+        // This caused 500 error for XEUSD deposits
+    }
+    ...
+}
+```
+
+**After:**
+```php
+public function approveDeposit($depositId)
+{
+    // Only query NOWPayments for NOWPayments/crypto deposits
+    if (($deposit->payment_method === 'nowpayments' || $deposit->payment_method === 'crypto') && $deposit->payment_id) {
+        $nowpaymentsData = $this->nowPayments->getPaymentStatus($deposit->payment_id);
+        ...
+    }
+
+    // For XEUSD deposits, use the amount (already verified on blockchain)
+    if ($deposit->payment_method === 'xeusd') {
+        $creditAmount = $deposit->amount; // XEUSD has no fees
+    }
+    ...
+}
+```
+
+#### Change 3: Actions Column
+
+**Before:**
+```php
+// Showed "Refresh" button for ALL deposits with payment_id
+if ($deposit->payment_id) {
+    $actions .= '<button onclick="refreshPaymentStatus(...)">Refresh</button>';
+}
+
+// Only allowed Reject for manual deposits
+if ($deposit->payment_method === 'manual' || !$deposit->payment_id) {
+    $actions .= '<button onclick="showRejectModal(...)">Reject</button>';
+}
+```
+
+**After:**
+```php
+// Only show "Refresh" for NOWPayments/crypto (not XEUSD)
+if ($deposit->payment_id && $deposit->payment_method !== 'xeusd') {
+    $actions .= '<button onclick="refreshPaymentStatus(...)">Refresh</button>';
+}
+
+// Allow Reject for manual, XEUSD, and deposits without payment_id
+if ($deposit->payment_method === 'manual' || $deposit->payment_method === 'xeusd' || !$deposit->payment_id) {
+    $actions .= '<button onclick="showRejectModal(...)">Reject</button>';
+}
+```
+
+---
+
+## Visual Changes
+
+### Before (XEUSD shown as NOWPayments):
+```
+Payment ID            | Status    | Actions
+----------------------|-----------|------------------
+0xb0e149...          | Pending   | Details | Refresh | Approve
+NOWPayments          |           |
+```
+
+### After (XEUSD properly identified):
+```
+Payment ID            | Status    | Actions
+----------------------|-----------|------------------
+0xb0e149...cce8de    | Pending   | Details | Approve | Reject
+XEUSD ✓              |           |
+```
+
+**Key Improvements:**
+- ✅ Shows "XEUSD" badge (green) instead of "NOWPayments"
+- ✅ Transaction hash links to BSCScan
+- ✅ No "Refresh" button (not needed for blockchain)
+- ✅ Shows "Reject" button (manual review)
+- ✅ Approve button works without 500 error
+
+---
+
+## Testing
+
+### Test Case 1: Display XEUSD Deposits
+1. Go to `/admin/nowpayments`
+2. Look for deposits with payment_method='xeusd'
+3. ✅ Should show green "XEUSD" badge
+4. ✅ Transaction hash should link to BSCScan
+5. ✅ No "Refresh" button visible
+
+### Test Case 2: Approve XEUSD Deposit
+1. Find pending XEUSD deposit
+2. Click "Approve" button
+3. ✅ Should approve successfully (no 500 error)
+4. ✅ User balance should increase by deposit amount
+5. ✅ Deposit status should change to "completed"
+
+### Test Case 3: Verify Other Payment Methods Still Work
+1. Manual deposits: Should show "Manual" badge
+2. NOWPayments deposits: Should show "NOWPayments" with Refresh button
+3. Crypto deposits: Should show "NOWPayments" with Refresh button
+
+---
+
+## Database Impact
+
+### XEUSD Deposit Record Structure:
+```php
+[
+    'user_id' => 123,
+    'amount' => 10.00,
+    'tax_percent' => 0,      // No fee
+    'tax_amount' => 0,       // No fee
+    'net_amount' => 10.00,   // Full amount
+    'status' => 'pending',
+    'payment_method' => 'xeusd',  // Key identifier
+    'payment_id' => '0xb0e1498a9daa307f69055990bf60260db2d15862933fe3d1e0107a6fcccce8de',
+    'crypto_currency' => 'XEUSD',
+    'payment_address' => '0x8a9d164039b27eeB37AD27a2C1D0c619C38A5a3e', // Sender
+    'unique_address' => '0x22A4c7f8A2D26B8FE49E741dbf7437c56574EA06',  // Deposit wallet
+]
+```
+
+---
+
+## Error Handling
+
+### Original Error:
+```
+POST /admin/deposits/approve/18 500 (Internal Server Error)
+Error: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+```
+
+**Root Cause:**
+- NOWPayments API was being called with XEUSD transaction hash
+- API returned HTML error page (not JSON)
+- JavaScript tried to parse HTML as JSON → Error
+
+**Fix:**
+- Skip NOWPayments API call for XEUSD deposits
+- Use pre-verified amount from blockchain verification
+- Return proper JSON response
+
+---
+
+## Benefits
+
+### For Admin:
+- ✅ Clear visual distinction (XEUSD vs NOWPayments)
+- ✅ Direct link to BSCScan for verification
+- ✅ Simplified approval process (no unnecessary API calls)
+- ✅ Proper error handling
+
+### For System:
+- ✅ Reduced external API calls
+- ✅ Faster approval process for XEUSD
+- ✅ Better separation of concerns
+- ✅ More maintainable code
+
+### For Users:
+- ✅ Faster deposit approval
+- ✅ Transparent blockchain verification
+- ✅ 0% fees properly credited
+
+---
+
+## Summary
+
+**Status:** ✅ Fixed and Tested
+
+**Changes:**
+1. ✅ XEUSD deposits now display with green "XEUSD" badge
+2. ✅ Transaction hash links to BSCScan
+3. ✅ Approval works without 500 error
+4. ✅ No unnecessary "Refresh" button for blockchain deposits
+5. ✅ Reject button available for manual review
+
+**Impact:**
+- Admin panel now properly handles XEUSD deposits
+- Clear visual distinction between payment methods
+- No breaking changes to existing functionality
+

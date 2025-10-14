@@ -36,6 +36,12 @@
           "slug": "admin.withdrawals.index"
         },
         {
+          "url": "admin/xeusd-withdrawals",
+          "name": "XEUSD Withdrawals",
+          "icon": "menu-icon icon-base ti tabler-currency-bitcoin",
+          "slug": "admin.xeusd_withdrawals.index"
+        },
+        {
           "url": "admin/nowpayments",
           "name": "Deposit Records",
           "icon": "menu-icon icon-base ti tabler-cash",

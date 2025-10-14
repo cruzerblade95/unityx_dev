@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\WalletManagementController;
 use App\Http\Controllers\Admin\KycApprovalController;
 use App\Http\Controllers\Admin\NOWPaymentsController;
 use App\Http\Controllers\Admin\WithdrawalManagementController;
+use App\Http\Controllers\Admin\XeusdWithdrawalController;
 use App\Http\Controllers\Admin\MarketplaceController;
 use App\Http\Controllers\Admin\FixCronValueController;
 use App\Http\Controllers\Admin\BannerAdvertisementController;
@@ -107,6 +108,14 @@ Route::prefix('admin')->middleware('web')->group(function () {
         Route::post('/withdrawals/{id}/approve-gold', [WithdrawalManagementController::class, 'approveGold'])->name('admin.withdrawals.approve-gold');
         Route::get('/withdrawals/{id}/receipt', [WithdrawalManagementController::class, 'receipt'])->name('admin.withdrawals.receipt');
         Route::post('/withdrawals/{id}/reject', [WithdrawalManagementController::class, 'reject'])->name('admin.withdrawals.reject');
+
+        // XEUSD Withdrawal Management Routes
+        Route::get('/xeusd-withdrawals', [XeusdWithdrawalController::class, 'index'])->name('admin.xeusd_withdrawals.index');
+        Route::get('/xeusd-withdrawals/list', [XeusdWithdrawalController::class, 'list'])->name('admin.xeusd_withdrawals.list');
+        Route::get('/xeusd-withdrawals/{id}', [XeusdWithdrawalController::class, 'show'])->name('admin.xeusd_withdrawals.show');
+        Route::post('/xeusd-withdrawals/{id}/approve', [XeusdWithdrawalController::class, 'approve'])->name('admin.xeusd_withdrawals.approve');
+        Route::post('/xeusd-withdrawals/{id}/reject', [XeusdWithdrawalController::class, 'reject'])->name('admin.xeusd_withdrawals.reject');
+        Route::post('/xeusd-withdrawals/{id}/process', [XeusdWithdrawalController::class, 'markProcessing'])->name('admin.xeusd_withdrawals.process');
 
         // Marketplace Management Routes
         Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('admin.marketplace.index');

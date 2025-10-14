@@ -1,0 +1,11 @@
+{
+  "name": "web3-blockchain-scripts",
+  "version": "1.0.0",
+  "description": "Node.js scripts for BSC blockchain interaction",
+  "scripts": {
+    "test": "node send-token.js"
+  },
+  "dependencies": {
+    "web3": "^4.3.0"
+  }
+}
