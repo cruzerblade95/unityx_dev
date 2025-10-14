@@ -248,12 +248,15 @@ class NOWPaymentsController extends Controller
                     ]);
                 }
             } elseif ($deposit->payment_method === 'xeusd') {
-                // For XEUSD deposits, use the amount (which is already verified on blockchain)
-                $creditAmount = $deposit->amount; // XEUSD has no fees, use full amount
+                // For XEUSD deposits, use net_amount (after 1% fee deduction)
+                $creditAmount = $deposit->net_amount; // XEUSD has 1% fee, use net amount after fee
 
                 Log::info('Approving XEUSD deposit', [
                     'deposit_id' => $deposit->id,
-                    'amount' => $creditAmount,
+                    'gross_amount' => $deposit->amount,
+                    'fee_percent' => $deposit->tax_percent,
+                    'fee_amount' => $deposit->tax_amount,
+                    'net_amount' => $creditAmount,
                     'tx_hash' => $deposit->payment_id
                 ]);
             }
