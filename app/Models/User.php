@@ -52,6 +52,8 @@ class User extends Authenticatable
         'lastname',
         'username',
         'email',
+        'wallet_address',
+        'wallet_connected_at',
         'role',
         'last_active_at',
         'password',
@@ -156,6 +158,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_banned' => 'boolean',
             'banned_at' => 'datetime',
+            'wallet_connected_at' => 'datetime',
         ];
     }
 
@@ -262,5 +265,33 @@ class User extends Authenticatable
     public function aiTrades()
     {
         return $this->hasMany(AiTrade::class);
+    }
+
+    /**
+     * Get the user's XEUSD withdrawals
+     */
+    public function xeusdWithdrawals()
+    {
+        return $this->hasMany(XeusdWithdrawal::class);
+    }
+
+    /**
+     * Check if user has connected a MetaMask wallet
+     */
+    public function hasConnectedWallet()
+    {
+        return !empty($this->wallet_address);
+    }
+
+    /**
+     * Get the user's connected wallet address (formatted)
+     */
+    public function getFormattedWalletAddressAttribute()
+    {
+        if (empty($this->wallet_address)) {
+            return 'Not Connected';
+        }
+
+        return substr($this->wallet_address, 0, 6) . '...' . substr($this->wallet_address, -4);
     }
 }

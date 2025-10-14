@@ -12,6 +12,7 @@ use App\Http\Controllers\User\NotificationController;
 use App\Http\Controllers\User\InvestmentController;
 use App\Http\Controllers\User\AiTradeController;
 use App\Http\Controllers\User\MarketplaceController;
+use App\Http\Controllers\User\XeusdWithdrawalController;
 use App\Http\Controllers\User\ReferralBonusHistoryController;
 use App\Http\Controllers\User\RoiMatchingBonusHistoryController;
 use App\Http\Controllers\User\PaymentInfoController;
@@ -111,6 +112,12 @@ Route::prefix('user')->middleware('web')->group(function () {
     Route::get('withdrawal/{id}/receipt', [WithdrawalController::class, 'receipt'])->name('user.withdrawal.receipt')->middleware('require.payment.info');
     Route::get('withdrawal/history/list', [WithdrawalController::class, 'historyList'])->name('user.withdrawal.history.list')->middleware('require.payment.info');
 
+    // XEUSD Withdrawal
+    Route::get('withdrawal/xeusd', [XeusdWithdrawalController::class, 'index'])->name('user.withdrawal.xeusd')->middleware(['require.payment.info', 'require.kyc.verification']);
+    Route::post('withdrawal/xeusd/connect-wallet', [XeusdWithdrawalController::class, 'connectWallet'])->name('user.withdrawal.xeusd.connect_wallet')->middleware(['require.payment.info', 'require.kyc.verification']);
+    Route::post('withdrawal/xeusd/create', [XeusdWithdrawalController::class, 'create'])->name('user.withdrawal.xeusd.create')->middleware(['require.payment.info', 'require.kyc.verification']);
+    Route::get('withdrawal/xeusd/status/{uniqueId}', [XeusdWithdrawalController::class, 'getWithdrawalStatus'])->name('user.withdrawal.xeusd.status')->middleware(['require.payment.info', 'require.kyc.verification']);
+
     // Investment
     Route::get('investment', [InvestmentController::class, 'index'])->name('user.investment.index');
 
@@ -125,6 +132,7 @@ Route::prefix('user')->middleware('web')->group(function () {
     Route::post('marketplace/purchase/{listingId}', [MarketplaceController::class, 'purchaseListing'])->name('user.marketplace.purchase')->middleware(['require.payment.info', 'require.kyc.verification']);
     Route::post('marketplace/cancel/{listingId}', [MarketplaceController::class, 'cancelListing'])->name('user.marketplace.cancel')->middleware(['require.payment.info', 'require.kyc.verification']);
     Route::post('marketplace/topup', [MarketplaceController::class, 'topUpCash'])->name('user.marketplace.topup')->middleware(['require.payment.info', 'require.kyc.verification']);
+    Route::post('marketplace/transfer-to-deposit', [MarketplaceController::class, 'transferToDeposit'])->name('user.marketplace.transfer_to_deposit')->middleware(['require.payment.info', 'require.kyc.verification']);
 
     // Marketplace Verification
     Route::post('marketplace/upload-screenshot/{listingId}', [MarketplaceController::class, 'uploadScreenshot'])->name('user.marketplace.upload_screenshot');

@@ -131,34 +131,69 @@
                     Your Wallet Balances
                 </h5>
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-2">
                         <div class="balance-item">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h6 class="mb-1">Cash Balance</h6>
-                                    <small class="opacity-75">Available for marketplace</small>
+                                    <small class="opacity-75">For marketplace</small>
                                 </div>
                                 <h4 class="mb-0">${{ number_format($cashBalance, 2) }}</h4>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-2">
+                        <div class="balance-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Deposit Balance</h6>
+                                    <small class="opacity-75">AI Trading</small>
+                                </div>
+                                <h4 class="mb-0">${{ number_format($depositBalance, 2) }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
                         <div class="balance-item">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h6 class="mb-1">Profit Balance</h6>
-                                    <small class="opacity-75">For cash top-up</small>
+                                    <small class="opacity-75">Available for top-up</small>
                                 </div>
                                 <h4 class="mb-0">${{ number_format($profitBalance, 2) }}</h4>
                             </div>
                         </div>
                     </div>
+                    <div class="col-md-2">
+                        <div class="balance-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Bonus Balance</h6>
+                                    <small class="opacity-75">Available for top-up</small>
+                                </div>
+                                <h4 class="mb-0">${{ number_format($bonusBalance, 2) }}</h4>
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-md-4">
                         <div class="balance-item">
-                            <button class="btn btn-light btn-sm w-100" data-bs-toggle="modal" data-bs-target="#topUpModal">
-                                <i class="fas fa-arrow-up me-2"></i>
-                                Top Up Cash (1.5% fee)
-                            </button>
+                            <div class="row g-1">
+                                <div class="col-6">
+                                    <button class="btn btn-light btn-sm w-100" data-bs-toggle="modal"
+                                        data-bs-target="#topUpModal">
+                                        <i class="fas fa-arrow-up me-1"></i>
+                                        Top Up Cash
+                                    </button>
+                                </div>
+                                <div class="col-6">
+                                    <button class="btn btn-light btn-sm w-100" data-bs-toggle="modal"
+                                        data-bs-target="#transferToDepositModal">
+                                        <i class="fas fa-exchange-alt me-1"></i>
+                                        To Deposit
+                                    </button>
+                                </div>
+                            </div>
+                            <small class="text-muted d-block mt-1 text-center">1.5% fee for top-up | Free transfer</small>
                         </div>
                     </div>
                 </div>
@@ -326,20 +361,18 @@
                                                     <i class="fas fa-camera me-2"></i>
                                                     Screenshot Required
                                                 </h6>
-                                                <p class="mb-2">Please upload a screenshot of the transaction as proof before approving.</p>
-                                                <form id="screenshot-form-{{ $request->unique_id }}" enctype="multipart/form-data">
+                                                <p class="mb-2">Please upload a screenshot of the transaction as proof
+                                                    before approving.</p>
+                                                <form id="screenshot-form-{{ $request->unique_id }}"
+                                                    enctype="multipart/form-data">
                                                     @csrf
                                                     <div class="mb-2">
-                                                        <input type="file"
-                                                               class="form-control form-control-sm"
-                                                               id="screenshot-{{ $request->unique_id }}"
-                                                               name="screenshot"
-                                                               accept="image/*"
-                                                               required>
+                                                        <input type="file" class="form-control form-control-sm"
+                                                            id="screenshot-{{ $request->unique_id }}" name="screenshot"
+                                                            accept="image/*" required>
                                                     </div>
-                                                    <button type="button"
-                                                            class="btn btn-primary btn-sm w-100"
-                                                            onclick="uploadScreenshot('{{ $request->unique_id }}')">
+                                                    <button type="button" class="btn btn-primary btn-sm w-100"
+                                                        onclick="uploadScreenshot('{{ $request->unique_id }}')">
                                                         <i class="fas fa-upload me-2"></i>
                                                         Upload Screenshot
                                                     </button>
@@ -351,45 +384,47 @@
                                                     <i class="fas fa-check-circle me-2"></i>
                                                     Screenshot Uploaded
                                                 </h6>
-                                                <p class="mb-2">Screenshot uploaded successfully at {{ $request->screenshot_uploaded_at->format('M d, Y H:i') }}</p>
+                                                <p class="mb-2">Screenshot uploaded successfully at
+                                                    {{ $request->screenshot_uploaded_at->format('M d, Y H:i') }}</p>
                                                 <div class="d-flex gap-2 mb-2">
-                                                    <a href="#" onclick="previewScreenshot('{{ $request->screenshot_url }}')" class="btn btn-outline-primary btn-sm">
+                                                    <a href="#"
+                                                        onclick="previewScreenshot('{{ $request->screenshot_url }}')"
+                                                        class="btn btn-outline-primary btn-sm">
                                                         <i class="fas fa-eye me-2"></i>
                                                         View Screenshot
                                                     </a>
-                                                    <button type="button" class="btn btn-outline-warning btn-sm" onclick="showReplaceForm('{{ $request->unique_id }}')">
+                                                    <button type="button" class="btn btn-outline-warning btn-sm"
+                                                        onclick="showReplaceForm('{{ $request->unique_id }}')">
                                                         <i class="fas fa-sync-alt me-2"></i>
                                                         Replace
                                                     </button>
                                                 </div>
 
                                                 <!-- Hidden replace form -->
-                                                <div id="replace-form-{{ $request->unique_id }}" class="mt-3" style="display: none;">
+                                                <div id="replace-form-{{ $request->unique_id }}" class="mt-3"
+                                                    style="display: none;">
                                                     <hr>
                                                     <h6 class="text-warning mb-2">
                                                         <i class="fas fa-exclamation-triangle me-2"></i>
                                                         Replace Screenshot
                                                     </h6>
-                                                    <form id="replace-screenshot-form-{{ $request->unique_id }}" enctype="multipart/form-data">
+                                                    <form id="replace-screenshot-form-{{ $request->unique_id }}"
+                                                        enctype="multipart/form-data">
                                                         @csrf
                                                         <div class="mb-2">
-                                                            <input type="file"
-                                                                   class="form-control form-control-sm"
-                                                                   id="replace-screenshot-{{ $request->unique_id }}"
-                                                                   name="screenshot"
-                                                                   accept="image/*"
-                                                                   required>
+                                                            <input type="file" class="form-control form-control-sm"
+                                                                id="replace-screenshot-{{ $request->unique_id }}"
+                                                                name="screenshot" accept="image/*" required>
                                                         </div>
                                                         <div class="d-flex gap-2">
                                                             <button type="button"
-                                                                    class="btn btn-warning btn-sm flex-fill"
-                                                                    onclick="replaceScreenshot('{{ $request->unique_id }}')">
+                                                                class="btn btn-warning btn-sm flex-fill"
+                                                                onclick="replaceScreenshot('{{ $request->unique_id }}')">
                                                                 <i class="fas fa-upload me-2"></i>
                                                                 Upload New Screenshot
                                                             </button>
-                                                            <button type="button"
-                                                                    class="btn btn-secondary btn-sm"
-                                                                    onclick="hideReplaceForm('{{ $request->unique_id }}')">
+                                                            <button type="button" class="btn btn-secondary btn-sm"
+                                                                onclick="hideReplaceForm('{{ $request->unique_id }}')">
                                                                 <i class="fas fa-times me-2"></i>
                                                                 Cancel
                                                             </button>
@@ -401,7 +436,8 @@
 
                                         <div class="row">
                                             <div class="col-6">
-                                                <button class="btn btn-success btn-sm w-100 {{ !$request->hasScreenshot() ? 'disabled' : '' }}"
+                                                <button
+                                                    class="btn btn-success btn-sm w-100 {{ !$request->hasScreenshot() ? 'disabled' : '' }}"
                                                     onclick="approveVerification('{{ $request->unique_id }}')"
                                                     {{ !$request->hasScreenshot() ? 'disabled title="Upload screenshot first"' : '' }}>
                                                     <i class="fas fa-check me-2"></i>
@@ -988,7 +1024,24 @@
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle me-2"></i>
                             <strong>Available Profit:</strong> ${{ number_format($profitBalance, 2) }} |
+                            <strong>Available Bonus:</strong> ${{ number_format($bonusBalance, 2) }} |
                             <strong>Fee:</strong> 1.5%
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="source_wallet" class="form-label">Source Wallet</label>
+                            <select class="form-select" id="source_wallet" name="source_wallet" required
+                                onchange="updateMaxAmount()">
+                                <option value="">Select wallet to transfer from</option>
+                                @if ($profitBalance > 0)
+                                    <option value="profit">Profit Wallet (${{ number_format($profitBalance, 2) }}
+                                        available)</option>
+                                @endif
+                                @if ($bonusBalance > 0)
+                                    <option value="bonus">Bonus Wallet (${{ number_format($bonusBalance, 2) }}
+                                        available)</option>
+                                @endif
+                            </select>
                         </div>
 
                         <div class="mb-3">
@@ -996,21 +1049,84 @@
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
                                 <input type="number" step="0.01" class="form-control" id="topup_amount"
-                                    name="amount" required min="1" max="{{ $profitBalance * 0.985 }}">
+                                    name="amount" required min="1" max="0">
                             </div>
-                            <div class="form-text">Fee (1.5%) will be deducted from your profit wallet</div>
+                            <div class="form-text" id="fee-text">Fee (1.5%) will be deducted from your selected wallet
+                            </div>
                         </div>
 
                         <div class="alert alert-warning">
                             <i class="fas fa-calculator me-2"></i>
                             <strong>Example:</strong> Transfer $100 → You pay $101.50 (including 1.5% fee)
                         </div>
+
+                        @if ($profitBalance == 0 && $bonusBalance == 0)
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                You don't have sufficient balance in either Profit or Bonus wallet to perform a top-up.
+                            </div>
+                        @endif
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" @if ($profitBalance == 0 && $bonusBalance == 0) disabled @endif>
                             <i class="fas fa-arrow-up me-2"></i>
                             Top Up Cash
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transfer to Deposit Modal -->
+    <div class="modal fade" id="transferToDepositModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exchange-alt me-2"></i>
+                        Transfer Cash to Deposit Wallet
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ route('user.marketplace.transfer_to_deposit') }}">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Available Cash:</strong> ${{ number_format($cashBalance, 2) }} |
+                            <strong>No fees</strong> for this transfer
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="transfer_amount" class="form-label">Amount to Transfer</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" class="form-control" id="transfer_amount"
+                                    name="amount" required min="1" max="{{ $cashBalance }}">
+                            </div>
+                            <div class="form-text">Transfer from Cash wallet to Deposit wallet for AI Trading</div>
+                        </div>
+
+                        <div class="alert alert-success">
+                            <i class="fas fa-robot me-2"></i>
+                            <strong>After transfer:</strong> Your deposit will be automatically invested in AI Trade for
+                            potential 5x returns!
+                        </div>
+
+                        @if ($cashBalance == 0)
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                You don't have any balance in your Cash wallet to transfer.
+                            </div>
+                        @endif
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" @if ($cashBalance == 0) disabled @endif>
+                            <i class="fas fa-exchange-alt me-2"></i>
+                            Transfer to Deposit
                         </button>
                     </div>
                 </form>
@@ -1088,7 +1204,7 @@
                         <li>Contact seller via Telegram for verification</li>
                         <li>Seller will approve/reject on this marketplace</li>
                         <li>You have <strong>45 minutes</strong> to complete</li>
-                        <li>USDT will be added to your deposit wallet when approved</li>
+                        <li>USDT will be added to your cash wallet when approved</li>
                     </ol>
                 </div>
             </div>
@@ -1149,29 +1265,29 @@
             });
 
             fetch(`/user/marketplace/upload-screenshot/${listingId}`, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire({
-                        title: 'Success!',
-                        text: data.message,
-                        icon: 'success',
-                        confirmButtonText: 'OK'
-                    }).then(() => {
-                        // Reload page to show updated status
-                        window.location.reload();
-                    });
-                } else {
-                    Swal.fire('Error', data.error || 'Failed to upload screenshot.', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error uploading screenshot:', error);
-                Swal.fire('Error', 'Failed to upload screenshot. Please try again.', 'error');
-            });
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: data.message,
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            // Reload page to show updated status
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error', data.error || 'Failed to upload screenshot.', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error uploading screenshot:', error);
+                    Swal.fire('Error', 'Failed to upload screenshot. Please try again.', 'error');
+                });
         }
 
         function showReplaceForm(listingId) {
@@ -1226,29 +1342,29 @@
                     });
 
                     fetch(`/user/marketplace/upload-screenshot/${listingId}`, {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire({
-                                title: 'Success!',
-                                text: 'Screenshot replaced successfully!',
-                                icon: 'success',
-                                confirmButtonText: 'OK'
-                            }).then(() => {
-                                // Reload page to show updated status
-                                window.location.reload();
-                            });
-                        } else {
-                            Swal.fire('Error', data.error || 'Failed to replace screenshot.', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error replacing screenshot:', error);
-                        Swal.fire('Error', 'Failed to replace screenshot. Please try again.', 'error');
-                    });
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: 'Screenshot replaced successfully!',
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                }).then(() => {
+                                    // Reload page to show updated status
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire('Error', data.error || 'Failed to replace screenshot.', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error replacing screenshot:', error);
+                            Swal.fire('Error', 'Failed to replace screenshot. Please try again.', 'error');
+                        });
                 }
             });
         }
@@ -1256,7 +1372,7 @@
         function approveVerification(listingId) {
             Swal.fire({
                 title: 'Approve Transaction?',
-                text: 'This will transfer USDT from your cash wallet to the buyer\'s deposit wallet.',
+                text: 'This will transfer USDT from your escrow to the buyer\'s cash wallet.',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#28a745',
@@ -1403,6 +1519,34 @@
                     form.submit();
                 }
             });
+        }
+
+        function updateMaxAmount() {
+            const sourceWallet = document.getElementById('source_wallet').value;
+            const amountInput = document.getElementById('topup_amount');
+            const feeText = document.getElementById('fee-text');
+
+            const profitBalance = {{ $profitBalance }};
+            const bonusBalance = {{ $bonusBalance }};
+
+            if (sourceWallet === 'profit') {
+                // Calculate max amount considering 1.5% fee (amount + fee = total, so max = balance / 1.015)
+                const maxAmount = profitBalance / 1.015;
+                amountInput.max = maxAmount.toFixed(2);
+                feeText.textContent = 'Fee (1.5%) will be deducted from your Profit wallet';
+            } else if (sourceWallet === 'bonus') {
+                const maxAmount = bonusBalance / 1.015;
+                amountInput.max = maxAmount.toFixed(2);
+                feeText.textContent = 'Fee (1.5%) will be deducted from your Bonus wallet';
+            } else {
+                amountInput.max = 0;
+                feeText.textContent = 'Fee (1.5%) will be deducted from your selected wallet';
+            }
+
+            // Reset amount if it exceeds new max
+            if (parseFloat(amountInput.value) > parseFloat(amountInput.max)) {
+                amountInput.value = '';
+            }
         }
     </script>
 @endsection

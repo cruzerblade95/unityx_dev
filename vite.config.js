@@ -38,6 +38,7 @@ export default defineConfig({
         'resources/assets/js/app-chat.js',
         'resources/assets/js/app-user-list.js',
         'resources/assets/js/app-user-view-account.js',
+        'resources/assets/js/app-xeusd-withdrawal-list.js',
         'resources/assets/js/cards-actions.js',
         'resources/assets/js/cards-advance.js',
         'resources/assets/js/cards-analytics.js',

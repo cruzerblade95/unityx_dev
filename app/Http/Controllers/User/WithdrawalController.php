@@ -53,6 +53,13 @@ class WithdrawalController extends Controller
 
     public function crypto()
     {
+        // Redirect to new XEUSD withdrawal system
+        return redirect()->route('user.withdrawal.xeusd')
+            ->with('info', 'Crypto withdrawals have been upgraded! You can now withdraw as XEUSD tokens on BSC network.');
+    }
+
+    public function cryptoOld()
+    {
         $user = Auth::user();
 
         // Check if withdrawal system is in maintenance mode
