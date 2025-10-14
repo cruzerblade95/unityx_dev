@@ -37,7 +37,7 @@
       "submenu": [
         {
           "url": "user/withdrawal/crypto",
-          "name": "XEUSD Token",
+          "name": "XEUSD",
           "slug": "user.withdrawal.xeusd"
         },
         {
