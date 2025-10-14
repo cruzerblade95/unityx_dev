@@ -895,8 +895,13 @@
                                     <td>
                                         <strong>${{ number_format($deposit->amount, 2) }}</strong>
                                         <br>
+                                        <small class="text-warning">
+                                            <i class="fas fa-percent"></i> {{ $deposit->tax_percent }}% Fee
+                                        </small>
+                                        <br>
                                         <small class="text-success">
-                                            <i class="fas fa-gift"></i> 0% Fee
+                                            <i class="fas fa-check-circle"></i> Net:
+                                            ${{ number_format($deposit->net_amount, 2) }}
                                         </small>
                                     </td>
                                     <td>

@@ -89,11 +89,11 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>
                 <i class="fas fa-store me-2"></i>
-                USDT Marketplace
+                USD Marketplace
             </h2>
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createListingModal">
                 <i class="fas fa-plus me-2"></i>
-                Sell USDT
+                Sell USD
             </button>
         </div>
 
@@ -217,7 +217,7 @@
                                 <div class="card border-warning">
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <h6 class="card-title mb-0">{{ number_format($verification->amount, 2) }} USDT
+                                            <h6 class="card-title mb-0">{{ number_format($verification->amount, 2) }} USD
                                             </h6>
                                             <span class="badge bg-warning text-dark">Pending</span>
                                         </div>
@@ -265,8 +265,8 @@
                                         </div>
 
                                         <div class="mb-2">
-                                            <small class="text-muted">You'll receive USDT:
-                                                {{ number_format($verification->amount * 0.982, 2) }} USDT</small>
+                                            <small class="text-muted">You'll receive USD:
+                                                {{ number_format($verification->amount * 0.982, 2) }} USD</small>
                                         </div>
 
                                         <div class="mb-3">
@@ -308,7 +308,7 @@
                                 <div class="card border-info">
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <h6 class="card-title mb-0">{{ number_format($request->amount, 2) }} USDT</h6>
+                                            <h6 class="card-title mb-0">{{ number_format($request->amount, 2) }} USD</h6>
                                             <span class="badge bg-info">Verification Request</span>
                                         </div>
 
@@ -342,8 +342,8 @@
                                         </div>
 
                                         <div class="mb-2">
-                                            <small class="text-muted">USDT Amount to give:
-                                                {{ number_format($request->amount, 2) }} USDT</small>
+                                            <small class="text-muted">USD Amount to give:
+                                                {{ number_format($request->amount, 2) }} USD</small>
                                         </div>
 
                                         <div class="mb-3">
@@ -466,7 +466,7 @@
             <div class="card-header">
                 <h5 class="mb-0">
                     <i class="fas fa-shopping-cart me-2"></i>
-                    Available USDT Listings
+                    Available USD Listings
                 </h5>
             </div>
             <div class="card-body">
@@ -481,7 +481,7 @@
                                         <i class="fas fa-coins text-warning" style="font-size: 2rem;"></i>
                                     </div>
 
-                                    <h6 class="card-title text-center">{{ number_format($listing->amount, 2) }} USDT</h6>
+                                    <h6 class="card-title text-center">{{ number_format($listing->amount, 2) }} USD</h6>
 
                                     <div class="mb-3">
                                         <div class="d-flex justify-content-between">
@@ -493,15 +493,15 @@
                                             <strong>${{ number_format($listing->total_price, 2) }}</strong>
                                         </div>
                                         <div class="d-flex justify-content-between">
-                                            <small class="text-muted">USDT After Fee (1.8%):</small>
+                                            <small class="text-muted">USD After Fee (1.8%):</small>
                                             <small class="text-success">{{ number_format($listing->amount * 0.982, 2) }}
-                                                USDT</small>
+                                                USD</small>
                                         </div>
                                         <hr>
                                         <div class="d-flex justify-content-between">
                                             <strong>You Receive:</strong>
                                             <strong class="text-success">{{ number_format($listing->amount * 0.982, 2) }}
-                                                USDT</strong>
+                                                USD</strong>
                                         </div>
                                     </div>
 
@@ -548,7 +548,7 @@
                 @else
                     <div class="text-center py-4">
                         <i class="fas fa-store-slash text-muted" style="font-size: 3rem;"></i>
-                        <h5 class="mt-3 text-muted">No USDT listings available</h5>
+                        <h5 class="mt-3 text-muted">No USD listings available</h5>
                         <p class="text-muted">Be the first to create a listing!</p>
                     </div>
                 @endif
@@ -654,7 +654,7 @@
                                         @foreach ($myActiveListings as $listing)
                                             <tr>
                                                 <td><code>{{ $listing->unique_id }}</code></td>
-                                                <td>{{ number_format($listing->amount, 2) }} USDT</td>
+                                                <td>{{ number_format($listing->amount, 2) }} USD</td>
                                                 <td>x{{ number_format($listing->price_per_usdt, 2) }}</td>
                                                 <td>${{ number_format($listing->total_price, 2) }}</td>
                                                 <td>{{ $listing->created_at->diffForHumans() }}</td>
@@ -699,7 +699,7 @@
                                             <tr>
                                                 <td><code>{{ $purchase->unique_id }}</code></td>
                                                 <td>{{ $purchase->seller->username }}</td>
-                                                <td>{{ number_format($purchase->amount, 2) }} USDT</td>
+                                                <td>{{ number_format($purchase->amount, 2) }} USD</td>
                                                 <td>${{ number_format($purchase->total_price, 2) }}</td>
                                                 <td>
                                                     @if ($purchase->remaining_verification_time > 0)
@@ -749,7 +749,7 @@
                                             <tr>
                                                 <td><code>{{ $listing->unique_id }}</code></td>
                                                 <td>{{ $listing->buyer ? $listing->buyer->username : 'N/A' }}</td>
-                                                <td>{{ number_format($listing->amount, 2) }} USDT</td>
+                                                <td>{{ number_format($listing->amount, 2) }} USD</td>
                                                 <td>${{ number_format($listing->total_price, 2) }}</td>
                                                 <td>{{ $listing->sold_at ? $listing->sold_at->format('M d, Y H:i') : 'N/A' }}
                                                 </td>
@@ -786,7 +786,7 @@
                                             <tr>
                                                 <td><code>{{ $purchase->unique_id }}</code></td>
                                                 <td>{{ $purchase->seller->username }}</td>
-                                                <td>{{ number_format($purchase->amount, 2) }} USDT</td>
+                                                <td>{{ number_format($purchase->amount, 2) }} USD</td>
                                                 <td>${{ number_format($purchase->total_price, 2) }}</td>
                                                 <td>{{ $purchase->sold_at ? $purchase->sold_at->format('M d, Y H:i') : 'N/A' }}
                                                 </td>
@@ -820,7 +820,7 @@
                                         @foreach ($myCancelledListings as $listing)
                                             <tr>
                                                 <td><code>{{ $listing->unique_id }}</code></td>
-                                                <td>{{ number_format($listing->amount, 2) }} USDT</td>
+                                                <td>{{ number_format($listing->amount, 2) }} USD</td>
                                                 <td>${{ number_format($listing->total_price, 2) }}</td>
                                                 <td>{{ $listing->updated_at->format('M d, Y H:i') }}</td>
                                             </tr>
