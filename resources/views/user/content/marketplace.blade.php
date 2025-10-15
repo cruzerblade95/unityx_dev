@@ -18,6 +18,142 @@
             box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
         }
 
+        .listing-card .card-body {
+            padding: 1rem;
+            position: relative;
+        }
+
+        .listing-card h6 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .listing-card .coin-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .listing-card .info-row {
+            padding: 0.25rem 0;
+            font-size: 0.875rem;
+        }
+
+        .listing-card .info-row small {
+            font-size: 0.8rem;
+        }
+
+        .listing-card hr {
+            margin: 0.5rem 0;
+        }
+
+        .listing-card .btn {
+            font-size: 0.875rem;
+            padding: 0.5rem;
+        }
+
+        /* Compact mobile view */
+        @media (max-width: 768px) {
+            .listing-card {
+                border-radius: 0.5rem;
+            }
+
+            .listing-card .card-body {
+                padding: 0.5rem;
+            }
+
+            .listing-card h6 {
+                font-size: 0.9rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .listing-card .coin-icon {
+                font-size: 1rem;
+                margin-bottom: 0.3rem;
+            }
+
+            .listing-card .info-row {
+                font-size: 0.75rem;
+                padding: 0.15rem 0;
+            }
+
+            .listing-card .info-row small {
+                font-size: 0.7rem;
+            }
+
+            .listing-card hr {
+                margin: 0.3rem 0;
+            }
+
+            .listing-card .btn {
+                font-size: 0.75rem;
+                padding: 0.35rem 0.5rem;
+            }
+
+            .listing-card .status-badge {
+                font-size: 0.65rem;
+                padding: 0.2rem 0.4rem;
+            }
+
+            .listing-card .text-muted {
+                font-size: 0.7rem;
+            }
+
+            .listing-card .mb-2 {
+                margin-bottom: 0.4rem !important;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .listing-card {
+                border-radius: 0.4rem;
+            }
+
+            .listing-card .card-body {
+                padding: 0.4rem;
+            }
+
+            .listing-card h6 {
+                font-size: 0.85rem;
+                margin-bottom: 0.3rem;
+            }
+
+            .listing-card .coin-icon {
+                font-size: 0.9rem;
+                margin-bottom: 0.2rem;
+            }
+
+            .listing-card .info-row {
+                font-size: 0.7rem;
+                padding: 0.1rem 0;
+            }
+
+            .listing-card .info-row small {
+                font-size: 0.65rem;
+            }
+
+            .listing-card hr {
+                margin: 0.25rem 0;
+            }
+
+            .listing-card .btn {
+                font-size: 0.7rem;
+                padding: 0.3rem 0.4rem;
+            }
+
+            .listing-card .btn i {
+                font-size: 0.65rem;
+            }
+
+            .listing-card .status-badge {
+                font-size: 0.6rem;
+                padding: 0.15rem 0.3rem;
+            }
+
+            .listing-card .mb-2 {
+                margin-bottom: 0.3rem !important;
+            }
+        }
+
         .wallet-balance-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -28,6 +164,69 @@
             border-radius: 0.5rem;
             padding: 1rem;
             backdrop-filter: blur(10px);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .balance-item h6 {
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .balance-item h4 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .balance-item small {
+            font-size: 0.75rem;
+            opacity: 0.85;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .balance-item .btn {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.5rem;
+            white-space: nowrap;
+        }
+
+        /* Ensure proper sizing on desktop */
+        @media (min-width: 992px) {
+            .balance-item h4 {
+                font-size: 1.3rem;
+            }
+
+            .balance-item h6 {
+                font-size: 0.85rem;
+            }
+
+            .balance-item small {
+                font-size: 0.7rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .balance-item h4 {
+                font-size: 1.2rem;
+            }
+
+            .balance-item h6 {
+                font-size: 0.9rem;
+            }
         }
 
         .listing-grid {
@@ -42,10 +241,127 @@
             }
         }
 
+        @media (max-width: 768px) {
+            .listing-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .listing-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .d-flex.justify-content-between {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .d-flex.justify-content-between .btn {
+                width: 100%;
+            }
+
+            .wallet-balance-card .card-body {
+                padding: 1rem;
+            }
+
+            .wallet-balance-card .card-title {
+                font-size: 1.1rem;
+            }
+
+            .balance-item {
+                margin-bottom: 1rem;
+                padding: 0.75rem;
+            }
+
+            .balance-item h6 {
+                font-size: 0.9rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .balance-item h4 {
+                font-size: 1.2rem;
+            }
+
+            .balance-item small {
+                font-size: 0.75rem;
+            }
+
+            .balance-item .d-flex {
+                flex-direction: column;
+                align-items: flex-start !important;
+            }
+
+            .modal-dialog {
+                margin: 0.5rem;
+            }
+
+            .card-header h5 {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            h2 {
+                font-size: 1.3rem;
+            }
+
+            .wallet-balance-card .card-body {
+                padding: 0.75rem;
+            }
+
+            .balance-item {
+                padding: 0.5rem;
+            }
+
+            .balance-item h6 {
+                font-size: 0.85rem;
+            }
+
+            .balance-item h4 {
+                font-size: 1rem;
+            }
+
+            .btn {
+                font-size: 0.85rem;
+                padding: 0.5rem 0.75rem;
+            }
+
+            .alert {
+                font-size: 0.85rem;
+                padding: 0.75rem;
+            }
+        }
+
         .status-badge {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 8px;
+            right: 8px;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .status-badge {
+                top: 6px;
+                right: 6px;
+                font-size: 0.7rem;
+                padding: 0.2rem 0.4rem;
+            }
         }
 
         .listing-card .card-body {
@@ -80,6 +396,170 @@
             color: #a7a9b7;
             background-color: white;
             border-color: #d9dee3;
+        }
+
+        /* Activity Tables Responsive */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .table {
+            min-width: 100%;
+            font-size: 0.9rem;
+        }
+
+        .table th,
+        .table td {
+            white-space: nowrap;
+            padding: 0.75rem;
+            vertical-align: middle;
+        }
+
+        .table th {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .table td code {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.4rem;
+            background: #f5f5f5;
+            border-radius: 0.25rem;
+        }
+
+        .table .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .table .badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        /* Mobile table optimization */
+        @media (max-width: 768px) {
+            .table {
+                font-size: 0.75rem;
+            }
+
+            .table th,
+            .table td {
+                padding: 0.5rem 0.4rem;
+                font-size: 0.75rem;
+            }
+
+            .table th {
+                font-size: 0.7rem;
+            }
+
+            .table td code {
+                font-size: 0.7rem;
+                padding: 0.15rem 0.3rem;
+                display: inline-block;
+                max-width: 80px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .table .btn-sm {
+                padding: 0.2rem 0.4rem;
+                font-size: 0.7rem;
+            }
+
+            .table .btn-sm i {
+                font-size: 0.65rem;
+            }
+
+            .table .badge {
+                font-size: 0.65rem;
+                padding: 0.2rem 0.4rem;
+            }
+
+            /* Hide less important columns on mobile */
+            .table th:nth-child(3),
+            .table td:nth-child(3),
+            .table th:nth-child(4),
+            .table td:nth-child(4) {
+                display: none;
+            }
+
+            /* Compact nav tabs */
+            .nav-tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+                border-bottom: 1px solid #dee2e6;
+                scrollbar-width: thin;
+            }
+
+            .nav-tabs::-webkit-scrollbar {
+                height: 4px;
+            }
+
+            .nav-tabs::-webkit-scrollbar-thumb {
+                background: #ccc;
+                border-radius: 4px;
+            }
+
+            .nav-tabs .nav-item {
+                flex-shrink: 0;
+            }
+
+            .nav-tabs .nav-link {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.75rem;
+                white-space: nowrap;
+            }
+
+            .nav-tabs .badge {
+                font-size: 0.65rem;
+                padding: 0.15rem 0.35rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .table {
+                font-size: 0.7rem;
+            }
+
+            .table th,
+            .table td {
+                padding: 0.4rem 0.3rem;
+                font-size: 0.7rem;
+            }
+
+            .table th {
+                font-size: 0.65rem;
+            }
+
+            .table td code {
+                font-size: 0.65rem;
+                max-width: 60px;
+            }
+
+            .table .btn-sm {
+                padding: 0.15rem 0.3rem;
+                font-size: 0.65rem;
+            }
+
+            .table .btn-sm i {
+                display: none;
+                /* Hide icons on very small screens */
+            }
+
+            .nav-tabs .nav-link {
+                padding: 0.4rem 0.5rem;
+                font-size: 0.65rem;
+                white-space: nowrap;
+            }
+
+            .nav-tabs .badge {
+                font-size: 0.6rem;
+                padding: 0.1rem 0.3rem;
+            }
         }
     </style>
 @endsection
@@ -130,70 +610,55 @@
                     <i class="fas fa-wallet me-2"></i>
                     Your Wallet Balances
                 </h5>
-                <div class="row">
-                    <div class="col-md-2">
-                        <div class="balance-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Cash Balance</h6>
-                                    <small class="opacity-75">For marketplace</small>
-                                </div>
-                                <h4 class="mb-0">${{ number_format($cashBalance, 2) }}</h4>
-                            </div>
+                <div class="row g-3">
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+                        <div class="balance-item text-center">
+                            <h6 class="mb-2">Cash Balance</h6>
+                            <h4 class="mb-2">${{ number_format($cashBalance, 2) }}</h4>
+                            <small class="opacity-75">For marketplace</small>
                         </div>
                     </div>
-                    <div class="col-md-2">
-                        <div class="balance-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Deposit Balance</h6>
-                                    <small class="opacity-75">AI Trading</small>
-                                </div>
-                                <h4 class="mb-0">${{ number_format($depositBalance, 2) }}</h4>
-                            </div>
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+                        <div class="balance-item text-center">
+                            <h6 class="mb-2">Deposit Balance</h6>
+                            <h4 class="mb-2">${{ number_format($depositBalance, 2) }}</h4>
+                            <small class="opacity-75">AI Trading</small>
                         </div>
                     </div>
-                    <div class="col-md-2">
-                        <div class="balance-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Profit Balance</h6>
-                                    <small class="opacity-75">Available for top-up</small>
-                                </div>
-                                <h4 class="mb-0">${{ number_format($profitBalance, 2) }}</h4>
-                            </div>
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+                        <div class="balance-item text-center">
+                            <h6 class="mb-2">Profit Balance</h6>
+                            <h4 class="mb-2">${{ number_format($profitBalance, 2) }}</h4>
+                            <small class="opacity-75">For top-up</small>
                         </div>
                     </div>
-                    <div class="col-md-2">
-                        <div class="balance-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Bonus Balance</h6>
-                                    <small class="opacity-75">Available for top-up</small>
-                                </div>
-                                <h4 class="mb-0">${{ number_format($bonusBalance, 2) }}</h4>
-                            </div>
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+                        <div class="balance-item text-center">
+                            <h6 class="mb-2">Bonus Balance</h6>
+                            <h4 class="mb-2">${{ number_format($bonusBalance, 2) }}</h4>
+                            <small class="opacity-75">For top-up</small>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-8 col-lg-12 col-xl-4">
                         <div class="balance-item">
-                            <div class="row g-1">
+                            <div class="row g-2">
                                 <div class="col-6">
                                     <button class="btn btn-light btn-sm w-100" data-bs-toggle="modal"
                                         data-bs-target="#topUpModal">
                                         <i class="fas fa-arrow-up me-1"></i>
-                                        Top Up Cash
+                                        Top Up
                                     </button>
                                 </div>
                                 <div class="col-6">
                                     <button class="btn btn-light btn-sm w-100" data-bs-toggle="modal"
                                         data-bs-target="#transferToDepositModal">
                                         <i class="fas fa-exchange-alt me-1"></i>
-                                        To Deposit
+                                        Transfer
                                     </button>
                                 </div>
                             </div>
-                            <small class="text-muted d-block mt-1 text-center">1.5% fee for top-up | Free transfer</small>
+                            <small class="text-white d-block mt-2 text-center opacity-75" style="font-size: 0.75rem;">1.5%
+                                fee for top-up | Free transfer</small>
                         </div>
                     </div>
                 </div>
@@ -477,51 +942,55 @@
                                 <div class="card-body">
                                     <span class="badge bg-success status-badge">Available</span>
 
-                                    <div class="text-center mb-3">
-                                        <i class="fas fa-coins text-warning" style="font-size: 2rem;"></i>
+                                    <div class="text-center mb-2">
+                                        <i class="fas fa-coins text-warning coin-icon"></i>
                                     </div>
 
-                                    <h6 class="card-title text-center">{{ number_format($listing->amount, 2) }} USD</h6>
+                                    <h6 class="card-title text-center mb-2">{{ number_format($listing->amount, 2) }} USD
+                                    </h6>
 
-                                    <div class="mb-3">
-                                        <div class="d-flex justify-content-between">
+                                    <div class="mb-2">
+                                        <div class="d-flex justify-content-between info-row">
                                             <small class="text-muted">Multiplier:</small>
                                             <strong>x{{ number_format($listing->price_per_usdt, 2) }}</strong>
                                         </div>
-                                        <div class="d-flex justify-content-between">
+                                        <div class="d-flex justify-content-between info-row">
                                             <small class="text-muted">Total Price:</small>
                                             <strong>${{ number_format($listing->total_price, 2) }}</strong>
                                         </div>
-                                        <div class="d-flex justify-content-between">
-                                            <small class="text-muted">USD After Fee (1.8%):</small>
+                                        <div class="d-flex justify-content-between info-row">
+                                            <small class="text-muted">After Fee:</small>
                                             <small class="text-success">{{ number_format($listing->amount * 0.982, 2) }}
                                                 USD</small>
                                         </div>
                                         <hr>
-                                        <div class="d-flex justify-content-between">
-                                            <strong>You Receive:</strong>
-                                            <strong class="text-success">{{ number_format($listing->amount * 0.982, 2) }}
+                                        <div class="d-flex justify-content-between info-row">
+                                            <strong style="font-size: 0.85rem;">You Receive:</strong>
+                                            <strong class="text-success"
+                                                style="font-size: 0.85rem;">{{ number_format($listing->amount * 0.982, 2) }}
                                                 USD</strong>
                                         </div>
                                     </div>
 
                                     @if ($listing->description)
-                                        <p class="card-text small text-muted">
-                                            {{ strlen($listing->description) > 80 ? substr($listing->description, 0, 80) . '...' : $listing->description }}
+                                        <p class="card-text small text-muted mb-2"
+                                            style="font-size: 0.75rem; line-height: 1.3;">
+                                            {{ strlen($listing->description) > 60 ? substr($listing->description, 0, 60) . '...' : $listing->description }}
                                         </p>
                                     @endif
 
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <small class="text-muted">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <small class="text-muted" style="font-size: 0.75rem;">
                                             <i class="fas fa-user me-1"></i>
                                             {{ $listing->seller->username ?? 'Seller' }}
                                         </small>
-                                        <small class="text-muted">ID: {{ $listing->unique_id }}</small>
+                                        <small class="text-muted"
+                                            style="font-size: 0.7rem;">{{ $listing->unique_id }}</small>
                                     </div>
 
-                                    <button class="btn btn-primary btn-sm w-100 mt-3"
+                                    <button class="btn btn-primary btn-sm w-100"
                                         onclick="purchaseListing('{{ $listing->unique_id }}', {{ $listing->amount }})">
-                                        <i class="fas fa-gift me-2"></i>
+                                        <i class="fas fa-gift me-1"></i>
                                         Start Verification
                                     </button>
                                 </div>
