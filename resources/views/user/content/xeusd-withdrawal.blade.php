@@ -26,7 +26,19 @@
         }
 
         .wallet-connected {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a7b 100%);
+            border: 2px solid #4a90e2;
+        }
+
+        .wallet-connected h5,
+        .wallet-connected p,
+        .wallet-connected small {
+            color: #ffffff !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .wallet-connected strong {
+            color: #b8e6ff;
         }
 
         .xeusd-banner {
@@ -68,6 +80,9 @@
             padding: 15px;
             margin: 15px 0;
             color: #ffffff;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-all;
         }
 
         .token-info h6 {
@@ -77,6 +92,170 @@
         .token-info p {
             color: #d2d2dc;
         }
+
+        .token-info small {
+            font-size: 0.75rem;
+            word-break: break-all;
+            overflow-wrap: break-word;
+            display: block;
+            line-height: 1.4;
+        }
+
+        /* Responsive adjustments for mobile */
+        @media (max-width: 768px) {
+            .xeusd-banner .col-md-4 {
+                margin-top: 15px;
+                text-align: left !important;
+            }
+
+            .token-info {
+                padding: 10px;
+                margin: 10px 0;
+            }
+
+            .token-info small {
+                font-size: 0.7rem;
+            }
+
+            /* Withdrawal Form Mobile Responsive */
+            .withdrawal-form {
+                padding: 15px;
+                border-radius: 10px;
+            }
+
+            .withdrawal-form h5 {
+                font-size: 1.1rem;
+                margin-bottom: 1rem !important;
+            }
+
+            .withdrawal-form .form-label {
+                font-size: 0.9rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .withdrawal-form .form-text {
+                font-size: 0.75rem;
+            }
+
+            .withdrawal-form .btn-lg {
+                font-size: 0.9rem;
+                padding: 0.6rem 1rem;
+            }
+
+            /* Make button and text stack on mobile */
+            .withdrawal-form .d-flex.justify-content-between {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .withdrawal-form .d-flex.justify-content-between>div {
+                width: 100%;
+            }
+
+            .withdrawal-form .d-flex.justify-content-between button {
+                width: 100%;
+            }
+
+            /* Token info mobile adjustments */
+            .withdrawal-form .token-info {
+                margin: 15px 0;
+            }
+
+            .withdrawal-form .token-info h6 {
+                font-size: 0.95rem;
+            }
+
+            .withdrawal-form .token-info p {
+                font-size: 0.85rem;
+                margin-bottom: 0.5rem !important;
+            }
+
+            /* Balance cards mobile spacing */
+            .balance-card {
+                margin-bottom: 15px;
+            }
+
+            .balance-card h3 {
+                font-size: 1.5rem;
+            }
+
+            /* MetaMask section mobile */
+            .metamask-connect-section {
+                padding: 15px;
+            }
+
+            .metamask-connect-section h5 {
+                font-size: 1rem;
+            }
+
+            .metamask-connect-section .col-md-4 {
+                margin-top: 15px;
+                text-align: left !important;
+            }
+
+            .metamask-connect-section .btn {
+                width: 100%;
+            }
+
+            /* Alert mobile adjustments */
+            .alert h5,
+            .alert h6 {
+                font-size: 1rem;
+            }
+
+            .alert ol,
+            .alert ul {
+                font-size: 0.85rem;
+                padding-left: 20px;
+            }
+
+            .alert .btn-sm {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.8rem;
+            }
+        }
+
+        /* Extra small devices (phones in portrait mode) */
+        @media (max-width: 576px) {
+            .withdrawal-form {
+                padding: 12px;
+            }
+
+            .withdrawal-form h5 {
+                font-size: 1rem;
+            }
+
+            .withdrawal-form .form-control,
+            .withdrawal-form .form-select {
+                font-size: 0.9rem;
+            }
+
+            .withdrawal-form .input-group-text {
+                font-size: 0.9rem;
+                padding: 0.5rem 0.75rem;
+            }
+
+            .token-info h6 {
+                font-size: 0.9rem;
+            }
+
+            .token-info p {
+                font-size: 0.8rem;
+            }
+
+            .balance-card h6 {
+                font-size: 0.85rem;
+            }
+
+            .balance-card h3 {
+                font-size: 1.3rem;
+            }
+
+            .balance-card small {
+                font-size: 0.75rem;
+            }
+        }
+
 
         .withdrawal-form {
             background: #2b2c40;
@@ -198,7 +377,7 @@
                 <div class="col-md-4 text-end">
                     <div class="token-info">
                         <strong>Contract Address:</strong><br>
-                        <small class="text-dark">0x046b0712F251f56ca1F0EecD4e57AB592FDA71be</small>
+                        <small class="text-light">0x046b0712F251f56ca1F0EecD4e57AB592FDA71be</small>
                     </div>
                 </div>
             </div>
@@ -220,6 +399,30 @@
             </div>
         @endif
 
+        <!-- Wallet Connection Guide -->
+        @if (!auth()->user()->hasConnectedWallet())
+            <div class="alert alert-info" role="alert">
+                <h5 class="alert-heading">
+                    <i class="fas fa-info-circle me-2"></i>
+                    How to Connect Your Wallet
+                </h5>
+                <ol class="mb-2">
+                    <li><strong>Install MetaMask:</strong> Make sure you have MetaMask browser extension installed</li>
+                    <li><strong>Click "Connect MetaMask":</strong> Click the button below to connect your wallet</li>
+                    <li><strong>Select Account:</strong> Choose the wallet address where you want to receive XEUSD tokens
+                    </li>
+                    <li><strong>Approve Connection:</strong> Confirm the connection in MetaMask popup</li>
+                    <li><strong>Network Switch:</strong> You'll be prompted to switch to BSC network (if not already)</li>
+                </ol>
+                <p class="mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Important:</strong> The connected wallet address will be used to receive all your XEUSD
+                    withdrawals.
+                    Make sure you have access to this wallet.
+                </p>
+            </div>
+        @endif
+
         <!-- MetaMask Connection Section -->
         <div class="metamask-connect-section @if (auth()->user()->hasConnectedWallet()) wallet-connected @endif">
             <div class="row align-items-center">
@@ -234,20 +437,35 @@
                         </p>
                         <small class="opacity-75">Connected on
                             {{ auth()->user()->wallet_connected_at ? \Carbon\Carbon::parse(auth()->user()->wallet_connected_at)->format('M d, Y H:i') : 'Unknown' }}</small>
+                        <div class="mt-2">
+                            <small class="text-light">
+                                <i class="fas fa-lightbulb me-1"></i>
+                                <strong>Tip:</strong> To use a different wallet, first switch accounts in MetaMask
+                                extension,
+                                make sure it's connected to this website, then click "Reconnect Wallet" below.
+                            </small>
+                        </div>
                     @else
                         <h5 class="mb-2">
                             <i class="fab fa-ethereum me-2"></i>
                             Connect Your MetaMask Wallet
                         </h5>
                         <p class="mb-0">Connect your MetaMask wallet to receive XEVIEX USD on BSC network</p>
+                        <small class="opacity-75 mt-2 d-block">
+                            <i class="fas fa-shield-alt me-1"></i>
+                            Your wallet address will be securely stored for future withdrawals
+                        </small>
                     @endif
                 </div>
                 <div class="col-md-4 text-end">
                     @if (auth()->user()->hasConnectedWallet())
-                        <button class="btn btn-light" onclick="connectWallet()">
+                        <button class="btn btn-light" onclick="connectWallet()" title="Connect a different wallet address">
                             <i class="fas fa-sync-alt me-2"></i>
                             Reconnect Wallet
                         </button>
+                        <div class="mt-2">
+                            <small class="text-light">Click to connect a different wallet</small>
+                        </div>
                     @else
                         <button class="btn btn-warning btn-lg" onclick="connectWallet()">
                             <i class="fab fa-ethereum me-2"></i>
@@ -258,15 +476,39 @@
             </div>
         </div>
 
+        <!-- Additional Wallet Information -->
+        @if (auth()->user()->hasConnectedWallet())
+            <div class="alert alert-success" role="alert">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h6 class="alert-heading mb-2">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Your Wallet is Ready
+                        </h6>
+                        <p class="mb-0">
+                            All XEUSD withdrawals will be sent to:
+                            <strong>{{ auth()->user()->getFormattedWalletAddressAttribute() }}</strong>
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button class="btn btn-sm btn-outline-primary" onclick="showWalletGuide()">
+                            <i class="fas fa-question-circle me-1"></i>
+                            Need Help?
+                        </button>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Wallet Balances -->
         <div class="row">
-            <div class="col-md-4">
+            {{-- <div class="col-md-4"> #unhide this if cash wallet is to be used. look at source wallet under
                 <div class="balance-card">
                     <h6 class="text-muted mb-1">Cash Balance</h6>
                     <h3 class="mb-0 text-primary">${{ number_format($cashBalance, 2) }}</h3>
                     <small class="text-muted">Available for withdrawal</small>
                 </div>
-            </div>
+            </div> --}}
             <div class="col-md-4">
                 <div class="balance-card">
                     <h6 class="text-muted mb-1">Profit Balance</h6>
@@ -300,10 +542,10 @@
                             <select class="form-select" name="source_wallet" id="source_wallet" required
                                 onchange="updateMaxAmount()">
                                 <option value="">Select wallet to withdraw from</option>
-                                @if ($cashBalance > 0)
+                                {{-- @if ($cashBalance > 0)
                                     <option value="cash">Cash Wallet (${{ number_format($cashBalance, 2) }} available)
                                     </option>
-                                @endif
+                                @endif --}}
                                 @if ($profitBalance > 0)
                                     <option value="profit">Profit Wallet (${{ number_format($profitBalance, 2) }}
                                         available)</option>
@@ -336,7 +578,8 @@
                     </h6>
                     <div class="row">
                         <div class="col-md-6">
-                            <p class="mb-1"><strong>Withdrawal Amount:</strong> $<span id="withdrawal-amount">0.00</span>
+                            <p class="mb-1"><strong>Withdrawal Amount:</strong> $<span
+                                    id="withdrawal-amount">0.00</span>
                             </p>
                             <p class="mb-1"><strong>Withdrawal Fee (1.8%):</strong> $<span id="fee-amount">0.00</span>
                             </p>
@@ -472,6 +715,31 @@
         async function connectWallet() {
             if (!(await initWeb3())) return;
 
+            // Show connecting message
+            Swal.fire({
+                title: 'Connecting...',
+                html: `
+                    <p>Please complete these steps:</p>
+                    <ol class="text-start">
+                        <li>Check your MetaMask extension for a popup</li>
+                        <li>Make sure the correct account is selected in MetaMask</li>
+                        <li>Click "Next" then "Connect" to approve</li>
+                        <li>Approve the network switch to BSC if prompted</li>
+                    </ol>
+                    <div class="alert alert-info mt-3 text-start">
+                        <small>
+                            <i class="fas fa-info-circle me-1"></i>
+                            <strong>Switching wallets?</strong> Make sure you've already switched to your desired account in MetaMask before clicking Reconnect.
+                        </small>
+                    </div>
+                `,
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                willOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
             try {
                 // Request account access
                 const accounts = await window.ethereum.request({
@@ -504,8 +772,21 @@
                 if (result.success) {
                     Swal.fire({
                         title: 'Success!',
-                        text: result.message,
-                        icon: 'success'
+                        html: `
+                            <p>${result.message}</p>
+                            <p class="mt-3">
+                                <strong>Connected Wallet:</strong><br>
+                                <small>${walletAddress}</small>
+                            </p>
+                            <div class="alert alert-info mt-3">
+                                <small>
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    All your XEUSD withdrawals will be sent to this address
+                                </small>
+                            </div>
+                        `,
+                        icon: 'success',
+                        confirmButtonText: 'Continue'
                     }).then(() => {
                         location.reload();
                     });
@@ -515,9 +796,32 @@
 
             } catch (error) {
                 console.error('Error connecting wallet:', error);
+
+                let errorMessage = error.message || 'Failed to connect wallet';
+                let helpText = '';
+
+                if (error.code === 4001) {
+                    errorMessage = 'Connection request was rejected';
+                    helpText =
+                        'You cancelled the connection request. Please try again and approve the connection in MetaMask.';
+                } else if (error.code === -32002) {
+                    errorMessage = 'Connection request pending';
+                    helpText =
+                        'Please check your MetaMask extension. There might be a pending request waiting for your approval.';
+                }
+
                 Swal.fire({
                     title: 'Connection Failed',
-                    text: error.message || 'Failed to connect wallet',
+                    html: `
+                        <p>${errorMessage}</p>
+                        ${helpText ? `<p class="text-muted mt-2"><small>${helpText}</small></p>` : ''}
+                        <div class="mt-3">
+                            <button class="btn btn-primary btn-sm" onclick="showWalletGuide()">
+                                <i class="fas fa-question-circle me-1"></i>
+                                View Connection Guide
+                            </button>
+                        </div>
+                    `,
                     icon: 'error'
                 });
             }
@@ -603,6 +907,53 @@
             document.getElementById('xeusd-amount').textContent = netAmount.toFixed(8);
         }
 
+        // Show wallet connection guide
+        function showWalletGuide() {
+            Swal.fire({
+                title: 'Wallet Connection Guide',
+                html: `
+                    <div class="text-start">
+                        <h6><i class="fas fa-question-circle me-2"></i>How to Change Wallet Address?</h6>
+                        <ol>
+                            <li><strong>Open MetaMask Extension:</strong> Click the MetaMask icon in your browser</li>
+                            <li><strong>Switch Account:</strong> Click on your current account at the top of MetaMask</li>
+                            <li><strong>Select Different Account:</strong> Choose the wallet address you want to use</li>
+                            <li><strong>Connect to Website (if needed):</strong> If the new account isn't connected to this site yet, you'll see a "Not connected" status. Click "Connect" in MetaMask</li>
+                            <li><strong>Click "Reconnect Wallet":</strong> Come back to this page and click the "Reconnect Wallet" button</li>
+                            <li><strong>Confirm in MetaMask:</strong> Approve the connection request in the MetaMask popup</li>
+                            <li><strong>Done:</strong> Your new wallet address will be saved and displayed</li>
+                        </ol>
+
+                        <hr class="my-3">
+
+                        <h6><i class="fas fa-exclamation-triangle me-2"></i>Important Notes</h6>
+                        <ul>
+                            <li>Make sure you own and have access to the wallet address</li>
+                            <li>Double-check the address before submitting withdrawals</li>
+                            <li>XEUSD tokens will be sent on BSC (BEP20) network only</li>
+                            <li>You can reconnect anytime to change your receiving address</li>
+                            <li>Gas fees for receiving tokens are covered by the platform</li>
+                        </ul>
+
+                        <hr class="my-3">
+
+                        <h6><i class="fas fa-wallet me-2"></i>Don't Have MetaMask?</h6>
+                        <p class="mb-0">
+                            <a href="https://metamask.io/download/" target="_blank" class="btn btn-sm btn-primary">
+                                <i class="fas fa-download me-1"></i>
+                                Download MetaMask
+                            </a>
+                        </p>
+                    </div>
+                `,
+                width: 600,
+                confirmButtonText: 'Got it!',
+                customClass: {
+                    popup: 'text-dark'
+                }
+            });
+        }
+
         // View withdrawal details
         async function viewWithdrawalDetails(uniqueId) {
             try {
@@ -664,8 +1015,18 @@
                     e.preventDefault();
                     Swal.fire({
                         title: 'Wallet Required',
-                        text: 'Please connect your MetaMask wallet first',
-                        icon: 'warning'
+                        html: `
+                            <p>Please connect your MetaMask wallet first to receive XEUSD tokens.</p>
+                            <div class="mt-3">
+                                <button class="btn btn-primary" onclick="connectWallet(); Swal.close();">
+                                    <i class="fab fa-ethereum me-2"></i>
+                                    Connect Wallet Now
+                                </button>
+                            </div>
+                        `,
+                        icon: 'warning',
+                        showConfirmButton: false,
+                        showCloseButton: true
                     });
                     return;
                 @endif
