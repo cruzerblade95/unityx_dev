@@ -47,6 +47,7 @@ class GroupSalesController extends Controller
                     'threshold' => $reward->sales_required,
                     'tax' => $reward->tax_percentage,
                     'base_percentage' => $reward->base_percentage,
+                    'level_percentage' => $reward->level_percentage,
                     'reward_amount' => $reward->reward_amount
                 ];
             })

@@ -147,7 +147,7 @@
                                         <div class="mb-3">
                                             <small class="text-muted">Reward Amount:</small>
                                             <div class="fw-bold text-success">${{ number_format($rewardAmount, 2) }}</div>
-                                            <small class="text-muted">${{ number_format($reward['threshold']) }} × 15% × {{ $reward['tax'] }}% tax</small>
+                                            <small class="text-muted">${{ number_format($reward['threshold']) }} × {{ $reward['base_percentage'] }}% × {{ $reward['level_percentage'] }}% × {{ $reward['tax'] }}% tax</small>
                                         </div>
 
                                         <div class="mb-3">

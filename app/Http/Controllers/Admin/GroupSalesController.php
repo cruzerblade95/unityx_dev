@@ -66,6 +66,7 @@ class GroupSalesController extends Controller
             'sales_required' => 'required|numeric|min:0',
             'base_percentage' => 'required|numeric|min:0|max:100',
             'tax_percentage' => 'required|numeric|min:0|max:100',
+            'level_percentage' => 'required|numeric|min:0|max:1000',
         ]);
 
         try {
@@ -75,6 +76,7 @@ class GroupSalesController extends Controller
                 'sales_required' => $request->sales_required,
                 'base_percentage' => $request->base_percentage,
                 'tax_percentage' => $request->tax_percentage,
+                'level_percentage' => $request->level_percentage,
                 'is_active' => true,
             ]);
 
@@ -103,6 +105,7 @@ class GroupSalesController extends Controller
             'sales_required' => 'required|numeric|min:0',
             'base_percentage' => 'required|numeric|min:0|max:100',
             'tax_percentage' => 'required|numeric|min:0|max:100',
+            'level_percentage' => 'required|numeric|min:0|max:1000',
         ]);
 
         try {
@@ -112,6 +115,7 @@ class GroupSalesController extends Controller
                 'sales_required' => $request->sales_required,
                 'base_percentage' => $request->base_percentage,
                 'tax_percentage' => $request->tax_percentage,
+                'level_percentage' => $request->level_percentage,
             ]);
 
             return response()->json([
