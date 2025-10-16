@@ -176,6 +176,11 @@
                         <input type="number" class="form-control" id="tax_percentage" name="tax_percentage" step="0.01" min="0" max="100" required placeholder="0.00">
                         <div class="form-text">Tax percentage applied to the reward (0-100%)</div>
                     </div>
+                    <div class="mb-3">
+                        <label for="level_percentage" class="form-label">Level Percent (%)</label>
+                        <input type="number" class="form-control" id="level_percentage" name="level_percentage" step="0.01" min="0" max="100" required placeholder="0.00">
+                        <div class="form-text">Level percentage for enhanced reward calculation (0-100%)</div>
+                    </div>
                     <div class="alert alert-info" id="reward_preview" style="display: none;"></div>
                 </div>
                 <div class="modal-footer">
@@ -228,6 +233,11 @@
                         <label for="edit_tax_percentage" class="form-label">Tax Percentage (%)</label>
                         <input type="number" class="form-control" id="edit_tax_percentage" name="tax_percentage" step="0.01" min="0" max="100" required placeholder="0.00">
                         <div class="form-text">Tax percentage applied to the reward (0-100%)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_level_percentage" class="form-label">Level Percent (%)</label>
+                        <input type="number" class="form-control" id="edit_level_percentage" name="level_percentage" step="0.01" min="0" max="100" required placeholder="0.00">
+                        <div class="form-text">Level percentage for enhanced reward calculation (0-100%)</div>
                     </div>
                     <div class="alert alert-info" id="edit_reward_preview" style="display: none;"></div>
                 </div>
@@ -340,7 +350,7 @@ $(document).ready(function() {
     }
 
     // Real-time validation for percentage inputs
-    $('#base_percentage, #tax_percentage, #edit_base_percentage, #edit_tax_percentage').on('input', function() {
+    $('#base_percentage, #tax_percentage, #level_percentage, #edit_base_percentage, #edit_tax_percentage, #edit_level_percentage').on('input', function() {
         validatePercentage($(this));
     });
 
@@ -350,23 +360,25 @@ $(document).ready(function() {
         const salesRequired = parseFloat($('#' + prefix + 'sales_required').val()) || 0;
         const basePercentage = parseFloat($('#' + prefix + 'base_percentage').val()) || 0;
         const taxPercentage = parseFloat($('#' + prefix + 'tax_percentage').val()) || 0;
+        const levelPercentage = parseFloat($('#' + prefix + 'level_percentage').val()) || 0;
 
-        const rewardAmount = salesRequired * (basePercentage / 100) * (taxPercentage / 100);
+        // Updated calculation: sales_required × base_percentage × tax_percentage × level_percentage
+        const rewardAmount = salesRequired * (basePercentage / 100) * (taxPercentage / 100) * (levelPercentage / 100);
         const previewId = isEdit ? '#edit_reward_preview' : '#reward_preview';
 
-        if (salesRequired > 0 && basePercentage > 0 && taxPercentage > 0) {
-            $(previewId).html('<i class="fas fa-calculator me-2"></i>Calculated Reward: <strong>$' + rewardAmount.toFixed(2) + '</strong>').show();
+        if (salesRequired > 0 && basePercentage > 0 && taxPercentage > 0 && levelPercentage > 0) {
+            $(previewId).html('<i class="fas fa-calculator me-2"></i>Calculated Reward: <strong>$' + rewardAmount.toFixed(2) + '</strong><br><small class="text-muted">Formula: $' + salesRequired + ' × ' + basePercentage + '% × ' + taxPercentage + '% × ' + levelPercentage + '%</small>').show();
         } else {
             $(previewId).hide();
         }
     }
 
     // Add reward calculation listeners
-    $('#sales_required, #base_percentage, #tax_percentage').on('input', function() {
+    $('#sales_required, #base_percentage, #tax_percentage, #level_percentage').on('input', function() {
         calculateRewardPreview(false);
     });
 
-    $('#edit_sales_required, #edit_base_percentage, #edit_tax_percentage').on('input', function() {
+    $('#edit_sales_required, #edit_base_percentage, #edit_tax_percentage, #edit_level_percentage').on('input', function() {
         calculateRewardPreview(true);
     });
 
@@ -396,6 +408,7 @@ $(document).ready(function() {
         isValid = validateRewardLevel($('#reward_level')) && isValid;
         isValid = validatePercentage($('#base_percentage')) && isValid;
         isValid = validatePercentage($('#tax_percentage')) && isValid;
+        isValid = validatePercentage($('#level_percentage')) && isValid;
 
         if (!isValid) {
             Swal.fire('Validation Error!', 'Please fix the validation errors before submitting.', 'error');
@@ -437,6 +450,7 @@ $(document).ready(function() {
                 $('#edit_sales_required').val(reward.sales_required);
                 $('#edit_base_percentage').val(reward.base_percentage);
                 $('#edit_tax_percentage').val(reward.tax_percentage);
+                $('#edit_level_percentage').val(reward.level_percentage || 0);
                 $('#editRewardModal').modal('show');
             } else {
                 Swal.fire('Error!', 'Failed to load reward data.', 'error');
@@ -456,6 +470,7 @@ $(document).ready(function() {
         isValid = validateRewardLevel($('#edit_reward_level')) && isValid;
         isValid = validatePercentage($('#edit_base_percentage')) && isValid;
         isValid = validatePercentage($('#edit_tax_percentage')) && isValid;
+        isValid = validatePercentage($('#edit_level_percentage')) && isValid;
 
         if (!isValid) {
             Swal.fire('Validation Error!', 'Please fix the validation errors before submitting.', 'error');

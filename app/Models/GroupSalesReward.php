@@ -17,6 +17,7 @@ class GroupSalesReward extends Model
         'sales_required',
         'base_percentage',
         'tax_percentage',
+        'level_percentage',
         'is_active',
     ];
 
@@ -24,6 +25,7 @@ class GroupSalesReward extends Model
         'sales_required' => 'decimal:2',
         'base_percentage' => 'decimal:2',
         'tax_percentage' => 'decimal:2',
+        'level_percentage' => 'decimal:2',
         'is_active' => 'boolean',
     ];
 
@@ -32,7 +34,10 @@ class GroupSalesReward extends Model
      */
     public function getRewardAmountAttribute()
     {
-        return $this->sales_required * ($this->base_percentage / 100) * ($this->tax_percentage / 100);
+        $baseAmount = ($this->sales_required * $this->base_percentage) / 100;
+        $levelAdjustment = ($baseAmount * $this->level_percentage) / 100;
+        $taxAmount = ($levelAdjustment * $this->tax_percentage) / 100;
+        return $levelAdjustment - $taxAmount;
     }
 
     /**
