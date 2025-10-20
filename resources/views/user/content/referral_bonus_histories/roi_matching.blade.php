@@ -27,7 +27,7 @@
                                     <tr>
                                         <td>{{ $bonus->created_at }}</td>
                                         <td>{{ optional(App\Models\User::find($bonus->from_user_id))->username ?? $bonus->from_user_id }}</td>
-                                        <td>{{ number_format($bonus->amount, 2) }}</td>
+                                        <td>{{ number_format($bonus->amount, 8) }}</td>
                                         <td>{{ $bonus->level ?? '-' }}</td>
                                         <td>{{ $bonus->note ?? '-' }}</td>
                                     </tr>
