@@ -196,8 +196,8 @@ Route::get('/account-recovery/success', [App\Http\Controllers\AccountRecoveryCon
 Route::get('/account-recovery/search-referral-users', [App\Http\Controllers\AccountRecoveryController::class, 'searchReferralUsers'])->name('account-recovery.search-referral-users');
 Route::post('/account-recovery/reset', [App\Http\Controllers\AccountRecoveryController::class, 'resetRecovery'])->name('account-recovery.reset');
 
-// NOWPayments webhook route (public access)
-Route::post('/api/nowpayments/webhook', [NOWPaymentsWebhookController::class, 'handle'])->name('nowpayments.webhook');
+// NOWPayments webhook route (public access) - DISABLED (See NOWPAYMENTS_DISABLED.md to re-enable)
+// Route::post('/api/nowpayments/webhook', [NOWPaymentsWebhookController::class, 'handle'])->name('nowpayments.webhook');
 
 // Route to process wallets and insert into ai_trades if not already present
 use Illuminate\Support\Facades\DB;

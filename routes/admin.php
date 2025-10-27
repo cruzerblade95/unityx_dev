@@ -63,16 +63,16 @@ Route::prefix('admin')->middleware('web')->group(function () {
         Route::post('/kyc/{id}/approve', [KycApprovalController::class, 'approve'])->name('admin.kyc.approve');
         Route::post('/kyc/{id}/reject', [KycApprovalController::class, 'reject'])->name('admin.kyc.reject');
 
-        // NOWPayments Payment Details
-        Route::get('/nowpayments', [NOWPaymentsController::class, 'index'])->name('admin.nowpayments.index');
-        Route::get('/nowpayments/list', [NOWPaymentsController::class, 'list'])->name('admin.nowpayments.list');
-        Route::post('/nowpayments/refresh-status/{paymentId}', [NOWPaymentsController::class, 'refreshStatus'])->name('admin.nowpayments.refresh-status');
-        Route::post('/nowpayments/refresh-all-statuses', [NOWPaymentsController::class, 'refreshAllStatuses'])->name('admin.nowpayments.refresh-all-statuses');
-        Route::post('/nowpayments/test-api', [NOWPaymentsController::class, 'testApiConnection'])->name('admin.nowpayments.test-api');
-        Route::get('/nowpayments/debug-connectivity', [NOWPaymentsController::class, 'debugConnectivity'])->name('admin.nowpayments.debug-connectivity');
-        Route::get('/nowpayments/deposit-details/{depositId}', [NOWPaymentsController::class, 'showDepositDetails'])->name('admin.nowpayments.deposit-details');
-        Route::post('/deposits/approve/{depositId}', [NOWPaymentsController::class, 'approveDeposit'])->name('admin.deposits.approve');
-        Route::post('/deposits/reject/{depositId}', [NOWPaymentsController::class, 'rejectDeposit'])->name('admin.deposits.reject');
+        // NOWPayments Payment Details - DISABLED (See NOWPAYMENTS_DISABLED.md to re-enable)
+        // Route::get('/nowpayments', [NOWPaymentsController::class, 'index'])->name('admin.nowpayments.index');
+        // Route::get('/nowpayments/list', [NOWPaymentsController::class, 'list'])->name('admin.nowpayments.list');
+        // Route::post('/nowpayments/refresh-status/{paymentId}', [NOWPaymentsController::class, 'refreshStatus'])->name('admin.nowpayments.refresh-status');
+        // Route::post('/nowpayments/refresh-all-statuses', [NOWPaymentsController::class, 'refreshAllStatuses'])->name('admin.nowpayments.refresh-all-statuses');
+        // Route::post('/nowpayments/test-api', [NOWPaymentsController::class, 'testApiConnection'])->name('admin.nowpayments.test-api');
+        // Route::get('/nowpayments/debug-connectivity', [NOWPaymentsController::class, 'debugConnectivity'])->name('admin.nowpayments.debug-connectivity');
+        // Route::get('/nowpayments/deposit-details/{depositId}', [NOWPaymentsController::class, 'showDepositDetails'])->name('admin.nowpayments.deposit-details');
+        // Route::post('/deposits/approve/{depositId}', [NOWPaymentsController::class, 'approveDeposit'])->name('admin.deposits.approve');
+        // Route::post('/deposits/reject/{depositId}', [NOWPaymentsController::class, 'rejectDeposit'])->name('admin.deposits.reject');
 
         // Deposit Report Routes
         Route::get('/deposit-report', [DepositReportController::class, 'index'])->name('admin.deposit-report.index');
