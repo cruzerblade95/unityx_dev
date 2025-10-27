@@ -100,8 +100,9 @@ Route::prefix('user')->middleware('web')->group(function () {
     Route::post('deposit', [DepositController::class, 'store'])->name('user.deposit.store');
     Route::get('deposit/xeusd/wallet-info', [DepositController::class, 'getXeusdWalletInfo'])->name('user.deposit.xeusd.wallet');
     Route::post('deposit/unique-address', [DepositController::class, 'getUniqueAddress'])->name('user.deposit.unique-address');
-    Route::post('deposit/crypto', [DepositController::class, 'createCryptoPayment'])->name('user.deposit.crypto');
-    Route::get('deposit/crypto/{deposit}/details', [DepositController::class, 'cryptoDetails'])->name('user.deposit.crypto.details');
+    // Crypto deposit (NOWPayments) - DISABLED (See NOWPAYMENTS_DISABLED.md to re-enable)
+    // Route::post('deposit/crypto', [DepositController::class, 'createCryptoPayment'])->name('user.deposit.crypto');
+    // Route::get('deposit/crypto/{deposit}/details', [DepositController::class, 'cryptoDetails'])->name('user.deposit.crypto.details');
     Route::get('deposit/success', [DepositController::class, 'success'])->name('user.deposit.success');
     Route::get('deposit/cancel', [DepositController::class, 'cancel'])->name('user.deposit.cancel');
     Route::get('withdrawal', [WithdrawalController::class, 'index'])->name('user.withdrawal.index')->middleware('require.payment.info');

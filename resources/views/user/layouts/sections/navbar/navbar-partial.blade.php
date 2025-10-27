@@ -125,7 +125,8 @@
                             <span class="dropdown-shortcuts-icon rounded-circle mb-3">
                                 <i class="icon-base ti tabler-wallet icon-26px text-heading"></i>
                             </span>
-                            <a href="{{ route('user.deposit.index') }}" class="stretched-link">Deposit</a>
+                            {{-- Changed from route('user.deposit.index') to direct deposit (NOWPayments disabled) --}}
+                            <a href="{{ route('user.deposit.direct') }}" class="stretched-link">Deposit</a>
                             <small>Add Funds</small>
                         </div>
                         <div class="dropdown-shortcuts-item col">

@@ -317,6 +317,8 @@
 
 @section('content')
     {{-- @include('components.coming-soon-overlay') --}}
+    {{-- NOWPayments Crypto Deposit - DISABLED (See NOWPAYMENTS_DISABLED.md to re-enable) --}}
+    {{--
     <div class="container py-4 position-relative" style="z-index: 1;">
         <div class="deposit-header">
             <h2>
@@ -582,8 +584,11 @@
             </div>
         </div>
     </div>
+    --}}
+    {{-- End NOWPayments Crypto Deposit Section --}}
 
     <script>
+        {{-- Crypto form validation scripts - DISABLED
         document.addEventListener('DOMContentLoaded', function() {
             // Crypto form validation
             const cryptoForm = document.getElementById('cryptoDepositForm');
@@ -683,6 +688,7 @@
                 }
             }
         });
+        --}}
     </script>
 
 @endsection

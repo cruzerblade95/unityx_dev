@@ -18,11 +18,6 @@
       "slug": "user.deposit",
       "submenu": [
         {
-          "url": "user/deposit",
-          "name": "NOWPayment Crypto",
-          "slug": "user.deposit.index"
-        },
-        {
           "url": "user/deposit/direct",
           "name": "XEUSD Direct",
           "slug": "user.deposit.direct"
