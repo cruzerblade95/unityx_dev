@@ -160,7 +160,6 @@
                             <a href="{{ route('admin.dashboard') }}" class="stretched-link">Dashboard</a>
                             <small>Admin Dashboard</small>
                         </div>
-                        {{-- NOWPayments Menu - DISABLED (See NOWPAYMENTS_DISABLED.md to re-enable)
                         <div class="dropdown-shortcuts-item col">
                             <span class="dropdown-shortcuts-icon rounded-circle mb-3">
                                 <i class="icon-base ti tabler-cash icon-26px text-heading"></i>
@@ -168,7 +167,6 @@
                             <a href="{{ route('admin.nowpayments.index') }}" class="stretched-link">Deposits</a>
                             <small>NOWPayments</small>
                         </div>
-                        --}}
                     </div>
                     <div class="row row-bordered overflow-visible g-0">
                         <div class="dropdown-shortcuts-item col">
