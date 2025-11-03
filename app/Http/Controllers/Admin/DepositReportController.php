@@ -87,6 +87,26 @@ class DepositReportController extends Controller
                 });
             $deposits = $deposits->merge($directDeposits);
 
+            // 1c. XEUSD Deposits (from /user/deposit/direct - XEUSD blockchain deposits)
+            $xeusdDeposits = Deposit::with('user')
+                ->where('status', 'completed')
+                ->where('payment_method', 'xeusd')
+                ->get()
+                ->map(function ($deposit) {
+                    return [
+                        'id' => 'xeusd_' . $deposit->id,
+                        'user_id' => $deposit->user_id,
+                        'user' => $deposit->user,
+                        'amount' => $deposit->amount,
+                        'status' => 'completed',
+                        'created_at' => $deposit->created_at,
+                        'source_type' => 'xeusd_deposit',
+                        'reference' => $deposit->reference ?? 'N/A',
+                        'note' => 'XEUSD Blockchain Deposit'
+                    ];
+                });
+            $deposits = $deposits->merge($xeusdDeposits);
+
             // 2. Marketplace deposits (when user buys from marketplace)
             $marketplaceDeposits = DB::table('marketplace_listings')
                 ->join('users', 'marketplace_listings.buyer_id', '=', 'users.id')
@@ -291,6 +311,10 @@ class DepositReportController extends Controller
             $directDeposits = Deposit::where('status', 'completed')->where('payment_method', 'manual')->count();
             $directAmount = Deposit::where('status', 'completed')->where('payment_method', 'manual')->sum('amount');
 
+            // XEUSD deposits
+            $xeusdDeposits = Deposit::where('status', 'completed')->where('payment_method', 'xeusd')->count();
+            $xeusdAmount = Deposit::where('status', 'completed')->where('payment_method', 'xeusd')->sum('amount');
+
             // Marketplace deposits
             $marketplaceDeposits = DB::table('marketplace_listings')
                 ->where('status', 'sold')
@@ -311,13 +335,14 @@ class DepositReportController extends Controller
                 ->whereNotNull('admin_id')
                 ->sum('amount');
 
-            $totalDeposits = $cryptoDeposits + $directDeposits + $marketplaceDeposits + $manualDeposits;
-            $totalAmount = $cryptoAmount + $directAmount + $marketplaceAmount + $manualAmount;
+            $totalDeposits = $cryptoDeposits + $directDeposits + $xeusdDeposits + $marketplaceDeposits + $manualDeposits;
+            $totalAmount = $cryptoAmount + $directAmount + $xeusdAmount + $marketplaceAmount + $manualAmount;
 
             return [
                 'totalDeposits' => $totalDeposits,
                 'totalAmount' => $totalAmount,
                 'cryptoDeposits' => $cryptoDeposits,
+                'xeusdDeposits' => $xeusdDeposits,
                 'marketplaceDeposits' => $marketplaceDeposits,
                 'directDeposits' => $directDeposits,
                 'manualDeposits' => $manualDeposits,
@@ -329,6 +354,7 @@ class DepositReportController extends Controller
                 'totalDeposits' => 0,
                 'totalAmount' => 0,
                 'cryptoDeposits' => 0,
+                'xeusdDeposits' => 0,
                 'marketplaceDeposits' => 0,
                 'directDeposits' => 0,
                 'manualDeposits' => 0,
@@ -344,6 +370,8 @@ class DepositReportController extends Controller
         switch ($sourceType) {
             case 'crypto_deposit':
                 return '<span class="badge bg-label-success">Crypto Deposit</span>';
+            case 'xeusd_deposit':
+                return '<span class="badge bg-label-success"><i class="fas fa-coins me-1"></i>XEUSD</span>';
             case 'marketplace':
                 return '<span class="badge bg-label-primary">Marketplace</span>';
             case 'direct_deposit':

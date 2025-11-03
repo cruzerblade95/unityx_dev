@@ -23,6 +23,10 @@ class XeusdWithdrawalController extends Controller
         $processingWithdrawals = XeusdWithdrawal::where('status', 'processing')->count();
         $completedWithdrawals = XeusdWithdrawal::where('status', 'completed')->count();
 
+        // Amount statistics
+        $pendingAmount = XeusdWithdrawal::where('status', 'pending')->sum('amount_usd');
+        $completedAmount = XeusdWithdrawal::where('status', 'completed')->sum('amount_usd');
+
         // Get owner wallet balance for display
         try {
             $web3Service = new Web3Service();
@@ -37,6 +41,8 @@ class XeusdWithdrawalController extends Controller
             'pendingWithdrawals',
             'processingWithdrawals',
             'completedWithdrawals',
+            'pendingAmount',
+            'completedAmount',
             'ownerBalance'
         ));
     }
