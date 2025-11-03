@@ -730,7 +730,8 @@
                                 <li>Send XEVIEX USD from your wallet to our deposit address below</li>
                                 <li>Wait for blockchain confirmation (usually 1-2 minutes)</li>
                                 <li>Copy your transaction hash and paste it in the form below</li>
-                                <li>Submit and wait for admin approval</li>
+                                <li>Submit - Your deposit will be <strong>automatically approved</strong> once verified on
+                                    blockchain!</li>
                             </ol>
                         </div>
 

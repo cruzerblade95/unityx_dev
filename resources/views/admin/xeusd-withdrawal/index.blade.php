@@ -60,7 +60,10 @@
                             <div class="d-flex align-items-center my-1">
                                 <h4 class="mb-0 me-2">{{ number_format($pendingWithdrawals) }}</h4>
                             </div>
-                            <small class="text-muted">Awaiting approval</small>
+                            <small class="text-muted">
+                                Awaiting approval<br>
+                                <strong class="text-warning">${{ number_format($pendingAmount, 2) }}</strong> USD
+                            </small>
                         </div>
                         <div class="avatar">
                             <span class="avatar-initial rounded bg-label-warning">
@@ -102,7 +105,10 @@
                             <div class="d-flex align-items-center my-1">
                                 <h4 class="mb-0 me-2">{{ number_format($completedWithdrawals) }}</h4>
                             </div>
-                            <small class="text-muted">Successfully completed</small>
+                            <small class="text-muted">
+                                Successfully completed<br>
+                                <strong class="text-success">${{ number_format($completedAmount, 2) }}</strong> USD
+                            </small>
                         </div>
                         <div class="avatar">
                             <span class="avatar-initial rounded bg-label-success">

@@ -8,8 +8,11 @@ use App\Models\Deposit;
 use App\Services\NOWPaymentsService;
 use App\Services\WalletAddressService;
 use App\Services\XeusdDepositService;
+use App\Services\NotificationService;
+use App\Helpers\Helpers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class DepositController extends Controller
 {
@@ -307,36 +310,92 @@ class DepositController extends Controller
             $feeAmount = $txData['amount'] * ($feePercent / 100);
             $netAmount = $txData['amount'] - $feeAmount;
 
-            // Create deposit record
-            $deposit = Deposit::create([
-                'user_id' => Auth::id(),
-                'amount' => $txData['amount'],
-                'tax_percent' => $feePercent,
-                'tax_amount' => $feeAmount,
-                'net_amount' => $netAmount,
-                'status' => 'pending', // Pending admin approval
-                'reference' => 'XEUSD_' . substr($txHash, 2, 10),
-                'note' => 'XEUSD deposit from ' . $txData['from'],
-                'payment_method' => 'xeusd',
-                'payment_id' => $txHash,
-                'crypto_currency' => 'XEUSD',
-                'payment_address' => $txData['from'],
-                'unique_address' => $this->xeusdDepositService->getDepositWalletAddress(),
-                'address_memo' => 'Block: ' . $txData['block_number'],
-            ]);
+            // Start database transaction for atomic operation
+            DB::beginTransaction();
 
-            Log::info("XEUSD deposit request submitted", [
-                'user_id' => Auth::id(),
-                'amount' => $txData['amount'],
-                'tx_hash' => $txHash,
-                'deposit_id' => $deposit->id
-            ]);
+            try {
+                // Create deposit record with completed status (auto-approve)
+                $deposit = Deposit::create([
+                    'user_id' => Auth::id(),
+                    'amount' => $txData['amount'],
+                    'tax_percent' => $feePercent,
+                    'tax_amount' => $feeAmount,
+                    'net_amount' => $netAmount,
+                    'status' => 'completed', // Auto-approved since transaction hash is verified
+                    'reference' => 'XEUSD_' . substr($txHash, 2, 10),
+                    'note' => 'XEUSD deposit from ' . $txData['from'] . ' (Auto-approved)',
+                    'payment_method' => 'xeusd',
+                    'payment_id' => $txHash,
+                    'crypto_currency' => 'XEUSD',
+                    'payment_address' => $txData['from'],
+                    'unique_address' => $this->xeusdDepositService->getDepositWalletAddress(),
+                    'address_memo' => 'Block: ' . $txData['block_number'],
+                ]);
 
-            return redirect()->back()->with('success',
-                'XEUSD deposit verified! Amount: $' . number_format($txData['amount'], 2) .
-                ' XEUSD. Fee (1%): $' . number_format($feeAmount, 2) .
-                '. Net amount: $' . number_format($netAmount, 2) .
-                '. Your deposit is pending admin approval.');
+                // Update user wallet balance (add to deposit balance)
+                $user = Auth::user();
+                if ($user && $user->wallet) {
+                    $originalBalance = $user->wallet->deposit;
+                    $user->wallet->deposit += $netAmount;
+                    $user->wallet->save();
+
+                    // Verify the credit was applied
+                    $wallet = $user->wallet->fresh();
+                    $actualCreditedAmount = $wallet->deposit - $originalBalance;
+
+                    if (abs($actualCreditedAmount - $netAmount) > 0.01) {
+                        throw new \Exception("Wallet credit verification failed - expected: {$netAmount}, actual: {$actualCreditedAmount}");
+                    }
+                } else {
+                    throw new \Exception('User or wallet not found');
+                }
+
+                // Add bonus to upline
+                Helpers::insertAiTradeV2($user->id, $netAmount);
+                Helpers::depositBonus($user->id, $netAmount);
+
+                // Process deposit promo bonus if campaign is active
+                $promoBonusResult = Helpers::processDepositPromoBonus($user->id, $netAmount, $deposit->id);
+
+                // Create success notification for the user
+                NotificationService::createDepositSuccessNotification(
+                    $user->id,
+                    $netAmount,
+                    $deposit->id
+                );
+
+                // Commit transaction if all operations succeeded
+                DB::commit();
+
+                Log::info("XEUSD deposit auto-approved successfully", [
+                    'user_id' => $user->id,
+                    'amount' => $txData['amount'],
+                    'net_amount' => $netAmount,
+                    'tx_hash' => $txHash,
+                    'deposit_id' => $deposit->id,
+                    'wallet_credited' => $netAmount
+                ]);
+
+                return redirect()->back()->with('success',
+                    'XEUSD deposit verified and approved! Amount: $' . number_format($txData['amount'], 2) .
+                    ' XEUSD. Fee (1%): $' . number_format($feeAmount, 2) .
+                    '. Net amount credited: $' . number_format($netAmount, 2) .
+                    '. Your wallet has been updated automatically.');
+
+            } catch (\Throwable $e) {
+                DB::rollBack();
+
+                Log::error('Error in XEUSD deposit auto-approval: ' . $e->getMessage(), [
+                    'user_id' => Auth::id(),
+                    'tx_hash' => $txHash,
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+
+                return redirect()->back()->with('error',
+                    'Transaction verified but failed to credit wallet: ' . $e->getMessage());
+            }
 
         } catch (\Exception $e) {
             Log::error("XEUSD deposit verification failed", [

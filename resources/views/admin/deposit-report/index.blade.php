@@ -164,7 +164,7 @@
                                 <div class="d-flex align-items-center my-1">
                                     <h4 class="mb-0 me-2">{{ $totalDeposits }}</h4>
                                 </div>
-                                <small class="mb-0 text-success">Last 30 days</small>
+                                <small class="mb-0 text-success">All sources</small>
                             </div>
                             <div class="avatar">
                                 <span class="avatar-initial rounded bg-label-primary">
@@ -200,14 +200,14 @@
                     <div class="card-body">
                         <div class="d-flex align-items-start justify-content-between">
                             <div class="content-left">
-                                <span class="text-heading">Crypto Deposits</span>
+                                <span class="text-heading">XEUSD Deposits</span>
                                 <div class="d-flex align-items-center my-1">
-                                    <h4 class="mb-0 me-2">{{ $cryptoDeposits }}</h4>
+                                    <h4 class="mb-0 me-2">{{ $xeusdDeposits }}</h4>
                                 </div>
-                                <small class="mb-0 text-info">Cryptocurrency</small>
+                                <small class="mb-0 text-success">Blockchain verified</small>
                             </div>
                             <div class="avatar">
-                                <span class="avatar-initial rounded bg-label-info">
+                                <span class="avatar-initial rounded bg-label-success">
                                     <i class="fas fa-coins fa-lg"></i>
                                 </span>
                             </div>
@@ -220,20 +220,87 @@
                     <div class="card-body">
                         <div class="d-flex align-items-start justify-content-between">
                             <div class="content-left">
-                                <span class="text-heading">Other Sources</span>
+                                <span class="text-heading">Crypto Deposits</span>
                                 <div class="d-flex align-items-center my-1">
-                                    <h4 class="mb-0 me-2">{{ $marketplaceDeposits + $manualDeposits }}</h4>
+                                    <h4 class="mb-0 me-2">{{ $cryptoDeposits }}</h4>
                                 </div>
-                                <small class="mb-0 text-warning">Marketplace & Manual</small>
+                                <small class="mb-0 text-info">NOWPayments</small>
                             </div>
                             <div class="avatar">
-                                <span class="avatar-initial rounded bg-label-warning">
-                                    <i class="fas fa-plus-circle fa-lg"></i>
+                                <span class="avatar-initial rounded bg-label-info">
+                                    <i class="fab fa-bitcoin fa-lg"></i>
                                 </span>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Secondary Statistics Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-sm-6 col-xl-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div class="content-left">
+                                <span class="text-heading">Direct Deposits</span>
+                                <div class="d-flex align-items-center my-1">
+                                    <h4 class="mb-0 me-2">{{ $directDeposits }}</h4>
+                                </div>
+                                <small class="mb-0 text-warning">Manual</small>
+                            </div>
+                            <div class="avatar">
+                                <span class="avatar-initial rounded bg-label-warning">
+                                    <i class="fas fa-hand-holding-usd fa-lg"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div class="content-left">
+                                <span class="text-heading">Marketplace</span>
+                                <div class="d-flex align-items-center my-1">
+                                    <h4 class="mb-0 me-2">{{ $marketplaceDeposits }}</h4>
+                                </div>
+                                <small class="mb-0 text-primary">Purchases</small>
+                            </div>
+                            <div class="avatar">
+                                <span class="avatar-initial rounded bg-label-primary">
+                                    <i class="fas fa-shopping-cart fa-lg"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div class="content-left">
+                                <span class="text-heading">Admin Manual</span>
+                                <div class="d-flex align-items-center my-1">
+                                    <h4 class="mb-0 me-2">{{ $manualDeposits }}</h4>
+                                </div>
+                                <small class="mb-0 text-secondary">Adjustments</small>
+                            </div>
+                            <div class="avatar">
+                                <span class="avatar-initial rounded bg-label-secondary">
+                                    <i class="fas fa-user-shield fa-lg"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <!-- Empty placeholder for alignment -->
             </div>
         </div>
 
@@ -248,6 +315,7 @@
                         <select class="form-select" id="sourceFilter">
                             <option value="all">All Sources</option>
                             <option value="crypto_deposit">Crypto Deposit</option>
+                            <option value="xeusd_deposit">XEUSD Deposit</option>
                             <option value="direct_deposit">Direct Deposit</option>
                             <option value="marketplace">Marketplace</option>
                             <option value="admin_manual">Admin Manual</option>
