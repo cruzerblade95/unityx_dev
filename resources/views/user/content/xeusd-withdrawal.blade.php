@@ -407,11 +407,12 @@
                     How to Connect Your Wallet
                 </h5>
                 <ol class="mb-2">
-                    <li><strong>Install MetaMask:</strong> Make sure you have MetaMask browser extension installed</li>
-                    <li><strong>Click "Connect MetaMask":</strong> Click the button below to connect your wallet</li>
+                    <li><strong>Install Wallet:</strong> Make sure you have a Web3 wallet extension installed (e.g.,
+                        MetaMask, Binance Wallet)</li>
+                    <li><strong>Click "Connect Wallet":</strong> Click the button below to connect your wallet</li>
                     <li><strong>Select Account:</strong> Choose the wallet address where you want to receive XEUSD tokens
                     </li>
-                    <li><strong>Approve Connection:</strong> Confirm the connection in MetaMask popup</li>
+                    <li><strong>Approve Connection:</strong> Confirm the connection in your wallet popup</li>
                     <li><strong>Network Switch:</strong> You'll be prompted to switch to BSC network (if not already)</li>
                 </ol>
                 <p class="mb-0">
@@ -423,7 +424,7 @@
             </div>
         @endif
 
-        <!-- MetaMask Connection Section -->
+        <!-- Wallet Connection Section -->
         <div class="metamask-connect-section @if (auth()->user()->hasConnectedWallet()) wallet-connected @endif">
             <div class="row align-items-center">
                 <div class="col-md-8">
@@ -440,7 +441,7 @@
                         <div class="mt-2">
                             <small class="text-light">
                                 <i class="fas fa-lightbulb me-1"></i>
-                                <strong>Tip:</strong> To use a different wallet, first switch accounts in MetaMask
+                                <strong>Tip:</strong> To use a different wallet, first switch accounts in your wallet
                                 extension,
                                 make sure it's connected to this website, then click "Reconnect Wallet" below.
                             </small>
@@ -448,9 +449,9 @@
                     @else
                         <h5 class="mb-2">
                             <i class="fab fa-ethereum me-2"></i>
-                            Connect Your MetaMask Wallet
+                            Connect Your Wallet
                         </h5>
-                        <p class="mb-0">Connect your MetaMask wallet to receive XEVIEX USD on BSC network</p>
+                        <p class="mb-0">Connect your wallet to receive XEVIEX USD on BSC network</p>
                         <small class="opacity-75 mt-2 d-block">
                             <i class="fas fa-shield-alt me-1"></i>
                             Your wallet address will be securely stored for future withdrawals
@@ -469,7 +470,7 @@
                     @else
                         <button class="btn btn-warning btn-lg" onclick="connectWallet()">
                             <i class="fab fa-ethereum me-2"></i>
-                            Connect MetaMask
+                            Connect Wallet
                         </button>
                     @endif
                 </div>
@@ -690,22 +691,31 @@
     <script>
         let web3;
 
-        // Initialize Web3 and check MetaMask
+        // Initialize Web3 and check wallet
         async function initWeb3() {
             if (typeof window.ethereum !== 'undefined') {
                 web3 = new Web3(window.ethereum);
                 return true;
             } else {
                 Swal.fire({
-                    title: 'MetaMask Required',
-                    text: 'Please install MetaMask to use this feature',
+                    title: 'Wallet Not Found',
+                    html: `
+                        <p>No Web3 wallet extension detected in your browser.</p>
+                        <p class="mt-3">
+                            <a href="https://metamask.io/download/" target="_blank" class="btn btn-primary me-2">
+                                <i class="fab fa-ethereum me-2"></i>
+                                MetaMask
+                            </a>
+                            <a href="https://www.binance.com/en/web3wallet" target="_blank" class="btn btn-warning">
+                                <i class="fas fa-wallet me-2"></i>
+                                Binance Wallet
+                            </a>
+                        </p>
+                    `,
                     icon: 'warning',
-                    confirmButtonText: 'Install MetaMask',
-                    showCancelButton: true
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.open('https://metamask.io/', '_blank');
-                    }
+                    showCancelButton: true,
+                    showConfirmButton: false,
+                    cancelButtonText: 'Close'
                 });
                 return false;
             }
@@ -721,15 +731,15 @@
                 html: `
                     <p>Please complete these steps:</p>
                     <ol class="text-start">
-                        <li>Check your MetaMask extension for a popup</li>
-                        <li>Make sure the correct account is selected in MetaMask</li>
+                        <li>Check your wallet extension for a popup</li>
+                        <li>Make sure the correct account is selected in your wallet</li>
                         <li>Click "Next" then "Connect" to approve</li>
                         <li>Approve the network switch to BSC if prompted</li>
                     </ol>
                     <div class="alert alert-info mt-3 text-start">
                         <small>
                             <i class="fas fa-info-circle me-1"></i>
-                            <strong>Switching wallets?</strong> Make sure you've already switched to your desired account in MetaMask before clicking Reconnect.
+                            <strong>Switching wallets?</strong> Make sure you've already switched to your desired account in your wallet extension before clicking Reconnect.
                         </small>
                     </div>
                 `,
@@ -803,11 +813,11 @@
                 if (error.code === 4001) {
                     errorMessage = 'Connection request was rejected';
                     helpText =
-                        'You cancelled the connection request. Please try again and approve the connection in MetaMask.';
+                        'You cancelled the connection request. Please try again and approve the connection in your wallet.';
                 } else if (error.code === -32002) {
                     errorMessage = 'Connection request pending';
                     helpText =
-                        'Please check your MetaMask extension. There might be a pending request waiting for your approval.';
+                        'Please check your wallet extension. There might be a pending request waiting for your approval.';
                 }
 
                 Swal.fire({
@@ -839,7 +849,7 @@
                     }]
                 });
             } catch (switchError) {
-                // This error code indicates that the chain has not been added to MetaMask
+                // This error code indicates that the chain has not been added to the wallet
                 if (switchError.code === 4902) {
                     try {
                         await window.ethereum.request({
@@ -915,12 +925,12 @@
                     <div class="text-start">
                         <h6><i class="fas fa-question-circle me-2"></i>How to Change Wallet Address?</h6>
                         <ol>
-                            <li><strong>Open MetaMask Extension:</strong> Click the MetaMask icon in your browser</li>
-                            <li><strong>Switch Account:</strong> Click on your current account at the top of MetaMask</li>
+                            <li><strong>Open Wallet Extension:</strong> Click your wallet icon in your browser</li>
+                            <li><strong>Switch Account:</strong> Click on your current account at the top of your wallet</li>
                             <li><strong>Select Different Account:</strong> Choose the wallet address you want to use</li>
-                            <li><strong>Connect to Website (if needed):</strong> If the new account isn't connected to this site yet, you'll see a "Not connected" status. Click "Connect" in MetaMask</li>
+                            <li><strong>Connect to Website (if needed):</strong> If the new account isn't connected to this site yet, you'll see a "Not connected" status. Click "Connect" in your wallet</li>
                             <li><strong>Click "Reconnect Wallet":</strong> Come back to this page and click the "Reconnect Wallet" button</li>
-                            <li><strong>Confirm in MetaMask:</strong> Approve the connection request in the MetaMask popup</li>
+                            <li><strong>Confirm in Wallet:</strong> Approve the connection request in your wallet popup</li>
                             <li><strong>Done:</strong> Your new wallet address will be saved and displayed</li>
                         </ol>
 
