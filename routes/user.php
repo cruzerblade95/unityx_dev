@@ -136,6 +136,7 @@ Route::prefix('user')->middleware('web')->group(function () {
     Route::post('marketplace/cancel/{listingId}', [MarketplaceController::class, 'cancelListing'])->name('user.marketplace.cancel')->middleware(['require.payment.info', 'require.kyc.verification']);
     Route::post('marketplace/topup', [MarketplaceController::class, 'topUpCash'])->name('user.marketplace.topup')->middleware(['require.payment.info', 'require.kyc.verification']);
     Route::post('marketplace/transfer-to-deposit', [MarketplaceController::class, 'transferToDeposit'])->name('user.marketplace.transfer_to_deposit')->middleware(['require.payment.info', 'require.kyc.verification']);
+    Route::post('marketplace/xeusd-withdrawal', [MarketplaceController::class, 'createXeusdWithdrawal'])->name('user.marketplace.xeusd.withdrawal')->middleware(['require.payment.info', 'require.kyc.verification']);
 
     // Marketplace Verification
     Route::post('marketplace/upload-screenshot/{listingId}', [MarketplaceController::class, 'uploadScreenshot'])->name('user.marketplace.upload_screenshot');

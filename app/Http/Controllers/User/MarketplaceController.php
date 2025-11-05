@@ -101,6 +101,11 @@ class MarketplaceController extends Controller
             ->orderBy('verification_started_at', 'desc')
             ->get();
 
+        // Get user's XEUSD withdrawal requests
+        $myXeusdWithdrawals = \App\Models\XeusdWithdrawal::where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return view('user.content.marketplace', compact(
             'listings',
             'myActiveListings',
@@ -112,6 +117,7 @@ class MarketplaceController extends Controller
             'myCompletedPurchases',
             'pendingVerifications',
             'verificationRequests',
+            'myXeusdWithdrawals',
             'cashBalance',
             'profitBalance',
             'bonusBalance',
@@ -526,6 +532,75 @@ class MarketplaceController extends Controller
             DB::rollBack();
             Log::error('Error transferring cash to deposit wallet: ' . $e->getMessage());
             return redirect()->back()->withErrors(['error' => 'Failed to transfer to deposit wallet. Please try again.']);
+        }
+    }
+
+    /**
+     * Create XEUSD withdrawal request from marketplace
+     */
+    public function createXeusdWithdrawal(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:1|max:500',
+            'source_wallet' => 'required|in:cash',
+        ]);
+
+        $user = Auth::user();
+        $wallet = $user->wallet;
+
+        // Check if user has connected wallet
+        if (!$user->hasConnectedWallet()) {
+            return redirect()->back()->withErrors(['error' => 'Please connect your MetaMask wallet first at the XEUSD Withdrawal page.']);
+        }
+
+        if (!$wallet) {
+            return redirect()->back()->withErrors(['error' => 'Wallet not found.']);
+        }
+
+        $sourceWallet = $request->source_wallet;
+        $amount = $request->amount;
+
+        // Calculate 0.5% withdrawal fee
+        $feePercentage = 0.005; // 0.5%
+        $feeAmount = $amount * $feePercentage;
+        $netAmount = $amount - $feeAmount; // Amount user will receive
+
+        // Check if sufficient balance exists in cash wallet
+        $availableBalance = $wallet->cash;
+
+        if ($availableBalance < $amount) {
+            return redirect()->back()->withErrors(['error' => "Insufficient Cash balance. You have $" . number_format($availableBalance, 2) . ' available.']);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Deduct full amount from cash wallet
+            $wallet->cash -= $amount;
+            $wallet->save();
+
+            // Create withdrawal request (user receives net amount after fee)
+            $withdrawal = \App\Models\XeusdWithdrawal::create([
+                'user_id' => $user->id,
+                'unique_id' => \App\Models\XeusdWithdrawal::generateUniqueId(),
+                'amount_usd' => $amount,
+                'amount_xeusd' => $netAmount, // Net amount after 0.5% fee deduction
+                'source_wallet' => $sourceWallet,
+                'recipient_address' => $user->wallet_address,
+                'status' => 'pending'
+            ]);
+
+            DB::commit();
+
+            return redirect()->back()->with('success',
+                'XEUSD withdrawal request created successfully! Reference: ' . $withdrawal->unique_id .
+                '. Your request will be processed by our admin team. (Fee: 0.5%)'
+            );
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error creating XEUSD withdrawal from marketplace: ' . $e->getMessage());
+            return redirect()->back()->withErrors(['error' => 'Failed to create withdrawal request. Please try again.']);
         }
     }
 }

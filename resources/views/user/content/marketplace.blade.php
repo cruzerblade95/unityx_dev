@@ -561,6 +561,15 @@
                 padding: 0.1rem 0.3rem;
             }
         }
+
+        /* SweetAlert z-index override for modal */
+        .swal-high-zindex {
+            z-index: 9999 !important;
+        }
+
+        .swal-high-zindex .swal2-container {
+            z-index: 9999 !important;
+        }
     </style>
 @endsection
 
@@ -642,23 +651,30 @@
                     <div class="col-12 col-md-8 col-lg-12 col-xl-4">
                         <div class="balance-item">
                             <div class="row g-2">
-                                <div class="col-6">
+                                <div class="col-4">
                                     <button class="btn btn-light btn-sm w-100" data-bs-toggle="modal"
                                         data-bs-target="#topUpModal">
                                         <i class="fas fa-arrow-up me-1"></i>
                                         Top Up
                                     </button>
                                 </div>
-                                <div class="col-6">
+                                <div class="col-4">
                                     <button class="btn btn-light btn-sm w-100" data-bs-toggle="modal"
                                         data-bs-target="#transferToDepositModal">
                                         <i class="fas fa-exchange-alt me-1"></i>
                                         Transfer
                                     </button>
                                 </div>
+                                <div class="col-4">
+                                    <button class="btn btn-light btn-sm w-100" data-bs-toggle="modal"
+                                        data-bs-target="#xeusdWithdrawalModal">
+                                        <i class="fas fa-paper-plane me-1"></i>
+                                        Withdraw
+                                    </button>
+                                </div>
                             </div>
                             <small class="text-white d-block mt-2 text-center opacity-75" style="font-size: 0.75rem;">1.5%
-                                fee for top-up | Free transfer</small>
+                                fee for top-up | Free transfer | 0.5% fee for withdrawal</small>
                         </div>
                     </div>
                 </div>
@@ -1100,6 +1116,16 @@
                             @endif
                         </button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="xeusd-withdrawals-tab" data-bs-toggle="tab"
+                            data-bs-target="#xeusd-withdrawals" type="button" role="tab"
+                            aria-controls="xeusd-withdrawals" aria-selected="false">
+                            XEUSD Withdrawals
+                            @if ($myXeusdWithdrawals->count() > 0)
+                                <span class="badge bg-purple ms-2">{{ $myXeusdWithdrawals->count() }}</span>
+                            @endif
+                        </button>
+                    </li>
                 </ul>
 
                 <!-- Tab content -->
@@ -1380,6 +1406,74 @@
                             </div>
                         @endif
                     </div>
+
+                    <!-- XEUSD Withdrawals Tab -->
+                    <div class="tab-pane fade" id="xeusd-withdrawals" role="tabpanel"
+                        aria-labelledby="xeusd-withdrawals-tab">
+                        @if ($myXeusdWithdrawals->count() > 0)
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Reference ID</th>
+                                            <th>Amount</th>
+                                            <th>Source</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                            <th>Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($myXeusdWithdrawals as $withdrawal)
+                                            <tr>
+                                                <td><strong>{{ $withdrawal->unique_id }}</strong></td>
+                                                <td>
+                                                    ${{ number_format($withdrawal->amount_usd, 2) }}<br>
+                                                    <small
+                                                        class="text-muted">{{ number_format($withdrawal->amount_xeusd, 8) }}
+                                                        XEUSD</small>
+                                                </td>
+                                                <td>
+                                                    <span
+                                                        class="badge bg-info">{{ ucfirst($withdrawal->source_wallet) }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge {{ $withdrawal->getStatusBadgeClass() }}">
+                                                        {{ ucfirst($withdrawal->status) }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ $withdrawal->created_at->format('M d, Y H:i') }}</td>
+                                                <td>
+                                                    @if ($withdrawal->status === 'completed' && $withdrawal->transaction_hash)
+                                                        <a href="https://bscscan.com/tx/{{ $withdrawal->transaction_hash }}"
+                                                            target="_blank" class="btn btn-sm btn-outline-primary">
+                                                            <i class="fas fa-external-link-alt me-1"></i>View TX
+                                                        </a>
+                                                    @else
+                                                        <span class="text-muted">-</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Note:</strong> XEUSD withdrawals are processed manually by our admin team.
+                                Withdrawal fee: 0.5% | Network: BSC (BEP20)
+                            </div>
+                        @else
+                            <div class="text-center py-4">
+                                <i class="fas fa-paper-plane fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No XEUSD withdrawal requests yet</p>
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#xeusdWithdrawalModal">
+                                    <i class="fas fa-paper-plane me-2"></i>Create Withdrawal Request
+                                </button>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -1596,6 +1690,108 @@
                         <button type="submit" class="btn btn-primary" @if ($cashBalance == 0) disabled @endif>
                             <i class="fas fa-exchange-alt me-2"></i>
                             Transfer to Deposit
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- XEUSD Withdrawal Modal -->
+    <div class="modal fade" id="xeusdWithdrawalModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-paper-plane me-2"></i>
+                        Create XEUSD Withdrawal Request
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ route('user.marketplace.xeusd.withdrawal') }}"
+                    id="xeusdWithdrawalForm">
+                    @csrf
+                    <div class="modal-body">
+                        @if (!auth()->user()->hasConnectedWallet())
+                            <div class="alert alert-warning">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>Wallet Required:</strong> Please connect your wallet to
+                                        proceed.
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-warning"
+                                        onclick="connectWalletMarketplace()">
+                                        <i class="fab fa-ethereum me-1"></i>Connect Wallet
+                                    </button>
+                                </div>
+                            </div>
+                        @else
+                            <div class="alert alert-info d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-wallet me-2"></i>
+                                    <strong>Wallet Address:</strong>
+                                    {{ auth()->user()->getFormattedWalletAddressAttribute() }}
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                    onclick="connectWalletMarketplace()" title="Connect a different wallet address">
+                                    <i class="fas fa-sync-alt me-1"></i>Reconnect
+                                </button>
+                            </div>
+                        @endif
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Available Cash:</strong> ${{ number_format($cashBalance, 2) }} |
+                            <strong>Fee:</strong> 0.5%
+                        </div>
+
+                        <input type="hidden" name="source_wallet" value="cash">
+
+                        <div class="mb-3">
+                            <label for="withdrawal_amount" class="form-label">Withdrawal Amount (USD)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" class="form-control" id="withdrawal_amount"
+                                    name="amount" required min="1" max="500"
+                                    oninput="updateWithdrawalCalculation()">
+                            </div>
+                            <div class="form-text">Minimum: $1 | Maximum: $500</div>
+                        </div>
+
+                        <div class="alert alert-success">
+                            <h6 class="mb-2">
+                                <i class="fas fa-calculator me-2"></i>
+                                Withdrawal Information
+                            </h6>
+                            <p class="mb-1"><strong>Withdrawal Amount:</strong> $<span
+                                    id="withdrawal-display-amount">0.00</span></p>
+                            <p class="mb-1"><strong>Withdrawal Fee (0.5%):</strong> $<span
+                                    id="withdrawal-fee-amount">0.00</span>
+                            </p>
+                            <p class="mb-0"><strong>You will receive:</strong> <span
+                                    id="withdrawal-xeusd-amount">0</span> XEUSD
+                                tokens</p>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            <strong>Network:</strong> BSC (BEP20) |
+                            <strong>Processing:</strong> Manual by admin team
+                        </div>
+
+                        @if ($cashBalance == 0)
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                You don't have sufficient balance in your Cash wallet to perform a withdrawal.
+                            </div>
+                        @endif
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" @if (!auth()->user()->hasConnectedWallet() || $cashBalance == 0) disabled @endif>
+                            <i class="fas fa-paper-plane me-2"></i>
+                            Submit Withdrawal Request
                         </button>
                     </div>
                 </form>
@@ -2015,6 +2211,193 @@
             // Reset amount if it exceeds new max
             if (parseFloat(amountInput.value) > parseFloat(amountInput.max)) {
                 amountInput.value = '';
+            }
+        }
+
+        // XEUSD Withdrawal Calculation with 0.5% fee
+        function updateWithdrawalCalculation() {
+            const amount = parseFloat(document.getElementById('withdrawal_amount').value) || 0;
+
+            const cashBalance = {{ $cashBalance }};
+
+            // Calculate 0.5% fee
+            const feePercentage = 0.005; // 0.5%
+            const feeAmount = amount * feePercentage;
+            const netAmount = amount - feeAmount; // Amount user will receive in XEUSD
+
+            // Update display
+            document.getElementById('withdrawal-display-amount').textContent = amount.toFixed(2);
+            document.getElementById('withdrawal-fee-amount').textContent = feeAmount.toFixed(2);
+            document.getElementById('withdrawal-xeusd-amount').textContent = netAmount.toFixed(8);
+
+            // Validate amount doesn't exceed available balance
+            const withdrawalInput = document.getElementById('withdrawal_amount');
+            if (amount > cashBalance) {
+                withdrawalInput.setCustomValidity('Insufficient balance in Cash wallet');
+            } else if (amount > 500) {
+                withdrawalInput.setCustomValidity('Maximum withdrawal amount is $500');
+            } else if (amount < 1 && amount > 0) {
+                withdrawalInput.setCustomValidity('Minimum withdrawal amount is $1');
+            } else {
+                withdrawalInput.setCustomValidity('');
+            }
+        }
+
+        // Connect Wallet for XEUSD Withdrawal
+        async function connectWalletMarketplace() {
+            // Check if Web3 wallet is installed
+            if (typeof window.ethereum === 'undefined') {
+                Swal.fire({
+                    title: 'Wallet Not Found',
+                    html: `
+                        <p>No Web3 wallet extension detected in your browser.</p>
+                        <p class="mt-3">
+                            <a href="https://metamask.io/download/" target="_blank" class="btn btn-primary me-2">
+                                <i class="fab fa-ethereum me-2"></i>
+                                MetaMask
+                            </a>
+                            <a href="https://www.binance.com/en/web3wallet" target="_blank" class="btn btn-warning">
+                                <i class="fas fa-wallet me-2"></i>
+                                Binance Wallet
+                            </a>
+                        </p>
+                        <div class="alert alert-info mt-3">
+                            <small>
+                                <i class="fas fa-info-circle me-1"></i>
+                                After installing a wallet, refresh this page and try again
+                            </small>
+                        </div>
+                    `,
+                    icon: 'warning',
+                    customClass: {
+                        container: 'swal-high-zindex'
+                    }
+                });
+                return;
+            }
+
+            try {
+                // Request account access
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+
+                if (!accounts || accounts.length === 0) {
+                    throw new Error('No accounts found');
+                }
+
+                const walletAddress = accounts[0];
+
+                // Switch to BSC network if not already on it
+                await switchToBSCMarketplace();
+
+                // Send wallet address to backend
+                const response = await fetch('{{ route('user.withdrawal.xeusd.connect_wallet') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        wallet_address: walletAddress
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        title: 'Success!',
+                        html: `
+                            <p>${result.message}</p>
+                            <p class="mt-3">
+                                <strong>Connected Wallet:</strong><br>
+                                <small>${walletAddress}</small>
+                            </p>
+                            <div class="alert alert-info mt-3">
+                                <small>
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    All your XEUSD withdrawals will be sent to this address
+                                </small>
+                            </div>
+                        `,
+                        icon: 'success',
+                        confirmButtonText: 'Continue',
+                        customClass: {
+                            container: 'swal-high-zindex'
+                        }
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    throw new Error(result.message);
+                }
+
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
+
+                let errorMessage = error.message || 'Failed to connect wallet';
+                let helpText = '';
+
+                if (error.code === 4001) {
+                    errorMessage = 'Connection request was rejected';
+                    helpText =
+                        'You cancelled the connection request. Please try again and approve the connection in your wallet.';
+                } else if (error.code === -32002) {
+                    errorMessage = 'Connection request pending';
+                    helpText =
+                        'Please check your wallet extension. There might be a pending request waiting for your approval.';
+                }
+
+                Swal.fire({
+                    title: 'Connection Failed',
+                    html: `
+                        <p>${errorMessage}</p>
+                        ${helpText ? `<p class="text-muted mt-2"><small>${helpText}</small></p>` : ''}
+                    `,
+                    icon: 'error',
+                    customClass: {
+                        container: 'swal-high-zindex'
+                    }
+                });
+            }
+        }
+
+        // Switch to BSC network for marketplace withdrawal
+        async function switchToBSCMarketplace() {
+            const bscChainId = '0x38'; // BSC Mainnet
+
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{
+                        chainId: bscChainId
+                    }]
+                });
+            } catch (switchError) {
+                // This error code indicates that the chain has not been added to the wallet
+                if (switchError.code === 4902) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: bscChainId,
+                                chainName: 'BSC Mainnet',
+                                nativeCurrency: {
+                                    name: 'BNB',
+                                    symbol: 'BNB',
+                                    decimals: 18
+                                },
+                                rpcUrls: ['https://bsc-dataseed1.binance.org/'],
+                                blockExplorerUrls: ['https://bscscan.com/']
+                            }]
+                        });
+                    } catch (addError) {
+                        throw new Error('Failed to add BSC network');
+                    }
+                } else {
+                    throw new Error('Failed to switch to BSC network');
+                }
             }
         }
     </script>
