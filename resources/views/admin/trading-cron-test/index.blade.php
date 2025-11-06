@@ -258,7 +258,7 @@
 
 @section('page-script')
 <script>
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     let activeUsersTable;
     let testLogsTable;
 
