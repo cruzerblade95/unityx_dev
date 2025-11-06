@@ -80,6 +80,12 @@
       "slug": "admin.fix_cron_value.index"
     },
     {
+      "url": "admin/trading-cron-test",
+      "name": "Trading Cron Test",
+      "icon": "menu-icon icon-base ti tabler-test-pipe",
+      "slug": "admin.trading-cron-test.index"
+    },
+    {
       "url": "admin/recovery-accounts",
       "name": "Recovery Accounts",
       "icon": "menu-icon icon-base ti tabler-shield-check",

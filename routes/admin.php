@@ -276,5 +276,17 @@ Route::prefix('admin')->middleware('web')->group(function () {
             Route::put('/{id}', [GroupSalesController::class, 'update'])->name('update');
             Route::delete('/{id}', [GroupSalesController::class, 'destroy'])->name('destroy');
         });
+
+        // Trading Cron Test Routes
+        Route::prefix('trading-cron-test')->name('admin.trading-cron-test.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\TradingCronTestController::class, 'index'])->name('index');
+            Route::get('/data', [App\Http\Controllers\Admin\TradingCronTestController::class, 'getData'])->name('data');
+            Route::post('/test-user/{userId}', [App\Http\Controllers\Admin\TradingCronTestController::class, 'testUser'])->name('test-user');
+            Route::get('/user-details/{userId}', [App\Http\Controllers\Admin\TradingCronTestController::class, 'getUserDetails'])->name('user-details');
+            Route::get('/logs-data', [App\Http\Controllers\Admin\TradingCronTestController::class, 'getLogsData'])->name('logs-data');
+            Route::get('/log-details/{logId}', [App\Http\Controllers\Admin\TradingCronTestController::class, 'getLogDetails'])->name('log-details');
+            Route::post('/test-all-users', [App\Http\Controllers\Admin\TradingCronTestController::class, 'testAllUsers'])->name('test-all-users');
+            Route::delete('/clear-old-logs', [App\Http\Controllers\Admin\TradingCronTestController::class, 'clearOldLogs'])->name('clear-old-logs');
+        });
     });
 });
