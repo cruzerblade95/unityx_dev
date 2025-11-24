@@ -61,7 +61,7 @@ class XeusdWithdrawalController extends Controller
                 $search = $request->search['value'];
                 $query->where(function ($q) use ($search) {
                     $q->where('unique_id', 'LIKE', "%{$search}%")
-                      ->orWhere('wallet_address', 'LIKE', "%{$search}%")
+                      ->orWhere('recipient_address', 'LIKE', "%{$search}%")
                       ->orWhere('transaction_hash', 'LIKE', "%{$search}%")
                       ->orWhereHas('user', function ($userQuery) use ($search) {
                           $userQuery->where('username', 'LIKE', "%{$search}%")
@@ -72,24 +72,32 @@ class XeusdWithdrawalController extends Controller
                 });
             }
 
+            $totalRecords = XeusdWithdrawal::count();
+
+            // Get filtered count before any joins
+            $filteredRecords = (clone $query)->count();
+
             // Handle ordering
             if ($request->has('order')) {
-                $columns = ['id', 'user_info', 'amount_usd', 'recipient_address', 'status', 'transaction_hash', 'created_at', 'actions'];
-                $orderColumn = $columns[$request->order[0]['column']];
+                $columns = ['id', 'user_info', 'amount_usd', 'amount_xeusd', 'recipient_address', 'status', 'created_at', 'actions'];
+                $orderColumnIndex = $request->order[0]['column'];
                 $orderDirection = $request->order[0]['dir'];
 
-                if ($orderColumn === 'user_info') {
-                    $query->join('users', 'xeusd_withdrawals.user_id', '=', 'users.id')
-                          ->orderBy('users.username', $orderDirection);
-                } else {
-                    $query->orderBy($orderColumn, $orderDirection);
+                // Validate column index
+                if (isset($columns[$orderColumnIndex])) {
+                    $orderColumn = $columns[$orderColumnIndex];
+
+                    if ($orderColumn === 'user_info') {
+                        $query->join('users', 'xeusd_withdrawals.user_id', '=', 'users.id')
+                              ->orderBy('users.username', $orderDirection)
+                              ->select('xeusd_withdrawals.*');
+                    } elseif ($orderColumn !== 'actions') {
+                        $query->orderBy($orderColumn, $orderDirection);
+                    }
                 }
             } else {
                 $query->orderBy('created_at', 'desc');
             }
-
-            $totalRecords = XeusdWithdrawal::count();
-            $filteredRecords = $query->count();
 
             // Apply pagination
             $withdrawals = $query->offset($request->start ?? 0)

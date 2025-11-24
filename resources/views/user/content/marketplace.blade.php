@@ -550,7 +550,7 @@
                 /* Hide icons on very small screens */
             }
 
-            .nav-tabs .nav-link {
+            .nav-tabs .nav-link {   
                 padding: 0.4rem 0.5rem;
                 font-size: 0.65rem;
                 white-space: nowrap;
